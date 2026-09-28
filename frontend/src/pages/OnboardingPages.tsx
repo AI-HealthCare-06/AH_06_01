@@ -110,7 +110,7 @@ export function ProfilePage() {
       return;
     }
     setProfile(result.data);
-    notice("현재 위험도와 건강 점수는 Figma의 시연 값이며, 실제 AI 계산은 아직 연결되지 않았어요.");
+    notice("프로필 입력을 완료했어요. 건강 점수와 위험도는 체험용 예시예요.");
     navigate("/dinosaur");
   }
   return (
@@ -120,145 +120,187 @@ export function ProfilePage() {
       camera={assets.profile.imgEllipse}
     >
       <header className="profile-heading">
-        <h1>건강 프로필</h1>
-        <span>STEP 01</span>
+        <div className="profile-title-row">
+          <h1>건강 프로필</h1>
+          <span>STEP 01</span>
+        </div>
         <h2>
-          따뜻한 알을 깨우려면
+          나를 위한 건강 모험,
           <br />
-          당신을 좀 알아야 해요.
+          여기서 시작해요.
         </h2>
-        <p>내일부터는 오늘 뭐 했는지만 체크하면 돼요.</p>
+        <p>
+          기본 정보와 최근 측정값을 입력하고
+          <br />
+          함께할 공룡을 만나보세요.
+        </p>
       </header>
       <form onSubmit={submit} className="profile-form">
-        <div className="profile-grid">
-          <label>
-            나이
-            <div className="health-input">
-              <input
-                aria-label="나이"
-                type="number"
-                min="1"
-                max="120"
-                required
-                value={Number.isFinite(draft.age) ? draft.age : ""}
-                onChange={(e) => setDraft({ ...draft, age: e.target.valueAsNumber })}
-              />
-              <span>세</span>
-            </div>
-          </label>
-          <label>
-            성별
-            <select
-              value={draft.sex}
-              onChange={(e) => setDraft({ ...draft, sex: e.target.value as "female" | "male" })}
-            >
-              <option value="female">여성</option>
-              <option value="male">남성</option>
-            </select>
-          </label>
-          <label>
-            키
-            <div className="health-input">
-              <input
-                aria-label="키"
-                type="number"
-                min="50"
-                max="250"
-                step="0.1"
-                required
-                value={Number.isFinite(draft.height) ? draft.height : ""}
-                onChange={(e) => setDraft({ ...draft, height: e.target.valueAsNumber })}
-              />
-              <span>cm</span>
-            </div>
-          </label>
-          <label>
-            몸무게
-            <div className="health-input">
-              <input
-                aria-label="몸무게"
-                type="number"
-                min="1"
-                max="500"
-                step="0.1"
-                required
-                value={Number.isFinite(draft.weight) ? draft.weight : ""}
-                onChange={(e) => setDraft({ ...draft, weight: e.target.valueAsNumber })}
-              />
-              <span>kg</span>
-            </div>
-          </label>
-          <label>
-            혈압
-            <div className="health-input pressure-input">
-              <input
-                aria-label="혈압"
-                type="text"
-                required
-                value={draft.bloodPressure}
-                onChange={(e) => setDraft({ ...draft, bloodPressure: e.target.value })}
-              />
-              <span>mmHg</span>
-            </div>
-          </label>
-          <label>
-            공복 혈당
-            <div className="health-input">
-              <input
-                aria-label="공복 혈당"
-                type="number"
-                min="1"
-                max="1000"
-                required
-                value={Number.isFinite(draft.glucose) ? draft.glucose : ""}
-                onChange={(e) => setDraft({ ...draft, glucose: e.target.valueAsNumber })}
-              />
-              <span>mg/dL</span>
-            </div>
-          </label>
-        </div>
-        <h3>추가 건강 정보</h3>
-        <div className="health-toggles">
-          {(
-            [
-              { key: "smoking", label: "흡연" },
-              { key: "hypertensionFamily", label: "고혈압 가족력" },
-              { key: "diabetesFamily", label: "당뇨 가족력" },
-            ] as const
-          ).map(({ key, label }) => (
-            <button
-              type="button"
-              key={key}
-              className="cream-card health-toggle"
-              aria-pressed={draft[key]}
-              onClick={() => setDraft({ ...draft, [key]: !draft[key] })}
-            >
-              <b>{label}</b>
-              <strong className={draft[key] ? "red" : "green"}>
-                {key === "smoking" ? (draft[key] ? "예" : "아니요") : draft[key] ? "있음" : "없음"}
-              </strong>
-            </button>
-          ))}
-        </div>
+        <fieldset className="profile-section">
+          <legend>기본 정보</legend>
+          <div className="profile-grid">
+            <label>
+              나이
+              <div className="health-input">
+                <input
+                  aria-label="나이"
+                  type="number"
+                  inputMode="numeric"
+                  min="1"
+                  max="120"
+                  required
+                  value={Number.isFinite(draft.age) ? draft.age : ""}
+                  onChange={(e) => setDraft({ ...draft, age: e.target.valueAsNumber })}
+                />
+                <span>세</span>
+              </div>
+            </label>
+            <label>
+              성별
+              <div className="health-select">
+                <select
+                  value={draft.sex}
+                  onChange={(e) => setDraft({ ...draft, sex: e.target.value as "female" | "male" })}
+                >
+                  <option value="female">여성</option>
+                  <option value="male">남성</option>
+                </select>
+              </div>
+            </label>
+            <label>
+              키
+              <div className="health-input">
+                <input
+                  aria-label="키"
+                  type="number"
+                  inputMode="decimal"
+                  min="50"
+                  max="250"
+                  step="0.1"
+                  required
+                  value={Number.isFinite(draft.height) ? draft.height : ""}
+                  onChange={(e) => setDraft({ ...draft, height: e.target.valueAsNumber })}
+                />
+                <span>cm</span>
+              </div>
+            </label>
+            <label>
+              몸무게
+              <div className="health-input">
+                <input
+                  aria-label="몸무게"
+                  type="number"
+                  inputMode="decimal"
+                  min="1"
+                  max="500"
+                  step="0.1"
+                  required
+                  value={Number.isFinite(draft.weight) ? draft.weight : ""}
+                  onChange={(e) => setDraft({ ...draft, weight: e.target.valueAsNumber })}
+                />
+                <span>kg</span>
+              </div>
+            </label>
+          </div>
+        </fieldset>
+        <fieldset className="profile-section">
+          <legend>최근 건강 측정값</legend>
+          <p className="profile-section-note">최근에 측정한 값을 입력해 주세요.</p>
+          <div className="profile-grid profile-measurements">
+            <label>
+              혈압
+              <div className="health-input pressure-input">
+                <input
+                  aria-label="혈압"
+                  type="text"
+                  placeholder="120 / 80"
+                  aria-describedby="blood-pressure-hint"
+                  required
+                  value={draft.bloodPressure}
+                  onChange={(e) => setDraft({ ...draft, bloodPressure: e.target.value })}
+                />
+                <span>mmHg</span>
+              </div>
+              <small id="blood-pressure-hint" className="field-hint">
+                수축기 / 이완기 순서 · 예: 120 / 80
+              </small>
+            </label>
+            <label>
+              공복 혈당
+              <div className="health-input">
+                <input
+                  aria-label="공복 혈당"
+                  type="number"
+                  inputMode="numeric"
+                  min="1"
+                  max="1000"
+                  required
+                  value={Number.isFinite(draft.glucose) ? draft.glucose : ""}
+                  onChange={(e) => setDraft({ ...draft, glucose: e.target.valueAsNumber })}
+                />
+                <span>mg/dL</span>
+              </div>
+            </label>
+          </div>
+        </fieldset>
+        <fieldset className="profile-section">
+          <legend>생활 습관과 가족력</legend>
+          <div className="health-toggles">
+            {(
+              [
+                { key: "smoking", label: "흡연 여부" },
+                { key: "hypertensionFamily", label: "고혈압 가족력" },
+                { key: "diabetesFamily", label: "당뇨 가족력" },
+              ] as const
+            ).map(({ key, label }) => (
+              <div key={key} className="health-option-row">
+                <span id={`${key}-label`}>{label}</span>
+                <div className="health-options" role="radiogroup" aria-labelledby={`${key}-label`}>
+                  {[false, true].map((value) => (
+                    <label key={String(value)}>
+                      <input
+                        type="radio"
+                        name={key}
+                        value={String(value)}
+                        checked={draft[key] === value}
+                        onChange={() => setDraft({ ...draft, [key]: value })}
+                      />
+                      <span>
+                        {key === "smoking" ? (value ? "예" : "아니요") : value ? "있음" : "없음"}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </fieldset>
         <div className="cream-card bmi-card">
           <div>
-            <small>예상 BMI</small>
-            <strong>
+            <small>나의 BMI</small>
+            <strong aria-live="polite">
               {Number.isFinite(draft.height) && draft.height > 0 && Number.isFinite(draft.weight)
                 ? bmi(draft.height, draft.weight)
                 : "—"}
             </strong>
           </div>
-          <span>입력값 기준 자동 계산</span>
+          <span>
+            입력한 키와 몸무게로
+            <br />
+            자동 계산해요.
+          </span>
         </div>
         <button className="primary-button profile-submit" type="submit">
           공룡 깨우기
+          <span aria-hidden="true">→</span>
         </button>
         <p className="privacy-note">
           <img src={assets.profile.imgHealthFormPrivacyIcon} alt="" />
-          입력 정보는 위험도 계산에만 사용하며
-          <br />
-          다음부터 다시 묻지 않아요.
+          <span>
+            지금은 체험 화면이에요.
+            <br />
+            입력한 건강 정보는 저장되지 않아요.
+          </span>
         </p>
       </form>
     </ScenarioShell>

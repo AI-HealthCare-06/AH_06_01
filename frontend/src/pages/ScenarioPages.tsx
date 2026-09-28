@@ -231,7 +231,10 @@ export function MyPage() {
         </button>
       </div>
       <button className="logout-button" onClick={logout}>
-        로그아웃
+        <svg viewBox="0 0 24 24" aria-hidden="true" shapeRendering="crispEdges">
+          <path fill="currentColor" d="M3 3h9v3H6v12h6v3H3zM15 6h3v3h3v6h-3v3h-3v-3H9v-3h9V9h-3z" />
+        </svg>
+        <span>로그아웃</span>
       </button>
       <p className="app-version">REXRUN v0.1</p>
       {dialog && (
