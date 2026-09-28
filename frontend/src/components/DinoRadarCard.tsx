@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { assets } from "../design/assets";
 import { dinoRadarDemo } from "../services/dino-radar-data";
-import { AnimatedNumber } from "./AnimatedNumber";
 
 const center = { x: 85, y: 70 };
 function point(value: number, index: number) {
@@ -42,11 +41,8 @@ export function DinoRadarCard() {
         </span>
         <span>
           <i className="today-key" />
-          오늘
+          72일차(오늘)
         </span>
-        <b>
-          <AnimatedNumber value={72} />
-        </b>
       </div>
       <svg
         className="radar-comparison"
