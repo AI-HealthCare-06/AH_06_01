@@ -9,6 +9,7 @@ import { dinosaurs } from "../design/dinosaurs";
 import { bmi, profileSchema } from "../domain/profile";
 import { useProfileStore } from "../stores/profile-store";
 import { useGameStore } from "../stores/game-store";
+import { DinosaurArt } from "../components/DinosaurArt";
 
 export function LoginPage() {
   const [visible, setVisible] = useState(false);
@@ -328,7 +329,7 @@ export function DinosaurPage() {
             key={d.name}
             onClick={() => chooseDinosaur(i)}
           >
-            <img src={d.image} alt="" />
+            <DinosaurArt dinosaur={i} alt="" />
             <strong>{d.name}</strong>
             <small>{d.trait}</small>
             {game.dinosaur === i && <span>선택</span>}
@@ -358,11 +359,7 @@ export function FirstResultPage() {
       </header>
       <div className="dino-scene initial-scene">
         <img className="scene-background" src={a.imgRectangle} alt="초록 숲" />
-        <img
-          className="scene-dino"
-          src={game.dinosaur === 0 ? a.imgRectangle1 : dino.image}
-          alt={dino.name}
-        />
+        <DinosaurArt className="scene-dino" pose="initial" alt={dino.name} />
         <b className="scene-badge">NORMAL STATE</b>
         <strong>Lv.1 {dino.name}</strong>
       </div>

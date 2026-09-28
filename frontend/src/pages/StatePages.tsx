@@ -4,8 +4,12 @@ import { ScenarioShell } from "../components/AppShell";
 import { DesignCanvas } from "../components/DesignCanvas";
 import { useNotice } from "../components/NoticeProvider";
 import { assets } from "../design/assets";
+import { dinosaurs } from "../design/dinosaurs";
+import { useGameStore } from "../stores/game-store";
+import { DinosaurArt } from "../components/DinosaurArt";
 
 export function RiskPage() {
+  const selected = useGameStore((s) => s.game.dinosaur);
   const [period, setPeriod] = useState("일");
   const notice = useNotice();
   return (
@@ -50,7 +54,7 @@ export function RiskPage() {
           <b>연속 4일</b>
         </div>
         <div className="cream-card">
-          <h3>공룡 능력치</h3>
+          <h3>{dinosaurs[selected].name} 능력치</h3>
           <img src={assets.risk.imgFrame1} alt="공룡 능력치 레이더 차트" />
         </div>
       </div>
@@ -72,15 +76,17 @@ export function RiskPage() {
 }
 
 export function WitheredPage() {
+  const selected = useGameStore((s) => s.game.dinosaur);
+  const dino = dinosaurs[selected];
   return (
     <ScenarioShell className="withered-screen" camera={assets.withered.imgEllipse}>
       <header className="scenario-heading">
-        <h1>다시 만난 티라노</h1>
+        <h1>{dino.name}, 다시 시작해요</h1>
         <p>어제 퀘스트를 완료하지 못했어요.</p>
       </header>
       <div className="withered-scene">
         <span>WITHERED STATE</span>
-        <img src={assets.withered.imgRectangle} alt="힘이 빠진 티라노" />
+        <DinosaurArt pose="withered" alt={`힘이 빠진 ${dino.name}`} />
         <strong>힘이 빠져 축 처졌어요…</strong>
       </div>
       <div className="cream-card withered-message">

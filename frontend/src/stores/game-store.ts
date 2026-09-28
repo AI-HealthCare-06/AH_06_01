@@ -1,6 +1,14 @@
 import { create } from "zustand";
-import { claimDailyBonus, completeQuest, initialGame, restoreGame, rollDay } from "../domain/game";
+import {
+  applyDinosaurStyle,
+  claimDailyBonus,
+  completeQuest,
+  initialGame,
+  restoreGame,
+  rollDay,
+} from "../domain/game";
 import type { GameState, QuestId } from "../domain/game";
+import type { SkinId } from "../domain/appearance";
 
 const storageKey = "rexrun-demo-game-v1";
 function loadGame() {
@@ -24,6 +32,7 @@ type GameStore = {
   complete: (id: QuestId) => void;
   claimBonus: () => void;
   chooseDinosaur: (index: number) => void;
+  customizeDinosaur: (index: number, skin: SkinId) => void;
   togglePause: () => void;
   refreshDay: () => void;
   resetDemo: () => void;
@@ -52,6 +61,12 @@ export const useGameStore = create<GameStore>((set) => ({
       return { game };
     }),
   togglePause: () => set((state) => ({ paused: !state.paused })),
+  customizeDinosaur: (index, skin) =>
+    set((state) => {
+      const game = applyDinosaurStyle(state.game, index, skin);
+      save(game);
+      return { game };
+    }),
   refreshDay: () =>
     set((state) => {
       const game = rollDay(state.game);

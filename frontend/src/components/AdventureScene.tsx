@@ -4,6 +4,7 @@ import { dinosaurs } from "../design/dinosaurs";
 import { stageProgress } from "../domain/game";
 import type { GameState } from "../domain/game";
 import { AnimatedNumber } from "./AnimatedNumber";
+import { DinosaurArt } from "./DinosaurArt";
 
 export function AdventureScene({
   game,
@@ -59,9 +60,10 @@ export function AdventureScene({
         >
           <span aria-hidden="true" className={paused ? "play-symbol" : "pause-symbol"} />
         </button>
-        <img
+        <DinosaurArt
           className="idle-dino battle-animated"
-          src={game.dinosaur === 0 ? a.imgDinoIdle : dino.image}
+          dinosaur={game.dinosaur}
+          pose="adventure"
           alt={dino.name}
         />
         <img

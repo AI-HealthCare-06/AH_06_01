@@ -58,6 +58,9 @@ p {
 img {
   display: block;
 }
+.dinosaur-art {
+  image-rendering: pixelated;
+}
 strong,
 b {
   font-weight: 700;
@@ -510,7 +513,8 @@ b {
 .stage-label {
   position: absolute;
   right: 10px;
-  top: 9px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 84px;
   padding: 3px 0;
   border: 1px solid #ffe48666;
@@ -1496,13 +1500,27 @@ b {
 .growth-insight h3 {
   font: 400 12px/18px var(--pixel);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.growth-insight h3 > span:first-child {
+  font:
+    700 14px/20px "Noto Sans KR",
+    sans-serif;
 }
 .growth-insight p {
   font:
     700 11px/17px "Noto Sans KR",
     sans-serif;
   margin-top: 8px;
-  white-space: nowrap;
+  word-break: keep-all;
+}
+.shop-screen .main-content {
+  min-height: 672px;
+}
+.shop-screen .shop-catalog {
+  height: 484px;
 }
 .shop-wallet {
   min-height: 108px;
@@ -1598,6 +1616,9 @@ b {
   padding: 4px 6px;
   font-size: 12px;
 }
+.shop-tab[aria-pressed="true"] {
+  box-shadow: 0 3px 0 #192218;
+}
 .shop-tab-content {
   display: inline-flex;
   align-items: center;
@@ -1654,6 +1675,153 @@ b {
   grid-template-columns: 130fr 76fr 130fr;
   grid-template-rows: 206px 206px;
   gap: 13px 8px;
+}
+.customization-catalog {
+  padding: 2px;
+}
+.customization-intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 8px 14px;
+  color: var(--cream);
+}
+.customization-intro > strong {
+  font: 400 10px/16px var(--pixel);
+  color: var(--gold);
+}
+.customization-intro > span {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 7px;
+  color: #eff8dc;
+  background: #2d5138;
+  border: 1px solid #a4b783;
+  border-radius: 4px;
+}
+.customization-intro > p {
+  flex-basis: 100%;
+  font-size: 11px;
+  line-height: 17px;
+}
+.character-collection + .character-collection {
+  margin-top: 22px;
+}
+.character-collection > header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+  background: #f2d78c;
+  color: var(--ink);
+}
+.character-collection > header img {
+  width: 40px;
+  height: 36px;
+  object-fit: contain;
+}
+.character-collection h3 {
+  font-size: 13px;
+  line-height: 19px;
+}
+.character-collection header p {
+  font-size: 10px;
+  line-height: 15px;
+  color: #59634b;
+}
+.character-collection header > span {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 700;
+  color: #2e5636;
+  white-space: nowrap;
+}
+.style-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.style-card {
+  min-width: 0;
+  padding: 5px 5px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: #f8eed5;
+  color: var(--ink);
+  text-align: left;
+}
+.style-card[data-equipped="true"] {
+  border-color: #366d45;
+  box-shadow: inset 0 0 0 1px #366d45;
+}
+.style-card:focus-visible {
+  outline-offset: -3px;
+}
+.style-art {
+  display: grid;
+  place-items: center;
+  height: 80px;
+  border-radius: 5px;
+  border: 1px solid #b6af88;
+  overflow: hidden;
+}
+.style-art img {
+  width: 85%;
+  height: 66px;
+  object-fit: contain;
+}
+.style-card > strong,
+.style-card > small {
+  display: block;
+  margin: 6px 3px 0;
+}
+.style-card > strong {
+  font-size: 11px;
+  line-height: 16px;
+}
+.style-card > small {
+  margin-top: 2px;
+  font-size: 9px;
+  line-height: 13px;
+  color: #626652;
+}
+.style-card[data-equipped="true"] > small {
+  color: #326640;
+  font-weight: 700;
+}
+.style-preview-scene {
+  display: grid;
+  place-items: center;
+  height: 175px;
+  border: 1.5px solid var(--ink);
+  border-radius: 10px;
+}
+.style-preview-scene img {
+  width: 85%;
+  height: 140px;
+  object-fit: contain;
+}
+.style-preview-copy {
+  display: block;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #56604b;
+}
+.dialog-cancel {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  border: 1px solid #8d927b;
+  border-radius: 10px;
+  background: #eee5c9;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
 }
 .product {
   position: relative;
@@ -2985,7 +3153,10 @@ b {
   padding: 24px;
 }
 .info-dialog {
+  width: min(340px, calc(100vw - 24px));
   max-width: 340px;
+  max-height: calc(100svh - 32px);
+  overflow: auto;
   padding: 24px;
 }
 .info-dialog h2 {

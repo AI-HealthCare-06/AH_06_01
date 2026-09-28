@@ -6,11 +6,15 @@ export function InfoDialog({
   onClose,
   children,
   returnFocusTo,
+  onConfirm,
+  confirmLabel = "확인",
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
   returnFocusTo?: HTMLElement | null;
+  onConfirm?: () => void;
+  confirmLabel?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -34,9 +38,14 @@ export function InfoDialog({
       <div>
         <h2 id="dialog-title">{title}</h2>
         <p>{children}</p>
-        <button autoFocus className="primary-button" onClick={onClose}>
-          확인
+        <button autoFocus className="primary-button" onClick={onConfirm ?? onClose}>
+          {confirmLabel}
         </button>
+        {onConfirm && (
+          <button className="dialog-cancel" onClick={onClose}>
+            취소
+          </button>
+        )}
       </div>
     </dialog>
   );
