@@ -1,0 +1,29 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+frontend/test-results/
+frontend/playwright-report/
+docs/figma-reference/*-reference.tsx.txt
+docs/figma-reference/download-manifest.json
+docs/figma-reference/*.b64
+tmp/
+.cache/
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+*.pem
+*.key
+*.pfx
+*.p12
+secrets/
+
+# Local source documents supplied by the team; the app and implementation docs are versioned.
+docs/*.docx
+docs/*.xlsx
+docs/*.pdf
+docs/아키텍처 이미지.png
+docs/산출물_목록.md
+docs/레포템플릿_전체내용.md

@@ -1,0 +1,15 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Pixel icon / Icon" clip-path="url(#clip0_0_306)">
+<path id="Vector" d="M20 2H3V21H20V2Z" fill="#E4AE39" stroke="#20211D" stroke-width="2"/>
+<path id="Vector_2" d="M16 0H7V5H16V0Z" fill="#F8EED5" stroke="#20211D"/>
+<g id="Vector_3">
+<path d="M7 9H16ZM7 13H16ZM7 17H14Z" fill="black"/>
+<path d="M7 9H16M7 13H16M7 17H14" stroke="#20211D"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_306">
+<rect width="22" height="22" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -1,0 +1,602 @@
+[
+  {
+    "file": "buff-ellipse.svg",
+    "bytes": 231,
+    "width": "10",
+    "height": "10",
+    "viewBox": "0 0 10 10"
+  },
+  {
+    "file": "buff-rectangle.png",
+    "bytes": 2255198,
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "file": "buff-rectangle1.png",
+    "bytes": 83610,
+    "width": 282,
+    "height": 197
+  },
+  {
+    "file": "dashboard-avatar-frame.png",
+    "bytes": 14085,
+    "width": 82,
+    "height": 82
+  },
+  {
+    "file": "dashboard-dino-portrait.png",
+    "bytes": 26665,
+    "width": 157,
+    "height": 92
+  },
+  {
+    "file": "dashboard-navigation-item-dashboard-pixel-icon.svg",
+    "bytes": 409,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "dashboard-navigation-item-home-pixel-icon.svg",
+    "bytes": 351,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "dashboard-navigation-item-quest-pixel-icon.svg",
+    "bytes": 395,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "dashboard-navigation-item-shop-pixel-icon.svg",
+    "bytes": 576,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "dashboard-status-camera-dot.svg",
+    "bytes": 239,
+    "width": "8",
+    "height": "8",
+    "viewBox": "0 0 8 8"
+  },
+  {
+    "file": "dinosaur-dino-select-background-pixel-jungle.png",
+    "bytes": 2550649,
+    "width": 853,
+    "height": 1844
+  },
+  {
+    "file": "dinosaur-dino.png",
+    "bytes": 83610,
+    "width": 282,
+    "height": 197
+  },
+  {
+    "file": "dinosaur-dino1.png",
+    "bytes": 166929,
+    "width": 490,
+    "height": 348
+  },
+  {
+    "file": "dinosaur-dino2.png",
+    "bytes": 131068,
+    "width": 490,
+    "height": 330
+  },
+  {
+    "file": "dinosaur-dino3.png",
+    "bytes": 198382,
+    "width": 586,
+    "height": 377
+  },
+  {
+    "file": "dinosaur-dino4.png",
+    "bytes": 131910,
+    "width": 522,
+    "height": 310
+  },
+  {
+    "file": "dinosaur-dino5.png",
+    "bytes": 138983,
+    "width": 476,
+    "height": 481
+  },
+  {
+    "file": "dinosaur-ellipse.svg",
+    "bytes": 231,
+    "width": "10",
+    "height": "10",
+    "viewBox": "0 0 10 10"
+  },
+  {
+    "file": "first-result-ellipse.svg",
+    "bytes": 231,
+    "width": "10",
+    "height": "10",
+    "viewBox": "0 0 10 10"
+  },
+  {
+    "file": "first-result-rectangle.png",
+    "bytes": 2255198,
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "file": "first-result-rectangle1.png",
+    "bytes": 83610,
+    "width": 282,
+    "height": 197
+  },
+  {
+    "file": "home-avatar-frame.png",
+    "bytes": 14085,
+    "width": 82,
+    "height": 82
+  },
+  {
+    "file": "home-dino-idle.png",
+    "bytes": 83610,
+    "width": 282,
+    "height": 197
+  },
+  {
+    "file": "home-dino-portrait.png",
+    "bytes": 26665,
+    "width": 157,
+    "height": 92
+  },
+  {
+    "file": "home-ellipse.svg",
+    "bytes": 246,
+    "width": "8",
+    "height": "8",
+    "viewBox": "0 0 8 8"
+  },
+  {
+    "file": "home-ellipse1.svg",
+    "bytes": 246,
+    "width": "8",
+    "height": "8",
+    "viewBox": "0 0 8 8"
+  },
+  {
+    "file": "home-enemy-pixel-monster.svg",
+    "bytes": 952,
+    "width": "46",
+    "height": "46",
+    "viewBox": "0 0 46 46"
+  },
+  {
+    "file": "home-feedback-dino-message.png",
+    "bytes": 2255198,
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "file": "home-fx-impact-sprite.svg",
+    "bytes": 742,
+    "width": "44",
+    "height": "44",
+    "viewBox": "0 0 44 44"
+  },
+  {
+    "file": "home-group.svg",
+    "bytes": 2595,
+    "width": "85.2",
+    "height": "98.309",
+    "viewBox": "0 0 85.2 98.309"
+  },
+  {
+    "file": "home-hp-bar-pixel-heart.svg",
+    "bytes": 486,
+    "width": "26",
+    "height": "25",
+    "viewBox": "0 0 26 25"
+  },
+  {
+    "file": "home-navigation-item-dashboard-pixel-icon.svg",
+    "bytes": 409,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "home-navigation-item-home-pixel-icon.svg",
+    "bytes": 351,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "home-navigation-item-quest-pixel-icon.svg",
+    "bytes": 395,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "home-navigation-item-shop-pixel-icon.svg",
+    "bytes": 578,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "home-open-chevron.svg",
+    "bytes": 403,
+    "width": "12",
+    "height": "18",
+    "viewBox": "0 0 12 18"
+  },
+  {
+    "file": "home-open-chevron1.svg",
+    "bytes": 427,
+    "width": "12",
+    "height": "18",
+    "viewBox": "0 0 12 18"
+  },
+  {
+    "file": "home-pixel-icon-icon.svg",
+    "bytes": 626,
+    "width": "22",
+    "height": "22",
+    "viewBox": "0 0 22 22"
+  },
+  {
+    "file": "home-pixel-icon-radar.svg",
+    "bytes": 638,
+    "width": "24",
+    "height": "22",
+    "viewBox": "0 0 24 22"
+  },
+  {
+    "file": "home-quest-item0-checkbox-icon.svg",
+    "bytes": 596,
+    "width": "16",
+    "height": "16",
+    "viewBox": "0 0 16 16"
+  },
+  {
+    "file": "home-quest-item0-pixel-icon.svg",
+    "bytes": 557,
+    "width": "16",
+    "height": "16",
+    "viewBox": "0 0 16 16"
+  },
+  {
+    "file": "home-quest-item1-pixel-icon.svg",
+    "bytes": 375,
+    "width": "16",
+    "height": "16",
+    "viewBox": "0 0 16 16"
+  },
+  {
+    "file": "home-quest-item2-checkbox-icon.svg",
+    "bytes": 538,
+    "width": "16",
+    "height": "16",
+    "viewBox": "0 0 16 16"
+  },
+  {
+    "file": "home-quest-item2-pixel-icon.svg",
+    "bytes": 366,
+    "width": "16",
+    "height": "16",
+    "viewBox": "0 0 16 16"
+  },
+  {
+    "file": "home-quest-item3-pixel-icon.svg",
+    "bytes": 634,
+    "width": "16",
+    "height": "16",
+    "viewBox": "0 0 16 16"
+  },
+  {
+    "file": "home-stage-progress-egg-marker.svg",
+    "bytes": 708,
+    "width": "26",
+    "height": "28",
+    "viewBox": "0 0 26 28"
+  },
+  {
+    "file": "home-stage-progress-goal-flag.svg",
+    "bytes": 423,
+    "width": "22",
+    "height": "26",
+    "viewBox": "0 0 22 26"
+  },
+  {
+    "file": "home-status-camera-dot.svg",
+    "bytes": 239,
+    "width": "8",
+    "height": "8",
+    "viewBox": "0 0 8 8"
+  },
+  {
+    "file": "login-ellipse.svg",
+    "bytes": 231,
+    "width": "10",
+    "height": "10",
+    "viewBox": "0 0 10 10"
+  },
+  {
+    "file": "login-login-background-canyon-waterfall.png",
+    "bytes": 2453379,
+    "width": 853,
+    "height": 1844
+  },
+  {
+    "file": "login-login-form-email-icon.svg",
+    "bytes": 592,
+    "width": "20",
+    "height": "16",
+    "viewBox": "0 0 20 16"
+  },
+  {
+    "file": "login-login-form-lock-icon.svg",
+    "bytes": 666,
+    "width": "18",
+    "height": "20",
+    "viewBox": "0 0 18 20"
+  },
+  {
+    "file": "login-login-form-password-visibility.svg",
+    "bytes": 519,
+    "width": "20",
+    "height": "14",
+    "viewBox": "0 0 20 14"
+  },
+  {
+    "file": "login-login-hero-refined-egg-sprite.png",
+    "bytes": 820723,
+    "width": 1536,
+    "height": 1024
+  },
+  {
+    "file": "login-login-hero-rex-run-black-logo.png",
+    "bytes": 120167,
+    "width": 1024,
+    "height": 1024
+  },
+  {
+    "file": "my-page-ellipse.svg",
+    "bytes": 231,
+    "width": "10",
+    "height": "10",
+    "viewBox": "0 0 10 10"
+  },
+  {
+    "file": "my-page-ellipse1.svg",
+    "bytes": 234,
+    "width": "22",
+    "height": "22",
+    "viewBox": "0 0 22 22"
+  },
+  {
+    "file": "profile-ellipse.svg",
+    "bytes": 231,
+    "width": "10",
+    "height": "10",
+    "viewBox": "0 0 10 10"
+  },
+  {
+    "file": "profile-health-background-pixel-ocean.png",
+    "bytes": 1955161,
+    "width": 853,
+    "height": 1844
+  },
+  {
+    "file": "profile-health-form-privacy-icon.svg",
+    "bytes": 685,
+    "width": "18",
+    "height": "20",
+    "viewBox": "0 0 18 20"
+  },
+  {
+    "file": "quest-detail-ellipse.svg",
+    "bytes": 231,
+    "width": "10",
+    "height": "10",
+    "viewBox": "0 0 10 10"
+  },
+  {
+    "file": "quests-avatar-frame.png",
+    "bytes": 14085,
+    "width": 82,
+    "height": 82
+  },
+  {
+    "file": "quests-decoration-reward-spark.svg",
+    "bytes": 440,
+    "width": "16",
+    "height": "16",
+    "viewBox": "0 0 16 16"
+  },
+  {
+    "file": "quests-dino-portrait.png",
+    "bytes": 26665,
+    "width": 157,
+    "height": 92
+  },
+  {
+    "file": "quests-navigation-item-dashboard-pixel-icon.svg",
+    "bytes": 409,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "quests-navigation-item-home-pixel-icon.svg",
+    "bytes": 351,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "quests-navigation-item-quest-pixel-icon.svg",
+    "bytes": 395,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "quests-navigation-item-shop-pixel-icon.svg",
+    "bytes": 576,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "quests-status-camera-dot.svg",
+    "bytes": 239,
+    "width": "8",
+    "height": "8",
+    "viewBox": "0 0 8 8"
+  },
+  {
+    "file": "reward-ellipse.svg",
+    "bytes": 231,
+    "width": "10",
+    "height": "10",
+    "viewBox": "0 0 10 10"
+  },
+  {
+    "file": "reward-ellipse1.svg",
+    "bytes": 272,
+    "width": "190",
+    "height": "190",
+    "viewBox": "0 0 190 190"
+  },
+  {
+    "file": "reward-rectangle.png",
+    "bytes": 83610,
+    "width": 282,
+    "height": 197
+  },
+  {
+    "file": "risk-ellipse.svg",
+    "bytes": 231,
+    "width": "10",
+    "height": "10",
+    "viewBox": "0 0 10 10"
+  },
+  {
+    "file": "risk-frame.svg",
+    "bytes": 1991,
+    "width": "310",
+    "height": "115",
+    "viewBox": "0 0 310 115"
+  },
+  {
+    "file": "risk-frame1.svg",
+    "bytes": 405,
+    "width": "112",
+    "height": "82",
+    "viewBox": "0 0 112 82"
+  },
+  {
+    "file": "shop-avatar-frame.png",
+    "bytes": 14085,
+    "width": 82,
+    "height": 82
+  },
+  {
+    "file": "shop-decoration-customize-sparkle.svg",
+    "bytes": 514,
+    "width": "20",
+    "height": "20",
+    "viewBox": "0 0 20 20"
+  },
+  {
+    "file": "shop-decoration-recommendation-star.svg",
+    "bytes": 1231,
+    "width": "20.6937",
+    "height": "20",
+    "viewBox": "0 0 20.6937 20"
+  },
+  {
+    "file": "shop-decoration-rrr-coin.svg",
+    "bytes": 463,
+    "width": "21.154",
+    "height": "20",
+    "viewBox": "0 0 21.154 20"
+  },
+  {
+    "file": "shop-navigation-item-dashboard-pixel-icon.svg",
+    "bytes": 409,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "shop-navigation-item-home-pixel-icon.svg",
+    "bytes": 351,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "shop-navigation-item-quest-pixel-icon.svg",
+    "bytes": 395,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "shop-navigation-item-shop-pixel-icon.svg",
+    "bytes": 576,
+    "width": "25",
+    "height": "26",
+    "viewBox": "0 0 25 26"
+  },
+  {
+    "file": "shop-product-photo.png",
+    "bytes": 1758786,
+    "width": 1050,
+    "height": 1074
+  },
+  {
+    "file": "shop-product-photo1.png",
+    "bytes": 794002,
+    "width": 1134,
+    "height": 924
+  },
+  {
+    "file": "shop-product-photo2.png",
+    "bytes": 1831526,
+    "width": 1276,
+    "height": 1294
+  },
+  {
+    "file": "shop-product-photo3.png",
+    "bytes": 2005389,
+    "width": 1220,
+    "height": 1242
+  },
+  {
+    "file": "shop-status-camera-dot.svg",
+    "bytes": 239,
+    "width": "8",
+    "height": "8",
+    "viewBox": "0 0 8 8"
+  },
+  {
+    "file": "withered-ellipse.svg",
+    "bytes": 231,
+    "width": "10",
+    "height": "10",
+    "viewBox": "0 0 10 10"
+  },
+  {
+    "file": "withered-rectangle.png",
+    "bytes": 83610,
+    "width": 282,
+    "height": 197
+  }
+]

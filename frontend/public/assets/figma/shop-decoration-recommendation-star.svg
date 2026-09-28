@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20.6937" height="20" viewBox="0 0 20.6937 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Decoration / recommendation star">
+<path id="Skull / upper jaw" d="M1.69371 4L4.69371 2H14.6937L17.6937 4L19.6937 7L18.6937 10L15.6937 11H9.69371L8.69371 13H5.69371L4.69371 11H1.69371L0.693713 8H1.69371V4Z" fill="#FFEBAD" stroke="#141714"/>
+<path id="Skull / lower jaw" d="M4.69371 14L7.69371 16L14.6937 15L17.6937 12L19.6937 13L18.6937 16L15.6937 19H7.69371L3.69371 17L4.69371 14Z" fill="#FFEBAD" stroke="#141714"/>
+<rect id="Skull / eye socket" x="11.6937" y="4" width="4" height="3" fill="#141714"/>
+<rect id="Skull / nostril" x="3.69371" y="6" width="2" height="2" fill="#141714"/>
+<rect id="Skull / upper tooth 1" x="5.69371" y="11" width="1" height="3" fill="#141714"/>
+<rect id="Skull / upper tooth 2" x="7.69371" y="11" width="1" height="3" fill="#141714"/>
+<rect id="Skull / upper tooth 3" x="9.69371" y="11" width="1" height="2" fill="#141714"/>
+<rect id="Skull / lower tooth 1" x="8.69371" y="14" width="1" height="2" fill="#FFEBAD"/>
+<rect id="Skull / lower tooth 2" x="10.6937" y="14" width="1" height="2" fill="#FFEBAD"/>
+</g>
+</svg>

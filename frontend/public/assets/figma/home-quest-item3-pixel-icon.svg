@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="QuestItem / 3 pixel icon" clip-path="url(#clip0_0_349)">
+<path id="Vector" d="M8 1C5 5 2 9 2 11C2 12.3261 2.63214 13.5979 3.75736 14.5355C4.88258 15.4732 6.4087 16 8 16C9.5913 16 11.1174 15.4732 12.2426 14.5355C13.3679 13.5979 14 12.3261 14 11C14 9 11 5 8 1Z" fill="#5BA7C5" stroke="#20211D"/>
+<path id="Vector_2" d="M6 8H8V13H6V8Z" fill="#BFE5EC"/>
+</g>
+<defs>
+<clipPath id="clip0_0_349">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>

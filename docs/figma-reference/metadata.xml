@@ -1,0 +1,1468 @@
+<canvas id="5:2" name="WELL DINOS / Mobile App" x="0" y="0" width="0" height="0">
+  <section id="11:2" name="01 — App Screens / Galaxy" x="64" y="1350" width="1780" height="920">
+    <frame id="5:3" name="Home / Galaxy Base / 390×844" x="20" y="48" width="390" height="844">
+      <rounded-rectangle id="16:237" name="Paper texture / fleck" x="292" y="261" width="1" height="1" />
+      <rounded-rectangle id="16:236" name="Paper texture / fleck" x="20" y="543" width="1" height="1" />
+      <rounded-rectangle id="16:235" name="Paper texture / fleck" x="106" y="437" width="1" height="1" />
+      <rounded-rectangle id="16:234" name="Paper texture / fleck" x="222" y="731" width="1" height="1" />
+      <rounded-rectangle id="16:233" name="Paper texture / fleck" x="210" y="1" width="2" height="1" />
+      <rounded-rectangle id="16:232" name="Paper texture / fleck" x="54" y="655" width="1" height="1" />
+      <rounded-rectangle id="16:231" name="Paper texture / fleck" x="208" y="637" width="1" height="1" />
+      <rounded-rectangle id="16:230" name="Paper texture / fleck" x="48" y="159" width="1" height="1" />
+      <rounded-rectangle id="16:229" name="Paper texture / fleck" x="368" y="49" width="1" height="1" />
+      <rounded-rectangle id="16:228" name="Paper texture / fleck" x="163" y="667" width="2" height="1" />
+      <rounded-rectangle id="16:227" name="Paper texture / fleck" x="190" y="561" width="1" height="1" />
+      <rounded-rectangle id="16:226" name="Paper texture / fleck" x="276" y="59" width="1" height="1" />
+      <rounded-rectangle id="16:225" name="Paper texture / fleck" x="10" y="405" width="1" height="1" />
+      <rounded-rectangle id="16:224" name="Paper texture / fleck" x="53" y="794" width="1" height="1" />
+      <rounded-rectangle id="16:223" name="Paper texture / fleck" x="302" y="469" width="2" height="1" />
+      <rounded-rectangle id="16:222" name="Paper texture / fleck" x="238" y="363" width="1" height="1" />
+      <rounded-rectangle id="16:221" name="Paper texture / fleck" x="41" y="768" width="1" height="1" />
+      <rounded-rectangle id="16:220" name="Paper texture / fleck" x="369" y="670" width="1" height="1" />
+      <rounded-rectangle id="16:219" name="Paper texture / fleck" x="292" y="501" width="1" height="1" />
+      <rounded-rectangle id="16:218" name="Paper texture / fleck" x="336" y="415" width="2" height="1" />
+      <rounded-rectangle id="16:217" name="Paper texture / fleck" x="268" y="61" width="1" height="1" />
+      <rounded-rectangle id="16:216" name="Paper texture / fleck" x="50" y="127" width="1" height="1" />
+      <rounded-rectangle id="16:215" name="Paper texture / fleck" x="322" y="221" width="1" height="1" />
+      <rounded-rectangle id="16:214" name="Paper texture / fleck" x="324" y="39" width="1" height="1" />
+      <rounded-rectangle id="16:213" name="Paper texture / fleck" x="200" y="613" width="2" height="1" />
+      <rounded-rectangle id="16:212" name="Paper texture / fleck" x="60" y="51" width="1" height="1" />
+      <rounded-rectangle id="16:211" name="Paper texture / fleck" x="14" y="37" width="1" height="1" />
+      <rounded-rectangle id="16:210" name="Paper texture / fleck" x="258" y="595" width="1" height="1" />
+      <rounded-rectangle id="16:209" name="Paper texture / fleck" x="356" y="313" width="1" height="1" />
+      <rounded-rectangle id="16:208" name="Paper texture / fleck" x="46" y="319" width="2" height="1" />
+      <rounded-rectangle id="16:207" name="Paper texture / fleck" x="168" y="373" width="1" height="1" />
+      <rounded-rectangle id="16:206" name="Paper texture / fleck" x="126" y="667" width="1" height="1" />
+      <rounded-rectangle id="16:205" name="Paper texture / fleck" x="262" y="441" width="1" height="1" />
+      <rounded-rectangle id="16:204" name="Paper texture / fleck" x="144" y="619" width="1" height="1" />
+      <rounded-rectangle id="16:203" name="Paper texture / fleck" x="278" y="45" width="2" height="1" />
+      <rounded-rectangle id="16:202" name="Paper texture / fleck" x="320" y="167" width="1" height="1" />
+      <rounded-rectangle id="16:201" name="Paper texture / fleck" x="170" y="693" width="1" height="1" />
+      <rounded-rectangle id="16:200" name="Paper texture / fleck" x="106" y="559" width="1" height="1" />
+      <rounded-rectangle id="16:199" name="Paper texture / fleck" x="168" y="469" width="1" height="1" />
+      <rounded-rectangle id="16:198" name="Paper texture / fleck" x="239" y="778" width="2" height="1" />
+      <rounded-rectangle id="16:197" name="Paper texture / fleck" x="358" y="437" width="1" height="1" />
+      <rounded-rectangle id="16:196" name="Paper texture / fleck" x="120" y="107" width="1" height="1" />
+      <rounded-rectangle id="16:195" name="Paper texture / fleck" x="386" y="117" width="1" height="1" />
+      <rounded-rectangle id="16:194" name="Paper texture / fleck" x="112" y="399" width="1" height="1" />
+      <rounded-rectangle id="16:193" name="Paper texture / fleck" x="180" y="201" width="2" height="1" />
+      <rounded-rectangle id="16:192" name="Paper texture / fleck" x="384" y="527" width="1" height="1" />
+      <rounded-rectangle id="16:191" name="Paper texture / fleck" x="368" y="437" width="1" height="1" />
+      <rounded-rectangle id="16:190" name="Paper texture / fleck" x="138" y="411" width="1" height="1" />
+      <rounded-rectangle id="16:189" name="Paper texture / fleck" x="272" y="297" width="1" height="1" />
+      <rounded-rectangle id="16:188" name="Paper texture / fleck" x="82" y="607" width="2" height="1" />
+      <rounded-rectangle id="16:187" name="Paper texture / fleck" x="162" y="85" width="1" height="1" />
+      <rounded-rectangle id="16:186" name="Paper texture / fleck" x="8" y="391" width="1" height="1" />
+      <rounded-rectangle id="16:185" name="Paper texture / fleck" x="172" y="581" width="1" height="1" />
+      <rounded-rectangle id="16:184" name="Paper texture / fleck" x="16" y="435" width="1" height="1" />
+      <rounded-rectangle id="16:183" name="Paper texture / fleck" x="178" y="141" width="2" height="1" />
+      <rounded-rectangle id="16:182" name="Paper texture / fleck" x="164" y="51" width="1" height="1" />
+      <rounded-rectangle id="16:181" name="Paper texture / fleck" x="59" y="748" width="1" height="1" />
+      <rounded-rectangle id="16:180" name="Paper texture / fleck" x="74" y="283" width="1" height="1" />
+      <rounded-rectangle id="16:179" name="Paper texture / fleck" x="232" y="373" width="1" height="1" />
+      <rounded-rectangle id="16:178" name="Paper texture / fleck" x="304" y="275" width="2" height="1" />
+      <rounded-rectangle id="16:177" name="Paper texture / fleck" x="352" y="717" width="1" height="1" />
+      <rounded-rectangle id="16:176" name="Paper texture / fleck" x="288" y="643" width="1" height="1" />
+      <rounded-rectangle id="16:175" name="Paper texture / fleck" x="102" y="373" width="1" height="1" />
+      <rounded-rectangle id="16:174" name="Paper texture / fleck" x="162" y="695" width="1" height="1" />
+      <rounded-rectangle id="16:173" name="Paper texture / fleck" x="342" y="729" width="2" height="1" />
+      <rounded-rectangle id="16:172" name="Paper texture / fleck" x="57" y="667" width="1" height="1" />
+      <rounded-rectangle id="16:171" name="Paper texture / fleck" x="158" y="341" width="1" height="1" />
+      <rounded-rectangle id="16:170" name="Paper texture / fleck" x="370" y="687" width="1" height="1" />
+      <rounded-rectangle id="16:169" name="Paper texture / fleck" x="195" y="752" width="1" height="1" />
+      <rounded-rectangle id="16:168" name="Paper texture / fleck" x="254" y="287" width="2" height="1" />
+      <rounded-rectangle id="16:167" name="Paper texture / fleck" x="384" y="353" width="1" height="1" />
+      <rounded-rectangle id="16:166" name="Paper texture / fleck" x="30" y="475" width="1" height="1" />
+      <rounded-rectangle id="16:165" name="Paper texture / fleck" x="2" y="697" width="1" height="1" />
+      <rounded-rectangle id="16:164" name="Paper texture / fleck" x="174" y="615" width="1" height="1" />
+      <rounded-rectangle id="16:163" name="Paper texture / fleck" x="278" y="281" width="2" height="1" />
+      <rounded-rectangle id="164:649" name="Theme / dark glass shell" x="12" y="160" width="366" height="582" />
+      <rounded-rectangle id="164:651" name="Theme / gold pixel" x="344" y="164" width="8" height="8" />
+      <rounded-rectangle id="5:4" name="Status / island" x="126" y="9" width="134" height="18" hidden="true" />
+      <text id="5:5" name="Status / time" x="18" y="14" width="70" height="25" />
+      <text id="5:6" name="Status / signal" x="291" y="17" width="37" height="15" />
+      <text id="5:7" name="Status / wifi" x="330" y="16" width="20" height="18" />
+      <rounded-rectangle id="5:8" name="Status / battery" x="355" y="17" width="20" height="10" />
+      <rounded-rectangle id="5:9" name="Status / battery level" x="357" y="19" width="14" height="6" />
+      <frame id="5:10" name="Header / Greeting" x="16" y="42" width="358" height="65">
+        <rounded-rectangle id="5:11" name="Avatar / frame" x="0" y="0" width="48" height="48" />
+        <text id="5:12" name="Avatar / face" x="11" y="5" width="28" height="43.5" hidden="true" />
+        <text id="5:13" name="Avatar / hair" x="12" y="0" width="26" height="24" hidden="true" />
+        <text id="5:14" name="Greeting" x="60" y="0" width="220" height="31.5" />
+        <text id="5:15" name="Subtitle" x="60" y="31" width="245" height="19.5" />
+        <text id="5:16" name="Search" x="300" y="4" width="28" height="46.5" />
+        <text id="5:17" name="Menu" x="331" y="9" width="28" height="34.5" />
+        <rounded-rectangle id="16:238" name="Avatar / pixel detail" x="8" y="7" width="6" height="5" hidden="true" />
+        <rounded-rectangle id="16:239" name="Avatar / pixel detail" x="14" y="4" width="18" height="5" hidden="true" />
+        <rounded-rectangle id="16:240" name="Avatar / pixel detail" x="31" y="9" width="7" height="8" hidden="true" />
+        <rounded-rectangle id="16:241" name="Avatar / pixel detail" x="11" y="19" width="5" height="12" hidden="true" />
+        <rounded-rectangle id="16:242" name="Avatar / pixel detail" x="34" y="19" width="4" height="11" hidden="true" />
+        <rounded-rectangle id="16:243" name="Avatar / pixel detail" x="18" y="17" width="5" height="5" hidden="true" />
+        <rounded-rectangle id="16:244" name="Avatar / pixel detail" x="29" y="17" width="5" height="5" hidden="true" />
+        <rounded-rectangle id="16:245" name="Avatar / pixel detail" x="22" y="27" width="8" height="2" hidden="true" />
+        <rounded-rectangle id="16:246" name="Avatar / pixel detail" x="19" y="34" width="14" height="5" hidden="true" />
+      </frame>
+      <frame id="5:18" name="WeeklyCalendar" x="16" y="109" width="358" height="48">
+        <frame id="5:19" name="CalendarDay / MON" x="0" y="0" width="49" height="48">
+          <text id="5:20" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="5:21" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="5:22" name="CalendarDay / TUE" x="51" y="0" width="49" height="48">
+          <text id="5:23" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="5:24" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="5:25" name="CalendarDay / WED" x="102" y="0" width="49" height="48">
+          <text id="5:27" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="5:28" name="CalendarDay / THU" x="153" y="0" width="49" height="48">
+          <text id="5:29" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="5:30" name="Date" x="11" y="22" width="34" height="27" />
+          <text id="5:26" name="Day" x="-43" y="6" width="38" height="13.5" />
+        </frame>
+        <frame id="5:31" name="CalendarDay / FRI" x="204" y="0" width="49" height="48">
+          <text id="5:32" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="5:33" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="5:34" name="CalendarDay / SAT" x="255" y="0" width="49" height="48">
+          <text id="5:35" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="5:36" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="5:37" name="CalendarDay / SUN" x="306" y="0" width="49" height="48">
+          <text id="5:38" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="5:39" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+      </frame>
+      <rounded-rectangle id="10:38" name="Home indicator" x="148" y="837" width="98" height="4" />
+      <instance id="11:90" name="GameStage / DailyAdventure / instance" x="17" y="214" width="358" height="340" />
+      <instance id="11:179" name="Feedback / DinoMessage / instance" x="18" y="162" width="358" height="40" />
+      <instance id="11:208" name="HealthCard / RadarChart / instance" x="18" y="560" width="173" height="179" />
+      <instance id="11:249" name="QuestCard / Daily / instance" x="203" y="560" width="173" height="179" />
+      <instance id="11:331" name="Navigation / Bottom / instance" x="18" y="752" width="358" height="73" />
+      <ellipse id="28:502" name="Status / camera dot" x="191" y="13" width="8" height="8" />
+      <vector id="74:639" name="Vector 1" x="81.22038269042969" y="492.2184753417969" width="264.15960693359375" height="37.04549789428711" hidden="true" />
+      <vector id="74:640" name="Vector 2" x="47.298248291015625" y="482.3116455078125" width="20.20893096923828" height="6.495728015899658" hidden="true" />
+      <vector id="74:641" name="Vector 3" x="49.4634895324707" y="493.1378479003906" width="20.20893096923828" height="7.217475414276123" hidden="true" />
+      <vector id="74:642" name="Vector 4" x="32.38676834106445" y="481.1749572753906" width="22.96835708618164" height="31.414987564086914" hidden="true" />
+      <vector id="74:643" name="Vector 5" x="37.193782806396484" y="514.790283203125" width="5.05223274230957" height="12.991456031799316" hidden="true" />
+      <vector id="74:644" name="Vector 6" x="45.85475158691406" y="515.5120239257812" width="2.1652426719665527" height="11.547961235046387" hidden="true" />
+      <vector id="74:645" name="Vector 7" x="79.54285430908203" y="519.1207885742188" width="8.021317481994629" height="10.975650787353516" hidden="true" />
+      <vector id="74:646" name="Vector 8" x="111.17339324951172" y="485.9302062988281" width="14.795333862304688" height="9.37287425994873" hidden="true" />
+      <vector id="74:647" name="Vector 9" x="152.47499084472656" y="510.8923034667969" width="10.302860260009766" height="11.621786117553711" hidden="true" />
+      <vector id="74:648" name="Vector 10" x="207.59976196289062" y="511.72869873046875" width="12.699137687683105" height="10.436243057250977" hidden="true" />
+      <vector id="74:649" name="Vector 11" x="238.5613555908203" y="488.807373046875" width="7.890446662902832" height="11.571423530578613" hidden="true" />
+      <vector id="74:650" name="Vector 12" x="293.4447937011719" y="525.4765014648438" width="11.84366512298584" height="8.685118675231934" hidden="true" />
+      <vector id="74:659" name="Vector 13" x="323.7275695800781" y="473.7213134765625" width="17.321941375732422" height="19.416528701782227" hidden="true" />
+      <vector id="74:660" name="Vector 14" x="359.09320068359375" y="480.5697021484375" width="8.791916847229004" height="19.785633087158203" hidden="true" />
+      <vector id="74:661" name="Vector 15" x="335.9972839355469" y="458.6011657714844" width="31.515148162841797" height="22.266969680786133" hidden="true" />
+      <vector id="74:662" name="Vector 16" x="322.2876892089844" y="450.9708557128906" width="21.64881706237793" height="12.00744915008545" hidden="true" />
+      <vector id="74:663" name="Vector 17" x="362.7019348144531" y="455.2741394042969" width="10.129921913146973" height="12.993304252624512" hidden="true" />
+      <vector id="74:664" name="Vector 18" x="324.4493103027344" y="485.9203796386719" width="17.321941375732422" height="10.008328437805176" hidden="true" />
+      <vector id="74:665" name="Vector 19" x="340.3277587890625" y="485.1986389160156" width="12.269708633422852" height="5.05223274230957" hidden="true" />
+      <vector id="74:666" name="Vector 20" x="352.59747314453125" y="490.2508544921875" width="8.660970687866211" height="13.639829635620117" hidden="true" />
+      <vector id="74:667" name="Vector 21" x="328.77978515625" y="495.3031005859375" width="0.7217475771903992" height="5.05223274230957" hidden="true" />
+      <vector id="74:668" name="Vector 22" x="356.2062072753906" y="502.52056884765625" width="2.1652426719665527" height="5.773980617523193" hidden="true" />
+      <vector id="74:669" name="Vector 23" x="348.2669677734375" y="511.1815490722656" width="3.6087377071380615" height="2.8869903087615967" hidden="true" />
+      <vector id="74:670" name="Vector 24" x="359.09320068359375" y="509.01629638671875" width="0.7217475771903992" height="3.6087377071380615" hidden="true" />
+      <vector id="74:671" name="Vector 25" x="356.2062072753906" y="509.01629638671875" width="1.4434951543807983" height="7.217475414276123" hidden="true" />
+      <vector id="74:672" name="Vector 26" x="323.0058288574219" y="501.798828125" width="6.495728015899658" height="4.3304853439331055" hidden="true" />
+      <vector id="74:673" name="Vector 27" x="329.5015563964844" y="500.3553161621094" width="7.217475414276123" height="6.495728015899658" hidden="true" />
+      <vector id="74:674" name="Vector 28" x="328.05804443359375" y="505.4075622558594" width="0.7217475771903992" height="6.495728015899658" hidden="true" />
+      <rounded-rectangle id="164:650" name="Theme / red accent" x="30" y="158" width="104" height="3" />
+    </frame>
+    <frame id="40:524" name="Quest / Galaxy Base / 390×844" x="450" y="48" width="390" height="844">
+      <rounded-rectangle id="40:525" name="Paper texture / fleck" x="292" y="261" width="1" height="1" />
+      <rounded-rectangle id="40:526" name="Paper texture / fleck" x="20" y="543" width="1" height="1" />
+      <rounded-rectangle id="40:527" name="Paper texture / fleck" x="106" y="437" width="1" height="1" />
+      <rounded-rectangle id="40:528" name="Paper texture / fleck" x="220" y="739" width="1" height="1" />
+      <rounded-rectangle id="40:529" name="Paper texture / fleck" x="210" y="1" width="2" height="1" />
+      <rounded-rectangle id="40:530" name="Paper texture / fleck" x="52" y="663" width="1" height="1" />
+      <rounded-rectangle id="40:531" name="Paper texture / fleck" x="206" y="645" width="1" height="1" />
+      <rounded-rectangle id="40:532" name="Paper texture / fleck" x="48" y="159" width="1" height="1" />
+      <rounded-rectangle id="40:533" name="Paper texture / fleck" x="368" y="49" width="1" height="1" />
+      <rounded-rectangle id="40:534" name="Paper texture / fleck" x="158" y="843" width="2" height="1" />
+      <rounded-rectangle id="40:535" name="Paper texture / fleck" x="188" y="569" width="1" height="1" />
+      <rounded-rectangle id="40:536" name="Paper texture / fleck" x="276" y="59" width="1" height="1" />
+      <rounded-rectangle id="40:537" name="Paper texture / fleck" x="10" y="405" width="1" height="1" />
+      <rounded-rectangle id="40:538" name="Paper texture / fleck" x="54" y="803" width="1" height="1" />
+      <rounded-rectangle id="40:539" name="Paper texture / fleck" x="302" y="469" width="2" height="1" />
+      <rounded-rectangle id="40:540" name="Paper texture / fleck" x="238" y="363" width="1" height="1" />
+      <rounded-rectangle id="40:541" name="Paper texture / fleck" x="42" y="777" width="1" height="1" />
+      <rounded-rectangle id="40:542" name="Paper texture / fleck" x="370" y="679" width="1" height="1" />
+      <rounded-rectangle id="40:543" name="Paper texture / fleck" x="292" y="501" width="1" height="1" />
+      <rounded-rectangle id="40:544" name="Paper texture / fleck" x="336" y="415" width="2" height="1" />
+      <rounded-rectangle id="40:545" name="Paper texture / fleck" x="268" y="61" width="1" height="1" />
+      <rounded-rectangle id="40:546" name="Paper texture / fleck" x="50" y="127" width="1" height="1" />
+      <rounded-rectangle id="40:547" name="Paper texture / fleck" x="322" y="221" width="1" height="1" />
+      <rounded-rectangle id="40:548" name="Paper texture / fleck" x="324" y="39" width="1" height="1" />
+      <rounded-rectangle id="40:549" name="Paper texture / fleck" x="198" y="621" width="2" height="1" />
+      <rounded-rectangle id="40:550" name="Paper texture / fleck" x="60" y="51" width="1" height="1" />
+      <rounded-rectangle id="40:551" name="Paper texture / fleck" x="14" y="37" width="1" height="1" />
+      <rounded-rectangle id="40:552" name="Paper texture / fleck" x="256" y="603" width="1" height="1" />
+      <rounded-rectangle id="40:553" name="Paper texture / fleck" x="356" y="313" width="1" height="1" />
+      <rounded-rectangle id="40:554" name="Paper texture / fleck" x="46" y="319" width="2" height="1" />
+      <rounded-rectangle id="40:555" name="Paper texture / fleck" x="168" y="373" width="1" height="1" />
+      <rounded-rectangle id="40:556" name="Paper texture / fleck" x="124" y="675" width="1" height="1" />
+      <rounded-rectangle id="40:557" name="Paper texture / fleck" x="262" y="441" width="1" height="1" />
+      <rounded-rectangle id="40:558" name="Paper texture / fleck" x="142" y="627" width="1" height="1" />
+      <rounded-rectangle id="40:559" name="Paper texture / fleck" x="278" y="45" width="2" height="1" />
+      <rounded-rectangle id="40:560" name="Paper texture / fleck" x="320" y="167" width="1" height="1" />
+      <rounded-rectangle id="40:561" name="Paper texture / fleck" x="168" y="701" width="1" height="1" />
+      <rounded-rectangle id="40:562" name="Paper texture / fleck" x="104" y="567" width="1" height="1" />
+      <rounded-rectangle id="40:563" name="Paper texture / fleck" x="168" y="469" width="1" height="1" />
+      <rounded-rectangle id="40:564" name="Paper texture / fleck" x="240" y="787" width="2" height="1" />
+      <rounded-rectangle id="40:565" name="Paper texture / fleck" x="358" y="437" width="1" height="1" />
+      <rounded-rectangle id="40:566" name="Paper texture / fleck" x="120" y="107" width="1" height="1" />
+      <rounded-rectangle id="40:567" name="Paper texture / fleck" x="386" y="117" width="1" height="1" />
+      <rounded-rectangle id="40:568" name="Paper texture / fleck" x="112" y="399" width="1" height="1" />
+      <rounded-rectangle id="40:569" name="Paper texture / fleck" x="180" y="201" width="2" height="1" />
+      <rounded-rectangle id="40:570" name="Paper texture / fleck" x="384" y="527" width="1" height="1" />
+      <rounded-rectangle id="40:571" name="Paper texture / fleck" x="368" y="437" width="1" height="1" />
+      <rounded-rectangle id="40:572" name="Paper texture / fleck" x="138" y="411" width="1" height="1" />
+      <rounded-rectangle id="40:573" name="Paper texture / fleck" x="272" y="297" width="1" height="1" />
+      <rounded-rectangle id="40:574" name="Paper texture / fleck" x="80" y="615" width="2" height="1" />
+      <rounded-rectangle id="40:575" name="Paper texture / fleck" x="162" y="85" width="1" height="1" />
+      <rounded-rectangle id="40:576" name="Paper texture / fleck" x="8" y="391" width="1" height="1" />
+      <rounded-rectangle id="40:577" name="Paper texture / fleck" x="170" y="589" width="1" height="1" />
+      <rounded-rectangle id="40:578" name="Paper texture / fleck" x="16" y="435" width="1" height="1" />
+      <rounded-rectangle id="40:579" name="Paper texture / fleck" x="178" y="141" width="2" height="1" />
+      <rounded-rectangle id="40:580" name="Paper texture / fleck" x="164" y="51" width="1" height="1" />
+      <rounded-rectangle id="40:581" name="Paper texture / fleck" x="60" y="757" width="1" height="1" />
+      <rounded-rectangle id="40:582" name="Paper texture / fleck" x="74" y="283" width="1" height="1" />
+      <rounded-rectangle id="40:583" name="Paper texture / fleck" x="232" y="373" width="1" height="1" />
+      <rounded-rectangle id="40:584" name="Paper texture / fleck" x="304" y="275" width="2" height="1" />
+      <rounded-rectangle id="40:585" name="Paper texture / fleck" x="350" y="725" width="1" height="1" />
+      <rounded-rectangle id="40:586" name="Paper texture / fleck" x="286" y="651" width="1" height="1" />
+      <rounded-rectangle id="40:587" name="Paper texture / fleck" x="102" y="373" width="1" height="1" />
+      <rounded-rectangle id="40:588" name="Paper texture / fleck" x="160" y="703" width="1" height="1" />
+      <rounded-rectangle id="40:589" name="Paper texture / fleck" x="340" y="737" width="2" height="1" />
+      <rounded-rectangle id="40:590" name="Paper texture / fleck" x="52" y="843" width="1" height="1" />
+      <rounded-rectangle id="40:591" name="Paper texture / fleck" x="158" y="341" width="1" height="1" />
+      <rounded-rectangle id="40:592" name="Paper texture / fleck" x="368" y="695" width="1" height="1" />
+      <rounded-rectangle id="40:593" name="Paper texture / fleck" x="196" y="761" width="1" height="1" />
+      <rounded-rectangle id="40:594" name="Paper texture / fleck" x="254" y="287" width="2" height="1" />
+      <rounded-rectangle id="40:595" name="Paper texture / fleck" x="384" y="353" width="1" height="1" />
+      <rounded-rectangle id="40:596" name="Paper texture / fleck" x="30" y="475" width="1" height="1" />
+      <rounded-rectangle id="40:597" name="Paper texture / fleck" x="0" y="705" width="1" height="1" />
+      <rounded-rectangle id="40:598" name="Paper texture / fleck" x="172" y="623" width="1" height="1" />
+      <rounded-rectangle id="40:599" name="Paper texture / fleck" x="278" y="281" width="2" height="1" />
+      <rounded-rectangle id="164:652" name="Theme / dark glass shell" x="12" y="160" width="366" height="582" />
+      <rounded-rectangle id="164:653" name="Theme / red accent" x="30" y="160" width="104" height="6" />
+      <rounded-rectangle id="164:654" name="Theme / gold pixel" x="344" y="174" width="8" height="8" />
+      <rounded-rectangle id="40:600" name="Status / island" x="126" y="9" width="134" height="18" hidden="true" />
+      <text id="40:601" name="Status / time" x="18" y="14" width="70" height="25" />
+      <text id="40:602" name="Status / signal" x="291" y="17" width="37" height="15" />
+      <text id="40:603" name="Status / wifi" x="330" y="16" width="20" height="18" />
+      <rounded-rectangle id="40:604" name="Status / battery" x="355" y="17" width="20" height="10" />
+      <rounded-rectangle id="40:605" name="Status / battery level" x="357" y="19" width="14" height="6" />
+      <frame id="40:606" name="Header / Greeting" x="16" y="42" width="358" height="65">
+        <rounded-rectangle id="40:607" name="Avatar / frame" x="0" y="0" width="48" height="48" />
+        <text id="40:608" name="Avatar / face" x="11" y="5" width="28" height="43.5" hidden="true" />
+        <text id="40:609" name="Avatar / hair" x="12" y="0" width="26" height="24" hidden="true" />
+        <text id="40:610" name="Greeting" x="60" y="0" width="220" height="31.5" />
+        <text id="40:611" name="Subtitle" x="60" y="31" width="245" height="19.5" />
+        <text id="40:612" name="Search" x="300" y="4" width="28" height="46.5" />
+        <text id="40:613" name="Menu" x="331" y="9" width="28" height="34.5" />
+        <rounded-rectangle id="40:614" name="Avatar / pixel detail" x="8" y="7" width="6" height="5" hidden="true" />
+        <rounded-rectangle id="40:615" name="Avatar / pixel detail" x="14" y="4" width="18" height="5" hidden="true" />
+        <rounded-rectangle id="40:616" name="Avatar / pixel detail" x="31" y="9" width="7" height="8" hidden="true" />
+        <rounded-rectangle id="40:617" name="Avatar / pixel detail" x="11" y="19" width="5" height="12" hidden="true" />
+        <rounded-rectangle id="40:618" name="Avatar / pixel detail" x="34" y="19" width="4" height="11" hidden="true" />
+        <rounded-rectangle id="40:619" name="Avatar / pixel detail" x="18" y="17" width="5" height="5" hidden="true" />
+        <rounded-rectangle id="40:620" name="Avatar / pixel detail" x="29" y="17" width="5" height="5" hidden="true" />
+        <rounded-rectangle id="40:621" name="Avatar / pixel detail" x="22" y="27" width="8" height="2" hidden="true" />
+        <rounded-rectangle id="40:622" name="Avatar / pixel detail" x="19" y="34" width="14" height="5" hidden="true" />
+      </frame>
+      <frame id="40:623" name="WeeklyCalendar" x="16" y="109" width="358" height="48">
+        <frame id="40:624" name="CalendarDay / MON" x="0" y="0" width="49" height="48">
+          <text id="40:625" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:626" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:627" name="CalendarDay / TUE" x="51" y="0" width="49" height="48">
+          <text id="40:628" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:629" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:630" name="CalendarDay / WED" x="102" y="0" width="49" height="48">
+          <text id="40:631" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:632" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:633" name="CalendarDay / THU" x="153" y="0" width="49" height="48">
+          <text id="40:634" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:635" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:636" name="CalendarDay / FRI" x="204" y="0" width="49" height="48">
+          <text id="40:637" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:638" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:639" name="CalendarDay / SAT" x="255" y="0" width="49" height="48">
+          <text id="40:640" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:641" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:642" name="CalendarDay / SUN" x="306" y="0" width="49" height="48">
+          <text id="40:643" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:644" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+      </frame>
+      <rounded-rectangle id="40:645" name="Home indicator" x="146" y="835" width="98" height="4" />
+      <instance id="40:651" name="Navigation / Bottom / instance" x="16" y="750" width="358" height="73" />
+      <ellipse id="40:652" name="Status / camera dot" x="191" y="13" width="8" height="8" />
+      <text id="42:581" name="Screen title" x="16" y="169" width="250" height="28.5" />
+      <text id="42:582" name="Screen subtitle" x="16" y="198" width="330" height="18" />
+      <frame id="42:583" name="Quest / Daily Summary" x="16" y="228" width="358" height="72">
+        <rounded-rectangle id="99:643" name="Decoration / red stripe" x="0" y="0" width="7" height="72" />
+        <rounded-rectangle id="99:644" name="Decoration / olive top" x="7" y="0" width="351" height="5" />
+        <rounded-rectangle id="42:584" name="Dino portrait" x="16" y="14" width="70" height="46" />
+        <frame id="42:585" name="Summary text" x="98" y="10" width="246" height="52">
+          <text id="42:586" name="Progress" x="0" y="0" width="220" height="18" />
+          <text id="42:587" name="Power" x="0" y="21" width="180" height="16.5" />
+          <rounded-rectangle id="42:588" name="Power track" x="0" y="39" width="150" height="8" />
+          <rounded-rectangle id="42:589" name="Power fill" x="1" y="40" width="90" height="6" />
+          <rounded-rectangle id="99:645" name="Decoration / reward badge" x="164" y="28" width="76" height="22" />
+          <text id="99:646" name="+60 COIN" x="175" y="33" width="44" height="11" />
+          <frame id="99:647" name="Decoration / reward spark" x="153" y="31" width="16" height="16" />
+        </frame>
+        <rounded-rectangle id="99:649" name="Decoration / pixel 0" x="327" y="8" width="7" height="7" />
+        <rounded-rectangle id="99:650" name="Decoration / pixel 1" x="338" y="8" width="7" height="7" />
+        <rounded-rectangle id="99:651" name="Decoration / pixel 2" x="327" y="19" width="7" height="7" />
+        <rounded-rectangle id="99:652" name="Decoration / pixel 3" x="338" y="19" width="7" height="7" />
+      </frame>
+      <frame id="42:590" name="Quest / Mission List" x="16" y="312" width="358" height="292">
+        <frame id="42:591" name="QuestItem / Completed" x="13.5" y="9.5" width="334" height="50">
+          <frame id="42:592" name="Checkbox" x="0" y="5" width="26" height="26">
+            <text id="42:593" name="Mark" x="5" y="1" width="18" height="24" />
+          </frame>
+          <frame id="42:594" name="Quest content" x="34" y="5" width="205" height="38">
+            <text id="42:595" name="Label" x="0" y="0" width="200" height="18" />
+            <text id="42:596" name="Detail" x="0" y="19" width="200" height="13.5" />
+          </frame>
+          <text id="42:597" name="Reward" x="247" y="5" width="76" height="13.5" />
+        </frame>
+        <frame id="42:598" name="QuestItem / Completed" x="13.5" y="63.5" width="334" height="50">
+          <frame id="42:599" name="Checkbox" x="0" y="5" width="26" height="26">
+            <text id="42:600" name="Mark" x="5" y="1" width="18" height="24" />
+          </frame>
+          <frame id="42:601" name="Quest content" x="34" y="5" width="205" height="38">
+            <text id="42:602" name="Label" x="0" y="0" width="200" height="18" />
+            <text id="42:603" name="Detail" x="0" y="19" width="200" height="13.5" />
+          </frame>
+          <text id="42:604" name="Reward" x="247" y="5" width="76" height="13.5" />
+        </frame>
+        <frame id="42:605" name="QuestItem / Active" x="13.5" y="117.5" width="334" height="50">
+          <frame id="42:606" name="Checkbox" x="0" y="5" width="26" height="26" />
+          <frame id="42:607" name="Quest content" x="34" y="5" width="205" height="38">
+            <text id="42:608" name="Label" x="0" y="0" width="200" height="18" />
+            <text id="42:609" name="Detail" x="0" y="19" width="200" height="13.5" />
+            <rounded-rectangle id="42:610" name="Progress track" x="0" y="33.5" width="178" height="4" />
+            <rounded-rectangle id="42:611" name="Progress fill" x="0" y="38.5" width="96.12000274658203" height="4" />
+          </frame>
+          <text id="42:612" name="Reward" x="247" y="5" width="76" height="13.5" />
+        </frame>
+        <frame id="42:613" name="QuestItem / Active" x="13.5" y="171.5" width="334" height="50">
+          <frame id="42:614" name="Checkbox" x="0" y="5" width="26" height="26" />
+          <frame id="42:615" name="Quest content" x="34" y="5" width="205" height="38">
+            <text id="42:616" name="Label" x="0" y="0" width="200" height="18" />
+            <text id="42:617" name="Detail" x="0" y="19" width="200" height="13.5" />
+            <rounded-rectangle id="42:618" name="Progress track" x="0" y="33.5" width="178" height="4" />
+          </frame>
+          <text id="42:619" name="Reward" x="247" y="5" width="76" height="13.5" />
+        </frame>
+        <frame id="42:620" name="QuestItem / Active" x="13.5" y="225.5" width="334" height="50">
+          <frame id="42:621" name="Checkbox" x="0" y="5" width="26" height="26" />
+          <frame id="42:622" name="Quest content" x="34" y="5" width="205" height="38">
+            <text id="42:623" name="Label" x="0" y="0" width="200" height="18" />
+            <text id="42:624" name="Detail" x="0" y="19" width="200" height="13.5" />
+            <rounded-rectangle id="42:625" name="Progress track" x="0" y="33.5" width="178" height="4" />
+            <rounded-rectangle id="42:626" name="Progress fill" x="0" y="38.5" width="156.63999938964844" height="4" />
+          </frame>
+          <text id="42:627" name="Reward" x="247" y="5" width="76" height="13.5" />
+        </frame>
+      </frame>
+      <frame id="42:628" name="Quest / Weekly Reward" x="16" y="616" width="358" height="111">
+        <text id="42:629" name="Title" x="16" y="12" width="300" height="18" />
+        <text id="42:630" name="Body" x="16" y="40" width="240" height="18" />
+        <text id="42:631" name="Count" x="16" y="67" width="130" height="18" />
+        <rounded-rectangle id="42:632" name="Days track" x="142" y="72" width="185" height="9" />
+        <rounded-rectangle id="42:633" name="Days fill" x="142" y="72" width="111" height="9" />
+      </frame>
+    </frame>
+    <frame id="40:914" name="Dashboard / Galaxy Base / 390×844" x="880" y="48" width="390" height="844">
+      <rounded-rectangle id="40:915" name="Paper texture / fleck" x="292" y="261" width="1" height="1" />
+      <rounded-rectangle id="40:916" name="Paper texture / fleck" x="20" y="543" width="1" height="1" />
+      <rounded-rectangle id="40:917" name="Paper texture / fleck" x="106" y="437" width="1" height="1" />
+      <rounded-rectangle id="40:918" name="Paper texture / fleck" x="220" y="739" width="1" height="1" />
+      <rounded-rectangle id="40:919" name="Paper texture / fleck" x="210" y="1" width="2" height="1" />
+      <rounded-rectangle id="40:920" name="Paper texture / fleck" x="52" y="663" width="1" height="1" />
+      <rounded-rectangle id="40:921" name="Paper texture / fleck" x="206" y="645" width="1" height="1" />
+      <rounded-rectangle id="40:922" name="Paper texture / fleck" x="48" y="159" width="1" height="1" />
+      <rounded-rectangle id="40:923" name="Paper texture / fleck" x="368" y="49" width="1" height="1" />
+      <rounded-rectangle id="40:924" name="Paper texture / fleck" x="158" y="843" width="2" height="1" />
+      <rounded-rectangle id="40:925" name="Paper texture / fleck" x="188" y="569" width="1" height="1" />
+      <rounded-rectangle id="40:926" name="Paper texture / fleck" x="276" y="59" width="1" height="1" />
+      <rounded-rectangle id="40:927" name="Paper texture / fleck" x="10" y="405" width="1" height="1" />
+      <rounded-rectangle id="40:928" name="Paper texture / fleck" x="54" y="803" width="1" height="1" />
+      <rounded-rectangle id="40:929" name="Paper texture / fleck" x="302" y="469" width="2" height="1" />
+      <rounded-rectangle id="40:930" name="Paper texture / fleck" x="238" y="363" width="1" height="1" />
+      <rounded-rectangle id="40:931" name="Paper texture / fleck" x="42" y="777" width="1" height="1" />
+      <rounded-rectangle id="40:932" name="Paper texture / fleck" x="370" y="679" width="1" height="1" />
+      <rounded-rectangle id="40:933" name="Paper texture / fleck" x="292" y="501" width="1" height="1" />
+      <rounded-rectangle id="40:934" name="Paper texture / fleck" x="336" y="415" width="2" height="1" />
+      <rounded-rectangle id="40:935" name="Paper texture / fleck" x="268" y="61" width="1" height="1" />
+      <rounded-rectangle id="40:936" name="Paper texture / fleck" x="50" y="127" width="1" height="1" />
+      <rounded-rectangle id="40:937" name="Paper texture / fleck" x="322" y="221" width="1" height="1" />
+      <rounded-rectangle id="40:938" name="Paper texture / fleck" x="324" y="39" width="1" height="1" />
+      <rounded-rectangle id="40:939" name="Paper texture / fleck" x="198" y="621" width="2" height="1" />
+      <rounded-rectangle id="40:940" name="Paper texture / fleck" x="60" y="51" width="1" height="1" />
+      <rounded-rectangle id="40:941" name="Paper texture / fleck" x="14" y="37" width="1" height="1" />
+      <rounded-rectangle id="40:942" name="Paper texture / fleck" x="256" y="603" width="1" height="1" />
+      <rounded-rectangle id="40:943" name="Paper texture / fleck" x="356" y="313" width="1" height="1" />
+      <rounded-rectangle id="40:944" name="Paper texture / fleck" x="46" y="319" width="2" height="1" />
+      <rounded-rectangle id="40:945" name="Paper texture / fleck" x="168" y="373" width="1" height="1" />
+      <rounded-rectangle id="40:946" name="Paper texture / fleck" x="124" y="675" width="1" height="1" />
+      <rounded-rectangle id="40:947" name="Paper texture / fleck" x="262" y="441" width="1" height="1" />
+      <rounded-rectangle id="40:948" name="Paper texture / fleck" x="142" y="627" width="1" height="1" />
+      <rounded-rectangle id="40:949" name="Paper texture / fleck" x="278" y="45" width="2" height="1" />
+      <rounded-rectangle id="40:950" name="Paper texture / fleck" x="320" y="167" width="1" height="1" />
+      <rounded-rectangle id="40:951" name="Paper texture / fleck" x="168" y="701" width="1" height="1" />
+      <rounded-rectangle id="40:952" name="Paper texture / fleck" x="104" y="567" width="1" height="1" />
+      <rounded-rectangle id="40:953" name="Paper texture / fleck" x="168" y="469" width="1" height="1" />
+      <rounded-rectangle id="40:954" name="Paper texture / fleck" x="240" y="787" width="2" height="1" />
+      <rounded-rectangle id="40:955" name="Paper texture / fleck" x="358" y="437" width="1" height="1" />
+      <rounded-rectangle id="40:956" name="Paper texture / fleck" x="120" y="107" width="1" height="1" />
+      <rounded-rectangle id="40:957" name="Paper texture / fleck" x="386" y="117" width="1" height="1" />
+      <rounded-rectangle id="40:958" name="Paper texture / fleck" x="112" y="399" width="1" height="1" />
+      <rounded-rectangle id="40:959" name="Paper texture / fleck" x="180" y="201" width="2" height="1" />
+      <rounded-rectangle id="40:960" name="Paper texture / fleck" x="384" y="527" width="1" height="1" />
+      <rounded-rectangle id="40:961" name="Paper texture / fleck" x="368" y="437" width="1" height="1" />
+      <rounded-rectangle id="40:962" name="Paper texture / fleck" x="138" y="411" width="1" height="1" />
+      <rounded-rectangle id="40:963" name="Paper texture / fleck" x="272" y="297" width="1" height="1" />
+      <rounded-rectangle id="40:964" name="Paper texture / fleck" x="80" y="615" width="2" height="1" />
+      <rounded-rectangle id="40:965" name="Paper texture / fleck" x="162" y="85" width="1" height="1" />
+      <rounded-rectangle id="40:966" name="Paper texture / fleck" x="8" y="391" width="1" height="1" />
+      <rounded-rectangle id="40:967" name="Paper texture / fleck" x="170" y="589" width="1" height="1" />
+      <rounded-rectangle id="40:968" name="Paper texture / fleck" x="16" y="435" width="1" height="1" />
+      <rounded-rectangle id="40:969" name="Paper texture / fleck" x="178" y="141" width="2" height="1" />
+      <rounded-rectangle id="40:970" name="Paper texture / fleck" x="164" y="51" width="1" height="1" />
+      <rounded-rectangle id="40:971" name="Paper texture / fleck" x="60" y="757" width="1" height="1" />
+      <rounded-rectangle id="40:972" name="Paper texture / fleck" x="74" y="283" width="1" height="1" />
+      <rounded-rectangle id="40:973" name="Paper texture / fleck" x="232" y="373" width="1" height="1" />
+      <rounded-rectangle id="40:974" name="Paper texture / fleck" x="304" y="275" width="2" height="1" />
+      <rounded-rectangle id="40:975" name="Paper texture / fleck" x="350" y="725" width="1" height="1" />
+      <rounded-rectangle id="40:976" name="Paper texture / fleck" x="286" y="651" width="1" height="1" />
+      <rounded-rectangle id="40:977" name="Paper texture / fleck" x="102" y="373" width="1" height="1" />
+      <rounded-rectangle id="40:978" name="Paper texture / fleck" x="160" y="703" width="1" height="1" />
+      <rounded-rectangle id="40:979" name="Paper texture / fleck" x="340" y="737" width="2" height="1" />
+      <rounded-rectangle id="40:980" name="Paper texture / fleck" x="52" y="843" width="1" height="1" />
+      <rounded-rectangle id="40:981" name="Paper texture / fleck" x="158" y="341" width="1" height="1" />
+      <rounded-rectangle id="40:982" name="Paper texture / fleck" x="368" y="695" width="1" height="1" />
+      <rounded-rectangle id="40:983" name="Paper texture / fleck" x="196" y="761" width="1" height="1" />
+      <rounded-rectangle id="40:984" name="Paper texture / fleck" x="254" y="287" width="2" height="1" />
+      <rounded-rectangle id="40:985" name="Paper texture / fleck" x="384" y="353" width="1" height="1" />
+      <rounded-rectangle id="40:986" name="Paper texture / fleck" x="30" y="475" width="1" height="1" />
+      <rounded-rectangle id="40:987" name="Paper texture / fleck" x="0" y="705" width="1" height="1" />
+      <rounded-rectangle id="40:988" name="Paper texture / fleck" x="172" y="623" width="1" height="1" />
+      <rounded-rectangle id="40:989" name="Paper texture / fleck" x="278" y="281" width="2" height="1" />
+      <rounded-rectangle id="164:655" name="Theme / dark glass shell" x="12" y="160" width="366" height="582" />
+      <rounded-rectangle id="164:656" name="Theme / red accent" x="30" y="160" width="104" height="6" />
+      <rounded-rectangle id="164:657" name="Theme / gold pixel" x="344" y="174" width="8" height="8" />
+      <rounded-rectangle id="40:990" name="Status / island" x="126" y="9" width="134" height="18" hidden="true" />
+      <text id="40:991" name="Status / time" x="18" y="14" width="70" height="25" />
+      <text id="40:992" name="Status / signal" x="291" y="17" width="37" height="15" />
+      <text id="40:993" name="Status / wifi" x="330" y="16" width="20" height="18" />
+      <rounded-rectangle id="40:994" name="Status / battery" x="355" y="17" width="20" height="10" />
+      <rounded-rectangle id="40:995" name="Status / battery level" x="357" y="19" width="14" height="6" />
+      <frame id="40:996" name="Header / Greeting" x="16" y="42" width="358" height="65">
+        <rounded-rectangle id="40:997" name="Avatar / frame" x="0" y="0" width="48" height="48" />
+        <text id="40:998" name="Avatar / face" x="11" y="5" width="28" height="43.5" hidden="true" />
+        <text id="40:999" name="Avatar / hair" x="12" y="0" width="26" height="24" hidden="true" />
+        <text id="40:1000" name="Greeting" x="60" y="0" width="220" height="31.5" />
+        <text id="40:1001" name="Subtitle" x="60" y="31" width="245" height="19.5" />
+        <text id="40:1002" name="Search" x="300" y="4" width="28" height="46.5" />
+        <text id="40:1003" name="Menu" x="331" y="9" width="28" height="34.5" />
+        <rounded-rectangle id="40:1004" name="Avatar / pixel detail" x="8" y="7" width="6" height="5" hidden="true" />
+        <rounded-rectangle id="40:1005" name="Avatar / pixel detail" x="14" y="4" width="18" height="5" hidden="true" />
+        <rounded-rectangle id="40:1006" name="Avatar / pixel detail" x="31" y="9" width="7" height="8" hidden="true" />
+        <rounded-rectangle id="40:1007" name="Avatar / pixel detail" x="11" y="19" width="5" height="12" hidden="true" />
+        <rounded-rectangle id="40:1008" name="Avatar / pixel detail" x="34" y="19" width="4" height="11" hidden="true" />
+        <rounded-rectangle id="40:1009" name="Avatar / pixel detail" x="18" y="17" width="5" height="5" hidden="true" />
+        <rounded-rectangle id="40:1010" name="Avatar / pixel detail" x="29" y="17" width="5" height="5" hidden="true" />
+        <rounded-rectangle id="40:1011" name="Avatar / pixel detail" x="22" y="27" width="8" height="2" hidden="true" />
+        <rounded-rectangle id="40:1012" name="Avatar / pixel detail" x="19" y="34" width="14" height="5" hidden="true" />
+      </frame>
+      <frame id="40:1013" name="WeeklyCalendar" x="16" y="109" width="358" height="48">
+        <frame id="40:1014" name="CalendarDay / MON" x="0" y="0" width="49" height="48">
+          <text id="40:1015" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1016" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1017" name="CalendarDay / TUE" x="51" y="0" width="49" height="48">
+          <text id="40:1018" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1019" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1020" name="CalendarDay / WED" x="102" y="0" width="49" height="48">
+          <text id="40:1021" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1022" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1023" name="CalendarDay / THU" x="153" y="0" width="49" height="48">
+          <text id="40:1024" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1025" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1026" name="CalendarDay / FRI" x="204" y="0" width="49" height="48">
+          <text id="40:1027" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1028" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1029" name="CalendarDay / SAT" x="255" y="0" width="49" height="48">
+          <text id="40:1030" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1031" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1032" name="CalendarDay / SUN" x="306" y="0" width="49" height="48">
+          <text id="40:1033" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1034" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+      </frame>
+      <rounded-rectangle id="40:1035" name="Home indicator" x="146" y="835" width="98" height="4" />
+      <instance id="40:1041" name="Navigation / Bottom / instance" x="16" y="750" width="358" height="73" />
+      <ellipse id="40:1042" name="Status / camera dot" x="191" y="13" width="8" height="8" />
+      <text id="43:581" name="Screen title" x="16" y="169" width="340" height="25.5" />
+      <text id="43:582" name="Screen subtitle" x="16" y="198" width="345" height="18" />
+      <frame id="43:583" name="Dashboard / Health Score" x="16" y="228" width="358" height="103">
+        <text id="43:584" name="Label" x="14" y="11" width="220" height="16.5" />
+        <text id="43:585" name="Score" x="14" y="30" width="90" height="69" />
+        <text id="43:586" name="Unit" x="75" y="54" width="70" height="21" />
+        <text id="43:587" name="Rank" x="250" y="19" width="100" height="19" />
+        <text id="43:588" name="Message" x="134" y="57" width="205" height="18" />
+        <rounded-rectangle id="43:589" name="Score track" x="134" y="80" width="205" height="8" />
+        <rounded-rectangle id="43:590" name="Score fill" x="134" y="80" width="168" height="8" />
+      </frame>
+      <frame id="43:591" name="Dashboard / Quest Impact Projection" x="16" y="488" width="358" height="150">
+        <text id="185:693" name="Impact / Title" x="12" y="7" width="165" height="20" />
+        <rounded-rectangle id="185:694" name="Impact / legend current" x="197" y="13" width="8" height="8" />
+        <text id="185:695" name="Impact / legend current label" x="209" y="9" width="34" height="16" />
+        <rounded-rectangle id="185:696" name="Impact / legend projected" x="251" y="13" width="8" height="8" />
+        <text id="185:697" name="Impact / legend projected label" x="263" y="9" width="47" height="16" />
+        <text id="185:698" name="Impact / note" x="307" y="9" width="40" height="16" />
+        <text id="185:699" name="Impact / Hypertension / label" x="12" y="37" width="60" height="20" />
+        <rounded-rectangle id="185:700" name="Impact / Hypertension / current track" x="78" y="38" width="210" height="7" />
+        <rounded-rectangle id="185:701" name="Impact / Hypertension / current" x="78" y="38" width="134.39999389648438" height="7" />
+        <rounded-rectangle id="185:702" name="Impact / Hypertension / future track" x="78" y="49" width="210" height="7" />
+        <rounded-rectangle id="185:703" name="Impact / Hypertension / future" x="78" y="49" width="113.4000015258789" height="7" />
+        <text id="185:704" name="Impact / Hypertension / values" x="294" y="37" width="50" height="20" />
+        <text id="185:705" name="Impact / Diabetes / label" x="12" y="71" width="60" height="20" />
+        <rounded-rectangle id="185:706" name="Impact / Diabetes / current track" x="78" y="72" width="210" height="7" />
+        <rounded-rectangle id="185:707" name="Impact / Diabetes / current" x="78" y="72" width="75.5999984741211" height="7" />
+        <rounded-rectangle id="185:708" name="Impact / Diabetes / future track" x="78" y="83" width="210" height="7" />
+        <rounded-rectangle id="185:709" name="Impact / Diabetes / future" x="78" y="83" width="63" height="7" />
+        <text id="185:710" name="Impact / Diabetes / values" x="294" y="71" width="50" height="20" />
+        <text id="185:711" name="Impact / Hyperlipidemia / label" x="12" y="105" width="60" height="20" />
+        <rounded-rectangle id="185:712" name="Impact / Hyperlipidemia / current track" x="78" y="106" width="210" height="7" />
+        <rounded-rectangle id="185:713" name="Impact / Hyperlipidemia / current" x="78" y="106" width="172.1999969482422" height="7" />
+        <rounded-rectangle id="185:714" name="Impact / Hyperlipidemia / future track" x="78" y="117" width="210" height="7" />
+        <rounded-rectangle id="185:715" name="Impact / Hyperlipidemia / future" x="78" y="117" width="147" height="7" />
+        <text id="185:716" name="Impact / Hyperlipidemia / values" x="294" y="105" width="50" height="20" />
+        <text id="185:717" name="Impact / scale 0" x="76" y="137" width="12" height="9" />
+        <text id="185:718" name="Impact / scale 25" x="177" y="137" width="18" height="9" />
+        <text id="185:719" name="Impact / scale 50" x="275" y="137" width="24" height="9" />
+      </frame>
+      <frame id="43:617" name="Dashboard / Disease Risk" x="16" y="336" width="358" height="145">
+        <text id="171:649" name="Risk / Title" x="14" y="9" width="160" height="22" />
+        <text id="171:650" name="Risk / Updated" x="205" y="11" width="138" height="18" />
+        <rounded-rectangle id="171:651" name="Risk / Hypertension / panel" x="13" y="38" width="108" height="94" />
+        <text id="171:652" name="Risk / Hypertension / label" x="21" y="44" width="92" height="18" />
+        <text id="171:653" name="Risk / Hypertension / percent" x="21" y="62" width="92" height="26" />
+        <rounded-rectangle id="171:654" name="Risk / Hypertension / track" x="21" y="94" width="92" height="8" />
+        <rounded-rectangle id="171:655" name="Risk / Hypertension / fill" x="21" y="94" width="29.440000534057617" height="8" />
+        <rounded-rectangle id="171:656" name="Risk / Hypertension / tick 1" x="43.5" y="94" width="1" height="8" />
+        <rounded-rectangle id="171:657" name="Risk / Hypertension / tick 2" x="66.5" y="94" width="1" height="8" />
+        <rounded-rectangle id="171:658" name="Risk / Hypertension / tick 3" x="89.5" y="94" width="1" height="8" />
+        <text id="171:659" name="Risk / Hypertension / status" x="21" y="106" width="92" height="18" />
+        <rounded-rectangle id="171:660" name="Risk / Diabetes / panel" x="125" y="38" width="108" height="94" />
+        <text id="171:661" name="Risk / Diabetes / label" x="133" y="44" width="92" height="18" />
+        <text id="171:662" name="Risk / Diabetes / percent" x="133" y="62" width="92" height="26" />
+        <rounded-rectangle id="171:663" name="Risk / Diabetes / track" x="133" y="94" width="92" height="8" />
+        <rounded-rectangle id="171:664" name="Risk / Diabetes / fill" x="133" y="94" width="16.559999465942383" height="8" />
+        <rounded-rectangle id="171:665" name="Risk / Diabetes / tick 1" x="155.5" y="94" width="1" height="8" />
+        <rounded-rectangle id="171:666" name="Risk / Diabetes / tick 2" x="178.5" y="94" width="1" height="8" />
+        <rounded-rectangle id="171:667" name="Risk / Diabetes / tick 3" x="201.5" y="94" width="1" height="8" />
+        <text id="171:668" name="Risk / Diabetes / status" x="133" y="106" width="92" height="18" />
+        <rounded-rectangle id="171:669" name="Risk / Hyperlipidemia / panel" x="237" y="38" width="108" height="94" />
+        <text id="171:670" name="Risk / Hyperlipidemia / label" x="245" y="44" width="92" height="18" />
+        <text id="171:671" name="Risk / Hyperlipidemia / percent" x="245" y="62" width="92" height="26" />
+        <rounded-rectangle id="171:672" name="Risk / Hyperlipidemia / track" x="245" y="94" width="92" height="8" />
+        <rounded-rectangle id="171:673" name="Risk / Hyperlipidemia / fill" x="245" y="94" width="37.720001220703125" height="8" />
+        <rounded-rectangle id="171:674" name="Risk / Hyperlipidemia / tick 1" x="267.5" y="94" width="1" height="8" />
+        <rounded-rectangle id="171:675" name="Risk / Hyperlipidemia / tick 2" x="290.5" y="94" width="1" height="8" />
+        <rounded-rectangle id="171:676" name="Risk / Hyperlipidemia / tick 3" x="313.5" y="94" width="1" height="8" />
+        <text id="171:677" name="Risk / Hyperlipidemia / status" x="245" y="106" width="92" height="18" />
+      </frame>
+      <frame id="43:628" name="Dashboard / Dino Insight" x="16" y="644" width="358" height="83">
+        <rounded-rectangle id="43:629" name="Dino portrait" x="8" y="5" width="78" height="69" />
+        <text id="43:630" name="Title" x="94" y="13" width="240" height="18" />
+        <text id="43:631" name="Body" x="94" y="40" width="248" height="16.5" />
+      </frame>
+    </frame>
+    <frame id="40:1304" name="Shop / Galaxy Base / 390×844" x="1310" y="48" width="390" height="844">
+      <rounded-rectangle id="40:1305" name="Paper texture / fleck" x="292" y="261" width="1" height="1" />
+      <rounded-rectangle id="40:1306" name="Paper texture / fleck" x="20" y="543" width="1" height="1" />
+      <rounded-rectangle id="40:1307" name="Paper texture / fleck" x="106" y="437" width="1" height="1" />
+      <rounded-rectangle id="40:1308" name="Paper texture / fleck" x="220" y="739" width="1" height="1" />
+      <rounded-rectangle id="40:1309" name="Paper texture / fleck" x="210" y="1" width="2" height="1" />
+      <rounded-rectangle id="40:1310" name="Paper texture / fleck" x="52" y="663" width="1" height="1" />
+      <rounded-rectangle id="40:1311" name="Paper texture / fleck" x="206" y="645" width="1" height="1" />
+      <rounded-rectangle id="40:1312" name="Paper texture / fleck" x="48" y="159" width="1" height="1" />
+      <rounded-rectangle id="40:1313" name="Paper texture / fleck" x="368" y="49" width="1" height="1" />
+      <rounded-rectangle id="40:1314" name="Paper texture / fleck" x="158" y="843" width="2" height="1" />
+      <rounded-rectangle id="40:1315" name="Paper texture / fleck" x="188" y="569" width="1" height="1" />
+      <rounded-rectangle id="40:1316" name="Paper texture / fleck" x="276" y="59" width="1" height="1" />
+      <rounded-rectangle id="40:1317" name="Paper texture / fleck" x="10" y="405" width="1" height="1" />
+      <rounded-rectangle id="40:1318" name="Paper texture / fleck" x="54" y="803" width="1" height="1" />
+      <rounded-rectangle id="40:1319" name="Paper texture / fleck" x="302" y="469" width="2" height="1" />
+      <rounded-rectangle id="40:1320" name="Paper texture / fleck" x="238" y="363" width="1" height="1" />
+      <rounded-rectangle id="40:1321" name="Paper texture / fleck" x="42" y="777" width="1" height="1" />
+      <rounded-rectangle id="40:1322" name="Paper texture / fleck" x="370" y="679" width="1" height="1" />
+      <rounded-rectangle id="40:1323" name="Paper texture / fleck" x="292" y="501" width="1" height="1" />
+      <rounded-rectangle id="40:1324" name="Paper texture / fleck" x="336" y="415" width="2" height="1" />
+      <rounded-rectangle id="40:1325" name="Paper texture / fleck" x="268" y="61" width="1" height="1" />
+      <rounded-rectangle id="40:1326" name="Paper texture / fleck" x="50" y="127" width="1" height="1" />
+      <rounded-rectangle id="40:1327" name="Paper texture / fleck" x="322" y="221" width="1" height="1" />
+      <rounded-rectangle id="40:1328" name="Paper texture / fleck" x="324" y="39" width="1" height="1" />
+      <rounded-rectangle id="40:1329" name="Paper texture / fleck" x="198" y="621" width="2" height="1" />
+      <rounded-rectangle id="40:1330" name="Paper texture / fleck" x="60" y="51" width="1" height="1" />
+      <rounded-rectangle id="40:1331" name="Paper texture / fleck" x="14" y="37" width="1" height="1" />
+      <rounded-rectangle id="40:1332" name="Paper texture / fleck" x="256" y="603" width="1" height="1" />
+      <rounded-rectangle id="40:1333" name="Paper texture / fleck" x="356" y="313" width="1" height="1" />
+      <rounded-rectangle id="40:1334" name="Paper texture / fleck" x="46" y="319" width="2" height="1" />
+      <rounded-rectangle id="40:1335" name="Paper texture / fleck" x="168" y="373" width="1" height="1" />
+      <rounded-rectangle id="40:1336" name="Paper texture / fleck" x="124" y="675" width="1" height="1" />
+      <rounded-rectangle id="40:1337" name="Paper texture / fleck" x="262" y="441" width="1" height="1" />
+      <rounded-rectangle id="40:1338" name="Paper texture / fleck" x="142" y="627" width="1" height="1" />
+      <rounded-rectangle id="40:1339" name="Paper texture / fleck" x="278" y="45" width="2" height="1" />
+      <rounded-rectangle id="40:1340" name="Paper texture / fleck" x="320" y="167" width="1" height="1" />
+      <rounded-rectangle id="40:1341" name="Paper texture / fleck" x="168" y="701" width="1" height="1" />
+      <rounded-rectangle id="40:1342" name="Paper texture / fleck" x="104" y="567" width="1" height="1" />
+      <rounded-rectangle id="40:1343" name="Paper texture / fleck" x="168" y="469" width="1" height="1" />
+      <rounded-rectangle id="40:1344" name="Paper texture / fleck" x="240" y="787" width="2" height="1" />
+      <rounded-rectangle id="40:1345" name="Paper texture / fleck" x="358" y="437" width="1" height="1" />
+      <rounded-rectangle id="40:1346" name="Paper texture / fleck" x="120" y="107" width="1" height="1" />
+      <rounded-rectangle id="40:1347" name="Paper texture / fleck" x="386" y="117" width="1" height="1" />
+      <rounded-rectangle id="40:1348" name="Paper texture / fleck" x="112" y="399" width="1" height="1" />
+      <rounded-rectangle id="40:1349" name="Paper texture / fleck" x="180" y="201" width="2" height="1" />
+      <rounded-rectangle id="40:1350" name="Paper texture / fleck" x="384" y="527" width="1" height="1" />
+      <rounded-rectangle id="40:1351" name="Paper texture / fleck" x="368" y="437" width="1" height="1" />
+      <rounded-rectangle id="40:1352" name="Paper texture / fleck" x="138" y="411" width="1" height="1" />
+      <rounded-rectangle id="40:1353" name="Paper texture / fleck" x="272" y="297" width="1" height="1" />
+      <rounded-rectangle id="40:1354" name="Paper texture / fleck" x="80" y="615" width="2" height="1" />
+      <rounded-rectangle id="40:1355" name="Paper texture / fleck" x="162" y="85" width="1" height="1" />
+      <rounded-rectangle id="40:1356" name="Paper texture / fleck" x="8" y="391" width="1" height="1" />
+      <rounded-rectangle id="40:1357" name="Paper texture / fleck" x="170" y="589" width="1" height="1" />
+      <rounded-rectangle id="40:1358" name="Paper texture / fleck" x="16" y="435" width="1" height="1" />
+      <rounded-rectangle id="40:1359" name="Paper texture / fleck" x="178" y="141" width="2" height="1" />
+      <rounded-rectangle id="40:1360" name="Paper texture / fleck" x="164" y="51" width="1" height="1" />
+      <rounded-rectangle id="40:1361" name="Paper texture / fleck" x="60" y="757" width="1" height="1" />
+      <rounded-rectangle id="40:1362" name="Paper texture / fleck" x="74" y="283" width="1" height="1" />
+      <rounded-rectangle id="40:1363" name="Paper texture / fleck" x="232" y="373" width="1" height="1" />
+      <rounded-rectangle id="40:1364" name="Paper texture / fleck" x="304" y="275" width="2" height="1" />
+      <rounded-rectangle id="40:1365" name="Paper texture / fleck" x="350" y="725" width="1" height="1" />
+      <rounded-rectangle id="40:1366" name="Paper texture / fleck" x="286" y="651" width="1" height="1" />
+      <rounded-rectangle id="40:1367" name="Paper texture / fleck" x="102" y="373" width="1" height="1" />
+      <rounded-rectangle id="40:1368" name="Paper texture / fleck" x="160" y="703" width="1" height="1" />
+      <rounded-rectangle id="40:1369" name="Paper texture / fleck" x="340" y="737" width="2" height="1" />
+      <rounded-rectangle id="40:1370" name="Paper texture / fleck" x="52" y="843" width="1" height="1" />
+      <rounded-rectangle id="40:1371" name="Paper texture / fleck" x="158" y="341" width="1" height="1" />
+      <rounded-rectangle id="40:1372" name="Paper texture / fleck" x="368" y="695" width="1" height="1" />
+      <rounded-rectangle id="40:1373" name="Paper texture / fleck" x="196" y="761" width="1" height="1" />
+      <rounded-rectangle id="40:1374" name="Paper texture / fleck" x="254" y="287" width="2" height="1" />
+      <rounded-rectangle id="40:1375" name="Paper texture / fleck" x="384" y="353" width="1" height="1" />
+      <rounded-rectangle id="40:1376" name="Paper texture / fleck" x="30" y="475" width="1" height="1" />
+      <rounded-rectangle id="40:1377" name="Paper texture / fleck" x="0" y="705" width="1" height="1" />
+      <rounded-rectangle id="40:1378" name="Paper texture / fleck" x="172" y="623" width="1" height="1" />
+      <rounded-rectangle id="40:1379" name="Paper texture / fleck" x="278" y="281" width="2" height="1" />
+      <rounded-rectangle id="164:658" name="Theme / dark glass shell" x="12" y="160" width="366" height="582" />
+      <rounded-rectangle id="164:659" name="Theme / red accent" x="30" y="160" width="104" height="6" />
+      <rounded-rectangle id="164:660" name="Theme / gold pixel" x="344" y="174" width="8" height="8" />
+      <rounded-rectangle id="40:1380" name="Status / island" x="126" y="9" width="134" height="18" hidden="true" />
+      <text id="40:1381" name="Status / time" x="18" y="14" width="70" height="25" />
+      <text id="40:1382" name="Status / signal" x="291" y="17" width="37" height="15" />
+      <text id="40:1383" name="Status / wifi" x="330" y="16" width="20" height="18" />
+      <rounded-rectangle id="40:1384" name="Status / battery" x="355" y="17" width="20" height="10" />
+      <rounded-rectangle id="40:1385" name="Status / battery level" x="357" y="19" width="14" height="6" />
+      <frame id="40:1386" name="Header / Greeting" x="16" y="42" width="358" height="65">
+        <rounded-rectangle id="40:1387" name="Avatar / frame" x="0" y="0" width="48" height="48" />
+        <text id="40:1388" name="Avatar / face" x="11" y="5" width="28" height="43.5" hidden="true" />
+        <text id="40:1389" name="Avatar / hair" x="12" y="0" width="26" height="24" hidden="true" />
+        <text id="40:1390" name="Greeting" x="60" y="0" width="220" height="31.5" />
+        <text id="40:1391" name="Subtitle" x="60" y="31" width="245" height="19.5" />
+        <text id="40:1392" name="Search" x="300" y="4" width="28" height="46.5" />
+        <text id="40:1393" name="Menu" x="331" y="9" width="28" height="34.5" />
+        <rounded-rectangle id="40:1394" name="Avatar / pixel detail" x="8" y="7" width="6" height="5" hidden="true" />
+        <rounded-rectangle id="40:1395" name="Avatar / pixel detail" x="14" y="4" width="18" height="5" hidden="true" />
+        <rounded-rectangle id="40:1396" name="Avatar / pixel detail" x="31" y="9" width="7" height="8" hidden="true" />
+        <rounded-rectangle id="40:1397" name="Avatar / pixel detail" x="11" y="19" width="5" height="12" hidden="true" />
+        <rounded-rectangle id="40:1398" name="Avatar / pixel detail" x="34" y="19" width="4" height="11" hidden="true" />
+        <rounded-rectangle id="40:1399" name="Avatar / pixel detail" x="18" y="17" width="5" height="5" hidden="true" />
+        <rounded-rectangle id="40:1400" name="Avatar / pixel detail" x="29" y="17" width="5" height="5" hidden="true" />
+        <rounded-rectangle id="40:1401" name="Avatar / pixel detail" x="22" y="27" width="8" height="2" hidden="true" />
+        <rounded-rectangle id="40:1402" name="Avatar / pixel detail" x="19" y="34" width="14" height="5" hidden="true" />
+      </frame>
+      <frame id="40:1403" name="WeeklyCalendar" x="16" y="109" width="358" height="48">
+        <frame id="40:1404" name="CalendarDay / MON" x="0" y="0" width="49" height="48">
+          <text id="40:1405" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1406" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1407" name="CalendarDay / TUE" x="51" y="0" width="49" height="48">
+          <text id="40:1408" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1409" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1410" name="CalendarDay / WED" x="102" y="0" width="49" height="48">
+          <text id="40:1411" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1412" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1413" name="CalendarDay / THU" x="153" y="0" width="49" height="48">
+          <text id="40:1414" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1415" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1416" name="CalendarDay / FRI" x="204" y="0" width="49" height="48">
+          <text id="40:1417" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1418" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1419" name="CalendarDay / SAT" x="255" y="0" width="49" height="48">
+          <text id="40:1420" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1421" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+        <frame id="40:1422" name="CalendarDay / SUN" x="306" y="0" width="49" height="48">
+          <text id="40:1423" name="Day" x="8" y="6" width="38" height="13.5" />
+          <text id="40:1424" name="Date" x="11" y="22" width="34" height="27" />
+        </frame>
+      </frame>
+      <rounded-rectangle id="40:1425" name="Home indicator" x="146" y="835" width="98" height="4" />
+      <instance id="40:1431" name="Navigation / Bottom / instance" x="16" y="750" width="358" height="73" />
+      <ellipse id="40:1432" name="Status / camera dot" x="191" y="13" width="8" height="8" />
+      <text id="45:581" name="Screen title" x="16" y="169" width="250" height="28.5" />
+      <text id="45:582" name="Screen subtitle" x="16" y="198" width="330" height="18" />
+      <frame id="45:583" name="Shop / Wallet" x="16" y="228" width="358" height="65">
+        <text id="45:584" name="Coin" x="14" y="13" width="42" height="39" />
+        <text id="45:585" name="Balance" x="47" y="4" width="125" height="47" />
+        <text id="45:586" name="Label" x="14" y="52" width="125" height="8" />
+        <text id="45:587" name="Hint" x="186" y="20" width="158" height="16.5" />
+      </frame>
+      <rounded-rectangle id="179:693" name="Shop / warm gold catalog panel" x="12" y="299" width="366" height="386" />
+      <frame id="45:588" name="Shop / Category Tabs" x="16" y="305" width="358" height="38">
+        <frame id="45:589" name="Tab / 추천" x="0" y="0" width="112" height="38">
+          <text id="45:590" name="Label" x="38" y="10" width="52" height="18" />
+          <frame id="158:649" name="Decoration / recommendation star" x="12" y="9" width="20" height="20" />
+        </frame>
+        <frame id="45:591" name="Tab / RRR" x="123" y="0" width="112" height="38">
+          <text id="45:592" name="Label" x="33" y="4" width="62" height="17" />
+          <text id="158:651" name="Decoration / RRR subtitle" x="30" y="22" width="44" height="7" />
+          <frame id="158:652" name="Decoration / RRR coin" x="12" y="9" width="20" height="20" />
+          <rounded-rectangle id="158:659" name="Decoration / gold pixel 0" x="98" y="3" width="3" height="3" />
+          <rounded-rectangle id="158:660" name="Decoration / gold pixel 1" x="103" y="3" width="3" height="3" />
+          <rounded-rectangle id="158:661" name="Decoration / gold pixel 2" x="98" y="8" width="3" height="3" />
+          <rounded-rectangle id="158:662" name="Decoration / gold pixel 3" x="103" y="8" width="3" height="3" />
+        </frame>
+        <frame id="45:595" name="Tab / 꾸미기" x="246" y="0" width="112" height="38">
+          <text id="45:596" name="Label" x="40" y="10" width="62" height="18" />
+          <frame id="158:663" name="Decoration / customize sparkle" x="12" y="9" width="20" height="20" />
+        </frame>
+      </frame>
+      <frame id="45:597" name="ShopItem / Chicken Breast" x="16" y="357" width="220" height="151">
+        <rounded-rectangle id="45:598" name="Product photo" x="7" y="7" width="206" height="101" />
+        <text id="45:599" name="Item icon" x="59" y="25" width="60" height="52.5" hidden="true" />
+        <text id="45:600" name="Name" x="10" y="111" width="200" height="17" />
+        <text id="45:601" name="Effect" x="10" y="130" width="200" height="14" />
+        <rounded-rectangle id="45:602" name="Buy button" x="155" y="13" width="58" height="21" />
+        <text id="45:603" name="Price" x="159" y="15" width="50" height="17" />
+        <rounded-rectangle id="177:693" name="RRR / gold badge" x="14" y="13" width="36" height="21" />
+        <text id="177:694" name="RRR / gold badge label" x="17" y="16" width="30" height="15" />
+        <rounded-rectangle id="182:693" name="Merch / Weekly sale / bg" x="14" y="87" width="78" height="18" />
+        <text id="182:694" name="Merch / Weekly sale / label" x="17" y="89" width="72" height="14" />
+        <text id="182:697" name="Chicken / Original price" x="118" y="17" width="34" height="13" />
+      </frame>
+      <frame id="45:604" name="ShopItem / Red Ginseng" x="244" y="357" width="130" height="151">
+        <rounded-rectangle id="45:605" name="Product photo" x="7" y="7" width="116" height="101" />
+        <text id="45:606" name="Item icon" x="59" y="25" width="60" height="52.5" hidden="true" />
+        <text id="45:607" name="Name" x="10" y="111" width="110" height="17" />
+        <text id="45:608" name="Effect" x="10" y="130" width="110" height="14" />
+        <rounded-rectangle id="45:609" name="Buy button" x="65" y="13" width="58" height="21" />
+        <text id="45:610" name="Price" x="69" y="15" width="50" height="17" />
+        <rounded-rectangle id="179:694" name="RRR / gold badge" x="14" y="13" width="36" height="21" />
+        <text id="179:695" name="RRR / gold badge label" x="17" y="16" width="30" height="15" />
+      </frame>
+      <frame id="45:611" name="ShopItem / Multivitamin" x="16" y="521" width="130" height="151">
+        <rounded-rectangle id="45:612" name="Product photo" x="7" y="7" width="116" height="101" />
+        <text id="45:613" name="Item icon" x="59" y="25" width="60" height="52.5" hidden="true" />
+        <text id="45:614" name="Name" x="10" y="111" width="110" height="17" />
+        <text id="45:615" name="Effect" x="10" y="130" width="110" height="14" />
+        <rounded-rectangle id="45:616" name="Buy button" x="65" y="13" width="58" height="21" />
+        <text id="45:617" name="Price" x="69" y="15" width="50" height="17" />
+        <rounded-rectangle id="179:696" name="RRR / gold badge" x="14" y="13" width="36" height="21" />
+        <text id="179:697" name="RRR / gold badge label" x="17" y="16" width="30" height="15" />
+      </frame>
+      <frame id="45:618" name="ShopItem / Protein Drink" x="154" y="521" width="220" height="151">
+        <rounded-rectangle id="45:619" name="Product photo" x="7" y="7" width="206" height="101" />
+        <text id="45:620" name="Item icon" x="59" y="25" width="60" height="52.5" hidden="true" />
+        <text id="45:621" name="Name" x="10" y="111" width="200" height="17" />
+        <text id="45:622" name="Effect" x="10" y="130" width="200" height="14" />
+        <rounded-rectangle id="45:623" name="Buy button" x="155" y="13" width="58" height="21" />
+        <text id="45:624" name="Price" x="159" y="15" width="50" height="17" />
+        <rounded-rectangle id="179:698" name="RRR / gold badge" x="14" y="13" width="36" height="21" />
+        <text id="179:699" name="RRR / gold badge label" x="17" y="16" width="30" height="15" />
+        <rounded-rectangle id="182:695" name="Merch / Best / bg" x="14" y="87" width="54" height="18" />
+        <text id="182:696" name="Merch / Best / label" x="17" y="89" width="48" height="14" />
+      </frame>
+      <frame id="45:625" name="Shop / Daily Bonus" x="16" y="697" width="358" height="40">
+        <text id="45:626" name="Gift" x="12" y="6" width="30" height="31.5" />
+        <text id="45:627" name="DAILY FREE COIN · 받기" x="48" y="10" width="270" height="15" />
+        <text id="45:628" name="Arrow" x="328" y="4" width="20" height="36" />
+      </frame>
+    </frame>
+    <text id="48:581" name="Screen label / HOME" x="20" y="14" width="360" height="22" />
+    <text id="48:582" name="Screen label / QUEST" x="450" y="14" width="360" height="22" />
+    <text id="48:583" name="Screen label / DASHBOARD" x="880" y="14" width="360" height="22" />
+    <text id="48:584" name="Screen label / SHOP" x="1310" y="14" width="360" height="22" />
+  </section>
+  <instance id="11:294" name="HealthCard / BloodSugar / instance" x="2020" y="1014" width="358" height="262" />
+  <section id="11:3" name="02 — Components" x="70" y="2465" width="900" height="1400">
+    <symbol id="11:89" name="GameStage / DailyAdventure" x="30" y="103" width="358" height="340" />
+    <symbol id="11:178" name="Feedback / DinoMessage" x="415" y="103" width="358" height="40" />
+    <symbol id="11:207" name="HealthCard / RadarChart" x="415" y="193" width="173" height="179" />
+    <symbol id="11:248" name="QuestCard / Daily" x="620" y="193" width="173" height="179" />
+    <symbol id="11:293" name="HealthCard / BloodSugar" x="415" y="423" width="358" height="96" />
+    <frame id="12:263" name="QuestItem" x="410" y="833" width="170" height="34">
+      <symbol id="12:250" name="State=Completed" x="0" y="0" width="170" height="34" />
+      <symbol id="12:256" name="State=In Progress" x="0" y="0" width="170" height="34" />
+      <symbol id="12:262" name="State=Not Started" x="0" y="0" width="170" height="34" />
+    </frame>
+    <frame id="12:273" name="StatusBadge" x="620" y="833" width="84" height="22">
+      <symbol id="12:266" name="State=Stable" x="0" y="0" width="84" height="22" />
+      <symbol id="12:269" name="State=Warning" x="0" y="0" width="84" height="22" />
+      <symbol id="12:272" name="State=High" x="0" y="0" width="84" height="22" />
+    </frame>
+    <symbol id="12:282" name="Header" x="30" y="1003" width="358" height="65" />
+    <symbol id="12:305" name="WeeklyCalendar" x="420" y="1003" width="358" height="48" />
+    <frame id="12:321" name="CalendarDay" x="30" y="1093" width="49" height="48">
+      <symbol id="12:309" name="Selected=True" x="0" y="0" width="49" height="48" />
+      <symbol id="12:318" name="Selected=False" x="0" y="0" width="49" height="48" />
+    </frame>
+    <symbol id="13:164" name="HPBar" x="230" y="1093" width="150" height="22" />
+    <symbol id="13:167" name="CombatFeedback" x="400" y="1093" width="70" height="35" />
+    <symbol id="13:170" name="RewardIndicator" x="500" y="1093" width="90" height="30" />
+    <symbol id="13:175" name="QuestProgress" x="620" y="1093" width="130" height="20" />
+    <symbol id="13:183" name="PixelIconButton" x="155" y="1183" width="44" height="44" />
+    <frame id="13:187" name="NavigationItem" x="30" y="1183" width="88" height="64">
+      <symbol id="13:179" name="State=Active" x="0" y="0" width="88" height="64" />
+      <symbol id="13:184" name="State=Inactive" x="0" y="0" width="88" height="64" />
+    </frame>
+    <frame id="13:195" name="Enemy" x="250" y="1183" width="46" height="46">
+      <symbol id="12:317" name="State=Idle" x="0" y="0" width="46" height="46" />
+      <symbol id="13:188" name="State=Hit" x="0" y="0" width="46" height="46" />
+    </frame>
+  </section>
+  <frame id="12:244" name="Navigation / Bottom" x="100" y="3128" width="1468" height="73">
+    <symbol id="11:330" name="Active=Home" x="0" y="0" width="358" height="73" />
+    <symbol id="12:217" name="Active=Quest" x="370" y="0" width="358" height="73" />
+    <symbol id="12:226" name="Active=Dashboard" x="740" y="0" width="358" height="73" />
+    <symbol id="12:235" name="Active=Shop" x="1110" y="0" width="358" height="73" />
+  </frame>
+  <section id="11:4" name="03 — Design System" x="974" y="2558" width="870" height="500">
+    <text id="12:193" name="Section heading" x="70" y="14" width="400" height="45" />
+    <rounded-rectangle id="12:194" name="Swatch / Paper" x="70" y="70" width="130" height="60" />
+    <text id="12:195" name="Swatch label" x="70" y="136" width="150" height="16.5" />
+    <rounded-rectangle id="12:196" name="Swatch / Card" x="232" y="70" width="130" height="60" />
+    <text id="12:197" name="Swatch label" x="232" y="136" width="150" height="16.5" />
+    <rounded-rectangle id="12:198" name="Swatch / Ink" x="394" y="70" width="130" height="60" />
+    <text id="12:199" name="Swatch label" x="394" y="136" width="150" height="16.5" />
+    <rounded-rectangle id="12:200" name="Swatch / Red" x="556" y="70" width="130" height="60" />
+    <text id="12:201" name="Swatch label" x="556" y="136" width="150" height="16.5" />
+    <rounded-rectangle id="12:202" name="Swatch / Forest" x="718" y="70" width="130" height="60" />
+    <text id="12:203" name="Swatch label" x="718" y="136" width="150" height="16.5" />
+    <rounded-rectangle id="12:204" name="Swatch / Light Green" x="70" y="180" width="130" height="60" />
+    <text id="12:205" name="Swatch label" x="70" y="246" width="150" height="16.5" />
+    <rounded-rectangle id="12:206" name="Swatch / Mustard" x="232" y="180" width="130" height="60" />
+    <text id="12:207" name="Swatch label" x="232" y="246" width="150" height="16.5" />
+    <rounded-rectangle id="12:208" name="Swatch / Brown" x="394" y="180" width="130" height="60" />
+    <text id="12:209" name="Swatch label" x="394" y="246" width="150" height="16.5" />
+    <rounded-rectangle id="12:210" name="Swatch / Blue" x="556" y="180" width="130" height="60" />
+    <text id="12:211" name="Swatch label" x="556" y="246" width="150" height="16.5" />
+    <rounded-rectangle id="12:212" name="Swatch / Border" x="718" y="180" width="130" height="60" />
+    <text id="12:213" name="Swatch label" x="718" y="246" width="150" height="16.5" />
+    <text id="12:214" name="Typography heading" x="70" y="309" width="300" height="37.5" />
+    <text id="12:215" name="Display specimen" x="70" y="346" width="800" height="45" />
+    <text id="12:216" name="Information specimen" x="70" y="400" width="800" height="22.5" />
+  </section>
+  <section id="11:5" name="04 — Pixel Assets" x="1020" y="3098" width="900" height="620">
+    <text id="14:169" name="Pixel Assets heading" x="24" y="20" width="300" height="45" />
+    <rounded-rectangle id="14:170" name="Dino / Mascot sprite" x="24" y="70" width="210" height="150" />
+    <rounded-rectangle id="14:171" name="Icon tile / HP" x="245" y="75" width="75" height="62" />
+    <text id="14:172" name="Pixel Icon / HP" x="269" y="83" width="40" height="45" />
+    <rounded-rectangle id="14:173" name="Icon tile / Coin" x="360" y="75" width="75" height="62" />
+    <text id="14:174" name="Pixel Icon / Coin" x="384" y="83" width="40" height="45" />
+    <rounded-rectangle id="14:175" name="Icon tile / Quest" x="245" y="155" width="75" height="62" />
+    <text id="14:176" name="Pixel Icon / Quest" x="269" y="163" width="40" height="45" />
+    <rounded-rectangle id="14:177" name="Icon tile / Damage" x="360" y="155" width="75" height="62" />
+    <text id="14:178" name="Pixel Icon / Damage" x="384" y="163" width="40" height="45" />
+    <rounded-rectangle id="23:248" name="Background / Pixel Forest source" x="24" y="235" width="292" height="139" />
+    <symbol id="24:233" name="Brand / REXRUN Team Logo" x="510" y="208" width="180" height="180" />
+    <text id="24:234" name="Team logo label" x="220" y="418" width="265" height="34" />
+    <frame id="120:649" name="Dino Asset / Triceratops" x="20" y="460" width="150" height="120" />
+    <frame id="120:650" name="Dino Asset / Sauropod" x="190" y="460" width="150" height="120" />
+    <frame id="120:651" name="Dino Asset / Pterosaur" x="360" y="460" width="150" height="120" />
+    <frame id="120:652" name="Dino Asset / Raptor" x="530" y="460" width="150" height="120" />
+    <frame id="120:653" name="Dino Asset / Stegosaurus" x="700" y="460" width="150" height="120" />
+  </section>
+  <section id="27:252" name="05 — Reference Poster" x="2000" y="1482" width="1064" height="1576" />
+  <frame id="27:253" name="WELL DINOS / Reference Composition" x="2020" y="1598" width="1024" height="1536">
+    <rounded-rectangle id="27:254" name="Poster / left artwork" x="0" y="0" width="158" height="1536" />
+    <rounded-rectangle id="27:255" name="Poster / right artwork" x="870" y="0" width="154" height="1536" />
+    <rounded-rectangle id="27:256" name="Phone / outer dark outline" x="157" y="8" width="711" height="1503" />
+    <rounded-rectangle id="27:257" name="Phone / red accent" x="164" y="14" width="697" height="1492" />
+    <rounded-rectangle id="27:258" name="Phone / inner dark edge" x="170" y="18" width="685" height="1484" />
+    <rounded-rectangle id="27:259" name="Phone / paper panel" x="178" y="27" width="669" height="1456" />
+    <frame id="27:260" name="Home UI / editable scaled copy" x="184" y="40" width="655.2000122070312" height="1417.9200439453125">
+      <rounded-rectangle id="27:261" name="Paper texture / fleck" x="490.55999755859375" y="438.4800109863281" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:262" name="Paper texture / fleck" x="33.599998474121094" y="912.239990234375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:263" name="Paper texture / fleck" x="178.0800018310547" y="734.1599731445312" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:264" name="Paper texture / fleck" x="369.6000061035156" y="1241.52001953125" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:265" name="Paper texture / fleck" x="352.79998779296875" y="1.6799999475479126" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:266" name="Paper texture / fleck" x="87.36000061035156" y="1113.8399658203125" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:267" name="Paper texture / fleck" x="346.0799865722656" y="1083.5999755859375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:268" name="Paper texture / fleck" x="80.63999938964844" y="267.1199951171875" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:269" name="Paper texture / fleck" x="618.239990234375" y="82.31999969482422" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:270" name="Paper texture / fleck" x="265.44000244140625" y="1416.239990234375" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:271" name="Paper texture / fleck" x="315.8399963378906" y="955.9199829101562" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:272" name="Paper texture / fleck" x="463.67999267578125" y="99.12000274658203" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:273" name="Paper texture / fleck" x="16.799999237060547" y="680.4000244140625" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:274" name="Paper texture / fleck" x="90.72000122070312" y="1349.0400390625" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:275" name="Paper texture / fleck" x="507.3599853515625" y="787.9199829101562" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:276" name="Paper texture / fleck" x="399.8399963378906" y="609.8400268554688" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:277" name="Paper texture / fleck" x="70.55999755859375" y="1305.3599853515625" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:278" name="Paper texture / fleck" x="621.5999755859375" y="1140.719970703125" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:279" name="Paper texture / fleck" x="490.55999755859375" y="841.6799926757812" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:280" name="Paper texture / fleck" x="564.47998046875" y="697.2000122070312" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:281" name="Paper texture / fleck" x="450.239990234375" y="102.4800033569336" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:282" name="Paper texture / fleck" x="84" y="213.36000061035156" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:283" name="Paper texture / fleck" x="540.9600219726562" y="371.2799987792969" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:284" name="Paper texture / fleck" x="544.3200073242188" y="65.5199966430664" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:285" name="Paper texture / fleck" x="332.6400146484375" y="1043.280029296875" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:286" name="Paper texture / fleck" x="100.80000305175781" y="85.68000030517578" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:287" name="Paper texture / fleck" x="23.520000457763672" y="62.15999984741211" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:288" name="Paper texture / fleck" x="430.0799865722656" y="1013.0399780273438" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:289" name="Paper texture / fleck" x="598.0800170898438" y="525.8400268554688" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:290" name="Paper texture / fleck" x="77.27999877929688" y="535.9199829101562" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:291" name="Paper texture / fleck" x="282.239990234375" y="626.6400146484375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:292" name="Paper texture / fleck" x="208.32000732421875" y="1134" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:293" name="Paper texture / fleck" x="440.1600036621094" y="740.8800048828125" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:294" name="Paper texture / fleck" x="238.55999755859375" y="1053.3599853515625" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:295" name="Paper texture / fleck" x="467.0400085449219" y="75.5999984741211" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:296" name="Paper texture / fleck" x="537.5999755859375" y="280.55999755859375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:297" name="Paper texture / fleck" x="282.239990234375" y="1177.6800537109375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:298" name="Paper texture / fleck" x="174.72000122070312" y="952.5599975585938" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:299" name="Paper texture / fleck" x="282.239990234375" y="787.9199829101562" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:300" name="Paper texture / fleck" x="403.20001220703125" y="1322.1600341796875" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:301" name="Paper texture / fleck" x="601.4400024414062" y="734.1599731445312" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:302" name="Paper texture / fleck" x="201.60000610351562" y="179.75999450683594" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:303" name="Paper texture / fleck" x="648.47998046875" y="196.55999755859375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:304" name="Paper texture / fleck" x="188.16000366210938" y="670.3200073242188" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:305" name="Paper texture / fleck" x="302.3999938964844" y="337.67999267578125" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:306" name="Paper texture / fleck" x="645.1199951171875" y="885.3599853515625" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:307" name="Paper texture / fleck" x="618.239990234375" y="734.1599731445312" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:308" name="Paper texture / fleck" x="231.83999633789062" y="690.47998046875" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:309" name="Paper texture / fleck" x="456.9599914550781" y="498.9599914550781" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:310" name="Paper texture / fleck" x="134.39999389648438" y="1033.199951171875" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:311" name="Paper texture / fleck" x="272.1600036621094" y="142.8000030517578" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:312" name="Paper texture / fleck" x="13.4399995803833" y="656.8800048828125" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:313" name="Paper texture / fleck" x="285.6000061035156" y="989.52001953125" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:314" name="Paper texture / fleck" x="26.8799991607666" y="730.7999877929688" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:315" name="Paper texture / fleck" x="299.0400085449219" y="236.8800048828125" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:316" name="Paper texture / fleck" x="275.5199890136719" y="85.68000030517578" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:317" name="Paper texture / fleck" x="100.80000305175781" y="1271.760009765625" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:318" name="Paper texture / fleck" x="124.31999969482422" y="475.44000244140625" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:319" name="Paper texture / fleck" x="389.760009765625" y="626.6400146484375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:320" name="Paper texture / fleck" x="510.7200012207031" y="462" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:321" name="Paper texture / fleck" x="588" y="1218" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:322" name="Paper texture / fleck" x="480.4800109863281" y="1093.6800537109375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:323" name="Paper texture / fleck" x="171.36000061035156" y="626.6400146484375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:324" name="Paper texture / fleck" x="268.79998779296875" y="1181.0400390625" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:325" name="Paper texture / fleck" x="571.2000122070312" y="1238.1600341796875" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:326" name="Paper texture / fleck" x="87.36000061035156" y="1416.239990234375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:327" name="Paper texture / fleck" x="265.44000244140625" y="572.8800048828125" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:328" name="Paper texture / fleck" x="618.239990234375" y="1167.5999755859375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:329" name="Paper texture / fleck" x="329.2799987792969" y="1278.47998046875" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:330" name="Paper texture / fleck" x="426.7200012207031" y="482.1600036621094" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:331" name="Paper texture / fleck" x="645.1199951171875" y="593.0399780273438" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:332" name="Paper texture / fleck" x="50.400001525878906" y="798" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:333" name="Paper texture / fleck" x="0" y="1184.4000244140625" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:334" name="Paper texture / fleck" x="288.9599914550781" y="1046.6400146484375" width="1.6799999475479126" height="1.6799999475479126" />
+      <rounded-rectangle id="27:335" name="Paper texture / fleck" x="467.0400085449219" y="472.0799865722656" width="3.359999895095825" height="1.6799999475479126" />
+      <rounded-rectangle id="27:336" name="Status / island" x="211.67999267578125" y="15.119999885559082" width="225.1199951171875" height="30.239999771118164" />
+      <text id="27:337" name="Status / time" x="30.239999771118164" y="23.520000457763672" width="117.5999984741211" height="42" />
+      <text id="27:338" name="Status / signal" x="488.8800048828125" y="28.559999465942383" width="62.15999984741211" height="25.200000762939453" />
+      <text id="27:339" name="Status / wifi" x="554.4000244140625" y="26.8799991607666" width="33.599998474121094" height="30.239999771118164" />
+      <rounded-rectangle id="27:340" name="Status / battery" x="596.4000244140625" y="28.559999465942383" width="33.599998474121094" height="16.799999237060547" />
+      <rounded-rectangle id="27:341" name="Status / battery level" x="599.760009765625" y="31.920000076293945" width="23.520000457763672" height="10.079999923706055" />
+      <frame id="27:342" name="Header / Greeting" x="26.8799991607666" y="70.55999755859375" width="601.4400024414062" height="109.19999694824219">
+        <rounded-rectangle id="27:343" name="Avatar / frame" x="0" y="0" width="80.63999938964844" height="80.63999938964844" />
+        <text id="27:344" name="Avatar / face" x="18.479995727539062" y="8.400002479553223" width="47.040000915527344" height="73.08000183105469" hidden="true" />
+        <text id="27:345" name="Avatar / hair" x="20.159996032714844" y="0.000002441406195430318" width="43.68000030517578" height="40.31999969482422" hidden="true" />
+        <text id="27:346" name="Greeting" x="100.79999542236328" y="0.000002441406195430318" width="369.6000061035156" height="52.91999816894531" />
+        <text id="27:347" name="Subtitle" x="100.79999542236328" y="52.08000183105469" width="411.6000061035156" height="32.7599983215332" />
+        <text id="27:348" name="Search" x="504" y="6.7200026512146" width="47.040000915527344" height="78.12000274658203" />
+        <text id="27:349" name="Menu" x="556.0800170898438" y="15.120002746582031" width="47.040000915527344" height="57.959999084472656" />
+        <rounded-rectangle id="27:350" name="Avatar / pixel detail" x="13.439994812011719" y="11.760002136230469" width="10.079999923706055" height="8.399999618530273" hidden="true" />
+        <rounded-rectangle id="27:351" name="Avatar / pixel detail" x="23.519994735717773" y="6.7200026512146" width="30.239999771118164" height="8.399999618530273" hidden="true" />
+        <rounded-rectangle id="27:352" name="Avatar / pixel detail" x="52.079994201660156" y="15.120002746582031" width="11.760000228881836" height="13.4399995803833" hidden="true" />
+        <rounded-rectangle id="27:353" name="Avatar / pixel detail" x="18.479995727539062" y="31.920001983642578" width="8.399999618530273" height="20.15999984741211" hidden="true" />
+        <rounded-rectangle id="27:354" name="Avatar / pixel detail" x="57.1199951171875" y="31.920001983642578" width="6.71999979019165" height="18.479999542236328" hidden="true" />
+        <rounded-rectangle id="27:355" name="Avatar / pixel detail" x="30.2399959564209" y="28.56000328063965" width="8.399999618530273" height="8.399999618530273" hidden="true" />
+        <rounded-rectangle id="27:356" name="Avatar / pixel detail" x="48.719993591308594" y="28.56000328063965" width="8.399999618530273" height="8.399999618530273" hidden="true" />
+        <rounded-rectangle id="27:357" name="Avatar / pixel detail" x="36.95999526977539" y="45.36000061035156" width="13.4399995803833" height="3.359999895095825" hidden="true" />
+        <rounded-rectangle id="27:358" name="Avatar / pixel detail" x="31.919994354248047" y="57.12000274658203" width="23.520000457763672" height="8.399999618530273" hidden="true" />
+      </frame>
+      <frame id="27:359" name="WeeklyCalendar" x="26.8799991607666" y="183.1199951171875" width="601.4400024414062" height="80.63999938964844">
+        <frame id="27:360" name="CalendarDay / MON" x="0" y="0" width="82.31999969482422" height="80.63999938964844">
+          <text id="27:361" name="Day" x="13.439994812011719" y="10.080004692077637" width="63.84000015258789" height="22.68000030517578" />
+          <text id="27:362" name="Date" x="18.479995727539062" y="36.96000671386719" width="57.119998931884766" height="45.36000061035156" />
+        </frame>
+        <frame id="27:363" name="CalendarDay / TUE" x="85.67999267578125" y="0.000004882812390860636" width="82.31999969482422" height="80.63999938964844">
+          <text id="27:364" name="Day" x="13.43994140625" y="10.080004692077637" width="63.84000015258789" height="22.68000030517578" />
+          <text id="27:365" name="Date" x="18.479942321777344" y="36.96000671386719" width="57.119998931884766" height="45.36000061035156" />
+        </frame>
+        <frame id="27:366" name="CalendarDay / WED" x="171.36000061035156" y="0.000004882812390860636" width="82.31999969482422" height="80.63999938964844">
+          <text id="27:367" name="Day" x="13.440010070800781" y="10.080004692077637" width="63.84000015258789" height="22.68000030517578" />
+          <text id="27:368" name="Date" x="18.480009078979492" y="36.96000671386719" width="57.119998931884766" height="45.36000061035156" />
+        </frame>
+        <frame id="27:369" name="CalendarDay / THU" x="257.0400085449219" y="0.000004882812390860636" width="82.31999969482422" height="80.63999938964844">
+          <text id="27:370" name="Day" x="13.439955711364746" y="10.080004692077637" width="63.84000015258789" height="22.68000030517578" />
+          <text id="27:371" name="Date" x="18.479955673217773" y="36.96000671386719" width="57.119998931884766" height="45.36000061035156" />
+        </frame>
+        <frame id="27:372" name="CalendarDay / FRI" x="342.7200012207031" y="0.000004882812390860636" width="82.31999969482422" height="80.63999938964844">
+          <text id="27:373" name="Day" x="13.440024375915527" y="10.080004692077637" width="63.84000015258789" height="22.68000030517578" />
+          <text id="27:374" name="Date" x="18.480024337768555" y="36.96000671386719" width="57.119998931884766" height="45.36000061035156" />
+        </frame>
+        <frame id="27:375" name="CalendarDay / SAT" x="428.3999938964844" y="0.000004882812390860636" width="82.31999969482422" height="80.63999938964844">
+          <text id="27:376" name="Day" x="13.439970970153809" y="10.080004692077637" width="63.84000015258789" height="22.68000030517578" />
+          <text id="27:377" name="Date" x="18.479970932006836" y="36.96000671386719" width="57.119998931884766" height="45.36000061035156" />
+        </frame>
+        <frame id="27:378" name="CalendarDay / SUN" x="514.0800170898438" y="0.000004882812390860636" width="82.31999969482422" height="80.63999938964844">
+          <text id="27:379" name="Day" x="13.440038681030273" y="10.080004692077637" width="63.84000015258789" height="22.68000030517578" />
+          <text id="27:380" name="Date" x="18.480039596557617" y="36.96000671386719" width="57.119998931884766" height="45.36000061035156" />
+        </frame>
+      </frame>
+      <rounded-rectangle id="27:381" name="Home indicator" x="245.27999877929688" y="1402.800048828125" width="164.63999938964844" height="6.71999979019165" />
+      <instance id="27:382" name="GameStage / DailyAdventure / instance" x="26.8799991607666" y="272.1600036621094" width="601.4400024414062" height="571.2000122070312" />
+      <instance id="27:383" name="Feedback / DinoMessage / instance" x="26.8799991607666" y="692.1599731445312" width="601.4400024414062" height="67.20000457763672" />
+      <instance id="27:384" name="HealthCard / BloodPressure / instance" x="26.8799991607666" y="776.1599731445312" width="290.6400146484375" height="300.7200012207031" />
+      <instance id="27:385" name="QuestCard / Daily / instance" x="337.67999267578125" y="776.1599731445312" width="290.6400146484375" height="300.7200012207031" />
+      <instance id="27:386" name="HealthCard / BloodSugar / instance" x="26.8799991607666" y="1090.3199462890625" width="601.4400024414062" height="161.27999877929688" />
+      <instance id="27:387" name="Navigation / Bottom / instance" x="26.8799991607666" y="1260" width="601.4400024414062" height="122.64000701904297" />
+      <ellipse id="28:503" name="Status / camera dot" x="406.55999755859375" y="23.520000457763672" width="13.4399995803833" height="13.4399995803833" />
+    </frame>
+  </frame>
+  <section id="54:581" name="06 — Onboarding / Scenario" x="80" y="3998" width="1780" height="920">
+    <frame id="54:582" name="ONB-01 / Login" x="20" y="48" width="390" height="844">
+      <rounded-rectangle id="130:649" name="Login Background / Canyon Waterfall" x="0" y="0" width="390" height="844" />
+      <rounded-rectangle id="130:650" name="Login Background / global cream haze" x="0" y="0" width="390" height="844" />
+      <rounded-rectangle id="133:649" name="Login Background / hero mist" x="75" y="8" width="250" height="462" />
+      <text id="54:584" name="12:32" x="22" y="17" width="41" height="18" />
+      <ellipse id="54:585" name="Ellipse" x="190" y="24" width="10" height="10" />
+      <rounded-rectangle id="54:586" name="Rectangle" x="135" y="828" width="120" height="5" />
+      <rounded-rectangle id="139:649" name="Login Form / red accent" x="36" y="488" width="104" height="6" />
+      <rounded-rectangle id="137:673" name="Login Hero / dark form panel" x="18" y="488" width="354" height="326" />
+      <text id="57:587" name="이메일" x="44" y="548" width="28" height="12" />
+      <rounded-rectangle id="57:588" name="Rectangle" x="44" y="568" width="302" height="44" />
+      <text id="57:589" name="hello@rexrun.com" x="83" y="582" width="94" height="13" />
+      <text id="57:590" name="비밀번호" x="44" y="626" width="37" height="12" />
+      <rounded-rectangle id="57:591" name="Rectangle" x="44" y="646" width="302" height="44" />
+      <text id="57:592" name="••••••••" x="83" y="656" width="72" height="19" />
+      <rounded-rectangle id="57:593" name="Rectangle" x="44" y="706" width="302" height="50" />
+      <text id="57:594" name="다음" x="169" y="721" width="28" height="18" />
+      <text id="57:595" name="계정이 없나요? 가입하기 ›" x="135" y="778" width="115" height="12" />
+      <text id="137:669" name="♥" x="99" y="323" width="11" height="12" />
+      <text id="137:672" name="EAT MOVE SLEEP TOGETHER" x="309" y="359" width="50" height="44" />
+      <text id="139:650" name="Login Form / title" x="44" y="504" width="164" height="16" />
+      <text id="139:651" name="Login Form / subtitle" x="44" y="525" width="143" height="11" />
+      <frame id="139:652" name="Login Form / email icon" x="56" y="582" width="20" height="16" />
+      <frame id="139:655" name="Login Form / lock icon" x="57" y="658" width="18" height="20" />
+      <frame id="139:659" name="Login Form / password visibility" x="314" y="661" width="20" height="14" />
+      <rounded-rectangle id="139:662" name="Login Form / slash 1" x="314" y="716" width="13.07473623752594" height="29.76776421070099" />
+      <rounded-rectangle id="139:663" name="Login Form / slash 2" x="325" y="716" width="13.07473623752594" height="29.76776421070099" />
+      <text id="139:664" name="Login Form / next arrow" x="292" y="715" width="11" height="31" />
+      <rounded-rectangle id="142:649" name="Login Hero / RexRun Black Logo" x="105" y="51" width="180" height="153" />
+      <frame id="140:653" name="Login Hero / pixel egg" x="104" y="216" width="192" height="218" hidden="true" />
+      <rounded-rectangle id="143:649" name="Login Hero / refined egg sprite" x="18" y="187" width="353" height="255" />
+    </frame>
+    <text id="54:583" name="01 LOGIN" x="20" y="14" width="68" height="18" />
+    <frame id="54:587" name="ONB-02 / Health Profile" x="450" y="48" width="390" height="844">
+      <rounded-rectangle id="145:649" name="Health Background / Pixel Ocean" x="0" y="0" width="390" height="844" />
+      <rounded-rectangle id="145:650" name="Health Background / cream haze" x="0" y="0" width="390" height="844" />
+      <rounded-rectangle id="145:651" name="Health Background / dark form panel" x="12" y="48" width="366" height="764" />
+      <rounded-rectangle id="160:649" name="Health Form / red accent" x="30" y="48" width="110" height="6" />
+      <text id="54:589" name="12:32" x="22" y="17" width="41" height="18" />
+      <ellipse id="54:590" name="Ellipse" x="190" y="24" width="10" height="10" />
+      <rounded-rectangle id="54:591" name="Rectangle" x="135" y="828" width="120" height="5" />
+      <text id="57:596" name="건강 프로필" x="24" y="58" width="116" height="29" />
+      <text id="57:597" name="따뜻한 알을 깨우려면 당신을 좀 알아야 해요." x="24" y="94" width="186" height="48" />
+      <text id="57:598" name="내일부터는 오늘 뭐 했는지만 체크하면 돼요." x="24" y="150" width="201" height="13" />
+      <text id="57:599" name="나이" x="24" y="190" width="21" height="13" />
+      <rounded-rectangle id="57:600" name="Rectangle" x="24" y="208" width="164" height="46" />
+      <text id="57:601" name="45세" x="38" y="222" width="30" height="16" />
+      <text id="57:602" name="성별" x="202" y="190" width="21" height="13" />
+      <rounded-rectangle id="57:603" name="Rectangle" x="202" y="208" width="164" height="46" />
+      <text id="57:604" name="여성" x="216" y="222" width="24" height="16" />
+      <text id="57:605" name="키" x="24" y="268" width="11" height="13" />
+      <rounded-rectangle id="57:606" name="Rectangle" x="24" y="286" width="164" height="46" />
+      <text id="57:607" name="165 cm" x="38" y="300" width="46" height="16" />
+      <text id="57:608" name="몸무게" x="202" y="268" width="31" height="13" />
+      <rounded-rectangle id="57:609" name="Rectangle" x="202" y="286" width="164" height="46" />
+      <text id="57:610" name="68 kg" x="216" y="300" width="36" height="16" />
+      <text id="57:611" name="혈압" x="24" y="346" width="21" height="13" />
+      <rounded-rectangle id="57:612" name="Rectangle" x="24" y="364" width="164" height="46" />
+      <text id="57:613" name="120 / 80 mmHg" x="38" y="378" width="97" height="16" />
+      <text id="57:614" name="공복 혈당" x="202" y="346" width="44" height="13" />
+      <rounded-rectangle id="57:615" name="Rectangle" x="202" y="364" width="164" height="46" />
+      <text id="57:616" name="104 mg/dL" x="216" y="378" width="68" height="16" />
+      <text id="57:617" name="추가 건강 정보" x="24" y="432" width="72" height="15" />
+      <frame id="57:618" name="Frame" x="24" y="458" width="342" height="42">
+        <text id="57:619" name="흡연" x="14" y="12" width="23" height="15" />
+        <text id="57:620" name="아니요" x="268" y="12" width="34" height="15" />
+      </frame>
+      <frame id="57:621" name="Frame" x="24" y="510" width="342" height="42">
+        <text id="57:622" name="고혈압 가족력" x="14" y="12" width="70" height="15" />
+        <text id="57:623" name="있음" x="268" y="12" width="23" height="15" />
+      </frame>
+      <frame id="57:624" name="Frame" x="24" y="562" width="342" height="42">
+        <text id="57:625" name="당뇨 가족력" x="14" y="12" width="58" height="15" />
+        <text id="57:626" name="없음" x="268" y="12" width="23" height="15" />
+      </frame>
+      <frame id="57:627" name="Frame" x="24" y="624" width="342" height="58">
+        <text id="57:628" name="예상 BMI" x="14" y="11" width="44" height="13" />
+        <text id="57:629" name="25.0" x="14" y="28" width="40" height="22" />
+        <text id="57:630" name="입력값 기준 자동 계산" x="170" y="23" width="101" height="13" />
+      </frame>
+      <rounded-rectangle id="57:631" name="Rectangle" x="24" y="704" width="342" height="56" />
+      <text id="57:632" name="공룡 깨우기" x="145" y="722" width="78" height="19" />
+      <text id="57:633" name="입력 정보는 위험도 계산에만 사용하며 다음부터 다시 묻지 않아요." x="76" y="777" width="159" height="24" />
+      <rounded-rectangle id="160:650" name="Health Form / step badge" x="286" y="62" width="68" height="24" />
+      <text id="160:651" name="Health Form / step label" x="299" y="68" width="36" height="11" />
+      <frame id="160:652" name="Health Form / privacy icon" x="50" y="779" width="18" height="20" />
+    </frame>
+    <text id="54:588" name="02 HEALTH INPUT" x="450" y="14" width="133" height="18" />
+    <frame id="54:592" name="ONB-03 / Choose Dino" x="880" y="48" width="390" height="844">
+      <rounded-rectangle id="154:649" name="Dino Select Background / Pixel Jungle" x="0" y="0" width="390" height="844" />
+      <rounded-rectangle id="154:650" name="Dino Select Background / cream haze" x="0" y="0" width="390" height="844" />
+      <rounded-rectangle id="154:651" name="Dino Select Background / header glass" x="16" y="48" width="358" height="70" />
+      <rounded-rectangle id="164:661" name="Theme / dark glass shell" x="12" y="48" width="366" height="764" />
+      <rounded-rectangle id="164:662" name="Theme / red accent" x="30" y="48" width="104" height="6" />
+      <rounded-rectangle id="164:663" name="Theme / gold pixel" x="344" y="62" width="8" height="8" />
+      <text id="54:594" name="12:32" x="22" y="17" width="41" height="18" />
+      <ellipse id="54:595" name="Ellipse" x="190" y="24" width="10" height="10" />
+      <rounded-rectangle id="54:596" name="Rectangle" x="135" y="828" width="120" height="5" />
+      <text id="58:581" name="함께할 공룡을 골라주세요" x="24" y="58" width="244" height="28" />
+      <text id="58:582" name="공룡마다 다른 건강 능력을 키워요." x="24" y="91" width="172" height="15" />
+      <frame id="58:583" name="Frame" x="24" y="130" width="164" height="142">
+        <rounded-rectangle id="58:584" name="Dino / 티라노" x="152" y="21" width="111" height="89" />
+        <text id="58:585" name="티라노" x="14" y="82" width="39" height="17" />
+        <text id="58:586" name="활력·도전" x="14" y="105" width="44" height="13" />
+        <rounded-rectangle id="58:587" name="Rectangle" x="112" y="10" width="40" height="22" />
+        <text id="58:588" name="선택" x="120" y="14" width="17" height="11" />
+      </frame>
+      <frame id="58:589" name="Frame" x="202" y="130" width="164" height="142">
+        <rounded-rectangle id="58:590" name="Dino / 트리케라" x="48" y="9" width="112" height="109" />
+        <text id="58:591" name="트리케라" x="14" y="82" width="52" height="17" />
+        <text id="58:592" name="꾸준함·방어" x="14" y="105" width="54" height="13" />
+      </frame>
+      <frame id="58:593" name="Frame" x="24" y="288" width="164" height="142">
+        <rounded-rectangle id="58:594" name="Dino / 랩터" x="27" y="11" width="125" height="119" />
+        <text id="58:595" name="랩터" x="14" y="82" width="26" height="17" />
+        <text id="58:596" name="민첩·걸음" x="14" y="105" width="44" height="13" />
+      </frame>
+      <frame id="58:597" name="Frame" x="202" y="288" width="164" height="142">
+        <rounded-rectangle id="58:598" name="Dino / 스테고" x="36" y="9" width="123" height="103" />
+        <text id="58:599" name="스테고" x="14" y="82" width="39" height="17" />
+        <text id="58:600" name="식사·균형" x="14" y="105" width="44" height="13" />
+      </frame>
+      <frame id="58:601" name="Frame" x="24" y="446" width="164" height="142">
+        <rounded-rectangle id="58:602" name="Dino / 프테라" x="29" y="6" width="117" height="112" />
+        <text id="58:603" name="프테라" x="14" y="82" width="39" height="17" />
+        <text id="58:604" name="수면·회복" x="14" y="105" width="44" height="13" />
+      </frame>
+      <frame id="58:605" name="Frame" x="202" y="446" width="164" height="142">
+        <rounded-rectangle id="58:606" name="Dino / 브라키오" x="40" y="5" width="101" height="123" />
+        <text id="58:607" name="브라키오" x="14" y="82" width="52" height="17" />
+        <text id="58:608" name="마음·여유" x="14" y="105" width="44" height="13" />
+      </frame>
+      <frame id="58:609" name="Frame" x="24" y="624" width="342" height="70">
+        <text id="58:610" name="오늘부터 티라노와 함께해요?" x="18" y="13" width="181" height="18" />
+        <text id="58:611" name="매일의 습관이 티라노를 성장시켜요." x="18" y="39" width="150" height="12" />
+      </frame>
+      <rounded-rectangle id="58:612" name="Rectangle" x="24" y="716" width="342" height="56" />
+      <text id="58:613" name="모험 시작하기" x="139" y="734" width="93" height="19" />
+    </frame>
+    <text id="54:593" name="03 DINO SELECT" x="880" y="14" width="124" height="18" />
+    <frame id="54:597" name="ONB-04 / First Risk Result" x="1310" y="48" width="390" height="844">
+      <rounded-rectangle id="164:664" name="Theme / dark glass shell" x="12" y="48" width="366" height="764" />
+      <rounded-rectangle id="164:665" name="Theme / red accent" x="30" y="48" width="104" height="6" />
+      <rounded-rectangle id="164:666" name="Theme / gold pixel" x="344" y="62" width="8" height="8" />
+      <text id="54:599" name="12:32" x="22" y="17" width="41" height="18" />
+      <ellipse id="54:600" name="Ellipse" x="190" y="24" width="10" height="10" />
+      <rounded-rectangle id="54:601" name="Rectangle" x="135" y="828" width="120" height="5" />
+      <text id="58:614" name="첫 건강 위험도" x="24" y="58" width="138" height="28" />
+      <text id="58:615" name="입력한 정보로 오늘의 시작점을 계산했어요." x="24" y="91" width="198" height="13" />
+      <frame id="58:616" name="Frame" x="24" y="124" width="342" height="250">
+        <rounded-rectangle id="58:617" name="Rectangle" x="0" y="0" width="342" height="250" />
+        <rounded-rectangle id="58:618" name="Rectangle" x="83" y="71" width="176" height="136" />
+        <rounded-rectangle id="58:619" name="Rectangle" x="14" y="14" width="116" height="28" />
+        <text id="58:620" name="NORMAL STATE" x="25" y="20" width="86" height="13" />
+        <text id="58:621" name="Lv.1 티라노" x="18" y="214" width="75" height="18" />
+      </frame>
+      <frame id="58:622" name="Frame" x="24" y="390" width="342" height="112">
+        <text id="58:623" name="고혈압 위험도" x="16" y="14" width="70" height="15" />
+        <text id="58:624" name="약 32%" x="16" y="36" width="106" height="39" />
+        <text id="58:625" name="생활습관을 바꾸면 낮아질 수 있어요." x="16" y="82" width="168" height="13" />
+      </frame>
+      <text id="58:626" name="오늘의 첫 퀘스트" x="24" y="522" width="104" height="18" />
+      <frame id="58:627" name="Frame" x="24" y="550" width="342" height="42">
+        <rounded-rectangle id="58:628" name="Rectangle" x="10" y="10" width="22" height="22" />
+        <text id="58:629" name="약 복용 체크" x="44" y="11" width="61" height="15" />
+        <text id="58:630" name="+10 COIN" x="258" y="12" width="47" height="12" />
+      </frame>
+      <frame id="58:631" name="Frame" x="24" y="602" width="342" height="42">
+        <rounded-rectangle id="58:632" name="Rectangle" x="10" y="10" width="22" height="22" />
+        <text id="58:633" name="건강한 한 끼" x="44" y="11" width="61" height="15" />
+        <text id="58:634" name="+20 COIN" x="258" y="12" width="48" height="12" />
+      </frame>
+      <frame id="58:635" name="Frame" x="24" y="654" width="342" height="42">
+        <rounded-rectangle id="58:636" name="Rectangle" x="10" y="10" width="22" height="22" />
+        <text id="58:637" name="6,000걸음 걷기" x="44" y="11" width="83" height="15" />
+        <text id="58:638" name="+30 COIN" x="258" y="12" width="49" height="12" />
+      </frame>
+      <rounded-rectangle id="58:639" name="Rectangle" x="24" y="724" width="342" height="56" />
+      <text id="58:640" name="첫 퀘스트 시작하기" x="122" y="742" width="126" height="19" />
+      <text id="58:641" name="위험도는 예측값이며 의료 진단이 아닙니다." x="77" y="795" width="162" height="11" />
+    </frame>
+    <text id="54:598" name="04 FIRST RESULT" x="1310" y="14" width="128" height="18" />
+  </section>
+  <section id="59:581" name="07 — Key Scenario States" x="80" y="4958" width="1350" height="1840">
+    <frame id="59:582" name="SCN-01 / Quest Detail" x="20" y="52" width="390" height="844">
+      <rounded-rectangle id="164:667" name="Theme / dark glass shell" x="12" y="48" width="366" height="764" />
+      <rounded-rectangle id="164:668" name="Theme / red accent" x="30" y="48" width="104" height="6" />
+      <rounded-rectangle id="164:669" name="Theme / gold pixel" x="344" y="62" width="8" height="8" />
+      <text id="59:584" name="12:32" x="22" y="17" width="41" height="18" />
+      <ellipse id="59:585" name="Ellipse" x="190" y="24" width="10" height="10" />
+      <rounded-rectangle id="59:586" name="Rectangle" x="135" y="828" width="120" height="5" />
+      <text id="62:581" name="← 오늘의 퀘스트" x="24" y="62" width="151" height="25" />
+      <rounded-rectangle id="62:582" name="Rectangle" x="24" y="112" width="74" height="74" />
+      <text id="62:583" name="6K" x="45" y="137" width="30" height="27" />
+      <text id="62:584" name="6,000걸음 걷기" x="116" y="116" width="152" height="27" />
+      <text id="62:585" name="진행 3,240 / 6,000" x="116" y="153" width="103" height="15" />
+      <rounded-rectangle id="62:586" name="Rectangle" x="24" y="208" width="342" height="18" />
+      <rounded-rectangle id="62:587" name="Rectangle" x="24" y="208" width="185" height="18" />
+      <text id="62:588" name="54%" x="320" y="205" width="27" height="15" />
+      <frame id="62:589" name="Frame" x="24" y="260" width="342" height="176">
+        <text id="62:590" name="왜 이 퀘스트인가요?" x="18" y="16" width="126" height="18" />
+        <text id="62:591" name="꾸준한 걷기는 혈압과 혈당 관리에 도움이 되고, 오늘의 위험도를 낮추는 가장 쉬운 시작이에요." x="18" y="50" width="198" height="48" />
+        <rounded-rectangle id="62:592" name="Rectangle" x="18" y="126" width="110" height="28" />
+        <text id="62:593" name="위험도 -0.2%p" x="27" y="133" width="66" height="12" />
+      </frame>
+      <text id="62:594" name="완료하면" x="24" y="468" width="48" height="16" />
+      <frame id="62:595" name="Frame" x="24" y="494" width="342" height="94">
+        <text id="62:596" name="+30" x="18" y="16" width="57" height="34" />
+        <text id="62:597" name="COIN" x="84" y="25" width="31" height="15" />
+        <text id="62:598" name="체력 +2 민첩 +3" x="18" y="58" width="90" height="15" />
+      </frame>
+      <rounded-rectangle id="62:599" name="Rectangle" x="24" y="700" width="342" height="56" />
+      <text id="62:600" name="완료 체크하기" x="139" y="718" width="93" height="19" />
+      <text id="62:601" name="직접 완료한 뒤 체크해 주세요." x="107" y="774" width="125" height="12" />
+    </frame>
+    <text id="59:583" name="05 QUEST DETAIL" x="20" y="20" width="132" height="18" />
+    <frame id="59:587" name="SCN-02 / Reward" x="450" y="52" width="390" height="844">
+      <rounded-rectangle id="164:670" name="Theme / dark glass shell" x="12" y="48" width="366" height="764" />
+      <rounded-rectangle id="164:671" name="Theme / red accent" x="30" y="48" width="104" height="6" />
+      <rounded-rectangle id="164:672" name="Theme / gold pixel" x="344" y="62" width="8" height="8" />
+      <text id="59:589" name="12:32" x="22" y="17" width="41" height="18" />
+      <ellipse id="59:590" name="Ellipse" x="190" y="24" width="10" height="10" />
+      <rounded-rectangle id="59:591" name="Rectangle" x="135" y="828" width="120" height="5" />
+      <text id="62:602" name="QUEST COMPLETE!" x="68" y="76" width="239" height="30" />
+      <ellipse id="62:603" name="Ellipse" x="100" y="136" width="190" height="190" />
+      <rounded-rectangle id="62:604" name="Rectangle" x="117" y="158" width="156" height="150" />
+      <text id="62:605" name="+30 COIN" x="114" y="350" width="125" height="31" />
+      <frame id="62:606" name="Frame" x="44" y="405" width="302" height="108">
+        <text id="62:607" name="티라노가 더 강해졌어요!" x="18" y="16" width="160" height="19" />
+        <text id="62:608" name="체력 12 → 14" x="18" y="49" width="79" height="16" />
+        <text id="62:609" name="민첩 8 → 11" x="166" y="49" width="70" height="16" />
+        <text id="62:610" name="오늘 완료 1 / 3" x="18" y="77" width="72" height="13" />
+      </frame>
+      <rounded-rectangle id="62:611" name="Rectangle" x="44" y="690" width="302" height="56" />
+      <text id="62:612" name="강해진 티라노 보기" x="112" y="708" width="118" height="18" />
+    </frame>
+    <text id="59:588" name="06 REWARD" x="450" y="20" width="90" height="18" />
+    <frame id="59:592" name="SCN-03 / Buff Home" x="880" y="52" width="390" height="844">
+      <rounded-rectangle id="164:673" name="Theme / dark glass shell" x="12" y="48" width="366" height="764" />
+      <rounded-rectangle id="164:674" name="Theme / red accent" x="30" y="48" width="104" height="6" />
+      <rounded-rectangle id="164:675" name="Theme / gold pixel" x="344" y="62" width="8" height="8" />
+      <text id="59:594" name="12:32" x="22" y="17" width="41" height="18" />
+      <ellipse id="59:595" name="Ellipse" x="190" y="24" width="10" height="10" />
+      <rounded-rectangle id="59:596" name="Rectangle" x="135" y="828" width="120" height="5" />
+      <text id="62:613" name="DAILY ADVENTURE" x="24" y="61" width="197" height="25" />
+      <text id="62:614" name="BUFF STATE · DAY 1" x="24" y="91" width="105" height="13" />
+      <frame id="62:615" name="Frame" x="24" y="124" width="342" height="322">
+        <rounded-rectangle id="62:616" name="Rectangle" x="0" y="0" width="342" height="322" />
+        <rounded-rectangle id="62:617" name="Rectangle" x="55" y="80" width="228" height="184" />
+        <rounded-rectangle id="62:618" name="Rectangle" x="16" y="16" width="138" height="30" />
+        <text id="62:619" name="BUFF + HEALTH" x="28" y="23" width="85" height="13" />
+        <text id="62:620" name="Lv.2 HP 340 / 340" x="18" y="279" width="129" height="17" />
+      </frame>
+      <frame id="62:621" name="Frame" x="24" y="464" width="342" height="82">
+        <text id="62:622" name="좋아요! 몸에 힘이 돌아왔어요." x="16" y="15" width="186" height="18" />
+        <text id="62:623" name="퀘스트를 더 완료하면 버프가 커져요." x="16" y="44" width="168" height="13" />
+      </frame>
+      <frame id="62:624" name="Frame" x="24" y="566" width="342" height="38">
+        <text id="62:625" name="약 복용" x="14" y="10" width="36" height="15" />
+        <text id="62:626" name="완료" x="284" y="10" width="21" height="13" />
+      </frame>
+      <frame id="62:627" name="Frame" x="24" y="614" width="342" height="38">
+        <text id="62:628" name="건강한 식사" x="14" y="10" width="58" height="15" />
+        <text id="62:629" name="진행" x="284" y="10" width="21" height="13" />
+      </frame>
+      <frame id="62:630" name="Frame" x="24" y="662" width="342" height="38">
+        <text id="62:631" name="6,000걸음" x="14" y="10" width="58" height="15" />
+        <text id="62:632" name="54%" x="284" y="10" width="24" height="13" />
+      </frame>
+      <text id="62:633" name="상태는 매일 초기화 · 능력치와 코인은 누적" x="68" y="742" width="177" height="12" />
+      <rounded-rectangle id="62:634" name="Rectangle" x="24" y="770" width="342" height="42" />
+      <text id="62:635" name="오늘의 모험 계속하기" x="115" y="782" width="114" height="16" />
+    </frame>
+    <text id="59:593" name="07 BUFF STATE" x="880" y="20" width="112" height="18" />
+    <frame id="59:597" name="SCN-04 / Risk Dashboard" x="20" y="948" width="390" height="844">
+      <rounded-rectangle id="164:676" name="Theme / dark glass shell" x="12" y="48" width="366" height="764" />
+      <rounded-rectangle id="164:677" name="Theme / red accent" x="30" y="48" width="104" height="6" />
+      <rounded-rectangle id="164:678" name="Theme / gold pixel" x="344" y="62" width="8" height="8" />
+      <text id="59:599" name="12:32" x="22" y="17" width="41" height="18" />
+      <ellipse id="59:600" name="Ellipse" x="190" y="24" width="10" height="10" />
+      <rounded-rectangle id="59:601" name="Rectangle" x="135" y="828" width="120" height="5" />
+      <text id="63:581" name="HEALTH DASHBOARD" x="24" y="60" width="223" height="25" />
+      <text id="63:582" name="위험도 변화" x="24" y="98" width="68" height="17" />
+      <rounded-rectangle id="63:583" name="Rectangle" x="24" y="126" width="48" height="32" />
+      <text id="63:584" name="일" x="42" y="135" width="11" height="13" />
+      <rounded-rectangle id="63:585" name="Rectangle" x="82" y="126" width="48" height="32" />
+      <text id="63:586" name="주" x="100" y="135" width="11" height="13" />
+      <rounded-rectangle id="63:587" name="Rectangle" x="140" y="126" width="48" height="32" />
+      <text id="63:588" name="월" x="158" y="135" width="11" height="13" />
+      <frame id="63:589" name="Frame" x="24" y="176" width="342" height="226">
+        <text id="63:590" name="고혈압 위험도" x="16" y="14" width="64" height="13" />
+        <text id="63:591" name="31.4%" x="16" y="34" width="83" height="34" />
+        <text id="63:592" name="어제보다 -0.6%p" x="190" y="45" width="83" height="13" />
+        <frame id="63:593" name="Frame" x="16" y="88" width="310" height="115">
+          <vector id="63:594" name="Vector" x="5" y="30" width="300" height="55" />
+          <vector id="63:595" name="Vector" x="5" y="40" width="300" height="60" />
+          <frame id="63:596" name="Group" x="0" y="25" width="310" height="65">
+            <vector id="63:597" name="Vector" x="0" y="80" width="10" height="10" />
+            <vector id="63:598" name="Vector" x="50" y="67" width="10" height="10" />
+            <vector id="63:599" name="Vector" x="100" y="74" width="10" height="10" />
+            <vector id="63:600" name="Vector" x="150" y="45" width="10" height="10" />
+            <vector id="63:601" name="Vector" x="200" y="53" width="10" height="10" />
+            <vector id="63:602" name="Vector" x="250" y="25" width="10" height="10" />
+            <vector id="63:603" name="Vector" x="300" y="33" width="10" height="10" />
+          </frame>
+        </frame>
+        <text id="63:604" name="월 화 수 목 금 토 일" x="30" y="199" width="116" height="12" />
+      </frame>
+      <frame id="63:605" name="Frame" x="24" y="420" width="164" height="126">
+        <text id="63:606" name="누적 달성" x="14" y="14" width="47" height="15" />
+        <text id="63:607" name="18" x="14" y="39" width="35" height="36" />
+        <text id="63:608" name="퀘스트" x="61" y="51" width="31" height="13" />
+        <text id="63:609" name="연속 4일" x="14" y="92" width="41" height="13" />
+      </frame>
+      <frame id="63:610" name="Frame" x="202" y="420" width="164" height="126">
+        <text id="63:611" name="공룡 능력치" x="14" y="14" width="58" height="15" />
+        <frame id="63:612" name="Frame" x="26" y="36" width="112" height="82" />
+      </frame>
+      <text id="63:615" name="이번 주 요약" x="24" y="572" width="71" height="17" />
+      <frame id="63:616" name="Frame" x="24" y="602" width="342" height="40">
+        <text id="63:617" name="위험도" x="14" y="11" width="31" height="13" />
+        <text id="63:618" name="-1.8%p" x="255" y="10" width="41" height="15" />
+      </frame>
+      <frame id="63:619" name="Frame" x="24" y="652" width="342" height="40">
+        <text id="63:620" name="퀘스트" x="14" y="11" width="31" height="13" />
+        <text id="63:621" name="12 / 15" x="255" y="10" width="38" height="15" />
+      </frame>
+      <frame id="63:622" name="Frame" x="24" y="702" width="342" height="40">
+        <text id="63:623" name="걸음" x="14" y="11" width="21" height="13" />
+        <text id="63:624" name="평균 6,420" x="255" y="10" width="60" height="15" />
+      </frame>
+    </frame>
+    <text id="59:598" name="08 RISK DASHBOARD" x="20" y="916" width="157" height="18" />
+    <frame id="59:602" name="SCN-05 / Withered Return" x="450" y="948" width="390" height="844">
+      <rounded-rectangle id="164:679" name="Theme / dark glass shell" x="12" y="48" width="366" height="764" />
+      <rounded-rectangle id="164:680" name="Theme / red accent" x="30" y="48" width="104" height="6" />
+      <rounded-rectangle id="164:681" name="Theme / gold pixel" x="344" y="62" width="8" height="8" />
+      <text id="59:604" name="12:32" x="22" y="17" width="41" height="18" />
+      <ellipse id="59:605" name="Ellipse" x="190" y="24" width="10" height="10" />
+      <rounded-rectangle id="59:606" name="Rectangle" x="135" y="828" width="120" height="5" />
+      <text id="63:625" name="다시 만난 티라노" x="24" y="61" width="145" height="25" />
+      <text id="63:626" name="어제 퀘스트를 완료하지 못했어요." x="24" y="94" width="168" height="15" />
+      <frame id="63:627" name="Frame" x="24" y="132" width="342" height="322">
+        <rounded-rectangle id="63:628" name="Rectangle" x="65" y="77" width="212" height="174" />
+        <rounded-rectangle id="63:629" name="Rectangle" x="16" y="16" width="142" height="30" />
+        <text id="63:630" name="WITHERED STATE" x="27" y="23" width="97" height="13" />
+        <text id="63:631" name="힘이 빠져 축 처졌어요…" x="79" y="272" width="137" height="17" />
+      </frame>
+      <frame id="63:632" name="Frame" x="24" y="474" width="342" height="116">
+        <text id="63:633" name="오늘은 코인 보너스가 없어요." x="16" y="15" width="181" height="18" />
+        <text id="63:634" name="하지만 퀘스트 하나만 완료하면 바로 NORMAL 상태로 회복해요." x="16" y="49" width="165" height="30" />
+      </frame>
+      <rounded-rectangle id="63:635" name="Rectangle" x="24" y="620" width="342" height="56" />
+      <text id="63:636" name="회복 퀘스트 시작하기" x="119" y="638" width="132" height="18" />
+      <frame id="63:637" name="Frame" x="24" y="696" width="342" height="82">
+        <text id="63:638" name="알림" x="14" y="12" width="21" height="13" />
+        <text id="63:639" name="오늘의 첫 퀘스트가 기다리고 있어요." x="14" y="36" width="181" height="15" />
+        <text id="63:640" name="오후 8:00" x="271" y="58" width="43" height="12" />
+      </frame>
+    </frame>
+    <text id="59:603" name="09 RETURN STATE" x="450" y="916" width="136" height="18" />
+    <frame id="59:607" name="SCN-06 / My Page" x="880" y="948" width="390" height="844">
+      <rounded-rectangle id="164:682" name="Theme / dark glass shell" x="12" y="48" width="366" height="764" />
+      <rounded-rectangle id="164:683" name="Theme / red accent" x="30" y="48" width="104" height="6" />
+      <rounded-rectangle id="164:684" name="Theme / gold pixel" x="344" y="62" width="8" height="8" />
+      <text id="59:609" name="12:32" x="22" y="17" width="41" height="18" />
+      <ellipse id="59:610" name="Ellipse" x="190" y="24" width="10" height="10" />
+      <rounded-rectangle id="59:611" name="Rectangle" x="135" y="828" width="120" height="5" />
+      <text id="63:641" name="MY PAGE" x="24" y="60" width="95" height="25" />
+      <frame id="63:642" name="Frame" x="24" y="100" width="342" height="94">
+        <rounded-rectangle id="63:643" name="Rectangle" x="14" y="14" width="64" height="64" />
+        <text id="63:644" name="MIN" x="29" y="37" width="28" height="17" />
+        <text id="63:645" name="민 님" x="96" y="17" width="36" height="21" />
+        <text id="63:646" name="티라노 · Lv.12" x="96" y="47" width="71" height="15" />
+        <text id="63:647" name="1,240 COIN" x="236" y="29" width="61" height="13" />
+      </frame>
+      <text id="63:648" name="계정 및 건강 정보" x="24" y="222" width="93" height="16" />
+      <frame id="63:649" name="Frame" x="24" y="250" width="342" height="62">
+        <text id="63:650" name="건강 정보 수정" x="14" y="12" width="78" height="16" />
+        <text id="63:651" name="나이·키·몸무게·혈압·혈당" x="14" y="36" width="104" height="12" />
+        <text id="63:652" name="›" x="316" y="19" width="8" height="24" />
+      </frame>
+      <frame id="63:653" name="Frame" x="24" y="326" width="342" height="62">
+        <text id="63:654" name="알림 설정" x="14" y="12" width="51" height="16" />
+        <text id="63:655" name="퀘스트·복약·저녁 리마인드" x="14" y="36" width="110" height="12" />
+        <text id="63:656" name="›" x="316" y="19" width="8" height="24" />
+      </frame>
+      <frame id="63:657" name="Frame" x="24" y="402" width="342" height="62">
+        <text id="63:658" name="연결 관리" x="14" y="12" width="51" height="16" />
+        <text id="63:659" name="Health Connect 준비" x="14" y="36" width="95" height="12" />
+        <text id="63:660" name="›" x="316" y="19" width="8" height="24" />
+      </frame>
+      <frame id="63:661" name="Frame" x="24" y="478" width="342" height="62">
+        <text id="63:662" name="개인정보 및 이용약관" x="14" y="12" width="114" height="16" />
+        <text id="63:663" name="데이터 사용 안내" x="14" y="36" width="71" height="12" />
+        <text id="63:664" name="›" x="316" y="19" width="8" height="24" />
+      </frame>
+      <frame id="63:665" name="Frame" x="24" y="570" width="342" height="82">
+        <text id="63:666" name="일일 상태 초기화" x="14" y="12" width="83" height="15" />
+        <text id="63:667" name="매일 00:00에 공룡 상태만 초기화" x="14" y="37" width="141" height="12" />
+        <rounded-rectangle id="63:668" name="Rectangle" x="270" y="22" width="52" height="28" />
+        <ellipse id="63:669" name="Ellipse" x="296" y="25" width="22" height="22" />
+      </frame>
+      <rounded-rectangle id="63:670" name="Rectangle" x="24" y="700" width="342" height="50" />
+      <text id="63:671" name="로그아웃" x="164" y="716" width="48" height="16" />
+      <text id="63:672" name="REXRUN v0.1" x="149" y="779" width="64" height="12" />
+    </frame>
+    <text id="59:608" name="10 MY PAGE" x="880" y="916" width="89" height="18" />
+  </section>
+</canvas>
+IMPORTANT: After you call this tool, you MUST call get_design_context if trying to implement the design, since this tool only returns metadata. If you do not call get_design_context, the agent will not be able to implement the design.

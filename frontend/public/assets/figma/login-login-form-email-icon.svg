@@ -1,0 +1,11 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Login Form / email icon" clip-path="url(#clip0_0_11)">
+<path id="Vector" d="M17 1H3C1.89543 1 1 1.89543 1 3V13C1 14.1046 1.89543 15 3 15H17C18.1046 15 19 14.1046 19 13V3C19 1.89543 18.1046 1 17 1Z" stroke="#6B7946" stroke-width="2"/>
+<path id="Vector_2" d="M2 3L10 9L18 3" stroke="#6B7946" stroke-width="2"/>
+</g>
+<defs>
+<clipPath id="clip0_0_11">
+<rect width="20" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
