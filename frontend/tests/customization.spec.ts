@@ -7,12 +7,14 @@ for (const [index, name] of names.entries()) {
     await page.goto("/dinosaur");
     const choice = page.getByRole("button", { name: new RegExp(name) });
     const image = await choice.locator("img").getAttribute("src");
+    const facing = await choice.locator("img").evaluate((img) => getComputedStyle(img).transform);
     await choice.click();
     await page.getByRole("link", { name: "모험 시작하기" }).click();
     await expect(page.locator(".initial-scene .dinosaur-art")).toHaveAttribute(
       "data-dinosaur",
       String(index),
     );
+    await expect(page.locator(".initial-scene .dinosaur-art")).toHaveCSS("transform", facing);
     for (const route of ["home", "quests", "dashboard"]) {
       await page.goto(`/${route}`);
       if (route === "dashboard") await page.locator(".growth-insight").waitFor();

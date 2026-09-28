@@ -101,11 +101,19 @@ export function LoginPage() {
 export function ProfilePage() {
   const { profile, setProfile } = useProfileStore();
   const [draft, setDraft] = useState(profile);
+  const [unknownMeasurements, setUnknownMeasurements] = useState({
+    bloodPressure: profile.bloodPressure === null,
+    glucose: profile.glucose === null,
+  });
   const notice = useNotice();
   const navigate = useNavigate();
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const result = profileSchema.safeParse(draft);
+    const result = profileSchema.safeParse({
+      ...draft,
+      bloodPressure: unknownMeasurements.bloodPressure ? null : (draft.bloodPressure ?? ""),
+      glucose: unknownMeasurements.glucose ? null : (draft.glucose ?? ""),
+    });
     if (!result.success) {
       notice("입력값을 확인해 주세요. 혈압은 120 / 80 형식으로 입력해 주세요.");
       return;
@@ -206,18 +214,38 @@ export function ProfilePage() {
         </fieldset>
         <fieldset className="profile-section">
           <legend>최근 건강 측정값</legend>
-          <p className="profile-section-note">최근에 측정한 값을 입력해 주세요.</p>
+          <p className="profile-section-note">
+            최근 측정값을 입력해 주세요. 값을 모르면 ‘모름’을 선택해도 괜찮아요.
+          </p>
           <div className="profile-grid profile-measurements">
-            <label>
-              혈압
+            <div className="measurement-field">
+              <div className="measurement-label-row">
+                <label htmlFor="blood-pressure">혈압</label>
+                <label className="unknown-measurement">
+                  <input
+                    type="checkbox"
+                    aria-label="혈압 모름"
+                    checked={unknownMeasurements.bloodPressure}
+                    onChange={(e) =>
+                      setUnknownMeasurements({
+                        ...unknownMeasurements,
+                        bloodPressure: e.target.checked,
+                      })
+                    }
+                  />
+                  <span>모름</span>
+                </label>
+              </div>
               <div className="health-input pressure-input">
                 <input
+                  id="blood-pressure"
                   aria-label="혈압"
                   type="text"
-                  placeholder="120 / 80"
+                  placeholder={unknownMeasurements.bloodPressure ? "모름" : "120 / 80"}
                   aria-describedby="blood-pressure-hint"
-                  required
-                  value={draft.bloodPressure}
+                  disabled={unknownMeasurements.bloodPressure}
+                  required={!unknownMeasurements.bloodPressure}
+                  value={unknownMeasurements.bloodPressure ? "" : (draft.bloodPressure ?? "")}
                   onChange={(e) => setDraft({ ...draft, bloodPressure: e.target.value })}
                 />
                 <span>mmHg</span>
@@ -225,23 +253,46 @@ export function ProfilePage() {
               <small id="blood-pressure-hint" className="field-hint">
                 수축기 / 이완기 순서 · 예: 120 / 80
               </small>
-            </label>
-            <label>
-              공복 혈당
+            </div>
+            <div className="measurement-field">
+              <div className="measurement-label-row">
+                <label htmlFor="fasting-glucose">공복 혈당</label>
+                <label className="unknown-measurement">
+                  <input
+                    type="checkbox"
+                    aria-label="공복 혈당 모름"
+                    checked={unknownMeasurements.glucose}
+                    onChange={(e) =>
+                      setUnknownMeasurements({
+                        ...unknownMeasurements,
+                        glucose: e.target.checked,
+                      })
+                    }
+                  />
+                  <span>모름</span>
+                </label>
+              </div>
               <div className="health-input">
                 <input
+                  id="fasting-glucose"
                   aria-label="공복 혈당"
                   type="number"
                   inputMode="numeric"
                   min="1"
                   max="1000"
-                  required
-                  value={Number.isFinite(draft.glucose) ? draft.glucose : ""}
+                  placeholder={unknownMeasurements.glucose ? "모름" : "예: 104"}
+                  disabled={unknownMeasurements.glucose}
+                  required={!unknownMeasurements.glucose}
+                  value={
+                    !unknownMeasurements.glucose && Number.isFinite(draft.glucose)
+                      ? (draft.glucose ?? "")
+                      : ""
+                  }
                   onChange={(e) => setDraft({ ...draft, glucose: e.target.valueAsNumber })}
                 />
                 <span>mg/dL</span>
               </div>
-            </label>
+            </div>
           </div>
         </fieldset>
         <fieldset className="profile-section">
@@ -257,7 +308,7 @@ export function ProfilePage() {
               <div key={key} className="health-option-row">
                 <span id={`${key}-label`}>{label}</span>
                 <div className="health-options" role="radiogroup" aria-labelledby={`${key}-label`}>
-                  {[false, true].map((value) => (
+                  {([false, true, null] as const).map((value) => (
                     <label key={String(value)}>
                       <input
                         type="radio"
@@ -267,7 +318,15 @@ export function ProfilePage() {
                         onChange={() => setDraft({ ...draft, [key]: value })}
                       />
                       <span>
-                        {key === "smoking" ? (value ? "예" : "아니요") : value ? "있음" : "없음"}
+                        {value === null
+                          ? "모름"
+                          : key === "smoking"
+                            ? value
+                              ? "예"
+                              : "아니요"
+                            : value
+                              ? "있음"
+                              : "없음"}
                       </span>
                     </label>
                   ))}
@@ -355,7 +414,7 @@ export function FirstResultPage() {
     <ScenarioShell className="first-result-screen" camera={a.imgEllipse}>
       <header className="scenario-heading">
         <h1>첫 건강 위험도</h1>
-        <p>입력한 정보로 오늘의 시작점을 계산했어요.</p>
+        <p>건강 모험의 시작 화면을 체험해 보세요.</p>
       </header>
       <div className="dino-scene initial-scene">
         <img className="scene-background" src={a.imgRectangle} alt="초록 숲" />
@@ -385,7 +444,7 @@ export function FirstResultPage() {
       <Link className="primary-button first-start" to="/quests">
         첫 퀘스트 시작하기
       </Link>
-      <p className="first-result-note">위험도는 예측값이며 의료 진단이 아닙니다.</p>
+      <p className="first-result-note">표시된 위험도는 입력값과 무관한 체험용 예시예요.</p>
     </ScenarioShell>
   );
 }

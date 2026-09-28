@@ -2306,6 +2306,41 @@ b {
   line-height: 18px;
   min-width: 0;
 }
+.measurement-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.unknown-measurement {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #243d42;
+  cursor: pointer;
+}
+.unknown-measurement input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+.unknown-measurement:focus-within {
+  outline: 3px solid #70d5f4;
+  outline-offset: 2px;
+}
+.health-input:has(input:disabled) {
+  background: #d5d9cb;
+  border-color: #829382;
+}
+.health-input input:disabled::placeholder {
+  color: #52604e;
+  opacity: 1;
+}
 .health-input,
 .profile-grid select {
   height: 50px;
@@ -2386,6 +2421,7 @@ b {
 .health-option-row {
   min-height: 52px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -2415,8 +2451,8 @@ b {
 .health-options span {
   display: grid;
   place-items: center;
-  min-width: 48px;
-  min-height: 40px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 6px;
   border: 1px solid transparent;
   border-radius: 5px;
@@ -2488,13 +2524,17 @@ b {
   height: 20px;
 }
 .dinosaur-screen .scenario-heading {
-  height: 72px;
+  padding: 14px 4px 22px;
   position: relative;
+}
+.dinosaur-screen .scenario-heading h1 {
+  padding-right: 12px;
+  word-break: keep-all;
 }
 .dinosaur-screen .scenario-heading:before {
   position: absolute;
   content: "";
-  inset: -10px -8px 12px;
+  inset: 4px -8px 12px;
   background: #f7ebcb0d;
   border-radius: 12px;
   z-index: -1;
@@ -2678,6 +2718,9 @@ b {
   height: 136px;
   left: calc(50% - 88px);
   top: 69px;
+}
+.initial-scene .scene-dino[data-dinosaur="0"] {
+  transform: scaleX(-1);
 }
 .first-risk {
   height: 112px;
