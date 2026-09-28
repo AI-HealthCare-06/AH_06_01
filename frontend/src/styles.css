@@ -866,16 +866,15 @@ b {
   display: flex;
   align-items: center;
   gap: 3px;
+  white-space: nowrap;
 }
 .radar-legend i {
   width: 11px;
+  flex-shrink: 0;
   border-top: 2px solid #d94738;
 }
 .radar-legend .baseline-key {
   border-top: 2px dashed #356b92;
-}
-.radar-legend b {
-  color: #b83b2e;
 }
 .radar-comparison {
   width: 100%;
@@ -2055,76 +2054,119 @@ b {
   visibility: hidden;
   margin-top: 12px;
 }
-.profile-heading {
-  position: relative;
+.profile-screen .scenario-content {
+  margin-inline: 10px;
+  padding: 24px 16px;
+}
+.profile-screen .scenario-content > .dark-shell {
+  inset: 0;
+  background: #182f36f5;
+  border-color: #a9b899;
+}
+.profile-screen .dark-shell:after {
+  display: none;
+}
+.profile-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 .profile-heading h1 {
-  font-size: 24px;
-  line-height: 29px;
+  font-size: 23px;
+  line-height: 32px;
 }
-.profile-heading > span {
-  position: absolute;
-  right: 13px;
-  top: 4px;
-  width: 68px;
-  height: 24px;
+.profile-title-row > span {
+  flex-shrink: 0;
+  padding: 9px 10px;
+  border: 1px solid #b18a27;
   border-radius: 5px;
-  background: #ffd34a;
-  color: #171b16;
-  display: grid;
-  place-items: center;
-  font-size: 9px;
-  font-weight: 700;
+  background: var(--gold);
+  color: var(--ink);
+  font: 400 7px/12px var(--pixel);
 }
 .profile-heading h2 {
   font-size: 20px;
-  line-height: 24px;
-  margin-top: 5px;
-  color: #ffd34a;
+  line-height: 29px;
+  margin-top: 18px;
+  color: var(--gold);
+  word-break: keep-all;
 }
 .profile-heading p {
-  font-size: 11px;
-  line-height: 17px;
-  margin-top: 8px;
+  font-size: 12px;
+  line-height: 20px;
+  margin-top: 10px;
+  color: #e2e6d6;
 }
 .profile-form {
-  margin-top: 24px;
+  display: grid;
+  gap: 24px;
+  margin-top: 28px;
+}
+.profile-section {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.profile-section > legend {
+  width: 100%;
+  padding: 0 0 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #bdc7ae40;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+.profile-section-note {
+  margin: -2px 0 12px;
+  color: #c6d2c3;
+  font-size: 11px;
+  line-height: 18px;
 }
 .profile-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 12px;
+}
+.profile-measurements {
+  grid-template-columns: minmax(0, 1fr);
 }
 .profile-grid label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  line-height: 17px;
+  line-height: 18px;
   min-width: 0;
 }
 .health-input,
 .profile-grid select {
-  margin-top: 3px;
-  height: 46px;
-  background: #f4f0df;
-  border: 1.5px solid #7d8755;
-  border-radius: 10px;
-  color: #171b16;
+  height: 50px;
+  background: var(--cream);
+  border: 1.5px solid #afb18f;
+  border-radius: 9px;
+  color: var(--ink);
   width: 100%;
   padding: 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.health-input {
+  margin-top: 6px;
   display: flex;
   align-items: center;
-  font-size: 13px;
-  font-weight: 700;
+  gap: 8px;
 }
 .health-input input {
   border: 0;
   background: none;
   padding: 0;
-  width: 28px;
+  width: 0;
+  flex: 1;
   min-width: 0;
-  color: #171b16;
+  color: var(--ink);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 16px;
+  line-height: 24px;
   appearance: textfield;
   -moz-appearance: textfield;
 }
@@ -2134,52 +2176,103 @@ b {
   margin: 0;
 }
 .health-input > span {
+  flex-shrink: 0;
   white-space: nowrap;
+  color: #59664f;
+  font-size: 12px;
+  font-weight: 500;
 }
-.health-input:not(.pressure-input) > span {
-  margin-left: 1px;
-}
-.health-input input[aria-label="나이"] {
-  width: 17px;
-}
-.pressure-input input {
-  width: 60px;
+.health-select {
+  position: relative;
+  margin-top: 6px;
 }
 .profile-grid select {
   appearance: none;
+  padding-right: 32px;
+  cursor: pointer;
 }
-.profile-form > h3 {
-  font-size: 12px;
+.health-select:after {
+  content: "";
+  position: absolute;
+  right: 14px;
+  top: 19px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid #59664f;
+  border-bottom: 2px solid #59664f;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.field-hint {
+  display: block;
+  margin-top: 6px;
+  color: #c6d2c3;
+  font-size: 10px;
+  font-weight: 400;
   line-height: 18px;
-  margin-top: 19px;
 }
 .health-toggles {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 10px;
-  margin-top: 10px;
 }
-.health-toggle {
-  height: 42px;
-  border: 1.25px solid #a89e7c;
-  border-radius: 10px;
+.health-option-row {
+  min-height: 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 39px 0 13px;
+  gap: 8px;
+  padding: 5px 6px 5px 12px;
+  border: 1px solid #839582;
+  border-radius: 9px;
+  background: #243d42;
   font-size: 12px;
-  background: #f0ecdd;
+  font-weight: 700;
+}
+.health-options {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+}
+.health-options label {
+  position: relative;
+  cursor: pointer;
+}
+.health-options input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+}
+.health-options span {
+  display: grid;
+  place-items: center;
+  min-width: 48px;
+  min-height: 40px;
+  padding: 6px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #d5ded0;
+  font-size: 11px;
+}
+.health-options input:checked + span {
+  color: var(--ink);
+  background: var(--gold);
+  border-color: #b18a27;
+}
+.health-options input:focus-visible + span {
+  outline: 3px solid #70d5f4;
+  outline-offset: 2px;
 }
 .bmi-card {
-  height: 58px;
-  margin-top: 20px;
-  border: 1.25px solid #a89e7c;
+  min-height: 78px;
+  border: 1.5px solid #afb18f;
   border-radius: 10px;
-  background: #f0ecdd;
-  padding: 8px 13px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 .bmi-card small {
   display: block;
@@ -2190,28 +2283,41 @@ b {
 }
 .bmi-card strong {
   display: block;
-  font-size: 18px;
-  line-height: 24px;
+  font-size: 26px;
+  line-height: 32px;
+  font-variant-numeric: tabular-nums;
 }
 .bmi-card > span {
   font-size: 11px;
-  color: #717367;
-  margin-right: 56px;
-  white-space: nowrap;
+  line-height: 18px;
+  color: #59664f;
+  text-align: right;
+  word-break: keep-all;
 }
 .profile-submit {
-  margin-top: 22px;
+  height: 54px;
+  gap: 14px;
+  background: #bb3528;
+  box-shadow: 0 3px 0 #101e21;
+}
+.profile-submit > span {
+  font-family: var(--pixel);
+  font-size: 15px;
 }
 .privacy-note {
   display: flex;
   align-items: center;
   gap: 8px;
-  justify-content: flex-start;
-  margin-left: 26px;
-  font-size: 10px;
-  line-height: 12px;
-  margin-top: 16px;
-  color: #e8e0be;
+  justify-content: center;
+  margin-top: -8px;
+  font-size: 11px;
+  line-height: 18px;
+  color: #c6d2c3;
+}
+.privacy-note img {
+  flex-shrink: 0;
+  width: 18px;
+  height: 20px;
 }
 .dinosaur-screen .scenario-heading {
   height: 72px;
@@ -2835,15 +2941,33 @@ b {
   left: 26px;
 }
 .logout-button {
-  height: 50px;
-  margin-top: 48px;
-  border: 1.5px solid #e84a3c;
+  min-height: 50px;
+  margin-top: 32px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px solid #ac3328;
   border-radius: 10px;
-  background: #fff8e7;
-  color: #fff4ce;
+  background: var(--cream);
+  color: #a72e24;
+  box-shadow: 0 3px 0 #171b16;
   width: 100%;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
+}
+.logout-button svg {
+  width: 20px;
+  height: 20px;
+}
+.logout-button:hover,
+.logout-button:focus-visible {
+  background: #ffe7cd;
+}
+.logout-button:active {
+  box-shadow: none;
+  transform: translateY(2px);
 }
 .app-version {
   font-size: 10px;
@@ -2997,19 +3121,6 @@ b {
   .scenario-heading h1 {
     font-size: 20px;
   }
-  .profile-grid {
-    gap: 12px 10px;
-  }
-  .health-input,
-  .profile-grid select {
-    padding-left: 8px;
-  }
-  .health-input > span {
-    font-size: 11px;
-  }
-  .bmi-card > span {
-    margin-right: 4px;
-  }
   .dinosaur-card img {
     max-width: 80%;
     left: 20px;
@@ -3139,14 +3250,6 @@ b {
 }
 .health-input input:focus {
   outline: none;
-  min-width: 50%;
-  flex: 1;
-}
-.health-input input[aria-label="몸무게"] {
-  width: 26px;
-}
-.health-input input[aria-label="키"] {
-  width: 26px;
 }
 .risk-screen h1 {
   font-size: 21px;
