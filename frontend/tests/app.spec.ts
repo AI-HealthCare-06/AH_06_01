@@ -8,6 +8,7 @@ test("all Figma routes render local assets with no browser errors", async ({ pag
     "quests",
     "dashboard",
     "shop",
+    "shop/customize",
     "login",
     "profile",
     "dinosaur",

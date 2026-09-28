@@ -8,6 +8,7 @@ import { InfoDialog } from "../components/InfoDialog";
 import { useGameStore } from "../stores/game-store";
 import { useProfileStore } from "../stores/profile-store";
 import { dinosaurs } from "../design/dinosaurs";
+import { DinosaurArt } from "../components/DinosaurArt";
 
 export function QuestDetailPage() {
   const { id } = useParams();
@@ -85,11 +86,7 @@ export function RewardPage() {
       <h1>QUEST COMPLETE!</h1>
       <div className="reward-medallion">
         <img src={assets.reward.imgEllipse1} alt="" />
-        <img
-          className="reward-dino"
-          src={game.dinosaur === 0 ? assets.reward.imgRectangle : dino.image}
-          alt={dino.name}
-        />
+        <DinosaurArt className="reward-dino" pose="reward" alt={dino.name} />
       </div>
       <strong className="reward-coins">+{reward?.coins ?? 30} COIN</strong>
       <div className="cream-card reward-stats">
@@ -118,13 +115,9 @@ export function BuffPage() {
       </header>
       <div className="dino-scene buff-scene">
         <img className="scene-background" src={assets.buff.imgRectangle} alt="초록 숲" />
-        <img
-          className="scene-dino"
-          src={game.dinosaur === 0 ? assets.buff.imgRectangle1 : dino.image}
-          alt={dino.name}
-        />
+        <DinosaurArt className="scene-dino" pose="buff" alt={dino.name} />
         <b className="scene-badge">BUFF + HEALTH</b>
-        <strong>Lv.2 HP 340 / 340</strong>
+        <strong>{dino.name} · Lv.2 · HP 340 / 340</strong>
       </div>
       <div className="cream-card buff-message">
         <h2>좋아요! 몸에 힘이 돌아왔어요.</h2>
@@ -240,7 +233,7 @@ export function MyPage() {
       {dialog && (
         <InfoDialog title={dialog} onClose={() => setDialog(null)} returnFocusTo={dialogTrigger}>
           {dialog === "개인정보 및 이용약관"
-            ? "현재는 UI 개발용 데모입니다. 건강 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 브라우저에는 공룡 선택, 퀘스트 완료와 코인만 저장됩니다."
+            ? "현재는 UI 개발용 데모입니다. 건강 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 브라우저에는 공룡과 꾸미기 선택, 퀘스트 완료와 코인 등이 저장됩니다."
             : dialog === "알림 설정"
               ? "시스템 알림과 복약 리마인드는 아직 연결되지 않았어요."
               : "Health Connect·웨어러블 연결은 준비 중이에요. 현재 기록은 Figma 예시 데이터입니다."}
