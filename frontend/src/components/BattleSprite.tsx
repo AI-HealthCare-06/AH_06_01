@@ -72,6 +72,7 @@ export function BattleSprite({
   backdrop = false,
   className = "",
   filter,
+  wingPhase,
 }: {
   src: string;
   label: string;
@@ -79,6 +80,7 @@ export function BattleSprite({
   backdrop?: boolean;
   className?: string;
   filter?: string;
+  wingPhase?: number;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -97,7 +99,11 @@ export function BattleSprite({
         if (frame !== undefined) {
           const pose = attackFrames[src]?.[Math.min(7, Math.max(0, frame))];
           if (pose) {
-            if (!sheets.has(src)) sheets.set(src, prepareAttackFrames(image, attackFrames[src]));
+            if (!sheets.has(src))
+              sheets.set(
+                src,
+                prepareAttackFrames(image, attackFrames[src], src.endsWith("434-578.png")),
+              );
             source = sheets.get(src)![Math.min(7, Math.max(0, frame))];
             width = pose[2];
             height = pose[3];
@@ -133,17 +139,63 @@ export function BattleSprite({
         );
         context.clearRect(0, 0, 160, 120);
         context.imageSmoothingEnabled = false;
-        context.drawImage(
-          source,
-          x,
-          y,
-          width,
-          height,
-          Math.round((160 - width * scale) / 2),
-          Math.round(120 - height * scale),
-          Math.round(width * scale),
-          Math.round(height * scale),
-        );
+        const draw = () =>
+          context.drawImage(
+            source,
+            x,
+            y,
+            width,
+            height,
+            Math.round((160 - width * scale) / 2),
+            Math.round(120 - height * scale),
+            Math.round(width * scale),
+            Math.round(height * scale),
+          );
+        if (wingPhase === undefined) draw();
+        else {
+          // Hinge the near wing from the original resting pose. The body stays
+          // still; this is not a whole-sprite squash masquerading as a flap.
+          const left = Math.round((160 - width * scale) / 2);
+          const top = Math.round(120 - height * scale);
+          const wing = new Path2D();
+          const points = [
+            [-4, 85],
+            [-4, 40],
+            [108, 32],
+            [122, 30],
+            [140, 48],
+            [145, 78],
+            [169, 94],
+            [179, 100],
+            [168, 112],
+            [147, 126],
+            [122, 147],
+            [100, 119],
+            [72, 97],
+            [34, 85],
+          ];
+          points.forEach(([px, py], i) => {
+            if (i === 0) wing.moveTo(left + px * scale, top + py * scale);
+            else wing.lineTo(left + px * scale, top + py * scale);
+          });
+          wing.closePath();
+          const body = new Path2D();
+          body.rect(0, 0, 160, 120);
+          body.addPath(wing);
+          context.save();
+          context.clip(body, "evenodd");
+          draw();
+          context.restore();
+          const pivotX = left + 164 * scale,
+            pivotY = top + 103 * scale;
+          context.save();
+          context.translate(pivotX, pivotY);
+          context.rotate((Math.sin(wingPhase * Math.PI * 2) * 18 * Math.PI) / 180);
+          context.translate(-pivotX, -pivotY);
+          context.clip(wing);
+          draw();
+          context.restore();
+        }
       })
       .catch(() => {
         /* Keep the accessible label when an asset cannot load. */
@@ -151,7 +203,7 @@ export function BattleSprite({
     return () => {
       active = false;
     };
-  }, [src, frame, backdrop]);
+  }, [src, frame, backdrop, wingPhase]);
   return (
     <canvas
       ref={canvas}
@@ -161,6 +213,8 @@ export function BattleSprite({
       role="img"
       aria-label={label}
       data-src={src}
+      data-frame={frame}
+      data-wing-phase={wingPhase}
       style={{ filter }}
     />
   );

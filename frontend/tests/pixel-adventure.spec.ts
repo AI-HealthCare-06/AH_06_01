@@ -77,10 +77,11 @@ test("battle uses one enemy, pauses, drops one coin and scrolls to the next stag
     await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!).coins),
   ).toBe(1290);
   await page.clock.runFor(9 * 4800);
-  await expect(scene).toHaveAttribute("data-stage", "2");
+  await expect(scene).toHaveAttribute("data-stage", "1");
+  await expect(scene).toHaveAttribute("data-substage", "2");
   await expect(page.locator(".battle-scenery")).toHaveAttribute(
     "aria-label",
-    "FOREST RUINS 스테이지 배경",
+    "ALPINE DAY 스테이지 배경",
   );
 });
 

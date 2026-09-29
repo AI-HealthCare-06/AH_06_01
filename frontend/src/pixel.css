@@ -442,7 +442,43 @@
   font-size: 7px;
 }
 .pixel-battle .battle-hud {
-  width: 170px;
+  width: 194px;
+  height: auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+.battle-buffs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
+}
+.battle-buffs a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid #787a69;
+  padding: 3px 0;
+  color: #bebba5;
+  background: #303831;
+  font-size: 8px;
+}
+.battle-buffs a[data-active="true"] {
+  color: #ffdd5c;
+  background: #30583e;
+  border-color: #c3ba74;
+  box-shadow: inset 0 -2px #203c2a;
+}
+.battle-buffs a:focus-visible {
+  outline: 2px solid var(--gold);
+}
+.compact-quest > .pixel-icon {
+  width: 14px;
+  height: 14px;
+  color: #656095;
+}
+.compact-quest[data-completed="true"] {
+  opacity: 0.6;
 }
 .battle-scenery {
   position: absolute;
@@ -1023,6 +1059,9 @@
 }
 .battle-dinosaur[data-dinosaur="4"][data-moving="true"] {
   animation: ptera-travel 0.56s steps(6) infinite;
+}
+.battle-dinosaur[data-dinosaur="4"][data-attacking="true"] {
+  animation: none;
 }
 .battle-enemy[data-hit="true"] {
   filter: brightness(1.8);

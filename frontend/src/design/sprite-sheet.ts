@@ -3,13 +3,48 @@ import type { SpriteFrame } from "./battle-assets";
 // The Brachiosaurus poses overlap horizontally (tails sit below a neighboring
 // neck). Separate connected character silhouettes before applying frame boxes.
 // This removes neighboring body fragments without cutting the selected pose.
-export function prepareAttackFrames(image: HTMLImageElement, frames: readonly SpriteFrame[]) {
+export function prepareAttackFrames(
+  image: HTMLImageElement,
+  frames: readonly SpriteFrame[],
+  darkBackdrop = false,
+) {
   const canvas = document.createElement("canvas");
   canvas.width = image.naturalWidth;
   canvas.height = image.naturalHeight;
   const context = canvas.getContext("2d")!;
   context.drawImage(image, 0, 0);
-  const { data, width, height } = context.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+  const { data, width, height } = pixels;
+  // The new Pteranodon sheet has an opaque black background. Flood from the
+  // outer edge only so black eyes and enclosed outlines remain in each pose.
+  if (darkBackdrop) {
+    const visited = new Uint8Array(width * height);
+    const pending = new Int32Array(width * height);
+    let head = 0,
+      tail = 0;
+    const add = (i: number) => {
+      if (i < 0 || i >= visited.length || visited[i]) return;
+      visited[i] = 1;
+      if (Math.max(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]) <= 24) pending[tail++] = i;
+    };
+    for (let x = 0; x < width; x++) {
+      add(x);
+      add((height - 1) * width + x);
+    }
+    for (let y = 0; y < height; y++) {
+      add(y * width);
+      add(y * width + width - 1);
+    }
+    while (head < tail) {
+      const i = pending[head++];
+      data[i * 4 + 3] = 0;
+      if (i % width) add(i - 1);
+      if (i % width < width - 1) add(i + 1);
+      add(i - width);
+      add(i + width);
+    }
+    context.putImageData(pixels, 0, 0);
+  }
   const labels = new Int32Array(width * height);
   const queue = new Int32Array(width * height);
   const components: { label: number; size: number; x: number }[] = [];
@@ -41,7 +76,7 @@ export function prepareAttackFrames(image: HTMLImageElement, frames: readonly Sp
   }
   const bodies = components
     .sort((a, b) => b.size - a.size)
-    .slice(0, 8)
+    .slice(0, frames.length)
     .sort((a, b) => a.x - b.x);
   const bodyLabels = new Set(bodies.map((body) => body.label));
   return frames.map(([x, y, w, h], index) => {
@@ -49,12 +84,12 @@ export function prepareAttackFrames(image: HTMLImageElement, frames: readonly Sp
     frame.width = w;
     frame.height = h;
     const output = frame.getContext("2d")!;
-    output.drawImage(image, x, y, w, h, 0, 0, w, h);
+    output.drawImage(canvas, x, y, w, h, 0, 0, w, h);
     const pixels = output.getImageData(0, 0, w, h);
     for (let row = 0; row < h; row++)
       for (let col = 0; col < w; col++) {
         const owner = labels[(y + row) * width + x + col];
-        if (bodyLabels.has(owner) && owner !== bodies[index].label)
+        if (bodyLabels.has(owner) && owner !== bodies[index]?.label)
           pixels.data[(row * w + col) * 4 + 3] = 0;
       }
     output.putImageData(pixels, 0, 0);

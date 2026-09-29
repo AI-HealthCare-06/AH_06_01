@@ -898,7 +898,7 @@ b {
 }
 .radar-grid:nth-of-type(4) {
   stroke: #454938;
-  stroke-width: 1.5;
+  stroke-width: 2.5;
 }
 .radar-axis {
   stroke: #c7bea0;

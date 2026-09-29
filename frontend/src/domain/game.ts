@@ -2,6 +2,7 @@ import { z } from "zod";
 import { defaultDinosaurStyles, skinIds } from "./appearance";
 import type { SkinId } from "./appearance";
 import { calendarWeek, localDate } from "./calendar";
+import { battleBuffStats } from "./battle";
 
 export const stepSnapshotSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -241,5 +242,9 @@ export function weeklyCompletedDays(game: GameState): number {
 export function collectBattleCoin(state: GameState, encounter: number): GameState {
   // A finished encounter grants its coin once, even when a timer/callback is retried.
   if (encounter !== state.battleDefeats) return state;
-  return { ...state, battleDefeats: state.battleDefeats + 1, coins: state.coins + 10 };
+  return {
+    ...state,
+    battleDefeats: state.battleDefeats + 1,
+    coins: state.coins + battleBuffStats(state.completed).coinReward,
+  };
 }

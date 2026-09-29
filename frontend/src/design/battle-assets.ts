@@ -3,6 +3,16 @@ export type SpriteFrame = readonly [x: number, y: number, width: number, height:
 // These sheets are hand laid out, not an equal-width grid. Keep the whole pose and
 // a shared scale/baseline so crouches, extended horns and effects do not get clipped.
 export const attackFrames: Record<string, readonly SpriteFrame[]> = {
+  [art("434-578")]: [
+    [15, 47, 308, 181],
+    [350, 65, 274, 171],
+    [658, 106, 306, 133],
+    [993, 123, 293, 116],
+    [1296, 90, 309, 122],
+    [1634, 94, 286, 119],
+    [1958, 42, 307, 177],
+    [2275, 34, 307, 185],
+  ],
   [art("288-700")]: [
     [17, 294, 242, 163],
     [285, 294, 240, 163],
@@ -59,7 +69,7 @@ export const battleDinosaurs = [
   { image: art("276-702"), attack: art("288-700"), movement: "trot" },
   { image: art("276-712"), attack: art("308-697"), movement: "sprint" },
   { image: art("276-705"), attack: null, movement: "waddle" },
-  { image: art("276-709"), attack: null, movement: "fly" },
+  { image: art("276-709"), attack: art("434-578"), movement: "fly" },
   { image: art("276-715"), attack: art("295-697"), movement: "stride" },
 ];
 export const villains = [

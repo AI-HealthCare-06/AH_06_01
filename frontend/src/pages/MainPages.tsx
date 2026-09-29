@@ -26,12 +26,15 @@ export function HomePage() {
   const { game, paused, togglePause } = useGameStore();
   const dino = dinosaurs[game.dinosaur];
   const a = assets.home;
-  const icons = [
-    a.imgQuestItem0PixelIcon,
-    a.imgQuestItem1PixelIcon,
-    a.imgQuestItem2PixelIcon,
-    a.imgQuestItem3PixelIcon,
-  ];
+  const icons = {
+    medicine: a.imgQuestItem0PixelIcon,
+    meal: a.imgQuestItem1PixelIcon,
+    walk: a.imgQuestItem2PixelIcon,
+    water: a.imgQuestItem3PixelIcon,
+  };
+  const homeQuests = [...quests]
+    .sort((a, b) => Number(game.completed.includes(a.id)) - Number(game.completed.includes(b.id)))
+    .slice(0, 4);
   return (
     <AppShell active="home">
       <Link to={game.completed.length ? "/buff" : "/withered"} className="dino-feedback">
@@ -56,12 +59,17 @@ export function HomePage() {
             <h3>DAILY QUEST</h3>
             <img src={a.imgOpenChevron} alt="" />
           </Link>
-          {quests.slice(0, 4).map((q, i) => {
+          {homeQuests.map((q) => {
             const done = game.completed.includes(q.id);
             return (
-              <Link className="compact-quest" key={q.id} to={`/quests/${q.id}`}>
+              <Link
+                className="compact-quest"
+                data-completed={done}
+                key={q.id}
+                to={`/quests/${q.id}`}
+              >
                 <PixelCheckbox checked={done} />
-                <img src={icons[i]} alt="" />
+                {q.id === "sleep" ? <PixelIcon name="moon" /> : <img src={icons[q.id]} alt="" />}
                 <div>
                   <div className="compact-quest-heading">
                     <strong>{q.title}</strong>

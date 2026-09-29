@@ -6,13 +6,15 @@ This feature continues the current REXRUN demo on `feature/pixel-adventure-devic
 
 - The calendar uses the device's local date, Sunday through Saturday. Daily quest reset and step queries use the same local midnight boundary.
 - New days start with no completed quests. A day qualifies for the weekly reward when all five quests are completed; five distinct qualifying days within Sunday–Saturday fill the bar. Old sample-day completions are not counted retroactively.
-- One randomly selected enemy appears per encounter. Attack → defeat → coin drop → movement → next enemy runs only while the Home screen is visible and unpaused. Each completed encounter grants 10 demo coins once. Every ten enemies advances to the next background; all six stages cycle.
-- Four characters use the supplied eight-frame attack sheets. Stegosaurus and Pteranodon retain their idle art during attacks. All six have distinct travel animations. Reduced-motion mode removes decorative CSS animation.
+- One randomly selected enemy appears per encounter. Attack → defeat → coin drop → movement → next enemy runs only while the Home screen is visible and unpaused. Each completed encounter grants 10 demo coins once (12 with the water buff).
+- Worlds contain ten substages: `1-1` through `1-10`, then `2-1`. The background changes only on a world transition; the six backgrounds cycle without resetting the world counter. Targets start at 10 defeats and increase by one per substage: 10, 11, …, 19, 20. Existing lifetime defeats are retained and mapped to this progression. The bar displays a full substage during travel before advancing.
+- Five characters use the supplied eight-frame attack sheets, including the new Pteranodon sheet. Only Stegosaurus retains idle artwork during attacks. All six have distinct travel animations. Pteranodon flaps its near wing independently of the body and attacks diagonally down-right before returning to flight height. Reduced-motion mode suppresses wing motion, lunges and attack-frame cycling.
+- Five quest buffs below the HP bar activate from today's completed quests: medicine adds 20 max HP, meal adds 15% attack speed, walk adds 20% movement speed, water adds 2 coins per defeat, and sleep adds 40 max HP. These are demo game effects; they reset with the daily quest state. The HP heart is removed.
 - Cards, controls, progress bars, navigation and text use pixel styling. Korean text uses the local [Galmuri](https://github.com/quiple/galmuri) font (OFL-1.1); English headings retain Press Start 2P.
 - Camera access begins only after tapping “카메라 켜기”. Medicine/water prefer the front camera; meals prefer the rear camera. Changing a quest restarts an active stream with the new lens. Sleep is excluded. Preview and capture share a 3:4 portrait crop. The stream stops on capture, hidden page or unmount. Photos remain in the page's memory. Live recognition and server photo verification are not implemented.
-- Attacks approach the visible enemy at impact. Pteranodon hovers and flies above the ground. Radar lines use a 2px staircase grid.
+- Attacks approach the visible enemy at impact. Pteranodon hovers and flies above the ground. Radar lines are straight with a thicker outer grid outline; point markers remain pixel squares.
 - Notices appear at the top safe area; dialogs remain modal. The account page shares the profile avatar, shows available battery/network status without a simulated punch hole, and includes back navigation, a pixel switch and wearable setup guidance.
-- Step-connection guidance sits above the quest list. Home has walk/water bars and counts next to the title, without redundant completion text.
+- Step-connection guidance sits above the quest list. Home prioritizes pending quests across all five types and shows up to four; completed quests fill any remaining slots. Walk/water bars and counts remain next to the title, without redundant completion text.
 - Dashboard radio controls switch between weekly prediction and monthly/yearly sample history. Growth details sit directly below the score. Risk cards show the actual latest profile registration date, or an unregistered state. Only that date is persisted, not the health inputs. History and predictions remain labeled demo data.
 - The greeting uses [Open-Meteo current weather](https://open-meteo.com/en/docs) after location permission. Coordinates are rounded to two decimals, used for the request and not persisted. Already-granted permission allows refresh on foreground return after 30 minutes; otherwise the user requests weather with the greeting button. Denied location and network errors keep a neutral fallback with retry.
 
@@ -24,10 +26,10 @@ The source is [REXRUN](https://www.figma.com/design/lCWaAEae4xccaADW0osrLx/REXRU
 | --- | --- | --- |
 | 08 — GameStage Background Variants | 258:697, 701, 705, 709, 713, 717 | Six scrolling stage backdrops |
 | 09 — Dino Character Assets | 276:699, 702, 705, 709, 712, 715 | Right-facing adventure and portrait artwork |
-| 10 — Character Attack Motions | 288:700, 290:697, 295:697, 308:697 | Triceratops, Tyrannosaurus, Brachiosaurus and Raptor attack sheets |
+| 10 — Character Attack Motions | 288:700, 290:697, 295:697, 308:697, 434:578 | Triceratops, Tyrannosaurus, Brachiosaurus, Raptor and Pteranodon attack sheets |
 | 11 — Villain Character Concepts | 300:700, 705, 710, 715; 313:694, 699 | Six random opponents |
 
-Attack sheets contain eight hand-positioned poses, not equal-width cells. Explicit frame bounds and connected-component separation preserve whole poses and remove neighboring silhouettes where their horizontal bounds overlap. Frames share scale and baseline. Concept cards' edge-connected white backgrounds are removed only during canvas rendering; original assets are unmodified. Onboarding retains the existing left-facing artwork.
+Attack sheets contain eight hand-positioned poses. Explicit frame bounds and connected-component separation preserve whole poses and remove neighboring silhouettes where their horizontal bounds overlap. Frames share scale and baseline. Concept cards' edge-connected white backgrounds and the Pteranodon sheet's black backdrop are removed only during canvas rendering; original assets are unmodified. The flight wing is hinged from the resting pose at render time. Onboarding retains the existing left-facing artwork.
 
 ## Android and iPhone steps
 
@@ -54,8 +56,9 @@ Web builds, browser emulation and mocked adapter tests do not prove physical-dev
 
 ### Verification on 2026-09-29
 
-- `npm ci`, lint, format check, 22 unit tests and production build passed.
-- All 44 browser cases passed across the full run and targeted rerun (41 initial passes, two corrected test fixtures and one new collision test; the affected 19-case set passed). Coverage includes all six characters' visible collision, front/rear camera selection and stream cleanup, portrait capture, location denial, history periods, registration dates, top notices and wearable dialogs.
+- `npm ci`, lint, format check, 25 unit tests and production build passed after the stage/buff/motion refinements.
+- All 47 browser cases passed in one final full run. Coverage includes the `1-10` → `2-1` boundary and persistence, increasing targets, quest priority and buffs, Pteranodon wing/diagonal attack/pause, all six characters' visible collision, camera selection and cleanup, portrait capture, location denial, dashboard periods, registration dates, top notices and wearable dialogs.
+- Visually inspected all five attack sheets (40 poses), three Pteranodon wing positions and its in-scene impact. The downloaded Pteranodon source is non-empty and retains the original Figma image.
 - Main tab heights/navigation positions match at 320/390/526/1440px and in mobile emulation. The five main tabs use a 1080px minimum height with no horizontal overflow.
-- `npx cap sync` completed for both platforms. Android `:app:assembleDebug` succeeded; the merged manifest contains only `READ_STEPS` among health permissions.
+- Earlier in this feature, `npx cap sync` completed for both platforms and Android `:app:assembleDebug` succeeded; the merged manifest contains only `READ_STEPS` among health permissions. Native builds were not rerun for the later web UI/game refinements.
 - iOS signing/build and physical-device health/camera testing remain pending because the development host is Windows.

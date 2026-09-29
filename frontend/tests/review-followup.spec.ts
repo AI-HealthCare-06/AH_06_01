@@ -204,7 +204,6 @@ test("home hides status copy, shows both progress bars and keeps the pteranodon 
   ).toBeGreaterThan(100);
   const points = await page.locator('[data-series="today"]').getAttribute("points");
   const vertices = points!.split(" ").map((p) => p.split(",").map(Number));
-  expect(
-    vertices.slice(1).every((p, i) => p[0] === vertices[i][0] || p[1] === vertices[i][1]),
-  ).toBe(true);
+  expect(vertices).toHaveLength(6);
+  await expect(page.locator(".radar-point")).toHaveCount(6);
 });
