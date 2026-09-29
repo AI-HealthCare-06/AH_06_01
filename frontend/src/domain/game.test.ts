@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   claimDailyBonus,
+  applyDinosaurStyle,
   completeQuest,
   initialGame,
   quests,
@@ -62,5 +63,36 @@ describe("demo reward rules", () => {
     expect(restoreGame({ coins: -100 })).toEqual(initialGame());
     const data = { ...initialGame(), completed: ["walk", "walk"] };
     expect(restoreGame(data).completed).toEqual(["walk"]);
+  });
+  it("restores older saves without losing currency, quests or selected character", () => {
+    const legacy: Record<string, unknown> = { ...initialGame(), coins: 1700, dinosaur: 3 };
+    delete legacy.dinosaurStyles;
+    const restored = restoreGame(legacy);
+    expect(restored).toMatchObject({ coins: 1700, dinosaur: 3, completed: ["medicine", "meal"] });
+    expect(restored.dinosaurStyles).toEqual(Array(6).fill("original"));
+    expect(restoreGame({ ...legacy, dinosaurStyles: ["bad-skin"] })).toEqual(restored);
+  });
+  it("keeps each character's style across switching, reload and day rollover without spending coins", () => {
+    const initial = initialGame();
+    const first = applyDinosaurStyle(initial, 3, "ocean");
+    const second = applyDinosaurStyle(first, 1, "gold");
+    const restored = restoreGame(JSON.parse(JSON.stringify(second)));
+    expect(restored.dinosaur).toBe(1);
+    expect(restored.dinosaurStyles[3]).toBe("ocean");
+    expect(restored.dinosaurStyles[1]).toBe("gold");
+    expect(restored.coins).toBe(initial.coins);
+    expect(restored.completed).toEqual(initial.completed);
+    const next = rollDay(restored, "2099-01-01");
+    expect(next.dinosaurStyles).toEqual(restored.dinosaurStyles);
+    expect(next.dinosaur).toBe(1);
+    expect(initial.dinosaurStyles).toEqual(Array(6).fill("original"));
+  });
+  it("ignores invalid character/style actions", () => {
+    const initial = initialGame();
+    expect(applyDinosaurStyle(initial, -1, "ocean")).toBe(initial);
+    expect(applyDinosaurStyle(initial, 6, "ocean")).toBe(initial);
+    expect(applyDinosaurStyle(initial, 1.5, "ocean")).toBe(initial);
+    // Untrusted persisted/UI values must not overwrite a valid style.
+    expect(applyDinosaurStyle(initial, 2, "unknown" as "ocean")).toBe(initial);
   });
 });
