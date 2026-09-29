@@ -43,11 +43,11 @@ test("quest completion persists and cannot grant a duplicate reward", async ({ p
   await page.goto("/quests/water");
   await page.getByRole("button", { name: "완료 체크하기" }).click();
   await expect(page).toHaveURL(/\/reward$/);
-  await expect(page.locator(".reward-coins")).toHaveText("+20 COIN");
+  await expect(page.locator(".reward-coins")).toHaveText("+30 EXP");
   await page.goto("/shop");
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,300");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280");
   await page.reload();
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,300");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280");
   await page.goto("/quests/water");
   await expect(page.getByRole("button", { name: "오늘 완료한 퀘스트예요" })).toBeDisabled();
 });

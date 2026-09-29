@@ -436,10 +436,19 @@
 }
 .pixel-battle .stage-label {
   right: 7px;
-  width: 82px;
+  top: 50%;
+  width: 92px;
+  font-size: 15px;
+  line-height: 17px;
+}
+.pixel-battle .stage-label > span {
+  display: block;
+  font-size: 10px;
+  line-height: 14px;
 }
 .pixel-battle .stage-label small {
-  font-size: 7px;
+  font-size: 8px;
+  line-height: 12px;
 }
 .pixel-battle .battle-hud {
   --hp-height: 12px;
@@ -488,7 +497,7 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 3px;
 }
-.battle-buffs a {
+.battle-buffs button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -497,16 +506,233 @@
   padding: 3px 0;
   color: #bebba5;
   background: #303831;
-  font-size: 8px;
+  font-size: 10px;
 }
-.battle-buffs a[data-active="true"] {
+.battle-buffs button[data-active="true"] {
   color: #ffdd5c;
   background: #30583e;
   border-color: #c3ba74;
   box-shadow: inset 0 -2px #203c2a;
 }
-.battle-buffs a:focus-visible {
+.battle-buffs button:focus-visible {
   outline: 2px solid var(--gold);
+}
+.battle-buffs button[data-debuff="true"] {
+  color: #ffc3aa;
+  background: #6b352c;
+  border-color: #dc7358;
+}
+.pixel-battle .battle-hud {
+  z-index: 8;
+}
+.battle-buff-detail {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 223px;
+  border: 2px solid #c8bfa1;
+  padding: 7px;
+  background: #202e2a;
+  color: #f8eed5;
+  box-shadow: 3px 3px #17221dcc;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.battle-buff-detail header {
+  display: flex;
+  justify-content: space-between;
+  color: #ffdd5c;
+}
+.battle-buff-detail header button {
+  color: #f8eed5;
+  background: transparent;
+  border: 0;
+  padding: 0 4px;
+  font-size: 15px;
+}
+.battle-buff-detail p {
+  margin: 3px 0;
+  color: #c8c8b4;
+}
+.battle-buff-detail a {
+  display: block;
+  border-top: 1px solid #647365;
+  padding-top: 4px;
+  color: #ffdd5c;
+}
+.battle-buff-detail a:focus-visible {
+  outline: 2px solid #ffdd5c;
+}
+.battle-enemy {
+  z-index: 3;
+}
+.battle-enemy[data-rank="elite"],
+.battle-enemy[data-rank="boss"] {
+  width: 94px;
+  height: 106px;
+}
+.battle-enemy[data-rank="boss"] small {
+  color: #ffdd5c;
+}
+.enemy-hp {
+  display: block;
+  height: 4px;
+  background: #67685a;
+}
+.enemy-hp i {
+  display: block;
+  height: 100%;
+  background: #d94436;
+}
+.wave-caption {
+  position: absolute;
+  bottom: 2px;
+  left: 10px;
+  color: #c8c8b4;
+  font-size: 8px;
+}
+.economy-wallet {
+  margin: 12px 0;
+  padding: 12px;
+}
+.economy-wallet summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #285d3b;
+}
+.economy-wallet summary span {
+  color: #554c37;
+  font-size: 10px;
+}
+.economy-wallet details[open] summary {
+  border-bottom: 1px solid #b9b196;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+.economy-wallet header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+.economy-wallet h3,
+.economy-wallet h4 {
+  margin: 0;
+  font-size: 13px;
+}
+.economy-wallet dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 12px 0;
+}
+.economy-wallet dl > div {
+  border: 1px solid #b9b196;
+  padding: 7px;
+  background: #e9e0bf;
+}
+.economy-wallet dt,
+.economy-wallet small,
+.economy-wallet p {
+  font-size: 10px;
+  line-height: 1.6;
+}
+.economy-wallet dd {
+  margin: 3px 0;
+  font-size: 21px;
+  color: #34764b;
+}
+.economy-wallet form {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  margin: 10px 0;
+}
+.economy-wallet label {
+  min-width: 0;
+  flex: 1;
+  font-size: 11px;
+}
+.economy-wallet input {
+  display: block;
+  width: 100%;
+  padding: 7px;
+  border: 2px solid #727a68;
+  background: #fffae7;
+}
+.economy-wallet button,
+.repeat-quest button {
+  padding: 9px;
+  border: 2px solid #333d30;
+  color: #fff4ce;
+  background: #387b50;
+  font-size: 11px;
+}
+.economy-wallet button:disabled,
+.repeat-quest button:disabled {
+  opacity: 0.45;
+}
+.repeat-quest {
+  padding: 12px;
+  font-size: 12px;
+}
+.repeat-quest small {
+  display: block;
+  margin-top: 7px;
+}
+.gold-effects {
+  margin-top: 16px;
+  border-top: 1px solid #b9b196;
+  padding-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.gold-effects h4,
+.gold-effects p {
+  width: 100%;
+  margin: 0;
+}
+.gold-effects button {
+  flex: 1;
+  min-width: 80px;
+  padding: 6px;
+}
+.gold-effects button small {
+  display: block;
+}
+.gold-effects button[aria-pressed="true"] {
+  outline: 2px solid #d4a83a;
+  outline-offset: 1px;
+}
+.pixel-battle[data-effect="emerald"] .battle-damage {
+  color: #6cffb3;
+  text-shadow: 2px 2px #205741;
+}
+.pixel-battle[data-effect="violet"] .battle-damage {
+  color: #e2aaff;
+  text-shadow: 2px 2px #573475;
+}
+.buff-quests small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.battle-recovery {
+  position: absolute;
+  left: 50%;
+  top: 220px;
+  transform: translateX(-50%);
+  z-index: 6;
+  white-space: nowrap;
+  background: #182723e8;
+  padding: 6px 10px;
+  color: #ffdd5c;
+  font-size: 10px;
 }
 .compact-quest > .pixel-icon {
   width: 14px;

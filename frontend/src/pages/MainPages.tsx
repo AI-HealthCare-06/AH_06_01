@@ -21,6 +21,8 @@ import { HealthTrend } from "../components/HealthTrend";
 import { healthPeriods } from "../services/health-history";
 import type { HealthPeriod } from "../services/health-history";
 import { useProfileStore } from "../stores/profile-store";
+import { GameWallet } from "../components/GameWallet";
+import { questExperience } from "../domain/experience";
 
 export function HomePage() {
   const { game, paused, togglePause } = useGameStore();
@@ -117,17 +119,21 @@ export function QuestsPage() {
           </h3>
           <div className="quest-summary-detail">
             <div className="quest-summary-power">
-              <p>{dino.name} 전투력 +12</p>
+              <p>{dino.name} EXP·버프 획득</p>
               <div className="summary-track">
                 <i className="metric-fill" style={{ width: `${stageProgress(game) * 10}%` }} />
               </div>
             </div>
             <button
               className="quest-summary-reward"
-              onClick={() => notice("모든 퀘스트를 완료하면 기본 보상에 50% 추가 보상이 지급돼요.")}
+              onClick={() =>
+                notice(
+                  "레벨업 시 도달 레벨 × 500 Coin을 받아요. 퀘스트 EXP는 레벨 구간에 따라 증가해요.",
+                )
+              }
             >
               <img src={assets.quests.imgDecorationRewardSpark} alt="" />
-              +50% COIN
+              LEVEL UP
             </button>
           </div>
         </div>
@@ -151,7 +157,9 @@ export function QuestsPage() {
                   delay={index * 45}
                 />
               </div>
-              <span className="quest-exp">+{q.experience} EXP</span>
+              <span className="quest-exp">
+                +{questExperience(q.experience, game.experience)} EXP
+              </span>
             </Link>
           );
         })}
@@ -369,7 +377,7 @@ export function ShopPage() {
       <PageHeading title="REX SHOP" subtitle={`건강 퀘스트 보상으로 ${dino.name} 꾸미기`} />
       <section className="shop-wallet" aria-label="헬스 코인 지갑">
         <h3>HEALTH COINS</h3>
-        <p>퀘스트 완료로 코인을 모아요</p>
+        <p>레벨업으로 Coin을 모아요 · 현실 상품에는 RP 사용</p>
         <div className="wallet-balance">
           <PixelIcon name="coin" />
           <strong>
@@ -397,6 +405,7 @@ export function ShopPage() {
           <b>{game.bonusClaimed ? "완료" : "받기"}</b>
         </button>
       </section>
+      <GameWallet />
       <section className="shop-catalog">
         <div className="shop-tabs" aria-label="상품 분류">
           {["추천", "RRR", "꾸미기"].map((label, i) => (
@@ -442,7 +451,7 @@ export function ShopPage() {
                   className={`product product-${i} ${p.wide ? "wide" : ""}`}
                   onClick={() =>
                     notice(
-                      `${p.name} · ${p.price} P — 상품 교환은 준비 중이며 코인은 차감되지 않아요.`,
+                      `${p.name} · ${p.price} RP — 실제 상품 교환은 서버 연동 후 제공됩니다. RP는 차감되지 않아요.`,
                     )
                   }
                 >
@@ -450,7 +459,7 @@ export function ShopPage() {
                     <img src={p.image} alt={p.name} />
                   </span>
                   <span className="rrr-badge">RRR</span>
-                  <span className="product-price">{p.price} P</span>
+                  <span className="product-price">{p.price} RP</span>
                   {p.badge && (
                     <span className={`product-badge ${i === 0 ? "sale" : ""}`}>{p.badge}</span>
                   )}

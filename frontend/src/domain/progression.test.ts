@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calendarWeek, localDate } from "./calendar";
 import {
-  collectBattleCoin,
   completeQuest,
   initialGame,
   questProgress,
@@ -10,7 +9,6 @@ import {
   syncDeviceSteps,
   weeklyCompletedDays,
 } from "./game";
-import { advanceBattle } from "./battle";
 
 describe("device dates and quest progression", () => {
   it("starts Sunday across month and year boundaries", () => {
@@ -35,9 +33,9 @@ describe("device dates and quest progression", () => {
     expect(questProgress(half, quests[2])).toBe(0.5);
     const done = syncDeviceSteps(half, { ...snapshot, count: 6000, syncedAt: 200 }, day);
     expect(done.completed).toEqual(["walk"]);
-    expect(done.coins).toBe(1310);
+    expect(done.coins).toBe(1280);
     expect(syncDeviceSteps(done, { ...snapshot, count: 6800, syncedAt: 300 }, day).coins).toBe(
-      1310,
+      1280,
     );
     expect(syncDeviceSteps(done, snapshot, day)).toBe(done);
     expect(syncDeviceSteps(done, { ...snapshot, date: "2026-09-28" }, day)).toBe(done);
@@ -53,7 +51,8 @@ describe("device dates and quest progression", () => {
         day,
       );
       expect(weeklyCompletedDays(game)).toBe(game.completedDates.length);
-      for (const q of quests) game = completeQuest(game, q.id, day);
+      for (const q of quests)
+        game = completeQuest(game, q.id, day, new Date(`${day}T12:00:00`).getTime());
       game = completeQuest(game, "sleep", day);
     }
     expect(weeklyCompletedDays(game)).toBe(5);
@@ -61,15 +60,5 @@ describe("device dates and quest progression", () => {
     const nextWeek = rollDay(game, "2026-10-04");
     expect(weeklyCompletedDays(nextWeek)).toBe(0);
     expect(nextWeek.completedDates).toHaveLength(5);
-  });
-  it("keeps the enemy through defeat/drop and replaces it only after movement", () => {
-    const defeat = advanceBattle({ phase: "attack", elapsed: 880, encounter: 0, enemy: 2 }, 80, 5);
-    expect(defeat).toMatchObject({ phase: "defeat", enemy: 2 });
-    const next = advanceBattle({ ...defeat, phase: "move", elapsed: 1040 }, 80, 5);
-    expect(next).toEqual({ phase: "spawn", elapsed: 0, encounter: 1, enemy: 5 });
-    const game = collectBattleCoin(initialGame(), 0);
-    expect(game.coins).toBe(1290);
-    expect(collectBattleCoin(game, 0)).toBe(game);
-    expect(collectBattleCoin(game, 2)).toBe(game);
   });
 });

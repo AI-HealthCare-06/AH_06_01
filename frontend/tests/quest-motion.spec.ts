@@ -64,7 +64,9 @@ test("numbers count up on tab entry and animate new rewards without changing the
   await expect(visual).toHaveAttribute("data-value", "0");
   await page.clock.runFor(800);
   await expect(visual).toHaveAttribute("data-value", "1,280");
-  expect(await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"))).toBe(before);
+  const after = await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!));
+  expect(after.coins).toBe(JSON.parse(before!).coins);
+  expect(after.experience).toBe(JSON.parse(before!).experience);
   await page.locator(".daily-bonus").click();
   await expect(page.locator(".wallet-balance > strong")).toHaveText("1,290");
   await expect(visual).toHaveAttribute("data-value", "1,280");

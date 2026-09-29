@@ -8,9 +8,10 @@ test("all dinosaurs reach the visible monster during the impact pose", async ({ 
     await page.evaluate(async (index) => {
       const path = "/src/stores/game-store.ts";
       const { useGameStore } = await import(path);
+      useGameStore.getState().resetDemo();
       useGameStore.getState().chooseDinosaur(index);
     }, dinosaur);
-    await page.clock.runFor(2080);
+    await page.clock.runFor(3600);
     await expect(page.locator(".battle-enemy")).toHaveAttribute("data-hit", "true");
     await page.getByRole("button", { name: "모험 일시정지" }).click();
     await expect

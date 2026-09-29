@@ -1,11 +1,23 @@
-// Continue the demo's existing level. Quest EXP remains cumulative across days.
-export const startingLevel = 12;
-export const experiencePerLevel = 300;
-
 export function experienceProgress(totalExperience: number) {
-  return {
-    level: startingLevel + Math.floor(totalExperience / experiencePerLevel),
-    current: totalExperience % experiencePerLevel,
-    required: experiencePerLevel,
-  };
+  let current = Math.max(0, Math.floor(totalExperience));
+  let level = 1;
+  let required = 100;
+  while (current >= required) {
+    current -= required;
+    level++;
+    required = Math.floor(required * 1.22);
+  }
+  return { level, current, required };
+}
+
+export function questExperience(base: number, total: number, repeat = false) {
+  const { level } = experienceProgress(total);
+  const multiplier = level < 5 ? 1 : level < 10 ? 1.5 : level < 15 ? 2.25 : 3.375;
+  return Math.floor(base * multiplier * (repeat ? 0.1 : 1));
+}
+
+export function levelUpCoins(before: number, after: number) {
+  const first = experienceProgress(before).level;
+  const last = experienceProgress(after).level;
+  return ((last * (last + 1) - first * (first + 1)) / 2) * 500;
 }

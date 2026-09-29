@@ -11,6 +11,23 @@ import { CameraPage } from "./pages/CameraPage";
 export default function App() {
   const location = useLocation();
   const refreshDay = useGameStore((s) => s.refreshDay);
+  const tick = useGameStore((s) => s.tick);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") tick();
+    }, 50);
+    const sync = () => {
+      tick();
+      refreshDay();
+    };
+    document.addEventListener("visibilitychange", sync);
+    window.addEventListener("pagehide", sync);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", sync);
+      window.removeEventListener("pagehide", sync);
+    };
+  }, [tick, refreshDay]);
   const syncSteps = useDeviceStore((s) => s.sync);
   useEffect(() => {
     void syncSteps();

@@ -5,7 +5,7 @@ test("quest EXP appears below HP in a thin gray and green gauge and survives rel
 }) => {
   await page.goto("/home");
   const exp = page.getByRole("progressbar", { name: "레벨 경험치" });
-  await expect(exp).toHaveText("EXP 000/300");
+  await expect(exp).toHaveText("EXP 000/100");
   const hpBox = (await page.getByRole("meter", { name: "공룡 체력" }).boundingBox())!;
   const expBox = (await exp.boundingBox())!;
   expect(expBox.y).toBeGreaterThan(hpBox.y + hpBox.height);
@@ -20,31 +20,34 @@ test("quest EXP appears below HP in a thin gray and green gauge and survives rel
   await page.goto("/quests/meal");
   await page.getByRole("button", { name: "완료 체크하기" }).click();
   await page.goto("/home");
-  await expect(exp).toHaveText("EXP 030/300");
+  await expect(exp).toHaveText("EXP 030/100");
   await expect(exp).toHaveAttribute("aria-valuenow", "30");
   expect(await exp.locator("i").evaluate((e) => getComputedStyle(e).backgroundColor)).toBe(
     "rgb(83, 166, 110)",
   );
   await page.reload();
-  await expect(exp).toHaveText("EXP 030/300");
+  await expect(exp).toHaveText("EXP 030/100");
   await page.goto("/quests/meal");
   await expect(page.getByRole("button", { name: "오늘 완료한 퀘스트예요" })).toBeDisabled();
 });
 
 test("level-up carries surplus EXP and all existing level labels agree", async ({ page }) => {
   await page.goto("/home");
-  await page.evaluate(() => {
-    const key = "rexrun-demo-game-v1";
-    const game = JSON.parse(localStorage.getItem(key)!);
-    localStorage.setItem(key, JSON.stringify({ ...game, experience: 290, completed: [] }));
+  await page.evaluate(async () => {
+    const path = "/src/stores/game-store.ts";
+    const { useGameStore } = await import(path);
+    useGameStore.setState((state: { game: object }) => ({
+      game: { ...state.game, experience: 90, completed: [] },
+    }));
+    useGameStore.getState().togglePause();
   });
   await page.goto("/quests/medicine");
   await page.getByRole("button", { name: "완료 체크하기" }).click();
   await page.goto("/home");
-  await expect(page.locator(".level")).toContainText("Lv.13");
-  await expect(page.getByRole("progressbar", { name: "레벨 경험치" })).toHaveText("EXP 010/300");
+  await expect(page.locator(".level")).toContainText("Lv.2");
+  await expect(page.getByRole("progressbar", { name: "레벨 경험치" })).toHaveText("EXP 010/122");
   await page.goto("/me");
-  await expect(page.locator(".member-card")).toContainText("Lv.13");
+  await expect(page.locator(".member-card")).toContainText("Lv.2");
   await page.goto("/buff");
-  await expect(page.locator(".buff-scene")).toContainText("Lv.13");
+  await expect(page.locator(".buff-scene")).toContainText("Lv.2");
 });

@@ -20,11 +20,11 @@ describe("demo reward rules", () => {
       source: "healthkit",
       syncedAt: 100,
     });
-    expect(first.coins).toBe(1310);
+    expect(first.coins).toBe(1280);
     expect(first.completed).toContain("walk");
     expect(completeQuest(first, "walk")).toBe(first);
   });
-  it("awards the all-done 50% bonus exactly once", () => {
+  it("awards the attained level's Coin exactly once across all quests", () => {
     let game = initialGame();
     game = syncDeviceSteps(game, {
       date: game.date,
@@ -33,10 +33,10 @@ describe("demo reward rules", () => {
       syncedAt: 100,
     });
     for (const q of quests) game = completeQuest(game, q.id);
-    expect(game.coins).toBe(1430);
-    expect(game.lastReward?.coins).toBe(70);
+    expect(game.coins).toBe(2280);
+    expect(game.lastReward?.experience).toBe(40);
     expect(game.allDoneBonusClaimed).toBe(true);
-    expect(completeQuest(game, "sleep").coins).toBe(1430);
+    expect(completeQuest(game, "sleep").coins).toBe(2280);
     expect(stageProgress(game)).toBe(10);
   });
   it("daily coin is idempotent and available again next Seoul day", () => {
@@ -72,7 +72,11 @@ describe("demo reward rules", () => {
     expect(seoulDate(new Date("2026-09-27T15:00:00Z"))).toBe("2026-09-28");
   });
   it("recovers invalid storage and removes repeated quest ids", () => {
-    expect(restoreGame({ coins: -100 })).toEqual(initialGame());
+    expect(restoreGame({ coins: -100 })).toMatchObject({
+      coins: 1280,
+      experience: 0,
+      completed: [],
+    });
     const data = { ...initialGame(), completed: ["walk", "walk"] };
     expect(restoreGame(data).completed).toEqual(["walk"]);
   });

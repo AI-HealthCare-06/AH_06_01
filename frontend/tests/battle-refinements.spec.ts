@@ -1,42 +1,61 @@
 import { expect, test } from "@playwright/test";
 
-test("background changes only after 1-10 and progress uses the growing target", async ({
+test("boss ends wave ten and changes background only when next stage is unlocked", async ({
   page,
 }) => {
   await page.clock.install();
   await page.clock.pauseAt(new Date());
-  await page.goto("/quests");
+  await page.goto("/home");
   await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
     const { useGameStore } = await import(path);
-    useGameStore.setState((state: { game: object }) => ({
-      game: { ...state.game, battleDefeats: 144 },
+    useGameStore.setState((state: { game: { combat: object } }) => ({
+      game: {
+        ...state.game,
+        experience: 550,
+        combat: {
+          ...state.game.combat,
+          wave: 10,
+          killed: 100,
+          spawned: 101,
+          spawnIn: 5000,
+          enemies: [
+            {
+              id: 0,
+              art: 5,
+              rank: "boss",
+              hp: 1,
+              maxHp: 683,
+              ad: 37.5,
+              distance: 2.9,
+              attackIn: 500,
+              ranged: false,
+              hitAt: -1000,
+            },
+          ],
+        },
+      },
     }));
   });
-  await page.getByRole("link", { name: "Home", exact: true }).click();
-  await expect(page.locator(".stage-label")).toContainText("STAGE 1-10");
-  const bar = page.getByRole("progressbar", { name: "스테이지 몬스터 처치" });
-  await expect(bar).toHaveAttribute("aria-valuenow", "18");
-  await expect(bar).toHaveAttribute("aria-valuemax", "19");
-  await page.clock.runFor(3680);
-  await expect(bar).toHaveAttribute("aria-valuenow", "19");
-  await expect(page.locator(".battle-scenery")).toHaveAttribute(
-    "aria-label",
-    "ALPINE DAY 스테이지 배경",
+  await expect(page.locator(".stage-label")).toContainText("STAGE 1");
+  await expect(page.locator(".stage-label")).toContainText("WAVE 10 / 10");
+  await expect(page.getByRole("progressbar", { name: "스테이지 몬스터 처치" })).toHaveAttribute(
+    "aria-valuemax",
+    "101",
   );
-  await page.clock.runFor(1120);
-  await expect(page.locator(".stage-label")).toContainText("STAGE 2-1");
-  await expect(bar).toHaveAttribute("aria-valuenow", "0");
-  await expect(bar).toHaveAttribute("aria-valuemax", "20");
+  await page.clock.runFor(50);
+  await expect(page.locator(".stage-label")).toContainText("STAGE 2");
+  await expect(page.locator(".stage-label")).toContainText("WAVE 1 / 10");
   await expect(page.locator(".battle-scenery")).toHaveAttribute(
     "aria-label",
     "FOREST RUINS 스테이지 배경",
   );
+  await page.getByRole("button", { name: "모험 일시정지" }).click();
   await page.reload();
-  await expect(page.locator(".stage-label")).toContainText("STAGE 2-1");
+  await expect(page.locator(".stage-label")).toContainText("STAGE 2");
 });
 
-test("pending quests replace finished rows and HUD buffs follow completion and reset", async ({
+test("pending quests and compact buff explanations reflect the actual linked stat", async ({
   page,
 }) => {
   await page.goto("/home");
@@ -45,46 +64,31 @@ test("pending quests replace finished rows and HUD buffs follow completion and r
     const { useGameStore } = await import(path);
     useGameStore.getState().complete("meal");
   });
-  const rows = page.locator(".compact-quest");
-  await expect(rows).toHaveCount(4);
-  await expect(rows.nth(0)).toContainText("약 복용하기");
-  await expect(rows.nth(1)).toContainText("6,000걸음");
-  await expect(rows.nth(2)).toContainText("물 8잔");
-  await expect(rows.nth(3)).toContainText("수면 7시간");
-  await expect(page.locator('.battle-buffs [data-active="true"]')).toHaveCount(1);
-  await expect(page.getByRole("link", { name: "식사 버프 활성: 공격 속도 +15%" })).toBeVisible();
-  await page.evaluate(async () => {
-    const path = "/src/stores/game-store.ts";
-    const { useGameStore } = await import(path);
-    const store = useGameStore.getState();
-    store.complete("medicine");
-    store.complete("water");
-    store.complete("sleep");
-    store.syncSteps({
-      date: store.game.date,
-      count: 6000,
-      source: "healthkit",
-      syncedAt: Date.now(),
-    });
-  });
-  await expect(page.locator('.battle-buffs [data-active="true"]')).toHaveCount(5);
-  await expect(page.getByRole("meter", { name: "공룡 체력" })).toHaveAttribute(
-    "aria-valuemax",
-    "380",
-  );
-  await expect(page.locator(".hp-heart")).toHaveCount(0);
-  await expect(rows.locator(".pixel-check")).toHaveCount(4);
-  await page.evaluate(async () => {
-    const path = "/src/stores/game-store.ts";
-    const { useGameStore } = await import(path);
-    useGameStore.getState().resetDemo();
-  });
-  await expect(page.locator('.battle-buffs [data-active="true"]')).toHaveCount(0);
+  await expect(page.locator(".compact-quest").nth(1)).toContainText("6,000걸음");
+  await expect(page.locator(".battle-buffs button")).toHaveText([
+    "ATK",
+    "DEF",
+    "CRT",
+    "SPD",
+    "GOLD",
+  ]);
+  const button = page.getByRole("button", { name: "DEF 버프 현황" });
+  await button.click();
+  const detail = page.getByRole("region", { name: "DEF 상세" });
+  await expect(detail).toContainText("받는 피해 −20%");
+  await expect(detail.getByRole("link")).toHaveAttribute("href", "/quests/meal");
+  const box = (await button.boundingBox())!;
+  expect((await detail.boundingBox())!.y).toBeGreaterThan(box.y + box.height);
+  await page.keyboard.press("Escape");
+  await expect(detail).toHaveCount(0);
+  await expect(button).toBeFocused();
+  await page.getByRole("button", { name: "GOLD 버프 현황" }).click();
+  await expect(page.locator(".battle-buff-detail")).toContainText("수면 데이터 없음");
+  await page.getByRole("link", { name: /연계 퀘스트/ }).click();
+  await expect(page).toHaveURL(/quests\/sleep$/);
 });
 
-test("Pteranodon flaps its wing, dives down-right with the new sheet, and pauses", async ({
-  page,
-}) => {
+test("Pteranodon flaps in place, attacks down-right and freezes when paused", async ({ page }) => {
   await page.clock.install();
   await page.clock.pauseAt(new Date());
   await page.goto("/home");
@@ -93,39 +97,55 @@ test("Pteranodon flaps its wing, dives down-right with the new sheet, and pauses
     const { useGameStore } = await import(path);
     useGameStore.getState().chooseDinosaur(4);
   });
-  const dino = page.locator(".battle-dinosaur");
-  const canvas = dino.locator("canvas");
+  const dino = page.locator(".battle-dinosaur"),
+    canvas = dino.locator("canvas");
   await expect(canvas).toHaveAttribute("data-src", "/assets/battle/434-578.png");
-  await expect
-    .poll(() =>
-      canvas.evaluate(
-        (e) => (e as HTMLCanvasElement).getContext("2d")!.getImageData(80, 80, 1, 1).data[3],
-      ),
-    )
-    .toBeGreaterThan(0);
-  const initial = await canvas.evaluate((e) => (e as HTMLCanvasElement).toDataURL());
-  await page.clock.runFor(240);
-  await expect
-    .poll(() => canvas.evaluate((e) => (e as HTMLCanvasElement).toDataURL()))
-    .not.toBe(initial);
+  const initial = await canvas.getAttribute("data-wing-phase");
+  await page.clock.runFor(250);
+  await expect(canvas).not.toHaveAttribute("data-wing-phase", initial!);
   const idle = await dino.evaluate((e) => ({
     left: parseFloat(getComputedStyle(e).left),
     bottom: parseFloat(getComputedStyle(e).bottom),
   }));
-  await page.clock.runFor(1840);
+  await page.clock.runFor(3350);
   await expect(dino).toHaveAttribute("data-attacking", "true");
   await expect(canvas).toHaveAttribute("data-frame", "4");
-  const impact = await dino.evaluate((e) => ({
+  const attack = await dino.evaluate((e) => ({
     left: parseFloat(getComputedStyle(e).left),
     bottom: parseFloat(getComputedStyle(e).bottom),
   }));
-  expect(impact.left).toBeGreaterThan(idle.left + 90);
-  expect(impact.bottom).toBeLessThan(idle.bottom - 25);
-  await page.clock.runFor(1600);
-  await expect(dino).toHaveAttribute("data-moving", "true");
-  await page.clock.runFor(160);
-  const flight = await canvas.getAttribute("data-wing-phase");
+  expect(attack.left).toBeGreaterThan(idle.left + 30);
+  expect(attack.bottom).toBeLessThan(idle.bottom - 20);
   await page.getByRole("button", { name: "모험 일시정지" }).click();
+  const frame = await canvas.getAttribute("data-frame");
   await page.clock.runFor(1000);
-  await expect(canvas).toHaveAttribute("data-wing-phase", flight!);
+  await expect(canvas).toHaveAttribute("data-frame", frame!);
+});
+
+test("demo wallet limits conversion, preserves balances and purchases only cosmetic effects", async ({
+  page,
+}) => {
+  await page.goto("/shop");
+  await page.evaluate(async () => {
+    const path = "/src/stores/game-store.ts";
+    const { useGameStore } = await import(path);
+    useGameStore.setState((state: { game: object }) => ({
+      paused: true,
+      game: { ...state.game, battlePaused: true, gold: 20000 },
+    }));
+  });
+  const wallet = page.getByRole("region", { name: "게임 재화 지갑" });
+  await wallet.locator("summary").click();
+  await wallet.getByRole("spinbutton", { name: "전환 RP" }).fill("151");
+  await expect(wallet.getByRole("button", { name: "데모 RP 전환" })).toBeDisabled();
+  await wallet.getByRole("spinbutton", { name: "전환 RP" }).fill("150");
+  await wallet.getByRole("button", { name: "데모 RP 전환" }).click();
+  await expect(wallet).toContainText("오늘 0");
+  await wallet.getByRole("button", { name: /에메랄드 타격/ }).click();
+  await expect(wallet.locator("dd")).toHaveText(["0", "1,280", "4,000", "150"]);
+  await page.reload();
+  await wallet.locator("summary").click();
+  await expect(wallet.locator("dd")).toHaveText(["0", "1,280", "4,000", "150"]);
+  await page.getByRole("link", { name: "Home", exact: true }).click();
+  await expect(page.locator(".adventure")).toHaveAttribute("data-effect", "emerald");
 });

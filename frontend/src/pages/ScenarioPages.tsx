@@ -12,15 +12,21 @@ import { DinosaurArt } from "../components/DinosaurArt";
 import { StepConnection } from "../components/StepConnection";
 import { useDeviceStore } from "../stores/device-store";
 import { ProfileAvatar } from "../components/ProfileAvatar";
-import { experienceProgress } from "../domain/experience";
+import { experienceProgress, questExperience } from "../domain/experience";
+import { battleBuffStats, questBuffs } from "../domain/battle";
+import { directRewardPreview } from "../domain/economy";
 
 export function QuestDetailPage() {
   const { id } = useParams();
-  const { game, complete } = useGameStore();
+  const { game, complete, repeat } = useGameStore();
   const navigate = useNavigate();
   const q = quests.find((q) => q.id === id);
   if (!q) return <Navigate to="/quests" replace />;
   const done = game.completed.includes(q.id);
+  const waterCooling =
+    q.id === "water" &&
+    game.lastWaterAt !== null &&
+    game.battleUpdatedAt - game.lastWaterAt < 7_200_000;
   const progress = Math.round(questProgress(game, q) * 100);
   return (
     <ScenarioShell className="quest-detail-screen" camera={assets["quest-detail"].imgEllipse}>
@@ -61,14 +67,14 @@ export function QuestDetailPage() {
       <h2 className="reward-label">완료하면</h2>
       <div className="quest-reward">
         <div>
-          <strong>+{q.reward}</strong>
-          <b>COIN</b>
+          <strong>+{questExperience(q.experience, game.experience)}</strong>
+          <b>EXP</b>
         </div>
-        <p>{q.id === "walk" ? "체력 +2 민첩 +3" : `경험치 +${q.experience}`}</p>
+        <p>{questBuffs.find((buff) => buff.id === q.id)!.effect}</p>
       </div>
       <button
         className="primary-button complete-quest"
-        disabled={done || q.id === "walk"}
+        disabled={done || q.id === "walk" || waterCooling}
         onClick={() => {
           complete(q.id);
           navigate("/reward");
@@ -78,19 +84,47 @@ export function QuestDetailPage() {
           ? "오늘 완료한 퀘스트예요"
           : q.id === "walk"
             ? "6,000걸음 달성 시 자동 완료"
-            : "완료 체크하기"}
+            : waterCooling
+              ? "물 인정 간격 120분 대기 중"
+              : "완료 체크하기"}
       </button>
       {q.id === "walk" ? (
         <StepConnection />
       ) : (
         <>
-          <p className="complete-help">직접 완료한 뒤 체크해 주세요.</p>
+          <p className="complete-help">
+            데모 완료 체크로 EXP·버프를 확인해요.{" "}
+            {directRewardPreview(q.id) > 0 &&
+              `직접 보상 ${directRewardPreview(q.id)} Gold는 인증·서버 검증 후 지급됩니다.`}
+          </p>
           {q.id !== "sleep" && (
             <Link className="camera-quest-link" to={`/camera?quest=${q.id}`}>
               카메라로 실천 기록 남기기
             </Link>
           )}
         </>
+      )}
+      {done && (q.id === "meal" || q.id === "water") && (
+        <div className="cream-card repeat-quest">
+          <p>초과 클리어 · 최초 EXP의 10% · 최대 5회</p>
+          <button
+            disabled={
+              (game.activity[q.id] ?? 1) >= 6 ||
+              (q.id === "water" &&
+                game.lastWaterAt !== null &&
+                game.battleUpdatedAt - game.lastWaterAt < 7_200_000)
+            }
+            onClick={() => {
+              repeat(q.id);
+              navigate("/reward");
+            }}
+          >
+            초과 클리어 데모 ({Math.max(0, (game.activity[q.id] ?? 1) - 1)} / 5)
+          </button>
+          {q.id === "water" && (
+            <small>물 인정 간격 120분 · 실제 섭취 안내는 개인별 목표를 따라 주세요.</small>
+          )}
+        </div>
       )}
     </ScenarioShell>
   );
@@ -107,12 +141,19 @@ export function RewardPage() {
         <img src={assets.reward.imgEllipse1} alt="" />
         <DinosaurArt className="reward-dino" pose="reward" alt={dino.name} />
       </div>
-      <strong className="reward-coins">+{reward?.coins ?? 30} COIN</strong>
+      <strong className="reward-coins">+{reward?.experience ?? 0} EXP</strong>
+      {!!reward?.coins && (
+        <p className="level-up-reward">LEVEL UP · +{reward.coins.toLocaleString()} COIN</p>
+      )}
       <div className="cream-card reward-stats">
         <h2>{dino.name}가 더 강해졌어요!</h2>
         <div>
-          <strong>체력 12 → 14</strong>
-          <strong>민첩 8 → 11</strong>
+          <strong>Lv.{experienceProgress(game.experience).level}</strong>
+          <strong>
+            {reward
+              ? questBuffs.find((buff) => buff.id === reward.questId)?.effect
+              : "퀘스트를 완료해 성장해요"}
+          </strong>
         </div>
         <p>오늘 완료 {game.completed.length} / 5</p>
       </div>
@@ -126,6 +167,7 @@ export function RewardPage() {
 export function BuffPage() {
   const game = useGameStore((s) => s.game);
   const dino = dinosaurs[game.dinosaur];
+  const stats = battleBuffStats(game);
   return (
     <ScenarioShell className="buff-screen" camera={assets.buff.imgEllipse}>
       <header className="scenario-heading">
@@ -137,7 +179,8 @@ export function BuffPage() {
         <DinosaurArt className="scene-dino" pose="buff" alt={dino.name} />
         <b className="scene-badge">BUFF + HEALTH</b>
         <strong>
-          {dino.name} · Lv.{experienceProgress(game.experience).level} · HP 340 / 340
+          {dino.name} · Lv.{experienceProgress(game.experience).level} · HP{" "}
+          {Math.ceil(game.combat.hp)} / {stats.maxHp}
         </strong>
       </div>
       <div className="cream-card buff-message">
@@ -145,9 +188,10 @@ export function BuffPage() {
         <p>퀘스트를 더 완료하면 버프가 커져요.</p>
       </div>
       <div className="buff-quests">
-        {quests.slice(0, 3).map((q) => (
+        {quests.map((q) => (
           <Link className="cream-card" to={`/quests/${q.id}`} key={q.id}>
             <b>{q.shortTitle}</b>
+            <small>{questBuffs.find((buff) => buff.id === q.id)!.effect}</small>
             <strong className={game.completed.includes(q.id) ? "green" : "red"}>
               {game.completed.includes(q.id)
                 ? "완료"

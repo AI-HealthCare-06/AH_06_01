@@ -44,45 +44,36 @@ test("device snapshots update the walk bar and complete without a manual button"
   await expect(page.locator(".quest-row").nth(2).locator(".pixel-check")).toBeVisible();
   await sync(6800);
   await page.goto("/shop");
-  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,310");
+  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,280");
   await page.goto("/quests/walk");
   await expect(page.getByRole("button", { name: "오늘 완료한 퀘스트예요" })).toBeDisabled();
 });
 
-test("battle uses one enemy, pauses, drops one coin and scrolls to the next stage", async ({
-  page,
-}) => {
+test("wave combat pauses, requires multiple hits and awards Gold separately", async ({ page }) => {
   await page.clock.install();
   await page.clock.pauseAt(new Date());
   await page.goto("/home");
+  await page.clock.runFor(50);
   await expect(page.locator(".battle-enemy")).toHaveCount(1);
-  const scene = page.locator(".adventure");
+  await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "70");
   await page.getByRole("button", { name: "모험 일시정지" }).click();
+  const enemyPosition = await page.locator(".battle-enemy").getAttribute("style");
   await page.clock.runFor(10_000);
-  await expect(scene).toHaveAttribute("data-encounter", "0");
-  const initialPhase = await scene.getAttribute("data-phase");
-  await page.clock.runFor(5000);
-  await expect(scene).toHaveAttribute("data-phase", initialPhase!);
+  await expect(page.locator(".battle-enemy")).toHaveAttribute("style", enemyPosition!);
   await page.getByRole("button", { name: "모험 재개" }).click();
-  await page.clock.runFor(2960);
-  await expect(scene).toHaveAttribute("data-phase", "drop");
-  await expect(page.locator(".battle-enemy")).toHaveCount(0);
-  await expect(page.locator(".battle-coin")).toBeVisible();
-  await page.clock.runFor(720);
-  await expect(scene).toHaveAttribute("data-phase", "move");
-  await page.clock.runFor(1120);
-  await expect(scene).toHaveAttribute("data-encounter", "1");
-  await expect(page.locator(".battle-enemy")).toHaveCount(1);
-  expect(
-    await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!).coins),
-  ).toBe(1290);
-  await page.clock.runFor(9 * 4800);
-  await expect(scene).toHaveAttribute("data-stage", "1");
-  await expect(scene).toHaveAttribute("data-substage", "2");
-  await expect(page.locator(".battle-scenery")).toHaveAttribute(
-    "aria-label",
-    "ALPINE DAY 스테이지 배경",
+  await page.clock.runFor(3300);
+  await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "50");
+  await page.clock.runFor(1500);
+  await expect(page.locator(".battle-coin")).toContainText("+30 G");
+  await expect(page.getByRole("progressbar", { name: "스테이지 몬스터 처치" })).toHaveAttribute(
+    "aria-valuenow",
+    "1",
   );
+  await page.clock.runFor(300);
+  await expect(page.locator(".battle-enemy")).toHaveCount(1);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!));
+  expect(saved.coins).toBe(1280);
+  expect(saved.gold).toBe(30);
 });
 
 test("camera requests on click, captures, and stops all tracks on navigation", async ({ page }) => {

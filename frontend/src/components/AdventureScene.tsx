@@ -1,17 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { DesignCanvas } from "./DesignCanvas";
 import { dinosaurs } from "../design/dinosaurs";
 import { battleDinosaurs, stages, villains } from "../design/battle-assets";
-import type { GameState } from "../domain/game";
-import { advanceBattle, battleDurations } from "../domain/battle";
-import type { BattleState } from "../domain/battle";
-import { useGameStore } from "../stores/game-store";
+import { quests } from "../domain/game";
+import type { GameState, QuestId } from "../domain/game";
 import { getSkin } from "../design/skins";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { BattleSprite } from "./BattleSprite";
 import { PixelIcon } from "./PixelIcon";
-import { battleBuffStats, battleStage, questBuffs } from "../domain/battle";
-import { Link } from "react-router-dom";
+import { battleBuffStats, questBuffs, waveTarget } from "../domain/battle";
+import { stagePolicies, wavePolicies } from "../domain/game-policy";
 import { experienceProgress } from "../domain/experience";
 
 export function AdventureScene({
@@ -23,17 +22,11 @@ export function AdventureScene({
   paused: boolean;
   onTogglePause: () => void;
 }) {
-  const [battle, setBattle] = useState<BattleState>(() => ({
-    phase: "spawn",
-    elapsed: 0,
-    encounter: game.battleDefeats,
-    enemy: Math.floor(Math.random() * villains.length),
-  }));
-  const [visible, setVisible] = useState(() => document.visibilityState === "visible");
-  const collectCoin = useGameStore((state) => state.collectCoin);
-  const stopped = paused || !visible;
-  const buffs = battleBuffStats(game.completed);
+  const battle = game.combat;
+  const buffs = battleBuffStats(game);
   const experience = experienceProgress(game.experience);
+  const [selected, setSelected] = useState<QuestId | null>(null);
+  const hud = useRef<HTMLDivElement>(null);
   const [reducedMotion, setReducedMotion] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -44,81 +37,85 @@ export function AdventureScene({
     return () => media.removeEventListener("change", change);
   }, []);
   useEffect(() => {
-    const change = () => setVisible(document.visibilityState === "visible");
-    document.addEventListener("visibilitychange", change);
-    return () => document.removeEventListener("visibilitychange", change);
-  }, []);
-  useEffect(() => {
-    if (stopped) return;
-    const timer = window.setInterval(() => {
-      const nextEnemy = Math.floor(Math.random() * villains.length);
-      setBattle((current) =>
-        advanceBattle(
-          current,
-          80 *
-            (current.phase === "attack"
-              ? buffs.attackSpeed
-              : current.phase === "move"
-                ? buffs.moveSpeed
-                : 1),
-          nextEnemy,
-        ),
-      );
-    }, 80);
-    return () => clearInterval(timer);
-  }, [stopped, buffs.attackSpeed, buffs.moveSpeed]);
-  useEffect(() => {
-    if (battle.phase === "move") collectCoin(battle.encounter);
-  }, [battle.phase, battle.encounter, collectCoin]);
+    if (!selected) return;
+    const outside = (event: PointerEvent) => {
+      if (!hud.current?.contains(event.target as Node)) setSelected(null);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        hud.current?.querySelector<HTMLButtonElement>(`[data-buff="${selected}"]`)?.focus();
+        setSelected(null);
+      }
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [selected]);
   const dino = dinosaurs[game.dinosaur];
   const art = battleDinosaurs[game.dinosaur];
   const skin = getSkin(game.dinosaurStyles[game.dinosaur]);
-  const stageState = battleStage(battle.encounter);
-  const stageIndex = (stageState.world - 1) % stages.length;
-  const stage = stages[stageIndex];
-  const progress = stageState.progress + (battle.phase === "move" ? 1 : 0);
-  const progressRatio = progress / stageState.target;
-  const enemy = villains[battle.enemy];
-  const attack = battle.phase === "attack" && art.attack;
-  const attackTime = battle.phase === "attack" ? battle.elapsed / battleDurations.attack : 0;
-  const approach =
-    battle.phase === "attack" && !reducedMotion
-      ? Math.min(1, attackTime / 0.42) * (attackTime > 0.78 ? (1 - attackTime) / 0.22 : 1)
-      : 0;
+  const stage = stages[battle.stage - 1];
+  const wave = wavePolicies[battle.wave - 1];
+  const target = waveTarget(battle.wave);
+  const attackElapsed = battle.lastAttack ? battle.clock - battle.lastAttack.time : 1000;
+  const attackDuration = Math.min(500, buffs.attackInterval);
+  const attacking = attackElapsed < attackDuration && battle.recovery === 0;
+  const attack = attacking && art.attack;
+  const attackTime = attackElapsed / attackDuration;
+  const approach = attacking && !reducedMotion ? Math.sin(Math.PI * attackTime) : 0;
   const flying = art.movement === "fly";
-  const wingPhase =
-    flying && battle.phase !== "attack" && !reducedMotion
-      ? (battle.elapsed % (battle.phase === "move" ? 560 : 960)) /
-        (battle.phase === "move" ? 560 : 960)
-      : undefined;
-  const offset =
-    battle.encounter * 70 +
-    (battle.phase === "move" ? (battle.elapsed / battleDurations.move) * 70 : 0);
+  const phase = battle.recovery > 0 ? "recover" : attacking ? "attack" : "idle";
+  const values = {
+    medicine: `공격력 ${buffs.ad} → ${Number(buffs.attack.toFixed(1))} · +${Math.round(buffs.adBonus * 100)}%`,
+    meal: `기본 방어력 ${buffs.def} · 받는 피해 −${Math.round(buffs.defBonus * 100)}%`,
+    walk: `CRT ${Math.round(buffs.crt * 100)}% · 치명타 피해 ×2.0 · ${(game.steps?.count ?? 0).toLocaleString()}보`,
+    water: `공격 간격 ${(buffs.attackInterval / 1000).toFixed(2)}초 · AS ${buffs.asBonus >= 0 ? "+" : ""}${Math.round(buffs.asBonus * 100)}%`,
+    sleep: `처치 Gold ×${buffs.gold.toFixed(1)} · ${game.sleepHours !== null ? `${game.sleepHours}시간` : game.completed.includes("sleep") ? "7시간 달성 기록" : "수면 데이터 없음"}`,
+  };
+  const active = {
+    medicine: buffs.adBonus > 0,
+    meal: buffs.defBonus > 0,
+    walk: buffs.crt > 0,
+    water: buffs.asBonus > 0,
+    sleep: buffs.gold > 1,
+  };
+  const selectedBuff = questBuffs.find((buff) => buff.id === selected);
+  const farming =
+    battle.wave === 10 &&
+    (battle.stage === 5 || experience.level < stagePolicies[battle.stage].level);
   return (
     <div
-      className={`adventure pixel-battle ${stopped ? "paused" : ""}`}
+      className={`adventure pixel-battle ${paused ? "paused" : ""}`}
+      data-effect={game.battleEffect}
       data-paused={paused}
-      data-phase={battle.phase}
-      data-encounter={battle.encounter}
-      data-stage={stageState.world}
-      data-substage={stageState.substage}
+      data-phase={phase}
+      data-encounter={game.battleDefeats}
+      data-stage={battle.stage}
+      data-substage={battle.wave}
     >
       <DesignCanvas width={354} height={336}>
         <div
           className="battle-scenery"
           role="img"
           aria-label={`${stage.name} 스테이지 배경`}
-          style={{ backgroundImage: `url(${stage.image})`, backgroundPositionX: `${-offset}px` }}
+          style={{
+            backgroundImage: `url(${stage.image})`,
+            backgroundPositionX: `${-(battle.wave - 1) * 70}px`,
+          }}
         />
         <div className="adventure-title">
           <h2>DAILY ADVENTURE</h2>
           <p>건강한 습관이 더 강한 나를 만들어요!</p>
           <strong className="stage-label">
-            STAGE {stageState.world}-{stageState.substage}
+            STAGE {battle.stage}
+            <span>WAVE {battle.wave} / 10</span>
             <small>{stage.name}</small>
           </strong>
         </div>
-        <div className="battle-hud">
+        <div className="battle-hud" ref={hud}>
           <div className="hp-stats">
             <span className="level">
               Lv.{experience.level} · {dino.name}
@@ -127,13 +124,13 @@ export function AdventureScene({
               className="hp-bar"
               role="meter"
               aria-label="공룡 체력"
-              aria-valuenow={buffs.maxHp}
+              aria-valuenow={Math.ceil(battle.hp)}
               aria-valuemin={0}
               aria-valuemax={buffs.maxHp}
             >
-              <i />
+              <i style={{ width: `${(battle.hp / buffs.maxHp) * 100}%` }} />
               <strong>
-                {buffs.maxHp} / {buffs.maxHp}
+                {Math.ceil(battle.hp)} / {buffs.maxHp}
               </strong>
             </div>
             <div
@@ -153,22 +150,53 @@ export function AdventureScene({
             </div>
           </div>
           <div className="battle-buffs" aria-label="오늘의 퀘스트 버프">
-            {questBuffs.map((buff) => {
-              const active = game.completed.includes(buff.id);
-              return (
-                <Link
-                  key={buff.id}
-                  to={`/quests/${buff.id}`}
-                  data-active={active}
-                  title={`${buff.label}: ${buff.effect} · ${active ? "활성" : "퀘스트 완료 시 활성"}`}
-                  aria-label={`${buff.label} 버프 ${active ? "활성" : "비활성"}: ${buff.effect}`}
-                >
-                  <span>{buff.label}</span>
-                  <b aria-hidden="true">{active ? "+" : "·"}</b>
-                </Link>
-              );
-            })}
+            {questBuffs.map((buff) => (
+              <button
+                key={buff.id}
+                data-buff={buff.id}
+                data-active={active[buff.id]}
+                data-debuff={
+                  (buff.id === "water" && buffs.asBonus < 0) ||
+                  (buff.id === "sleep" && buffs.gold < 1)
+                }
+                aria-label={`${buff.label} 버프 현황`}
+                aria-expanded={selected === buff.id}
+                aria-controls={selected === buff.id ? "battle-buff-detail" : undefined}
+                onClick={() => setSelected(selected === buff.id ? null : buff.id)}
+              >
+                {buff.label}
+              </button>
+            ))}
           </div>
+          {selectedBuff && (
+            <section
+              className="battle-buff-detail"
+              id="battle-buff-detail"
+              aria-label={`${selectedBuff.label} 상세`}
+            >
+              <header>
+                <strong>
+                  {selectedBuff.label} · {selectedBuff.stat}
+                </strong>
+                <button
+                  aria-label="버프 설명 닫기"
+                  onClick={() => {
+                    hud.current
+                      ?.querySelector<HTMLButtonElement>(`[data-buff="${selected}"]`)
+                      ?.focus();
+                    setSelected(null);
+                  }}
+                >
+                  ×
+                </button>
+              </header>
+              <b>{values[selectedBuff.id]}</b>
+              <p>{selectedBuff.effect}</p>
+              <Link to={`/quests/${selectedBuff.id}`}>
+                연계 퀘스트 · {quests.find((q) => q.id === selectedBuff.id)!.title} ›
+              </Link>
+            </section>
+          )}
         </div>
         <button
           className="pause-adventure"
@@ -183,65 +211,101 @@ export function AdventureScene({
           data-dinosaur={game.dinosaur}
           data-skin={skin.id}
           data-movement={art.movement}
-          data-moving={battle.phase === "move"}
+          data-moving={false}
           data-attacking={!!attack}
           style={{
-            left: 52 + approach * 110,
-            ...(flying ? { bottom: 112 - approach * 32, rotate: `${approach * 12}deg` } : {}),
+            left: 35 + approach * 45,
+            ...(flying
+              ? { bottom: 117 - approach * 26, rotate: `${approach * 12}deg` }
+              : { bottom: 90 }),
           }}
         >
           <BattleSprite
             src={attack || (flying ? art.attack! : art.image)}
             frame={
               attack && !reducedMotion
-                ? Math.min(7, Math.floor(battle.elapsed / 120))
+                ? Math.min(7, Math.floor(attackTime * 8))
                 : flying || attack
                   ? 0
                   : undefined
             }
-            wingPhase={wingPhase}
+            wingPhase={
+              flying && !attacking && !reducedMotion ? (battle.clock % 960) / 960 : undefined
+            }
             label={dino.name}
             filter={skin.filter}
           />
         </div>
-        {!["drop", "move"].includes(battle.phase) && (
-          <div
-            className="battle-enemy"
-            key={battle.encounter}
-            data-defeated={battle.phase === "defeat"}
-            data-spawning={battle.phase === "spawn"}
-            data-hit={battle.phase === "attack" && attackTime >= 0.42 && attackTime < 0.78}
-          >
-            <BattleSprite src={enemy.image} label={enemy.name} backdrop />
-            <small>{enemy.name}</small>
-          </div>
-        )}
-        {battle.phase === "defeat" && (
-          <b className="battle-damage" aria-hidden="true">
-            -32
+        {battle.enemies.map((monster) => {
+          const enemy = villains[monster.art];
+          return (
+            <div
+              className="battle-enemy"
+              key={monster.id}
+              data-rank={monster.rank}
+              data-hit={battle.clock - monster.hitAt < 300}
+              style={{ left: 78 + monster.distance * 26, bottom: 90 }}
+            >
+              <BattleSprite src={enemy.image} label={enemy.name} backdrop />
+              <small>
+                {monster.rank !== "normal" && `${monster.rank.toUpperCase()} · `}
+                {enemy.name}
+                <span
+                  className="enemy-hp"
+                  role="meter"
+                  aria-label={`${enemy.name} 체력`}
+                  aria-valuemin={0}
+                  aria-valuemax={monster.maxHp}
+                  aria-valuenow={Math.ceil(monster.hp)}
+                >
+                  <i style={{ width: `${(monster.hp / monster.maxHp) * 100}%` }} />
+                </span>
+              </small>
+            </div>
+          );
+        })}
+        {attacking && (
+          <b className="battle-damage" key={`hit-${battle.lastAttack!.time}`} aria-hidden="true">
+            {battle.lastAttack!.critical && "CRT "}−{Math.round(battle.lastAttack!.damage)}
           </b>
         )}
-        {battle.phase === "drop" && (
-          <div className="battle-coin" aria-label={`몬스터 처치 보상 ${buffs.coinReward}코인`}>
+        {battle.loot && battle.clock - battle.loot.time < 720 && (
+          <div
+            className="battle-coin"
+            key={`loot-${battle.loot.time}`}
+            aria-label={`몬스터 처치 보상 ${battle.loot.gold} Gold`}
+          >
             <PixelIcon name="coin" />
-            <b>+{buffs.coinReward}</b>
+            <b>+{battle.loot.gold} G</b>
+          </div>
+        )}
+        {battle.recovery > 0 && (
+          <div className="battle-recovery" role="status">
+            회복 중 · {Math.ceil(battle.recovery / 1000)}초 후 WAVE 재시작
           </div>
         )}
         <div className="stage-progress">
-          <span>STAGE PROGRESS</span>
+          <span>WAVE PROGRESS</span>
           <b>
-            <AnimatedNumber value={progress} /> / {stageState.target}
+            <AnimatedNumber value={battle.killed} /> / {target}
           </b>
           <div
             className="stage-track risk-track"
             role="progressbar"
             aria-label="스테이지 몬스터 처치"
             aria-valuemin={0}
-            aria-valuemax={stageState.target}
-            aria-valuenow={progress}
+            aria-valuemax={target}
+            aria-valuenow={battle.killed}
           >
-            <i style={{ width: `${progressRatio * 100}%` }} />
+            <i style={{ width: `${(battle.killed / target) * 100}%` }} />
           </div>
+          <small className="wave-caption">
+            {farming
+              ? battle.stage === 5
+                ? "최종 웨이브 반복 파밍"
+                : `다음 STAGE · Lv.${stagePolicies[battle.stage].level} 해제`
+              : `일반 ${wave.count}${wave.extra ? ` + ${wave.extra.toUpperCase()} 1` : ""} · 5초마다 출현`}
+          </small>
         </div>
       </DesignCanvas>
     </div>
