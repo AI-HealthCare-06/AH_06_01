@@ -3,6 +3,13 @@ export type SpriteFrame = readonly [x: number, y: number, width: number, height:
 // These sheets are hand laid out, not an equal-width grid. Keep the whole pose and
 // a shared scale/baseline so crouches, extended horns and effects do not get clipped.
 export const attackFrames: Record<string, readonly SpriteFrame[]> = {
+  // Section 10 walking sheet: four authored wing poses, read row by row.
+  [art("446-578")]: [
+    [114, 53, 551, 297],
+    [728, 53, 408, 296],
+    [166, 419, 477, 292],
+    [682, 419, 511, 292],
+  ],
   [art("434-578")]: [
     [15, 47, 308, 181],
     [350, 65, 274, 171],
@@ -69,14 +76,14 @@ export const battleDinosaurs = [
   { image: art("276-702"), attack: art("288-700"), movement: "trot" },
   { image: art("276-712"), attack: art("308-697"), movement: "sprint" },
   { image: art("276-705"), attack: null, movement: "waddle" },
-  { image: art("276-709"), attack: art("434-578"), movement: "fly" },
+  { image: art("276-709"), attack: art("434-578"), walk: art("446-578"), movement: "fly" },
   { image: art("276-715"), attack: art("295-697"), movement: "stride" },
 ];
 export const villains = [
-  { name: "다크 콜라", image: art("300-700") },
-  { name: "하드 캔디", image: art("300-705") },
-  { name: "스모키 마시멜로", image: art("300-710") },
-  { name: "로튼 버거", image: art("300-715") },
-  { name: "아크메이지 팝", image: art("313-694") },
-  { name: "닥터 파이어볼", image: art("313-699") },
+  { name: "다크 콜라", image: art("300-700"), hit: art("464-581") },
+  { name: "하드 캔디", image: art("300-705"), hit: art("464-586") },
+  { name: "스모키 마시멜로", image: art("300-710"), hit: art("464-591") },
+  { name: "로튼 버거", image: art("300-715"), hit: art("464-596") },
+  { name: "아크메이지 팝", image: art("313-694"), hit: art("464-601") },
+  { name: "닥터 파이어볼", image: art("313-699"), hit: art("464-606") },
 ];

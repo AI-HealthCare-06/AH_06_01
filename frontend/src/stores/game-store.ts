@@ -50,6 +50,7 @@ type GameStore = {
 };
 
 const loadedGame = loadGame();
+save(loadedGame);
 let lastSaved = 0;
 export const useGameStore = create<GameStore>((set) => ({
   game: loadedGame,

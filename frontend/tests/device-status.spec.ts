@@ -86,7 +86,7 @@ for (const mode of ["missing", "blocked"]) {
       "aria-label",
       "네트워크 연결됨 (브라우저 기준)",
     );
-    await page.getByRole("link", { name: "Quest", exact: true }).click();
+    await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
     await expect(page.locator(".quest-list")).toBeVisible();
     await expect(page.locator(".battery-percent")).toHaveText("—");
     expect(errors).toEqual([]);

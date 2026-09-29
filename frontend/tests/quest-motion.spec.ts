@@ -65,7 +65,7 @@ test("numbers count up on tab entry and animate new rewards without changing the
   await page.clock.runFor(800);
   await expect(visual).toHaveAttribute("data-value", "1,280");
   const after = await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!));
-  expect(after.coins).toBe(JSON.parse(before!).coins);
+  expect(after.gold).toBe(JSON.parse(before!).gold);
   expect(after.experience).toBe(JSON.parse(before!).experience);
   await page.locator(".daily-bonus").click();
   await expect(page.locator(".wallet-balance > strong")).toHaveText("1,290");
@@ -84,7 +84,7 @@ test("charts and progress bars replay when returning to their tab", async ({ pag
       Reflect.set(window, "previousRadar", element);
       Reflect.set(window, "previousRadarAnimation", element.getAnimations()[0]);
     });
-  await page.getByRole("link", { name: "Quest", exact: true }).click();
+  await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
   await page
     .locator(".quest-row-progress .metric-fill")
     .first()
@@ -107,7 +107,7 @@ test("charts and progress bars replay when returning to their tab", async ({ pag
         );
       }),
   ).toBe(true);
-  await page.getByRole("link", { name: "Quest", exact: true }).click();
+  await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
   expect(
     await page
       .locator(".quest-row-progress .metric-fill")

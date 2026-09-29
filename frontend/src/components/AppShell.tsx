@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useRef, type ReactNode } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { PaperTexture } from "../design/PaperTexture";
 import { useNotice } from "./NoticeProvider";
 import { useDevicePreview } from "./useDevicePreview";
@@ -10,24 +10,58 @@ import { useGameStore } from "../stores/game-store";
 import { ProfileAvatar } from "./ProfileAvatar";
 import { WeatherGreeting } from "./WeatherGreeting";
 
-export type TabName = "home" | "quests" | "camera" | "dashboard" | "shop";
+export type TabName = "home" | "quests" | "camera" | "dashboard" | "shop" | "character";
 const destinations = [
+  { path: "/shop", label: "Shop", key: "shop" },
+  { path: "/character", label: "Character", key: "character" },
   { path: "/home", label: "Home", key: "home" },
-  { path: "/quests", label: "Quest", key: "quests" },
   { path: "/camera", label: "Camera", key: "camera" },
   { path: "/dashboard", label: "Dashboard", key: "dashboard" },
-  { path: "/shop", label: "Shop", key: "shop" },
 ] as const;
 
 export function AppShell({ active, children }: { active: TabName; children: ReactNode }) {
   const game = useGameStore((state) => state.game);
   const notice = useNotice();
   const navigate = useNavigate();
+  const location = useLocation();
+  const swipe = useRef<{ x: number; y: number; id: number } | null>(null);
   const devicePreview = useDevicePreview();
   return (
     <div
       className={`mobile-screen main-screen ${active}-screen`}
       data-device-preview={devicePreview}
+      onTouchStart={(event) => {
+        swipe.current = null;
+        if (event.touches.length !== 1 || document.querySelector("dialog[open]")) return;
+        const target = event.target as HTMLElement;
+        if (target.closest("input, textarea, select, [role='slider'], [data-no-swipe]")) return;
+        const touch = event.touches[0];
+        if (touch.clientX < 20 || touch.clientX > window.innerWidth - 20) return;
+        swipe.current = { x: touch.clientX, y: touch.clientY, id: touch.identifier };
+      }}
+      onTouchMove={(event) => {
+        const start = swipe.current;
+        if (!start) return;
+        const touch = Array.from(event.touches).find((item) => item.identifier === start.id);
+        if (event.touches.length !== 1 || !touch || Math.abs(touch.clientY - start.y) > 40)
+          swipe.current = null;
+      }}
+      onTouchCancel={() => {
+        swipe.current = null;
+      }}
+      onTouchEnd={(event) => {
+        const start = swipe.current;
+        swipe.current = null;
+        if (!start) return;
+        const touch = Array.from(event.changedTouches).find((item) => item.identifier === start.id);
+        if (!touch) return;
+        const dx = touch.clientX - start.x,
+          dy = touch.clientY - start.y;
+        const current = destinations.findIndex((tab) => tab.path === location.pathname);
+        if (current < 0 || Math.abs(dx) < 65 || Math.abs(dx) < Math.abs(dy) * 1.7) return;
+        const next = destinations[current + (dx < 0 ? 1 : -1)];
+        if (next) navigate(next.path);
+      }}
     >
       <PaperTexture />
       {devicePreview && <StatusBar />}
@@ -50,7 +84,7 @@ export function AppShell({ active, children }: { active: TabName; children: Reac
           <PixelIcon name="menu" />
         </Link>
       </header>
-      {active !== "shop" && active !== "camera" && (
+      {active !== "shop" && active !== "camera" && active !== "character" && (
         <div className="weekly-calendar" aria-label="주간 달력">
           {calendarWeek(game.date).map((day) => (
             <button

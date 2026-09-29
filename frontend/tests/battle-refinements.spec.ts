@@ -72,6 +72,7 @@ test("pending quests and compact buff explanations reflect the actual linked sta
     "SPD",
     "GOLD",
   ]);
+  await page.getByRole("button", { name: "버프 목록 펼치기" }).click();
   const button = page.getByRole("button", { name: "DEF 버프 현황" });
   await button.click();
   const detail = page.getByRole("region", { name: "DEF 상세" });
@@ -99,16 +100,17 @@ test("Pteranodon flaps in place, attacks down-right and freezes when paused", as
   });
   const dino = page.locator(".battle-dinosaur"),
     canvas = dino.locator("canvas");
-  await expect(canvas).toHaveAttribute("data-src", "/assets/battle/434-578.png");
-  const initial = await canvas.getAttribute("data-wing-phase");
+  await expect(canvas).toHaveAttribute("data-src", "/assets/battle/446-578.png");
+  const initial = await canvas.getAttribute("data-frame");
   await page.clock.runFor(250);
-  await expect(canvas).not.toHaveAttribute("data-wing-phase", initial!);
+  await expect(canvas).not.toHaveAttribute("data-frame", initial!);
   const idle = await dino.evaluate((e) => ({
     left: parseFloat(getComputedStyle(e).left),
     bottom: parseFloat(getComputedStyle(e).bottom),
   }));
   await page.clock.runFor(3350);
   await expect(dino).toHaveAttribute("data-attacking", "true");
+  await expect(canvas).toHaveAttribute("data-src", "/assets/battle/434-578.png");
   await expect(canvas).toHaveAttribute("data-frame", "4");
   const attack = await dino.evaluate((e) => ({
     left: parseFloat(getComputedStyle(e).left),
@@ -135,17 +137,28 @@ test("demo wallet limits conversion, preserves balances and purchases only cosme
     }));
   });
   const wallet = page.getByRole("region", { name: "게임 재화 지갑" });
-  await wallet.locator("summary").click();
+  await page.getByRole("button", { name: "전환 ⇄" }).click();
   await wallet.getByRole("spinbutton", { name: "전환 RP" }).fill("151");
   await expect(wallet.getByRole("button", { name: "데모 RP 전환" })).toBeDisabled();
-  await wallet.getByRole("spinbutton", { name: "전환 RP" }).fill("150");
+  await wallet.getByRole("button", { name: "최대", exact: true }).click();
+  await expect(wallet.getByRole("spinbutton")).toHaveValue("150");
+  await wallet.getByRole("button", { name: "최소", exact: true }).click();
+  await expect(wallet.getByRole("spinbutton")).toHaveValue("1");
+  await wallet.getByRole("button", { name: "최대", exact: true }).click();
   await wallet.getByRole("button", { name: "데모 RP 전환" }).click();
   await expect(wallet).toContainText("오늘 0");
-  await wallet.getByRole("button", { name: /에메랄드 타격/ }).click();
-  await expect(wallet.locator("dd")).toHaveText(["0", "1,280", "4,000", "150"]);
+  await expect(wallet.getByRole("button", { name: "최대", exact: true })).toBeDisabled();
+  await expect(wallet.locator("dd")).toHaveText(["5,000", "150"]);
+  await expect(wallet).not.toContainText("EXP");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "전환 ⇄" })).toBeFocused();
+  await page.getByRole("link", { name: "Character", exact: true }).click();
+  await page.getByRole("button", { name: /에메랄드 타격/ }).click();
   await page.reload();
-  await wallet.locator("summary").click();
-  await expect(wallet.locator("dd")).toHaveText(["0", "1,280", "4,000", "150"]);
+  await page.getByRole("link", { name: "Shop", exact: true }).click();
+  await page.getByRole("button", { name: "전환 ⇄" }).click();
+  await expect(wallet.locator("dd")).toHaveText(["4,000", "150"]);
+  await page.getByRole("button", { name: "닫기", exact: true }).click();
   await page.getByRole("link", { name: "Home", exact: true }).click();
   await expect(page.locator(".adventure")).toHaveAttribute("data-effect", "emerald");
 });

@@ -33,10 +33,8 @@ describe("device dates and quest progression", () => {
     expect(questProgress(half, quests[2])).toBe(0.5);
     const done = syncDeviceSteps(half, { ...snapshot, count: 6000, syncedAt: 200 }, day);
     expect(done.completed).toEqual(["walk"]);
-    expect(done.coins).toBe(1280);
-    expect(syncDeviceSteps(done, { ...snapshot, count: 6800, syncedAt: 300 }, day).coins).toBe(
-      1280,
-    );
+    expect(done.gold).toBe(1280);
+    expect(syncDeviceSteps(done, { ...snapshot, count: 6800, syncedAt: 300 }, day).gold).toBe(1280);
     expect(syncDeviceSteps(done, snapshot, day)).toBe(done);
     expect(syncDeviceSteps(done, { ...snapshot, date: "2026-09-28" }, day)).toBe(done);
     expect(syncDeviceSteps(done, { ...snapshot, count: -1 }, day)).toBe(done);

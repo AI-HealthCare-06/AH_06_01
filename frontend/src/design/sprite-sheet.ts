@@ -7,6 +7,7 @@ export function prepareAttackFrames(
   image: HTMLImageElement,
   frames: readonly SpriteFrame[],
   darkBackdrop = false,
+  isolateBodies = true,
 ) {
   const canvas = document.createElement("canvas");
   canvas.width = image.naturalWidth;
@@ -45,6 +46,14 @@ export function prepareAttackFrames(
     }
     context.putImageData(pixels, 0, 0);
   }
+  if (!isolateBodies)
+    return frames.map(([x, y, width, height]) => {
+      const frame = document.createElement("canvas");
+      frame.width = width;
+      frame.height = height;
+      frame.getContext("2d")!.drawImage(canvas, x, y, width, height, 0, 0, width, height);
+      return frame;
+    });
   const labels = new Int32Array(width * height);
   const queue = new Int32Array(width * height);
   const components: { label: number; size: number; x: number }[] = [];

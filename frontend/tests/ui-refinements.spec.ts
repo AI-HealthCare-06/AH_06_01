@@ -62,7 +62,7 @@ test("quest rewards stay centered at the row end on narrow screens", async ({ pa
   }
 });
 
-test("wallet contains its bonus action and the larger catalog scrolls independently", async ({
+test("wallet contains its bonus action and catalog continues to the bottom navigation", async ({
   page,
 }) => {
   for (const width of [320, 390]) {
@@ -75,21 +75,12 @@ test("wallet contains its bonus action and the larger catalog scrolls independen
     expect(bonus.y).toBeGreaterThan(wallet.y + wallet.height / 2);
     expect(wallet.x + wallet.width - bonus.x - bonus.width).toBeGreaterThanOrEqual(12);
     expect(wallet.y + wallet.height - bonus.y - bonus.height).toBeGreaterThanOrEqual(12);
-    const region = page.getByRole("region", { name: "상품 목록" });
-    expect(await region.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(
-      true,
-    );
-    await region.focus();
-    const tabsBefore = await page.locator(".shop-tabs").boundingBox();
-    await region.press("End");
-    await expect
-      .poll(async () =>
-        region.evaluate(
-          (element) => element.scrollHeight - element.clientHeight - element.scrollTop,
-        ),
-      )
-      .toBeLessThan(2);
-    expect(await page.locator(".shop-tabs").boundingBox()).toEqual(tabsBefore);
+    const catalog = (await page.locator(".shop-catalog").boundingBox())!;
+    const lastProduct = (await page.locator(".product-3").boundingBox())!;
+    const navigation = (await page.locator(".bottom-navigation").boundingBox())!;
+    expect(navigation.y - catalog.y - catalog.height).toBeLessThan(24);
+    expect(catalog.y + catalog.height - lastProduct.y - lastProduct.height).toBeLessThan(24);
+    await page.locator(".product-3").scrollIntoViewIfNeeded();
     await expect(page.locator(".product-3 > strong")).toBeInViewport();
     await expect(page.getByRole("link", { name: "Home", exact: true })).toBeVisible();
   }

@@ -142,8 +142,8 @@ export function RewardPage() {
         <DinosaurArt className="reward-dino" pose="reward" alt={dino.name} />
       </div>
       <strong className="reward-coins">+{reward?.experience ?? 0} EXP</strong>
-      {!!reward?.coins && (
-        <p className="level-up-reward">LEVEL UP · +{reward.coins.toLocaleString()} COIN</p>
+      {!!reward?.gold && (
+        <p className="level-up-reward">LEVEL UP · +{reward.gold.toLocaleString()} GOLD</p>
       )}
       <div className="cream-card reward-stats">
         <h2>{dino.name}가 더 강해졌어요!</h2>
@@ -202,7 +202,7 @@ export function BuffPage() {
           </Link>
         ))}
       </div>
-      <p className="buff-note">상태는 매일 초기화 · 능력치와 코인은 누적</p>
+      <p className="buff-note">상태는 매일 초기화 · 능력치와 GOLD는 누적</p>
       <Link className="buff-continue" to="/home">
         오늘의 모험 계속하기
       </Link>
@@ -244,7 +244,7 @@ export function MyPage() {
             {dinosaurs[game.dinosaur].name} · Lv.{experienceProgress(game.experience).level}
           </p>
         </div>
-        <strong>{game.coins.toLocaleString("en-US")} COIN</strong>
+        <strong>{game.gold.toLocaleString("en-US")} GOLD</strong>
       </section>
       <h2 className="account-heading">계정 및 건강 정보</h2>
       <div className="account-menu">
@@ -319,7 +319,7 @@ export function MyPage() {
       {dialog && (
         <InfoDialog title={dialog} onClose={() => setDialog(null)} returnFocusTo={dialogTrigger}>
           {dialog === "개인정보 및 이용약관" ? (
-            "현재는 UI 개발용 데모입니다. 건강 프로필 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 이 기기에는 프로필 등록 일자, 공룡과 꾸미기 선택, 퀘스트 완료·코인, 연결한 오늘의 걸음 수와 동기화 시각이 저장됩니다. 사진은 촬영 화면에만 유지되며 서버에 전송하지 않습니다. 날씨에 위치 사용을 허용하면 반올림한 좌표를 Open-Meteo에 보내며 좌표는 저장하지 않습니다. 로그아웃하면 등록 일자·걸음 수·퀘스트 기록이 초기화됩니다."
+            "현재는 UI 개발용 데모입니다. 건강 프로필 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 이 기기에는 프로필 등록 일자, 공룡과 꾸미기 선택, 퀘스트 완료·GOLD, 연결한 오늘의 걸음 수와 동기화 시각이 저장됩니다. 사진은 촬영 화면에만 유지되며 서버에 전송하지 않습니다. 날씨에 위치 사용을 허용하면 반올림한 좌표를 Open-Meteo에 보내며 좌표는 저장하지 않습니다. 로그아웃하면 등록 일자·걸음 수·퀘스트 기록이 초기화됩니다."
           ) : dialog === "알림 설정" ? (
             "시스템 알림과 복약 리마인드는 아직 연결되지 않았어요."
           ) : dialog === "웨어러블 장비" ? (

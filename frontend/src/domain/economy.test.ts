@@ -2,13 +2,31 @@ import { describe, expect, it } from "vitest";
 import { directRewardGold, rpAllowance } from "./economy";
 import { convertDemoRp, initialGame, purchaseEffect, restoreGame } from "./game";
 
-describe("separate currencies and reward limits", () => {
+describe("Gold currency and reward limits", () => {
+  it("merges legacy Coin and Gold once, including rewards, without refunding later spending", () => {
+    const legacy = {
+      ...initialGame(),
+      version: 1,
+      coins: 6610,
+      gold: 10848,
+      lastReward: { questId: "meal", coins: 1000, experience: 30 },
+    };
+    const migrated = restoreGame(legacy);
+    expect(migrated).toMatchObject({ version: 2, gold: 17458, lastReward: { gold: 1000 } });
+    expect(migrated).not.toHaveProperty("coins");
+    expect(migrated.lastReward).not.toHaveProperty("coins");
+    const spent = purchaseEffect(convertDemoRp(migrated, 100), "emerald");
+    expect(spent.gold).toBe(6458);
+    expect(restoreGame(JSON.parse(JSON.stringify(spent)))).toEqual(spent);
+    expect(restoreGame({ ...spent, coins: 6610 }).gold).toBe(6458);
+    expect(restoreGame({ ...legacy, gold: undefined }).gold).toBe(6610);
+  });
   it("atomically exchanges Gold at 100:1, caps by all periods, and persists the ledger", () => {
     const date = "2026-09-29";
     const game = { ...initialGame(date), gold: 100000 };
     expect(convertDemoRp(game, 151, date)).toBe(game);
     const changed = convertDemoRp(game, 150, date);
-    expect(changed).toMatchObject({ gold: 85000, rp: 150, coins: 1280, experience: 0 });
+    expect(changed).toMatchObject({ gold: 85000, rp: 150, experience: 0 });
     expect(convertDemoRp(changed, 1, date)).toBe(changed);
     expect(restoreGame(JSON.parse(JSON.stringify(changed))).rpLedger).toEqual([
       { date, amount: 150 },
@@ -51,12 +69,11 @@ describe("separate currencies and reward limits", () => {
     }));
     expect(directRewardGold({ ...water, id: "w5", at: 5 * 7_200_000 }, accepted)).toBe(0);
   });
-  it("charges an appearance once without increasing combat stats or spending Coin/RP", () => {
+  it("charges an appearance once without increasing combat stats or spending RP", () => {
     const game = { ...initialGame(), gold: 1100 };
     const purchased = purchaseEffect(game, "emerald");
     expect(purchased).toMatchObject({
       gold: 100,
-      coins: game.coins,
       rp: 0,
       battleEffect: "emerald",
     });

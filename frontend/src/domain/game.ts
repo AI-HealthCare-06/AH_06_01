@@ -9,7 +9,7 @@ import {
   initialCombat,
   migrateCombat,
 } from "./battle";
-import { experienceProgress, levelUpCoins, questExperience } from "./experience";
+import { experienceProgress, levelUpGold, questExperience } from "./experience";
 import { effectCatalog, rpAllowance, rpPolicy } from "./economy";
 import type { EffectId } from "./economy";
 
@@ -82,47 +82,57 @@ export const quests: Quest[] = [
   },
 ];
 
-export const gameSchema = z.object({
-  version: z.literal(1),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  completed: z.array(z.enum(questIds)),
-  coins: z.number().int().nonnegative(),
-  experience: z.number().int().nonnegative().optional(),
-  gold: z.number().int().nonnegative().default(0),
-  rp: z.number().int().nonnegative().default(0),
-  rpLedger: z
-    .array(z.object({ date: z.string(), amount: z.number().int().positive() }))
-    .default([]),
-  activity: z.partialRecord(z.enum(questIds), z.number().int().nonnegative()).default({}),
-  firstQuestExp: z.partialRecord(z.enum(questIds), z.number().int().nonnegative()).default({}),
-  lastWaterAt: z.number().nullable().default(null),
-  sleepHours: z.number().min(0).max(24).nullable().default(null),
-  hydrationRatio: z.number().nonnegative().nullable().default(null),
-  combat: combatSchema.optional(),
-  battleUpdatedAt: z.number().nonnegative().default(0),
-  battlePaused: z.boolean().default(false),
-  ownedEffects: z.array(z.enum(["original", "emerald", "violet"])).default(["original"]),
-  battleEffect: z.enum(["original", "emerald", "violet"]).default("original"),
-  bonusClaimed: z.boolean(),
-  allDoneBonusClaimed: z.boolean(),
-  sampleDay: z.boolean().default(true),
-  steps: stepSnapshotSchema.nullable().default(null),
-  completedDates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).default([]),
-  battleDefeats: z.number().int().nonnegative().default(0),
-  dinosaur: z.number().int().min(0).max(5),
-  dinosaurStyles: z
-    .array(z.enum(skinIds))
-    .length(6)
-    .default(defaultDinosaurStyles)
-    .catch(defaultDinosaurStyles),
-  lastReward: z
-    .object({
-      questId: z.enum(questIds),
-      coins: z.number().int().nonnegative(),
-      experience: z.number().int().nonnegative().default(0),
-    })
-    .nullable(),
-});
+export const gameSchema = z
+  .object({
+    version: z.union([z.literal(1), z.literal(2)]),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    completed: z.array(z.enum(questIds)),
+    coins: z.number().int().nonnegative().optional(),
+    experience: z.number().int().nonnegative().optional(),
+    gold: z.number().int().nonnegative().default(0),
+    rp: z.number().int().nonnegative().default(0),
+    rpLedger: z
+      .array(z.object({ date: z.string(), amount: z.number().int().positive() }))
+      .default([]),
+    activity: z.partialRecord(z.enum(questIds), z.number().int().nonnegative()).default({}),
+    firstQuestExp: z.partialRecord(z.enum(questIds), z.number().int().nonnegative()).default({}),
+    lastWaterAt: z.number().nullable().default(null),
+    sleepHours: z.number().min(0).max(24).nullable().default(null),
+    hydrationRatio: z.number().nonnegative().nullable().default(null),
+    combat: combatSchema.optional(),
+    battleUpdatedAt: z.number().nonnegative().default(0),
+    battlePaused: z.boolean().default(false),
+    ownedEffects: z.array(z.enum(["original", "emerald", "violet"])).default(["original"]),
+    battleEffect: z.enum(["original", "emerald", "violet"]).default("original"),
+    bonusClaimed: z.boolean(),
+    allDoneBonusClaimed: z.boolean(),
+    sampleDay: z.boolean().default(true),
+    steps: stepSnapshotSchema.nullable().default(null),
+    completedDates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).default([]),
+    battleDefeats: z.number().int().nonnegative().default(0),
+    dinosaur: z.number().int().min(0).max(5),
+    dinosaurStyles: z
+      .array(z.enum(skinIds))
+      .length(6)
+      .default(defaultDinosaurStyles)
+      .catch(defaultDinosaurStyles),
+    lastReward: z
+      .object({
+        questId: z.enum(questIds),
+        coins: z.number().int().nonnegative().optional(),
+        gold: z.number().int().nonnegative().default(0),
+        experience: z.number().int().nonnegative().default(0),
+      })
+      .transform(({ coins, ...reward }) => ({ ...reward, gold: reward.gold + (coins ?? 0) }))
+      .nullable(),
+  })
+  .transform(({ coins, ...state }) => ({
+    ...state,
+    version: 2 as const,
+    // Version 1 kept two balances. Canonical saves omit coins, so repeated loads
+    // cannot credit the legacy balance twice (even after spending the Gold).
+    gold: state.gold + (state.version === 1 ? (coins ?? 0) : 0),
+  }));
 export type GameState = Omit<z.infer<typeof gameSchema>, "experience" | "combat"> & {
   experience: number;
   combat: z.infer<typeof combatSchema>;
@@ -139,12 +149,11 @@ export function seoulDate(date = new Date()): string {
 
 export function initialGame(date = localDate()): GameState {
   return {
-    version: 1,
+    version: 2,
     date,
     completed: [],
-    coins: 1280,
     experience: 0,
-    gold: 0,
+    gold: 1280,
     rp: 0,
     rpLedger: [],
     activity: {},
@@ -204,11 +213,11 @@ export function completeQuest(
   const allDone = completed.length === quests.length;
   const gained = questExperience(quest.experience, current.experience);
   const experience = current.experience + gained;
-  const coins = levelUpCoins(current.experience, experience);
+  const gold = levelUpGold(current.experience, experience);
   return {
     ...current,
     completed,
-    coins: current.coins + coins,
+    gold: current.gold + gold,
     experience,
     activity: { ...current.activity, [id]: 1 },
     firstQuestExp: { ...current.firstQuestExp, [id]: gained },
@@ -218,7 +227,7 @@ export function completeQuest(
       allDone && !current.sampleDay
         ? [...new Set([...current.completedDates, date])].slice(-365)
         : current.completedDates,
-    lastReward: { questId: id, coins, experience: gained },
+    lastReward: { questId: id, gold, experience: gained },
   };
 }
 
@@ -226,7 +235,7 @@ export function claimDailyBonus(state: GameState, date = localDate()): GameState
   const current = rollDay(state, date);
   return current.bonusClaimed
     ? current
-    : { ...current, coins: current.coins + 10, bonusClaimed: true };
+    : { ...current, gold: current.gold + 10, bonusClaimed: true };
 }
 
 export function applyDinosaurStyle(state: GameState, index: number, skin: SkinId): GameState {
@@ -385,13 +394,13 @@ export function repeatDemoQuest(state: GameState, id: QuestId, now = Date.now())
     questExperience(quests.find((q) => q.id === id)!.experience, current.experience);
   const gained = Math.floor(first * 0.1);
   const experience = current.experience + gained;
-  const coins = levelUpCoins(current.experience, experience);
+  const gold = levelUpGold(current.experience, experience);
   return {
     ...current,
     experience,
-    coins: current.coins + coins,
+    gold: current.gold + gold,
     activity: { ...current.activity, [id]: count + 1 },
     lastWaterAt: id === "water" ? now : current.lastWaterAt,
-    lastReward: { questId: id, coins, experience: gained },
+    lastReward: { questId: id, gold, experience: gained },
   };
 }

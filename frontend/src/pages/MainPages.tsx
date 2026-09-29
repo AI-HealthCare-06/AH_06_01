@@ -21,7 +21,7 @@ import { HealthTrend } from "../components/HealthTrend";
 import { healthPeriods } from "../services/health-history";
 import type { HealthPeriod } from "../services/health-history";
 import { useProfileStore } from "../stores/profile-store";
-import { GameWallet } from "../components/GameWallet";
+import { GameWallet, GoldEffects } from "../components/GameWallet";
 import { questExperience } from "../domain/experience";
 
 export function HomePage() {
@@ -128,7 +128,7 @@ export function QuestsPage() {
               className="quest-summary-reward"
               onClick={() =>
                 notice(
-                  "레벨업 시 도달 레벨 × 500 Coin을 받아요. 퀘스트 EXP는 레벨 구간에 따라 증가해요.",
+                  "레벨업 시 도달 레벨 × 500 GOLD를 받아요. 퀘스트 EXP는 레벨 구간에 따라 증가해요.",
                 )
               }
             >
@@ -366,33 +366,37 @@ export function ShopPage() {
   const notice = useNotice();
   const location = useLocation();
   const navigate = useNavigate();
-  const category =
-    location.pathname === "/shop/customize"
-      ? 2
-      : new URLSearchParams(location.search).get("category") === "rewards"
-        ? 1
-        : 0;
+  const [walletTrigger, setWalletTrigger] = useState<HTMLElement | null>(null);
+  const category = new URLSearchParams(location.search).get("category") === "rewards" ? 1 : 0;
   return (
     <AppShell active="shop">
       <PageHeading title="REX SHOP" subtitle={`건강 퀘스트 보상으로 ${dino.name} 꾸미기`} />
-      <section className="shop-wallet" aria-label="헬스 코인 지갑">
-        <h3>HEALTH COINS</h3>
-        <p>레벨업으로 Coin을 모아요 · 현실 상품에는 RP 사용</p>
+      <section className="shop-wallet" aria-label="GOLD 지갑">
+        <div className="wallet-heading">
+          <h3>GOLD</h3>
+          <button
+            className="wallet-convert"
+            onClick={(event) => setWalletTrigger(event.currentTarget)}
+          >
+            전환 ⇄
+          </button>
+        </div>
+        <p>전투와 레벨업으로 GOLD를 모아요 · 현실 상품에는 RP 사용</p>
         <div className="wallet-balance">
           <PixelIcon name="coin" />
           <strong>
-            <AnimatedNumber value={game.coins} separator />
+            <AnimatedNumber value={game.gold} separator />
           </strong>
         </div>
         <button
           className="daily-bonus"
           disabled={game.bonusClaimed}
           aria-label={
-            game.bonusClaimed ? "오늘의 무료 코인 받기 완료" : "오늘의 무료 코인 10개 받기"
+            game.bonusClaimed ? "오늘의 무료 GOLD 받기 완료" : "오늘의 무료 GOLD 10개 받기"
           }
           onClick={() => {
             claimBonus();
-            notice("오늘의 무료 코인 10개를 받았어요!");
+            notice("오늘의 무료 GOLD 10개를 받았어요!");
           }}
         >
           <span className="bonus-diamond" aria-hidden="true">
@@ -400,12 +404,14 @@ export function ShopPage() {
           </span>
           <span className="daily-bonus-copy">
             <strong>DAILY FREE</strong>
-            <small>+10 COIN</small>
+            <small>+10 GOLD</small>
           </span>
           <b>{game.bonusClaimed ? "완료" : "받기"}</b>
         </button>
       </section>
-      <GameWallet />
+      {walletTrigger && (
+        <GameWallet onClose={() => setWalletTrigger(null)} returnFocusTo={walletTrigger} />
+      )}
       <section className="shop-catalog">
         <div className="shop-tabs" aria-label="상품 분류">
           {["추천", "RRR", "꾸미기"].map((label, i) => (
@@ -413,7 +419,7 @@ export function ShopPage() {
               key={label}
               className={`shop-tab shop-tab-${i}`}
               aria-pressed={category === i}
-              onClick={() => navigate(["/shop", "/shop?category=rewards", "/shop/customize"][i])}
+              onClick={() => navigate(["/shop", "/shop?category=rewards", "/character"][i])}
             >
               <span className="shop-tab-content">
                 <img
@@ -438,38 +444,50 @@ export function ShopPage() {
           key={category}
           className="product-scroll"
           role="region"
-          aria-label={category === 2 ? "꾸미기 목록" : "상품 목록"}
+          aria-label="상품 목록"
           tabIndex={0}
         >
-          {category === 2 ? (
-            <DinosaurCustomization />
-          ) : (
-            <div className="product-grid">
-              {products.map((p, i) => (
-                <button
-                  key={p.name}
-                  className={`product product-${i} ${p.wide ? "wide" : ""}`}
-                  onClick={() =>
-                    notice(
-                      `${p.name} · ${p.price} RP — 실제 상품 교환은 서버 연동 후 제공됩니다. RP는 차감되지 않아요.`,
-                    )
-                  }
-                >
-                  <span className="product-photo">
-                    <img src={p.image} alt={p.name} />
-                  </span>
-                  <span className="rrr-badge">RRR</span>
-                  <span className="product-price">{p.price} RP</span>
-                  {p.badge && (
-                    <span className={`product-badge ${i === 0 ? "sale" : ""}`}>{p.badge}</span>
-                  )}
-                  <strong>{p.name}</strong>
-                  <small>{p.sub}</small>
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="product-grid">
+            {products.map((p, i) => (
+              <button
+                key={p.name}
+                className={`product product-${i} ${p.wide ? "wide" : ""}`}
+                onClick={() =>
+                  notice(
+                    `${p.name} · ${p.price} RP — 실제 상품 교환은 서버 연동 후 제공됩니다. RP는 차감되지 않아요.`,
+                  )
+                }
+              >
+                <span className="product-photo">
+                  <img src={p.image} alt={p.name} />
+                </span>
+                <span className="rrr-badge">RRR</span>
+                <span className="product-price">{p.price} RP</span>
+                {p.badge && (
+                  <span className={`product-badge ${i === 0 ? "sale" : ""}`}>{p.badge}</span>
+                )}
+                <strong>{p.name}</strong>
+                <small>{p.sub}</small>
+              </button>
+            ))}
+          </div>
         </div>
+      </section>
+    </AppShell>
+  );
+}
+
+export function CharacterPage() {
+  const game = useGameStore((state) => state.game);
+  return (
+    <AppShell active="character">
+      <PageHeading
+        title="MY CHARACTER"
+        subtitle={`${dinosaurs[game.dinosaur].name} · GOLD ${game.gold.toLocaleString()} · 나만의 스타일`}
+      />
+      <section className="character-customization cream-card" aria-label="꾸미기 목록" tabIndex={0}>
+        <DinosaurCustomization />
+        <GoldEffects />
       </section>
     </AppShell>
   );

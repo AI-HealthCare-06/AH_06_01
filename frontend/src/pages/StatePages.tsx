@@ -90,7 +90,7 @@ export function WitheredPage() {
         <strong>힘이 빠져 축 처졌어요…</strong>
       </div>
       <div className="cream-card withered-message">
-        <h2>오늘은 코인 보너스가 없어요.</h2>
+        <h2>오늘은 GOLD 보너스가 없어요.</h2>
         <p>
           하지만 퀘스트 하나만 완료하면
           <br />

@@ -37,12 +37,14 @@ for (const [index, name] of names.entries()) {
   });
 }
 
-test("customization previews without spending coins and remembers each character's applied style", async ({
+test("customization previews without spending Gold and remembers each character's applied style", async ({
   page,
 }) => {
+  await page.clock.install();
+  await page.clock.pauseAt(new Date());
   await page.goto("/shop");
-  await page.getByRole("button", { name: "꾸미기", exact: true }).click();
-  await expect(page).toHaveURL(/\/shop\/customize$/);
+  await page.getByRole("link", { name: "Character", exact: true }).click();
+  await expect(page).toHaveURL(/\/character$/);
   await expect(page.locator(".character-collection")).toHaveCount(6);
   const before = await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"));
   const preview = page.getByRole("button", { name: "스테고 바다 탐험가 스타일 미리보기" });
@@ -56,11 +58,11 @@ test("customization previews without spending coins and remembers each character
   await page.getByRole("button", { name: "이 스타일로 함께하기" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator(".page-heading p")).toContainText("스테고");
-  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,280");
+  await expect(page.locator(".page-heading p")).toContainText("GOLD 1,280");
   await page.reload();
-  await expect(page.getByRole("button", { name: "꾸미기", exact: true })).toHaveAttribute(
-    "aria-pressed",
-    "true",
+  await expect(page.getByRole("link", { name: "Character", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
   );
   await expect(
     page.getByRole("button", { name: "스테고 바다 탐험가 스타일 미리보기" }),

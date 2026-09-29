@@ -16,7 +16,7 @@ export function questExperience(base: number, total: number, repeat = false) {
   return Math.floor(base * multiplier * (repeat ? 0.1 : 1));
 }
 
-export function levelUpCoins(before: number, after: number) {
+export function levelUpGold(before: number, after: number) {
   const first = experienceProgress(before).level;
   const last = experienceProgress(after).level;
   return ((last * (last + 1) - first * (first + 1)) / 2) * 500;

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { HomePage, QuestsPage, DashboardPage, ShopPage } from "./pages/MainPages";
+import { HomePage, QuestsPage, DashboardPage, ShopPage, CharacterPage } from "./pages/MainPages";
 import { LoginPage, ProfilePage, DinosaurPage, FirstResultPage } from "./pages/OnboardingPages";
 import { QuestDetailPage, RewardPage, BuffPage, MyPage } from "./pages/ScenarioPages";
 import { RiskPage, WitheredPage } from "./pages/StatePages";
@@ -65,7 +65,8 @@ export default function App() {
       <Route path="/camera" element={<CameraPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/shop" element={<ShopPage />} />
-      <Route path="/shop/customize" element={<ShopPage />} />
+      <Route path="/character" element={<CharacterPage />} />
+      <Route path="/shop/customize" element={<Navigate to="/character" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/dinosaur" element={<DinosaurPage />} />

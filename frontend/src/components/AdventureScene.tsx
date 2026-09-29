@@ -26,6 +26,7 @@ export function AdventureScene({
   const buffs = battleBuffStats(game);
   const experience = experienceProgress(game.experience);
   const [selected, setSelected] = useState<QuestId | null>(null);
+  const [buffsExpanded, setBuffsExpanded] = useState(false);
   const hud = useRef<HTMLDivElement>(null);
   const [reducedMotion, setReducedMotion] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -120,6 +121,18 @@ export function AdventureScene({
             <span className="level">
               Lv.{experience.level} · {dino.name}
             </span>
+            <button
+              className="buffs-toggle"
+              aria-label={buffsExpanded ? "버프 목록 접기" : "버프 목록 펼치기"}
+              aria-expanded={buffsExpanded}
+              aria-controls="battle-buffs"
+              onClick={() => {
+                setBuffsExpanded(!buffsExpanded);
+                setSelected(null);
+              }}
+            >
+              BUFF {buffsExpanded ? "▴" : "▾"}
+            </button>
             <div
               className="hp-bar"
               role="meter"
@@ -149,7 +162,12 @@ export function AdventureScene({
               </strong>
             </div>
           </div>
-          <div className="battle-buffs" aria-label="오늘의 퀘스트 버프">
+          <div
+            id="battle-buffs"
+            className="battle-buffs"
+            aria-label="오늘의 퀘스트 버프"
+            hidden={!buffsExpanded}
+          >
             {questBuffs.map((buff) => (
               <button
                 key={buff.id}
@@ -214,23 +232,24 @@ export function AdventureScene({
           data-moving={false}
           data-attacking={!!attack}
           style={{
-            left: 35 + approach * 45,
+            left: 18 + approach * 80,
             ...(flying
-              ? { bottom: 117 - approach * 26, rotate: `${approach * 12}deg` }
+              ? { bottom: 110 - approach * 24, rotate: `${approach * 12}deg` }
               : { bottom: 90 }),
           }}
         >
           <BattleSprite
-            src={attack || (flying ? art.attack! : art.image)}
+            src={attack || art.walk || art.image}
             frame={
               attack && !reducedMotion
                 ? Math.min(7, Math.floor(attackTime * 8))
-                : flying || attack
-                  ? 0
-                  : undefined
-            }
-            wingPhase={
-              flying && !attacking && !reducedMotion ? (battle.clock % 960) / 960 : undefined
+                : art.walk
+                  ? reducedMotion
+                    ? 0
+                    : Math.floor((battle.clock % 640) / 160)
+                  : attack
+                    ? 0
+                    : undefined
             }
             label={dino.name}
             filter={skin.filter}
@@ -238,15 +257,16 @@ export function AdventureScene({
         </div>
         {battle.enemies.map((monster) => {
           const enemy = villains[monster.art];
+          const hit = battle.clock - monster.hitAt >= 0 && battle.clock - monster.hitAt < 200;
           return (
             <div
               className="battle-enemy"
               key={monster.id}
               data-rank={monster.rank}
-              data-hit={battle.clock - monster.hitAt < 300}
-              style={{ left: 78 + monster.distance * 26, bottom: 90 }}
+              data-hit={hit}
+              style={{ left: 68 + monster.distance * 30, bottom: 90 }}
             >
-              <BattleSprite src={enemy.image} label={enemy.name} backdrop />
+              <BattleSprite src={hit ? enemy.hit : enemy.image} label={enemy.name} backdrop />
               <small>
                 {monster.rank !== "normal" && `${monster.rank.toUpperCase()} · `}
                 {enemy.name}

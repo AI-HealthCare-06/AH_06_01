@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { experienceProgress, levelUpCoins, questExperience } from "./experience";
+import { experienceProgress, levelUpGold, questExperience } from "./experience";
 import {
   completeQuest,
   initialGame,
@@ -21,16 +21,16 @@ describe("document experience progression", () => {
     expect(allowed.experience).toBe(60);
     expect(allowed.activity.water).toBe(1);
   });
-  it("awards quests once and Coin only on level-up", () => {
+  it("awards quests once and Gold only on level-up", () => {
     let game = initialGame();
     const snapshot = { date: game.date, count: 6000, source: "healthkit", syncedAt: 10 };
     game = syncDeviceSteps(game, snapshot);
     expect(game.experience).toBe(50);
-    expect(game.coins).toBe(1280);
+    expect(game.gold).toBe(1280);
     game = syncDeviceSteps(game, { ...snapshot, count: 8000, syncedAt: 20 });
     for (const quest of quests) game = completeQuest(game, quest.id);
     expect(game.experience).toBe(170);
-    expect(game.coins).toBe(2280);
+    expect(game.gold).toBe(2280);
     for (const quest of quests) game = completeQuest(game, quest.id);
     expect(game.experience).toBe(170);
   });
@@ -41,7 +41,7 @@ describe("document experience progression", () => {
     expect(experienceProgress(232)).toEqual({ level: 3, current: 10, required: 148 });
     const game = completeQuest({ ...initialGame(), experience: 90 }, "medicine");
     expect(experienceProgress(game.experience)).toEqual({ level: 2, current: 10, required: 122 });
-    expect(levelUpCoins(0, 232)).toBe(2500);
+    expect(levelUpGold(0, 232)).toBe(2500);
     expect(questExperience(20, 550)).toBe(30);
     expect(questExperience(20, 2600)).toBe(45);
   });
@@ -59,12 +59,13 @@ describe("document experience progression", () => {
     expect(repeatDemoQuest(water, "water", water.lastWaterAt! + 7_200_000).experience).toBe(
       water.experience + 3,
     );
-    expect(game.gold).toBe(0);
+    expect(game.gold).toBe(1280);
   });
   it("migrates known legacy completions, gold defaults and waves without inventing rewards", () => {
     const legacy: Record<string, unknown> = {
       ...initialGame(),
       completed: ["meal", "meal", "walk"],
+      version: 1,
       coins: 2300,
       dinosaur: 4,
       battleDefeats: 70,
@@ -75,8 +76,7 @@ describe("document experience progression", () => {
     const restored = restoreGame(legacy);
     expect(restored).toMatchObject({
       experience: 80,
-      coins: 2300,
-      gold: 0,
+      gold: 2300,
       dinosaur: 4,
       combat: { stage: 1, wave: 3, killed: 0 },
     });

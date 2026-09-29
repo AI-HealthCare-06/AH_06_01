@@ -4,6 +4,7 @@ const paths = {
   snow: "M10 1h4v6h3V4h3v3h-3v3h6v4h-6v3h3v3h-3v-3h-3v6h-4v-6H7v3H4v-3h3v-3H1v-4h6V7H4V4h3v3h3z",
   moon: "M9 2h6v3h-3v4h3v3h4v-3h3v7h-3v4h-4v2H8v-2H4v-4H2V8h3V4h4z",
   home: "M2 10h2V8h2V6h2V4h2V2h4v2h2v2h2v2h2v2h2v3h-4v9h-5v-7h-2v7H6v-9H2z",
+  character: "M5 2h14v2h3v11h-3v3h-3v4H8v-4H5v-3H2V4h3zM6 6v5h4V6zM14 6v5h4V6zM8 14v2h8v-2z",
   quests: "M4 2h3v20H4zM8 3h13v4h-2v4h2v4H8z",
   camera: "M8 3h8v3h6v15H2V6h6zM9 9v2H7v5h2v2h6v-2h2v-5h-2V9zM10 11h4v5h-4z",
   dashboard: "M2 16h5v6H2zM10 10h5v12h-5zM18 2h5v20h-5z",

@@ -11,7 +11,7 @@ test("all dinosaurs reach the visible monster during the impact pose", async ({ 
       useGameStore.getState().resetDemo();
       useGameStore.getState().chooseDinosaur(index);
     }, dinosaur);
-    await page.clock.runFor(3600);
+    await page.clock.runFor(3500);
     await expect(page.locator(".battle-enemy")).toHaveAttribute("data-hit", "true");
     await page.getByRole("button", { name: "모험 일시정지" }).click();
     await expect

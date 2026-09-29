@@ -72,8 +72,7 @@ test("wave combat pauses, requires multiple hits and awards Gold separately", as
   await page.clock.runFor(300);
   await expect(page.locator(".battle-enemy")).toHaveCount(1);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!));
-  expect(saved.coins).toBe(1280);
-  expect(saved.gold).toBe(30);
+  expect(saved.gold).toBe(1310);
 });
 
 test("camera requests on click, captures, and stops all tracks on navigation", async ({ page }) => {
@@ -112,7 +111,7 @@ test("camera requests on click, captures, and stops all tracks on navigation", a
   ).toBe(true);
   await page.getByRole("button", { name: "다시 촬영" }).click();
   await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
-  await page.getByRole("link", { name: "Quest", exact: true }).click();
+  await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
   await expect(page).toHaveURL(/\/quests$/);
   await expect(page.locator(".camera-card")).toHaveCount(0);
   expect(

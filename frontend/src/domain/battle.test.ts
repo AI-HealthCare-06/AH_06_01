@@ -17,7 +17,7 @@ describe("document combat rules", () => {
     const game = { ...initialGame("2026-09-29"), battleUpdatedAt: now };
     const offline = tickBattle(game, now + 86_400_000);
     const direct = advanceCombat(game.combat, battleBuffStats(game), 1, 86_400_000);
-    expect(offline.gold).toBe(direct.gold);
+    expect(offline.gold).toBe(game.gold + direct.gold);
     expect(offline.battleDefeats).toBe(direct.defeats);
     expect(offline.gold).toBeGreaterThan(0);
     expect(tickBattle(offline, now + 86_400_000)).toBe(offline);
@@ -35,7 +35,7 @@ describe("document combat rules", () => {
       3_600_000,
     );
     const across = tickBattle(night, now + 25 * 3_600_000);
-    expect(across.gold).toBe(before.gold + after.gold);
+    expect(across.gold).toBe(night.gold + before.gold + after.gold);
     expect(across.activity).toEqual({});
   });
   it("matches the level milestones, damage floor and monster tables", () => {
@@ -121,10 +121,9 @@ describe("document combat rules", () => {
     const game = { ...initialGame("2026-09-29"), battleUpdatedAt: now };
     const result = tickBattle(game, now + 60_000);
     expect(result.gold).toBeGreaterThan(0);
-    expect(result.coins).toBe(game.coins);
     expect(tickBattle(result, now + 60_000)).toBe(result);
     const direct = advanceCombat(game.combat, battleBuffStats(game), 1, 60_000);
-    expect(result.gold).toBe(direct.gold);
+    expect(result.gold).toBe(game.gold + direct.gold);
     expect(result.combat).toEqual(direct.combat);
     const dead = {
       ...initialCombat(),

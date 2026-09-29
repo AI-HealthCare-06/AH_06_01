@@ -568,8 +568,8 @@
 }
 .battle-enemy[data-rank="elite"],
 .battle-enemy[data-rank="boss"] {
-  width: 94px;
-  height: 106px;
+  width: 65.8px;
+  height: 74.2px;
 }
 .battle-enemy[data-rank="boss"] small {
   color: #ffdd5c;
@@ -594,24 +594,6 @@
 .economy-wallet {
   margin: 12px 0;
   padding: 12px;
-}
-.economy-wallet summary {
-  cursor: pointer;
-  list-style: none;
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 12px;
-  color: #285d3b;
-}
-.economy-wallet summary span {
-  color: #554c37;
-  font-size: 10px;
-}
-.economy-wallet details[open] summary {
-  border-bottom: 1px solid #b9b196;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
 }
 .economy-wallet header {
   display: flex;
@@ -665,6 +647,7 @@
   background: #fffae7;
 }
 .economy-wallet button,
+.gold-effects button,
 .repeat-quest button {
   padding: 9px;
   border: 2px solid #333d30;
@@ -776,14 +759,15 @@
   position: absolute;
   left: 235px;
   bottom: 62px;
-  width: 82px;
-  height: 93px;
+  width: 57.4px;
+  height: 65.1px;
 }
 .battle-enemy small {
   position: absolute;
   top: -15px;
-  left: -16px;
-  width: 114px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 88px;
   text-align: center;
   background: #171b16bb;
   color: var(--cream);
@@ -1333,17 +1317,13 @@
 }
 .battle-dinosaur[data-dinosaur="4"] {
   bottom: 112px;
-  animation: ptera-hover 1.12s steps(8) infinite;
+  animation: none;
 }
 .battle-dinosaur[data-dinosaur="4"][data-moving="true"] {
   animation: ptera-travel 0.56s steps(6) infinite;
 }
 .battle-dinosaur[data-dinosaur="4"][data-attacking="true"] {
   animation: none;
-}
-.battle-enemy[data-hit="true"] {
-  filter: brightness(1.8);
-  transform: translateX(5px);
 }
 @keyframes ptera-hover {
   50% {
@@ -1384,4 +1364,118 @@
   .battle-dinosaur[data-dinosaur="4"] {
     animation: none;
   }
+}
+
+/* Main tabs and compact combat overlay. */
+.pixel-battle .battle-hud {
+  top: 58px;
+  left: 0;
+  transform: scale(0.8);
+  transform-origin: top left;
+}
+.battle-hud .hp-stats {
+  position: relative;
+}
+.buffs-toggle {
+  position: absolute;
+  top: -3px;
+  right: 0;
+  border: 0;
+  background: transparent;
+  color: #ffe486;
+  font-size: 10px;
+  min-height: 20px;
+}
+.battle-buffs[hidden] {
+  display: none;
+}
+.wallet-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.wallet-heading h3 {
+  margin: 0;
+}
+.wallet-convert {
+  color: #ffe486;
+  background: #233f4e;
+  border: 1px solid #b8b68e;
+  padding: 7px 12px;
+  font-size: 12px;
+}
+.conversion-presets {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.conversion-presets button {
+  flex: 1;
+}
+.info-dialog .economy-wallet {
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+.shop-screen .main-content {
+  display: flex;
+  flex-direction: column;
+}
+.shop-screen .shop-catalog {
+  flex: 1;
+  height: auto;
+  min-height: 484px;
+  padding-bottom: 6px;
+}
+.shop-screen .product-scroll {
+  display: flex;
+  overflow: visible;
+  flex: 1;
+}
+.shop-screen .product-grid {
+  flex: 1;
+  grid-template-rows: repeat(2, minmax(206px, 1fr));
+}
+.character-customization {
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.character-customization .gold-effects {
+  color: var(--ink);
+}
+.bottom-navigation a {
+  min-width: 0;
+}
+.bottom-navigation a span {
+  font-size: clamp(8px, 2.2vw, 10px);
+}
+
+.character-screen .main-content {
+  display: flex;
+  flex-direction: column;
+}
+.character-customization {
+  flex: 1 1 0;
+  min-height: 640px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+.shop-screen .product-photo {
+  height: auto;
+  bottom: 52px;
+}
+
+.shop-screen .product > strong {
+  top: auto;
+  bottom: 29px;
+}
+.shop-screen .product > small {
+  top: auto;
+  bottom: 10px;
+}
+.shop-screen .product-badge {
+  top: auto;
+  bottom: 59px;
 }
