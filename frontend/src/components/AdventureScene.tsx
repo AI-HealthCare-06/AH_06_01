@@ -54,6 +54,11 @@ export function AdventureScene({
   const progress = battle.encounter % 10;
   const enemy = villains[battle.enemy];
   const attack = battle.phase === "attack" && art.attack;
+  const attackTime = battle.phase === "attack" ? battle.elapsed / battleDurations.attack : 0;
+  const approach =
+    battle.phase === "attack"
+      ? Math.min(1, attackTime / 0.42) * (attackTime > 0.78 ? (1 - attackTime) / 0.22 : 1)
+      : 0;
   const offset =
     progress * 70 + (battle.phase === "move" ? (battle.elapsed / battleDurations.move) * 70 : 0);
   return (
@@ -111,12 +116,11 @@ export function AdventureScene({
           data-movement={art.movement}
           data-moving={battle.phase === "move"}
           data-attacking={!!attack}
+          style={{ left: 52 + approach * 110 }}
         >
           <BattleSprite
             src={attack || art.image}
             frame={attack ? Math.min(7, Math.floor(battle.elapsed / 120)) : undefined}
-            cropY={art.y}
-            cropHeight={art.height}
             label={dino.name}
             filter={skin.filter}
           />
@@ -127,6 +131,7 @@ export function AdventureScene({
             key={battle.encounter}
             data-defeated={battle.phase === "defeat"}
             data-spawning={battle.phase === "spawn"}
+            data-hit={battle.phase === "attack" && attackTime >= 0.42 && attackTime < 0.78}
           >
             <BattleSprite src={enemy.image} label={enemy.name} backdrop />
             <small>{enemy.name}</small>

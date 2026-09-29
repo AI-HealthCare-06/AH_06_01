@@ -9,7 +9,12 @@ This feature continues the current REXRUN demo on `feature/pixel-adventure-devic
 - One randomly selected enemy appears per encounter. Attack → defeat → coin drop → movement → next enemy runs only while the Home screen is visible and unpaused. Each completed encounter grants 10 demo coins once. Every ten enemies advances to the next background; all six stages cycle.
 - Four characters use the supplied eight-frame attack sheets. Stegosaurus and Pteranodon retain their idle art during attacks. All six have distinct travel animations. Reduced-motion mode removes decorative CSS animation.
 - Cards, controls, progress bars, navigation and text use pixel styling. Korean text uses the local [Galmuri](https://github.com/quiple/galmuri) font (OFL-1.1); English headings retain Press Start 2P.
-- Camera access begins only after tapping “카메라 켜기”. The stream stops on capture, hidden page or unmount. Photos remain only in the camera page's memory and do not automatically complete quests. Server photo verification is not implemented.
+- Camera access begins only after tapping “카메라 켜기”. Medicine/water prefer the front camera; meals prefer the rear camera. Changing a quest restarts an active stream with the new lens. Sleep is excluded. Preview and capture share a 3:4 portrait crop. The stream stops on capture, hidden page or unmount. Photos remain in the page's memory. Live recognition and server photo verification are not implemented.
+- Attacks approach the visible enemy at impact. Pteranodon hovers and flies above the ground. Radar lines use a 2px staircase grid.
+- Notices appear at the top safe area; dialogs remain modal. The account page shares the profile avatar, shows available battery/network status without a simulated punch hole, and includes back navigation, a pixel switch and wearable setup guidance.
+- Step-connection guidance sits above the quest list. Home has walk/water bars and counts next to the title, without redundant completion text.
+- Dashboard radio controls switch between weekly prediction and monthly/yearly sample history. Growth details sit directly below the score. Risk cards show the actual latest profile registration date, or an unregistered state. Only that date is persisted, not the health inputs. History and predictions remain labeled demo data.
+- The greeting uses [Open-Meteo current weather](https://open-meteo.com/en/docs) after location permission. Coordinates are rounded to two decimals, used for the request and not persisted. Already-granted permission allows refresh on foreground return after 30 minutes; otherwise the user requests weather with the greeting button. Denied location and network errors keep a neutral fallback with retry.
 
 ## Original Figma art
 
@@ -22,7 +27,7 @@ The source is [REXRUN](https://www.figma.com/design/lCWaAEae4xccaADW0osrLx/REXRU
 | 10 — Character Attack Motions | 288:700, 290:697, 295:697, 308:697 | Triceratops, Tyrannosaurus, Brachiosaurus and Raptor attack sheets |
 | 11 — Villain Character Concepts | 300:700, 705, 710, 715; 313:694, 699 | Six random opponents |
 
-Attack frames are rendered from eight equal-width sheet cells, with transparent outer padding cropped in the renderer. Concept cards' edge-connected white backgrounds are removed only during canvas rendering; original assets are unmodified. Onboarding retains the existing left-facing artwork.
+Attack sheets contain eight hand-positioned poses, not equal-width cells. Explicit frame bounds and connected-component separation preserve whole poses and remove neighboring silhouettes where their horizontal bounds overlap. Frames share scale and baseline. Concept cards' edge-connected white backgrounds are removed only during canvas rendering; original assets are unmodified. Onboarding retains the existing left-facing artwork.
 
 ## Android and iPhone steps
 
@@ -30,7 +35,7 @@ The [Capacitor Health plugin](https://github.com/Cap-go/capacitor-health) reads 
 
 The web build cannot read Health Connect/HealthKit and shows a connection explanation. Native builds contain the actual plugin, permission configuration and API calls. On iOS, denied read permission is intentionally not distinguishable from unavailable records: an empty response is shown as “아직 읽을 수 있는 기록이 없어요”, not a confirmed zero or successful authorization.
 
-The last daily reading (count/source/time), quest completion dates and demo coins are stored locally. Nothing is transmitted to a service. “연동 끄기” disables polling; OS permissions can be revoked in Health Connect/Health settings. Logout resets local progress and disables polling. Health risk predictions remain demo data.
+The last daily reading (count/source/time), quest completion dates and demo coins are stored locally. Health data is not transmitted to a service. “연동 끄기” disables polling; OS permissions can be revoked in Health Connect/Health settings. Logout resets local progress and disables polling. Health risk predictions remain demo data.
 
 ### Build and run
 
@@ -50,7 +55,7 @@ Web builds, browser emulation and mocked adapter tests do not prove physical-dev
 ### Verification on 2026-09-29
 
 - `npm ci`, lint, format check, 22 unit tests and production build passed.
-- All 38 browser tests passed (37 in the full run, the route smoke test on rerun). Native build output had triggered Vite's file watcher; Android/iOS directories are now excluded from web watching.
-- The five main tabs were visually checked at 390px: equal 1000px page height and navigation position, no horizontal overflow or broken images.
+- All 44 browser cases passed across the full run and targeted rerun (41 initial passes, two corrected test fixtures and one new collision test; the affected 19-case set passed). Coverage includes all six characters' visible collision, front/rear camera selection and stream cleanup, portrait capture, location denial, history periods, registration dates, top notices and wearable dialogs.
+- Main tab heights/navigation positions match at 320/390/526/1440px and in mobile emulation. The five main tabs use a 1080px minimum height with no horizontal overflow.
 - `npx cap sync` completed for both platforms. Android `:app:assembleDebug` succeeded; the merged manifest contains only `READ_STEPS` among health permissions.
 - iOS signing/build and physical-device health/camera testing remain pending because the development host is Windows.

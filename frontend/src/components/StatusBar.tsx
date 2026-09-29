@@ -1,4 +1,3 @@
-import { assets } from "../design/assets";
 import { useDeviceStatus } from "./useDeviceStatus";
 import { PixelIcon } from "./PixelIcon";
 
@@ -10,7 +9,7 @@ const connectionLabels: Record<string, string> = {
   wimax: "WiMAX",
 };
 
-export function StatusBar({ simple = false, camera }: { simple?: boolean; camera?: string }) {
+export function StatusBar() {
   const { time, network, battery } = useDeviceStatus();
   const connected = network.online && network.type !== "none";
   const networkLabel = connected
@@ -21,48 +20,40 @@ export function StatusBar({ simple = false, camera }: { simple?: boolean; camera
     : "배터리 정보를 제공하지 않는 환경";
 
   return (
-    <div className={`status-bar ${simple ? "simple" : ""}`} role="group" aria-label="기기 상태">
+    <div className="status-bar" role="group" aria-label="기기 상태">
       <time className="device-time" aria-label={`현재 기기 시간 ${time}`} dateTime={time}>
         {time}
       </time>
-      <img
-        className="camera-dot"
-        src={camera ?? assets.home.imgStatusCameraDot}
-        alt=""
-        aria-hidden="true"
-      />
-      {!simple && (
-        <div className="status-symbols">
-          <span
-            className="network-status"
-            role="img"
-            aria-label={networkLabel}
-            title={networkLabel}
-            data-online={connected}
-          >
-            <PixelIcon name="network" />
+      <div className="status-symbols">
+        <span
+          className="network-status"
+          role="img"
+          aria-label={networkLabel}
+          title={networkLabel}
+          data-online={connected}
+        >
+          <PixelIcon name="network" />
+        </span>
+        <span
+          className={`battery-status ${battery ? "" : "unavailable"}`}
+          role="img"
+          aria-label={batteryLabel}
+          title={batteryLabel}
+        >
+          <span className="battery-percent" aria-hidden="true">
+            {battery ? `${battery.percent}%` : "—"}
           </span>
-          <span
-            className={`battery-status ${battery ? "" : "unavailable"}`}
-            role="img"
-            aria-label={batteryLabel}
-            title={batteryLabel}
-          >
-            <span className="battery-percent" aria-hidden="true">
-              {battery ? `${battery.percent}%` : "—"}
-            </span>
-            <span className="battery" aria-hidden="true">
-              {battery && <i style={{ width: `${battery.percent}%` }} />}
-              {battery?.charging && (
-                <svg className="charging-symbol" viewBox="0 0 12 16">
-                  <path d="M7 1 2 9h4l-1 6 6-9H7z" />
-                </svg>
-              )}
-              {!battery && <span className="battery-unknown">?</span>}
-            </span>
+          <span className="battery" aria-hidden="true">
+            {battery && <i style={{ width: `${battery.percent}%` }} />}
+            {battery?.charging && (
+              <svg className="charging-symbol" viewBox="0 0 12 16">
+                <path d="M7 1 2 9h4l-1 6 6-9H7z" />
+              </svg>
+            )}
+            {!battery && <span className="battery-unknown">?</span>}
           </span>
-        </div>
-      )}
+        </span>
+      </div>
     </div>
   );
 }

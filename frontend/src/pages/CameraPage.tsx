@@ -3,13 +3,13 @@ import { Link, useSearchParams } from "react-router-dom";
 import { AppShell, PageHeading } from "../components/AppShell";
 import { PixelIcon } from "../components/PixelIcon";
 import { quests } from "../domain/game";
+const cameraQuests = quests.filter((q) => ["medicine", "meal", "water"].includes(q.id));
+const facingFor = (quest: string) => (quest === "meal" ? "environment" : "user");
 
 export function CameraPage() {
   const [params] = useSearchParams();
   const [quest, setQuest] = useState(
-    quests.some((q) => q.id === params.get("quest") && q.id !== "walk")
-      ? params.get("quest")!
-      : "meal",
+    cameraQuests.some((q) => q.id === params.get("quest")) ? params.get("quest")! : "meal",
   );
   const [live, setLive] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -43,9 +43,10 @@ export function CameraPage() {
     };
   }, []);
 
-  async function start() {
+  async function start(nextQuest = quest) {
     const token = ++request.current;
     stop();
+    setLive(false);
     setBusy(true);
     setPhoto(null);
     setSaved(false);
@@ -53,7 +54,12 @@ export function CameraPage() {
       if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia)
         throw new Error("카메라는 HTTPS 또는 localhost 환경에서 사용할 수 있어요.");
       const next = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 } },
+        video: {
+          facingMode: { ideal: facingFor(nextQuest) },
+          width: { ideal: 960 },
+          height: { ideal: 1280 },
+          aspectRatio: { ideal: 3 / 4 },
+        },
         audio: false,
       });
       if (request.current !== token) {
@@ -67,7 +73,11 @@ export function CameraPage() {
       }
       if (request.current !== token) return;
       setLive(true);
-      setMessage("준비되면 아래 촬영 버튼을 눌러 주세요.");
+      setMessage(
+        nextQuest === "meal"
+          ? "음식을 세로 화면에 담고 촬영해 주세요."
+          : "얼굴과 실천하는 모습을 화면에 담아 주세요. 실시간 자동 인식은 준비 중이에요.",
+      );
     } catch (error) {
       if (request.current !== token) return;
       stop();
@@ -90,11 +100,27 @@ export function CameraPage() {
   function capture() {
     if (!video.current?.videoWidth) return;
     const canvas = document.createElement("canvas");
-    canvas.width = Math.min(1280, video.current.videoWidth);
-    canvas.height = Math.round(
-      (canvas.width * video.current.videoHeight) / video.current.videoWidth,
+    const source = video.current;
+    const width = Math.min(source.videoWidth, (source.videoHeight * 3) / 4);
+    const height = (width * 4) / 3;
+    canvas.height = Math.min(1280, Math.round(height));
+    canvas.width = Math.round((canvas.height * 3) / 4);
+    const context = canvas.getContext("2d")!;
+    if (facingFor(quest) === "user") {
+      context.translate(canvas.width, 0);
+      context.scale(-1, 1);
+    }
+    context.drawImage(
+      source,
+      (source.videoWidth - width) / 2,
+      (source.videoHeight - height) / 2,
+      width,
+      height,
+      0,
+      0,
+      canvas.width,
+      canvas.height,
     );
-    canvas.getContext("2d")!.drawImage(video.current, 0, 0, canvas.width, canvas.height);
     setPhoto(canvas.toDataURL("image/jpeg", 0.88));
     stop();
     setLive(false);
@@ -108,19 +134,24 @@ export function CameraPage() {
           기록할 퀘스트
           <select
             value={quest}
-            disabled={!!photo}
-            onChange={(event) => setQuest(event.target.value)}
+            disabled={!!photo || busy}
+            onChange={(event) => {
+              const next = event.target.value;
+              setQuest(next);
+              if (live) void start(next);
+            }}
           >
-            {quests
-              .filter((q) => q.id !== "walk")
-              .map((q) => (
-                <option key={q.id} value={q.id}>
-                  {q.title}
-                </option>
-              ))}
+            {cameraQuests.map((q) => (
+              <option key={q.id} value={q.id}>
+                {q.title}
+              </option>
+            ))}
           </select>
         </label>
-        <div className={`camera-viewfinder ${live ? "live" : ""}`}>
+        <p className="camera-mode">
+          {quest === "meal" ? "후면 카메라 · 식사 사진 촬영" : "전면 카메라 · 실시간 인식 준비"}
+        </p>
+        <div className={`camera-viewfinder ${live ? "live" : ""}`} data-facing={facingFor(quest)}>
           <video
             ref={video}
             autoPlay

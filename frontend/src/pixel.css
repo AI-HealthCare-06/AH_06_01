@@ -26,7 +26,7 @@
   border-radius: 0 !important;
 }
 .main-screen[data-device-preview] {
-  min-height: max(1000px, 100svh);
+  min-height: max(1080px, 100svh);
 }
 .main-screen .main-content {
   min-height: 0;
@@ -461,6 +461,7 @@
 }
 .battle-dinosaur {
   position: absolute;
+  z-index: 2;
   left: 52px;
   bottom: 61px;
   width: 125px;
@@ -662,5 +663,408 @@
   .metric-fill {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Browser review: compact pixel controls, portrait capture, and readable history. */
+.notice {
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  bottom: auto;
+  border-radius: 0;
+  border-width: 2px;
+  box-shadow: 4px 4px 0 #171b1680;
+  transform: translate(-50%, -20px);
+}
+.notice.visible {
+  transform: translateX(-50%);
+}
+.profile-avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #b3cfaa;
+}
+.profile-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.1);
+}
+.avatar {
+  padding: 0;
+}
+.member-card > .profile-avatar {
+  padding: 0;
+  background: #b3cfaa;
+  display: block;
+  overflow: hidden;
+}
+.page-back {
+  display: block;
+  color: var(--cream);
+  padding: 0 0 14px;
+  font-size: 12px;
+}
+.daily-reset-setting button {
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.pixel-toggle-thumb {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+}
+.enabled .pixel-toggle-thumb {
+  left: 27px;
+}
+.wearable-devices > section {
+  padding: 12px 0;
+  border-bottom: 1px solid #b5ae96;
+}
+.wearable-devices h3 {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.wearable-devices p {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.step-connection-note {
+  display: block;
+  margin: 12px 6px 8px;
+  color: #ffada0;
+  font-size: 11px;
+  line-height: 1.7;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.compact-quest-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 4px;
+}
+.compact-quest-heading small {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 9px;
+}
+.compact-quests .compact-quest {
+  min-height: 42px;
+  align-items: center;
+}
+.compact-quests,
+.radar-card {
+  height: 216px;
+}
+.compact-quests .compact-quest > div {
+  flex: 1;
+  min-width: 0;
+}
+.compact-walk > span {
+  width: 100%;
+}
+.compact-quest .compact-walk {
+  width: 100%;
+  margin-top: 5px;
+}
+.radar-axis {
+  fill: none;
+}
+.radar-comparison polygon,
+.radar-comparison polyline {
+  stroke-linejoin: miter;
+  stroke-linecap: square;
+}
+.weather-greeting button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-align: left;
+  font-size: 11px;
+  line-height: 16px;
+}
+.weather-greeting .pixel-icon {
+  width: 12px;
+  height: 12px;
+}
+.weather-greeting small {
+  display: block;
+  margin: 2px 0 0 16px;
+  font-size: 8px;
+  color: #625f4e;
+}
+.weather-greeting a {
+  text-decoration: underline;
+}
+.greeting {
+  min-height: 62px;
+}
+.camera-mode {
+  margin: 12px 0 0;
+  font-size: 11px;
+  color: #496954;
+}
+.camera-viewfinder {
+  aspect-ratio: 3/4;
+  width: 100%;
+}
+.camera-viewfinder video,
+.camera-viewfinder > img {
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+}
+.camera-viewfinder[data-facing="user"] video {
+  transform: scaleX(-1);
+}
+.camera-screen .main-content {
+  min-height: 0;
+}
+.camera-card {
+  padding: 12px;
+}
+.camera-status {
+  min-height: 0;
+}
+.camera-card .camera-note {
+  margin-top: 12px;
+}
+.camera-card .camera-quest-link {
+  margin-top: 8px;
+  padding: 8px 0;
+}
+.dashboard-period {
+  border: 0;
+  padding: 0;
+  margin: 4px 4px 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.dashboard-period legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.dashboard-period label {
+  position: relative;
+  cursor: pointer;
+}
+.dashboard-period input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.dashboard-period span {
+  display: block;
+  border: 2px solid var(--ink);
+  padding: 10px;
+  background: #e8e4c8;
+  text-align: center;
+  font-size: 12px;
+}
+.dashboard-period input:checked + span {
+  background: var(--red);
+  color: #fff8e7;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.dashboard-period input:focus-visible + span {
+  outline: 3px solid #1baac8;
+  outline-offset: 2px;
+}
+.growth-insight {
+  min-height: 110px;
+  height: auto;
+  margin-top: 10px;
+  padding: 10px 8px;
+  gap: 8px;
+}
+.growth-insight img {
+  width: 68px;
+  height: 76px;
+}
+.growth-insight h3 {
+  white-space: normal;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 10px;
+}
+.growth-insight h3 > span:first-child {
+  font-size: 13px;
+}
+.growth-insight p {
+  font-size: 10px;
+  line-height: 16px;
+  margin-top: 5px;
+}
+.growth-insight small {
+  display: block;
+  font-size: 9px;
+  line-height: 14px;
+  margin-top: 5px;
+  color: #665834;
+}
+.health-trend {
+  margin-top: 10px;
+  border: 2px solid var(--ink);
+  padding: 12px 10px;
+  background: #f7eed4;
+}
+.health-trend header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.health-trend h3 {
+  font-size: 14px;
+}
+.health-trend header span {
+  font-size: 9px;
+  color: #817054;
+}
+.trend-bars {
+  display: flex;
+  gap: 5px;
+  align-items: end;
+}
+.trend-column {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+.trend-column > div {
+  height: 70px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  border-bottom: 2px solid #606650;
+}
+.trend-column i {
+  width: 65%;
+  display: block;
+  background: #428557;
+  border-top: 3px solid #235738;
+  transform-origin: bottom;
+}
+.trend-column strong {
+  font-size: 9px;
+}
+.trend-column small {
+  font-size: 8px;
+  white-space: nowrap;
+  display: block;
+  margin-top: 5px;
+}
+.health-trend > p {
+  font-size: 11px;
+  margin-top: 12px;
+}
+.health-trend > p small {
+  display: block;
+  font-size: 9px;
+  color: #7c705a;
+  margin-top: 6px;
+  line-height: 15px;
+}
+.disease-card {
+  margin-top: 10px;
+}
+.disease-card header > small {
+  font-size: 9px;
+}
+.impact-card {
+  height: auto;
+  padding: 10px;
+  margin-top: 10px;
+}
+.impact-card header {
+  display: block;
+}
+.impact-card .chart-legend {
+  justify-content: flex-end;
+  margin: 8px 0 10px;
+  gap: 14px;
+  font-size: 9px;
+}
+.impact-card .risk-change {
+  border-left: 1px solid #c9bea480;
+  padding-left: 8px;
+}
+.impact-card .impact-row {
+  grid-template-columns: 48px minmax(0, 1fr) 94px;
+  gap: 7px;
+}
+.impact-card .chart-axis {
+  margin-right: 101px;
+  margin-left: 55px;
+}
+.prediction-note {
+  color: #73674f;
+  font-size: 9px;
+  line-height: 15px;
+  text-align: right;
+  margin-top: 10px;
+}
+.battle-dinosaur[data-dinosaur="4"] {
+  bottom: 112px;
+  animation: ptera-hover 1.12s steps(8) infinite;
+}
+.battle-dinosaur[data-dinosaur="4"][data-moving="true"] {
+  animation: ptera-travel 0.56s steps(6) infinite;
+}
+.battle-enemy[data-hit="true"] {
+  filter: brightness(1.8);
+  transform: translateX(5px);
+}
+@keyframes ptera-hover {
+  50% {
+    transform: translateY(-7px) rotate(-2deg);
+  }
+}
+@keyframes ptera-travel {
+  0%,
+  100% {
+    transform: translate(0, -2px) rotate(-3deg);
+  }
+  50% {
+    transform: translate(9px, -14px) rotate(2deg);
+  }
+}
+@media (max-width: 350px) {
+  .weather-greeting button {
+    font-size: 10px;
+  }
+  .health-trend {
+    padding-inline: 7px;
+  }
+  .trend-bars {
+    gap: 2px;
+  }
+  .trend-column small {
+    font-size: 7px;
+  }
+  .impact-card .impact-row {
+    grid-template-columns: 41px minmax(0, 1fr) 85px;
+    gap: 5px;
+  }
+  .impact-card .risk-change-values {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .battle-dinosaur[data-dinosaur="4"] {
+    animation: none;
   }
 }

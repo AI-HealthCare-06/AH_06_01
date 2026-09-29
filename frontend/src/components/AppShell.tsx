@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { assets } from "../design/assets";
 import { PaperTexture } from "../design/PaperTexture";
 import { useNotice } from "./NoticeProvider";
 import { useDevicePreview } from "./useDevicePreview";
@@ -8,6 +7,8 @@ import { StatusBar } from "./StatusBar";
 import { PixelIcon } from "./PixelIcon";
 import { calendarWeek } from "../domain/calendar";
 import { useGameStore } from "../stores/game-store";
+import { ProfileAvatar } from "./ProfileAvatar";
+import { WeatherGreeting } from "./WeatherGreeting";
 
 export type TabName = "home" | "quests" | "camera" | "dashboard" | "shop";
 const destinations = [
@@ -19,7 +20,6 @@ const destinations = [
 ] as const;
 
 export function AppShell({ active, children }: { active: TabName; children: ReactNode }) {
-  const screenAssets = assets[active === "camera" ? "home" : active];
   const game = useGameStore((state) => state.game);
   const notice = useNotice();
   const navigate = useNavigate();
@@ -30,16 +30,14 @@ export function AppShell({ active, children }: { active: TabName; children: Reac
       data-device-preview={devicePreview}
     >
       <PaperTexture />
-      {devicePreview && <StatusBar camera={screenAssets.imgStatusCameraDot} />}
+      {devicePreview && <StatusBar />}
       <header className="greeting">
         <Link to="/me" className="avatar" aria-label="마이페이지">
-          <img src={screenAssets.imgAvatarFrame} alt="민 님의 픽셀 아바타" />
+          <ProfileAvatar />
         </Link>
         <div className="greeting-copy">
           <h1>Hello, Min!</h1>
-          <p>
-            오늘도 건강한 하루예요! <PixelIcon name="sun" />
-          </p>
+          <WeatherGreeting />
         </div>
         <button
           className="search-button"
@@ -97,7 +95,6 @@ export function ScenarioShell({
   children,
   className = "",
   background,
-  camera,
 }: {
   children: ReactNode;
   className?: string;
@@ -116,7 +113,7 @@ export function ScenarioShell({
           <div className="background-haze" />
         </>
       )}
-      {devicePreview && <StatusBar simple camera={camera} />}
+      {devicePreview && <StatusBar />}
       <main className="scenario-content">
         <div className="dark-shell" aria-hidden="true" />
         {children}

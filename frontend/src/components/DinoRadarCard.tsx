@@ -9,12 +9,22 @@ function point(value: number, index: number) {
   return { x: center.x + Math.cos(angle) * radius, y: center.y + Math.sin(angle) * radius };
 }
 function polygon(values: readonly number[]) {
-  return values
-    .map((value, index) => {
-      const p = point(value, index);
-      return `${p.x},${p.y}`;
-    })
-    .join(" ");
+  const points = values.map(point);
+  return points.map((p, i) => staircase(p, points[(i + 1) % points.length])).join(" ");
+}
+function staircase(from: { x: number; y: number }, to: { x: number; y: number }) {
+  const snap = (v: number) => Math.round(v / 2) * 2;
+  const count = Math.ceil(Math.max(Math.abs(to.x - from.x), Math.abs(to.y - from.y)) / 2);
+  let x = snap(from.x),
+    y = snap(from.y);
+  const result = [`${x},${y}`];
+  for (let i = 1; i <= count; i++) {
+    x = snap(from.x + ((to.x - from.x) * i) / count);
+    result.push(`${x},${y}`);
+    y = snap(from.y + ((to.y - from.y) * i) / count);
+    result.push(`${x},${y}`);
+  }
+  return result.join(" ");
 }
 
 export function DinoRadarCard() {
@@ -47,6 +57,7 @@ export function DinoRadarCard() {
       <svg
         className="radar-comparison"
         viewBox="0 0 170 140"
+        shapeRendering="crispEdges"
         role="img"
         aria-labelledby="dino-radar-title"
         aria-describedby="dino-radar-description"
@@ -61,22 +72,22 @@ export function DinoRadarCard() {
         ))}
         {axes.map((axis, i) => {
           const end = point(100, i);
-          return (
-            <line
-              key={axis}
-              className="radar-axis"
-              x1={center.x}
-              y1={center.y}
-              x2={end.x}
-              y2={end.y}
-            />
-          );
+          return <polyline key={axis} className="radar-axis" points={staircase(center, end)} />;
         })}
         <g className="radar-series radar-current">
           <polygon className="radar-today-series" data-series="today" points={polygon(today)} />
           {today.map((value, i) => {
             const p = point(value, i);
-            return <circle key={i} className="radar-point" cx={p.x} cy={p.y} r={2.5} />;
+            return (
+              <rect
+                key={i}
+                className="radar-point"
+                x={Math.round(p.x / 2) * 2 - 2}
+                y={Math.round(p.y / 2) * 2 - 2}
+                width={4}
+                height={4}
+              />
+            );
           })}
         </g>
         <g className="radar-series radar-baseline">

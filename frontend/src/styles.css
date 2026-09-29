@@ -3205,7 +3205,8 @@ b {
 .info-dialog h2 {
   font-size: 18px;
 }
-.info-dialog p {
+.info-dialog p,
+.info-dialog .dialog-body {
   font-size: 13px;
   line-height: 1.7;
   margin: 16px 0;

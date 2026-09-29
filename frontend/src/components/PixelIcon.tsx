@@ -1,4 +1,8 @@
 const paths = {
+  cloud: "M6 7h3V4h8v3h3v3h3v9H1v-9h5z",
+  rain: "M6 5h3V2h8v3h3v3h3v7H1V8h5zM4 17h3v5H4zM11 18h3v6h-3zM18 17h3v5h-3z",
+  snow: "M10 1h4v6h3V4h3v3h-3v3h6v4h-6v3h3v3h-3v-3h-3v6h-4v-6H7v3H4v-3h3v-3H1v-4h6V7H4V4h3v3h3z",
+  moon: "M9 2h6v3h-3v4h3v3h4v-3h3v7h-3v4h-4v2H8v-2H4v-4H2V8h3V4h4z",
   home: "M2 10h2V8h2V6h2V4h2V2h4v2h2v2h2v2h2v2h2v3h-4v9h-5v-7h-2v7H6v-9H2z",
   quests: "M4 2h3v20H4zM8 3h13v4h-2v4h2v4H8z",
   camera: "M8 3h8v3h6v15H2V6h6zM9 9v2H7v5h2v2h6v-2h2v-5h-2V9zM10 11h4v5h-4z",

@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { attackFrames } from "../design/battle-assets";
+import { prepareAttackFrames } from "../design/sprite-sheet";
 
 const images = new Map<string, Promise<HTMLImageElement>>();
 function load(src: string) {
@@ -15,6 +17,7 @@ function load(src: string) {
   return images.get(src)!;
 }
 const cutouts = new Map<string, HTMLCanvasElement>();
+const sheets = new Map<string, HTMLCanvasElement[]>();
 
 // Concept art has an opaque white backdrop. Remove only edge-connected backdrop pixels
 // while rendering; enclosed white eyes/highlights and the original source file stay intact.
@@ -66,8 +69,6 @@ export function BattleSprite({
   src,
   label,
   frame,
-  cropY = 0,
-  cropHeight = 0,
   backdrop = false,
   className = "",
   filter,
@@ -75,8 +76,6 @@ export function BattleSprite({
   src: string;
   label: string;
   frame?: number;
-  cropY?: number;
-  cropHeight?: number;
   backdrop?: boolean;
   className?: string;
   filter?: string;
@@ -88,16 +87,21 @@ export function BattleSprite({
       .then((image) => {
         if (!active || !canvas.current) return;
         const context = canvas.current.getContext("2d")!;
-        const source = backdrop ? silhouette(image, src) : image;
+        let source: HTMLImageElement | HTMLCanvasElement = backdrop
+          ? silhouette(image, src)
+          : image;
         let x = 0,
           y = 0,
           width = image.naturalWidth,
           height = image.naturalHeight;
         if (frame !== undefined) {
-          width /= 8;
-          x = Math.min(7, frame) * width;
-          y = cropY;
-          height = cropHeight;
+          const pose = attackFrames[src]?.[Math.min(7, Math.max(0, frame))];
+          if (pose) {
+            if (!sheets.has(src)) sheets.set(src, prepareAttackFrames(image, attackFrames[src]));
+            source = sheets.get(src)![Math.min(7, Math.max(0, frame))];
+            width = pose[2];
+            height = pose[3];
+          }
         } else if (backdrop) {
           // Art-card whitespace is outside the character's gameplay box.
           const pixels = (source as HTMLCanvasElement)
@@ -122,7 +126,11 @@ export function BattleSprite({
             height = bottom - top + 1;
           }
         }
-        const scale = Math.min(160 / width, 120 / height);
+        const poses = frame === undefined ? undefined : attackFrames[src];
+        const scale = Math.min(
+          160 / (poses ? Math.max(...poses.map((p) => p[2])) : width),
+          120 / (poses ? Math.max(...poses.map((p) => p[3])) : height),
+        );
         context.clearRect(0, 0, 160, 120);
         context.imageSmoothingEnabled = false;
         context.drawImage(
@@ -143,7 +151,7 @@ export function BattleSprite({
     return () => {
       active = false;
     };
-  }, [src, frame, cropY, cropHeight, backdrop]);
+  }, [src, frame, backdrop]);
   return (
     <canvas
       ref={canvas}

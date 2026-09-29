@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell, PageHeading } from "../components/AppShell";
 import { AdventureScene } from "../components/AdventureScene";
@@ -15,8 +16,11 @@ import { quests, stageProgress, questProgress, questProgressLabel } from "../dom
 import { useGameStore } from "../stores/game-store";
 import { dashboardService } from "../services/dashboard-service";
 import { weeklyCompletedDays } from "../domain/game";
-import { StepConnection } from "../components/StepConnection";
 import { PixelIcon } from "../components/PixelIcon";
+import { HealthTrend } from "../components/HealthTrend";
+import { healthPeriods } from "../services/health-history";
+import type { HealthPeriod } from "../services/health-history";
+import { useProfileStore } from "../stores/profile-store";
 
 export function HomePage() {
   const { game, paused, togglePause } = useGameStore();
@@ -59,21 +63,26 @@ export function HomePage() {
                 <PixelCheckbox checked={done} />
                 <img src={icons[i]} alt="" />
                 <div>
-                  <strong>{q.title}</strong>
-                  {q.id === "walk" && !done ? (
+                  <div className="compact-quest-heading">
+                    <strong>{q.title}</strong>
+                    {q.id === "water" && <small>{done ? 8 : 0} / 8잔</small>}
+                    {q.id === "walk" && <small>{Math.round(questProgress(game, q) * 100)}%</small>}
+                  </div>
+                  {(q.id === "walk" || q.id === "water") && (
                     <div className="compact-walk">
-                      <span>
+                      <span
+                        role="progressbar"
+                        aria-label={`${q.title} 진행도`}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={Math.round(questProgress(game, q) * 100)}
+                      >
                         <i
                           className="metric-fill"
                           style={{ width: `${questProgress(game, q) * 100}%` }}
                         />
                       </span>
-                      <small>
-                        <AnimatedNumber value={Math.round(questProgress(game, q) * 100)} />%
-                      </small>
                     </div>
-                  ) : (
-                    <small className={done ? "green" : ""}>{questProgressLabel(game, q)}</small>
                   )}
                 </div>
               </Link>
@@ -115,6 +124,9 @@ export function QuestsPage() {
           </div>
         </div>
       </section>
+      <Link className="step-connection-note" to="/me">
+        걸음 수 자동 완료는 Android·iPhone 앱의 건강 연결이 필요해요. 연결 관리 ›
+      </Link>
       <section className="quest-list" aria-label="오늘의 퀘스트">
         {quests.map((q, index) => {
           const done = game.completed.includes(q.id);
@@ -136,7 +148,6 @@ export function QuestsPage() {
           );
         })}
       </section>
-      <StepConnection />
       <button
         className="weekly-reward"
         onClick={() =>
@@ -173,8 +184,11 @@ export function QuestsPage() {
 }
 
 export function DashboardPage() {
-  const selected = useGameStore((s) => s.game.dinosaur);
-  const dino = dinosaurs[selected];
+  const game = useGameStore((s) => s.game);
+  const dino = dinosaurs[game.dinosaur];
+  const registeredOn = useProfileStore((s) => s.registeredOn);
+  const [period, setPeriod] = useState<HealthPeriod>("week");
+  const periodInfo = healthPeriods[period];
   const { data, isError } = useQuery({
     queryKey: ["dashboard", "demo"],
     queryFn: ({ signal }) => dashboardService.getSnapshot(signal),
@@ -183,32 +197,68 @@ export function DashboardPage() {
     <AppShell active="dashboard">
       <PageHeading
         title="HEALTH DASHBOARD"
-        subtitle={`이번 주 건강 기록과 ${dino.name}의 성장을 확인하세요`}
+        subtitle={`${periodInfo.label} 건강 기록과 ${dino.name}의 성장을 확인하세요`}
       />
+      <fieldset className="dashboard-period">
+        <legend>건강 변화 조회 기간</legend>
+        {(Object.keys(healthPeriods) as HealthPeriod[]).map((value) => (
+          <label key={value}>
+            <input
+              type="radio"
+              name="health-period"
+              value={value}
+              checked={period === value}
+              onChange={() => setPeriod(value)}
+            />
+            <span>{healthPeriods[value].label}</span>
+          </label>
+        ))}
+      </fieldset>
       {!data ? (
         <p role="status">
           {isError ? "기록을 불러오지 못했어요." : "건강 기록을 불러오고 있어요."}
         </p>
       ) : (
-        <>
+        <div key={period} className="dashboard-period-content">
           <section className="health-score">
-            <h3>WEEKLY HEALTH SCORE</h3>
+            <h3>{periodInfo.heading} HEALTH SCORE</h3>
             <strong className="score-number">
               <AnimatedNumber value={data.score} />
             </strong>
             <span className="score-total">/ 100</span>
             <b className="score-rank">RANK: A</b>
             <p>
-              지난주보다 <AnimatedNumber value={data.delta} />점 올랐어요!
+              {periodInfo.previous}보다 <AnimatedNumber value={periodInfo.delta} />점 올랐어요!
             </p>
             <div className="score-track">
               <i className="metric-fill" style={{ width: `${data.score}%` }} />
             </div>
           </section>
+          <Link to="/buff" className="growth-insight">
+            <DinosaurArt pose="portrait" alt={`성장한 ${dino.name}`} />
+            <div>
+              <h3>
+                <span>{dino.name} 성장</span>
+                <span>
+                  +<AnimatedNumber value={12} />%
+                </span>
+              </h3>
+              <p>
+                건강 점수 {data.score - periodInfo.delta} → {data.score} · 공격력 100 → 112
+              </p>
+              <p>
+                오늘 퀘스트 {game.completed.length}/5 · 이번 주 {weeklyCompletedDays(game)}일 달성
+              </p>
+              <small>꾸준한 실천이 성장으로 이어져요. 능력치는 데모예요.</small>
+            </div>
+          </Link>
+          {period !== "week" && <HealthTrend period={period} today={game.date} />}
           <Link to="/risk" className="disease-card" aria-label="질환 위험도 상세 보기">
             <header>
               <h3>질환 위험도</h3>
-              <small>최근 건강 기록 기준</small>
+              <small>
+                {registeredOn ? `등록일 ${registeredOn.replaceAll("-", ".")}` : "등록일 미등록"}
+              </small>
             </header>
             <div className="risk-grid">
               {data.risks.map((r) => (
@@ -225,55 +275,45 @@ export function DashboardPage() {
               ))}
             </div>
           </Link>
-          <section className="impact-card">
-            <header>
-              <h3>오늘 퀘스트 효과 예측</h3>
+          {period === "week" && (
+            <section className="impact-card">
+              <header>
+                <h3>퀘스트 효과 예측</h3>
+              </header>
               <div className="chart-legend">
                 <span>현재</span>
                 <span>완료 후</span>
               </div>
-              <small>예상 위험도</small>
-            </header>
-            <div className="impact-rows">
-              {data.risks.map((r) => (
-                <div className="impact-row" key={r.name}>
-                  <span>{r.name}</span>
-                  <div className="impact-bars">
-                    <div>
-                      <i className="metric-fill" style={{ width: `${r.current * 2}%` }} />
+              <div className="impact-rows">
+                {data.risks.map((r) => (
+                  <div className="impact-row" key={r.name}>
+                    <span>{r.name}</span>
+                    <div className="impact-bars">
+                      <div>
+                        <i className="metric-fill" style={{ width: `${r.current * 2}%` }} />
+                      </div>
+                      <div>
+                        <i className="metric-fill" style={{ width: `${r.projected * 2}%` }} />
+                      </div>
                     </div>
-                    <div>
-                      <i className="metric-fill" style={{ width: `${r.projected * 2}%` }} />
-                    </div>
+                    <RiskChange
+                      current={r.current}
+                      projected={r.projected}
+                      tone={r.tone}
+                      projectedTone={r.projectedTone}
+                    />
                   </div>
-                  <RiskChange
-                    current={r.current}
-                    projected={r.projected}
-                    tone={r.tone}
-                    projectedTone={r.projectedTone}
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="chart-axis">
-              <span>0</span>
-              <span>25</span>
-              <span>50%</span>
-            </div>
-          </section>
-          <Link to="/buff" className="growth-insight">
-            <DinosaurArt pose="portrait" alt={`성장한 ${dino.name}`} />
-            <div>
-              <h3>
-                <span>{dino.name} 성장</span>
-                <span>
-                  +<AnimatedNumber value={12} />%
-                </span>
-              </h3>
-              <p>건강 점수가 높아져 공격력이 올랐어요!</p>
-            </div>
-          </Link>
-        </>
+                ))}
+              </div>
+              <div className="chart-axis">
+                <span>0</span>
+                <span>25</span>
+                <span>50%</span>
+              </div>
+              <p className="prediction-note">데모 예상 수치로, 실제 결과와 다를 수 있어요.</p>
+            </section>
+          )}
+        </div>
       )}
     </AppShell>
   );

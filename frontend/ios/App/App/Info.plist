@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>현재 위치의 날씨에 맞는 안내를 보여주기 위해 앱 사용 중 위치를 확인합니다.</string>
     <key>NSHealthShareUsageDescription</key>
     <string>오늘의 걸음 수를 읽어 걷기 퀘스트의 진행도를 표시하고 6,000걸음에 자동 완료합니다.</string>
     <key>NSCameraUsageDescription</key>

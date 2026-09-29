@@ -1,4 +1,49 @@
 const art = (node: string) => `/assets/battle/${node}.png`;
+export type SpriteFrame = readonly [x: number, y: number, width: number, height: number];
+// These sheets are hand laid out, not an equal-width grid. Keep the whole pose and
+// a shared scale/baseline so crouches, extended horns and effects do not get clipped.
+export const attackFrames: Record<string, readonly SpriteFrame[]> = {
+  [art("288-700")]: [
+    [17, 294, 242, 163],
+    [285, 294, 240, 163],
+    [539, 331, 278, 127],
+    [837, 321, 274, 138],
+    [1142, 315, 247, 143],
+    [1395, 313, 252, 145],
+    [1660, 321, 233, 138],
+    [1911, 294, 240, 164],
+  ],
+  [art("290-697")]: [
+    [7, 299, 244, 194],
+    [263, 286, 253, 207],
+    [510, 339, 294, 154],
+    [797, 326, 289, 168],
+    [1081, 302, 286, 189],
+    [1368, 289, 285, 202],
+    [1658, 315, 242, 178],
+    [1909, 289, 241, 202],
+  ],
+  [art("295-697")]: [
+    [0, 232, 254, 269],
+    [243, 235, 260, 266],
+    [445, 284, 299, 219],
+    [729, 296, 283, 208],
+    [1023, 295, 384, 205],
+    [1358, 270, 315, 228],
+    [1640, 239, 257, 263],
+    [1899, 232, 257, 268],
+  ],
+  [art("308-697")]: [
+    [15, 298, 248, 182],
+    [287, 341, 259, 140],
+    [552, 346, 228, 135],
+    [793, 321, 283, 160],
+    [1087, 302, 279, 178],
+    [1359, 350, 271, 135],
+    [1644, 345, 258, 140],
+    [1913, 298, 246, 183],
+  ],
+};
 
 // Original image fills exported from REXRUN sections 08–11. Node IDs keep the source traceable.
 export const stages = [
@@ -10,12 +55,12 @@ export const stages = [
   { name: "MOONLIT NIGHT", image: art("258-717") },
 ];
 export const battleDinosaurs = [
-  { image: art("276-699"), attack: art("290-697"), y: 285, height: 215, movement: "stomp" },
-  { image: art("276-702"), attack: art("288-700"), y: 280, height: 195, movement: "trot" },
-  { image: art("276-712"), attack: art("308-697"), y: 295, height: 195, movement: "sprint" },
-  { image: art("276-705"), attack: null, y: 0, height: 0, movement: "waddle" },
-  { image: art("276-709"), attack: null, y: 0, height: 0, movement: "fly" },
-  { image: art("276-715"), attack: art("295-697"), y: 235, height: 275, movement: "stride" },
+  { image: art("276-699"), attack: art("290-697"), movement: "stomp" },
+  { image: art("276-702"), attack: art("288-700"), movement: "trot" },
+  { image: art("276-712"), attack: art("308-697"), movement: "sprint" },
+  { image: art("276-705"), attack: null, movement: "waddle" },
+  { image: art("276-709"), attack: null, movement: "fly" },
+  { image: art("276-715"), attack: art("295-697"), movement: "stride" },
 ];
 export const villains = [
   { name: "다크 콜라", image: art("300-700") },

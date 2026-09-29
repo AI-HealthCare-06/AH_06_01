@@ -11,6 +11,7 @@ import { dinosaurs } from "../design/dinosaurs";
 import { DinosaurArt } from "../components/DinosaurArt";
 import { StepConnection } from "../components/StepConnection";
 import { useDeviceStore } from "../stores/device-store";
+import { ProfileAvatar } from "../components/ProfileAvatar";
 
 export function QuestDetailPage() {
   const { id } = useParams();
@@ -83,9 +84,11 @@ export function QuestDetailPage() {
       ) : (
         <>
           <p className="complete-help">직접 완료한 뒤 체크해 주세요.</p>
-          <Link className="camera-quest-link" to={`/camera?quest=${q.id}`}>
-            카메라로 실천 기록 남기기
-          </Link>
+          {q.id !== "sleep" && (
+            <Link className="camera-quest-link" to={`/camera?quest=${q.id}`}>
+              카메라로 실천 기록 남기기
+            </Link>
+          )}
         </>
       )}
     </ScenarioShell>
@@ -176,9 +179,18 @@ export function MyPage() {
   }
   return (
     <ScenarioShell className="my-page-screen" camera={assets["my-page"].imgEllipse}>
+      <button
+        className="page-back"
+        onClick={() => {
+          if (window.history.state?.idx > 0) navigate(-1);
+          else navigate("/home");
+        }}
+      >
+        ← 뒤로가기
+      </button>
       <h1>MY PAGE</h1>
       <section className="cream-card member-card">
-        <span>MIN</span>
+        <ProfileAvatar />
         <div>
           <h2>민 님</h2>
           <p>{dinosaurs[game.dinosaur].name} · Lv.12</p>
@@ -202,6 +214,11 @@ export function MyPage() {
             title: "연결 관리",
             desc: "Android · Health Connect / iPhone · 건강",
             action: () => setDialog("연결 관리"),
+          },
+          {
+            title: "웨어러블 장비",
+            desc: "Apple Watch · Galaxy Watch · 수면 연동",
+            action: () => setDialog("웨어러블 장비"),
           },
           {
             title: "개인정보 및 이용약관",
@@ -240,7 +257,7 @@ export function MyPage() {
           }}
           className={resetEnabled ? "enabled" : ""}
         >
-          <img src={assets["my-page"].imgEllipse1} alt="" />
+          <span className="pixel-toggle-thumb" aria-hidden="true" />
         </button>
       </div>
       <button className="logout-button" onClick={logout}>
@@ -253,9 +270,32 @@ export function MyPage() {
       {dialog && (
         <InfoDialog title={dialog} onClose={() => setDialog(null)} returnFocusTo={dialogTrigger}>
           {dialog === "개인정보 및 이용약관" ? (
-            "현재는 UI 개발용 데모입니다. 건강 프로필 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 이 기기에는 공룡과 꾸미기 선택, 퀘스트 완료·코인, 연결한 오늘의 걸음 수와 동기화 시각이 저장됩니다. 사진은 촬영 화면에만 유지되며 서버에 전송하지 않습니다. 로그아웃하면 걸음 수와 퀘스트 기록이 초기화됩니다."
+            "현재는 UI 개발용 데모입니다. 건강 프로필 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 이 기기에는 프로필 등록 일자, 공룡과 꾸미기 선택, 퀘스트 완료·코인, 연결한 오늘의 걸음 수와 동기화 시각이 저장됩니다. 사진은 촬영 화면에만 유지되며 서버에 전송하지 않습니다. 날씨에 위치 사용을 허용하면 반올림한 좌표를 Open-Meteo에 보내며 좌표는 저장하지 않습니다. 로그아웃하면 등록 일자·걸음 수·퀘스트 기록이 초기화됩니다."
           ) : dialog === "알림 설정" ? (
             "시스템 알림과 복약 리마인드는 아직 연결되지 않았어요."
+          ) : dialog === "웨어러블 장비" ? (
+            <div className="wearable-devices">
+              <section>
+                <h3>Apple Watch</h3>
+                <p>
+                  iPhone의 건강 앱에 동기화된 걸음 수를 함께 읽어요. Watch 앱에서 기기를 페어링해
+                  주세요.
+                </p>
+              </section>
+              <section>
+                <h3>Galaxy Watch · Android 워치</h3>
+                <p>
+                  제조사 건강 앱에서 Health Connect로 걸음 수를 공유하면 연결된 기록에 반영돼요.
+                </p>
+              </section>
+              <section>
+                <h3>수면 시간</h3>
+                <p>
+                  웨어러블 수면 기록 연동 준비 중 · 현재 수면 기록을 읽거나 자동 완료하지 않아요.
+                </p>
+              </section>
+              <StepConnection />
+            </div>
           ) : (
             <StepConnection />
           )}
