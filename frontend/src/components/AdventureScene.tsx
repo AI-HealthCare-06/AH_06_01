@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { DesignCanvas } from "./DesignCanvas";
-import { assets } from "../design/assets";
 import { dinosaurs } from "../design/dinosaurs";
 import { battleDinosaurs, stages, villains } from "../design/battle-assets";
 import type { GameState } from "../domain/game";
@@ -13,6 +12,7 @@ import { BattleSprite } from "./BattleSprite";
 import { PixelIcon } from "./PixelIcon";
 import { battleBuffStats, battleStage, questBuffs } from "../domain/battle";
 import { Link } from "react-router-dom";
+import { experienceProgress } from "../domain/experience";
 
 export function AdventureScene({
   game,
@@ -33,6 +33,7 @@ export function AdventureScene({
   const collectCoin = useGameStore((state) => state.collectCoin);
   const stopped = paused || !visible;
   const buffs = battleBuffStats(game.completed);
+  const experience = experienceProgress(game.experience);
   const [reducedMotion, setReducedMotion] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -119,7 +120,9 @@ export function AdventureScene({
         </div>
         <div className="battle-hud">
           <div className="hp-stats">
-            <span className="level">Lv.12 · {dino.name}</span>
+            <span className="level">
+              Lv.{experience.level} · {dino.name}
+            </span>
             <div
               className="hp-bar"
               role="meter"
@@ -131,6 +134,21 @@ export function AdventureScene({
               <i />
               <strong>
                 {buffs.maxHp} / {buffs.maxHp}
+              </strong>
+            </div>
+            <div
+              className="exp-bar"
+              role="progressbar"
+              aria-label="레벨 경험치"
+              aria-valuemin={0}
+              aria-valuemax={experience.required}
+              aria-valuenow={experience.current}
+              aria-valuetext={`레벨 ${experience.level}, ${experience.current} / ${experience.required} EXP`}
+            >
+              <i style={{ width: `${(experience.current / experience.required) * 100}%` }} />
+              <strong>
+                EXP {String(experience.current).padStart(3, "0")}/
+                {String(experience.required).padStart(3, "0")}
               </strong>
             </div>
           </div>
@@ -215,7 +233,7 @@ export function AdventureScene({
             <AnimatedNumber value={progress} /> / {stageState.target}
           </b>
           <div
-            className="stage-track"
+            className="stage-track risk-track"
             role="progressbar"
             aria-label="스테이지 몬스터 처치"
             aria-valuemin={0}
@@ -224,16 +242,6 @@ export function AdventureScene({
           >
             <i style={{ width: `${progressRatio * 100}%` }} />
           </div>
-          {[0, 1, 2, 3].map((i) => (
-            <i className="pixel-stage-dot" key={i} style={{ left: 79 + i * 55 }} />
-          ))}
-          <img className="stage-flag" src={assets.home.imgStageProgressGoalFlag} alt="목표" />
-          <img
-            className="stage-egg"
-            src={assets.home.imgStageProgressEggMarker}
-            alt="현재 위치"
-            style={{ left: 13 + progressRatio * 278 }}
-          />
         </div>
       </DesignCanvas>
     </div>

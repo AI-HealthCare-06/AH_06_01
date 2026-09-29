@@ -84,6 +84,7 @@ export const gameSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   completed: z.array(z.enum(questIds)),
   coins: z.number().int().nonnegative(),
+  experience: z.number().int().nonnegative().optional(),
   bonusClaimed: z.boolean(),
   allDoneBonusClaimed: z.boolean(),
   sampleDay: z.boolean().default(true),
@@ -100,7 +101,7 @@ export const gameSchema = z.object({
     .object({ questId: z.enum(questIds), coins: z.number().int().nonnegative() })
     .nullable(),
 });
-export type GameState = z.infer<typeof gameSchema>;
+export type GameState = Omit<z.infer<typeof gameSchema>, "experience"> & { experience: number };
 
 export function seoulDate(date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -117,6 +118,7 @@ export function initialGame(date = localDate()): GameState {
     date,
     completed: [],
     coins: 1280,
+    experience: 0,
     bonusClaimed: false,
     allDoneBonusClaimed: false,
     sampleDay: false,
@@ -159,6 +161,7 @@ export function completeQuest(state: GameState, id: QuestId, date = localDate())
     ...current,
     completed,
     coins: current.coins + quest.reward + bonus,
+    experience: current.experience + quest.experience,
     allDoneBonusClaimed: allDone || current.allDoneBonusClaimed,
     completedDates:
       allDone && !current.sampleDay
@@ -186,9 +189,19 @@ export function applyDinosaurStyle(state: GameState, index: number, skin: SkinId
 
 export function restoreGame(value: unknown): GameState {
   const result = gameSchema.safeParse(value);
-  return result.success
-    ? rollDay({ ...result.data, completed: [...new Set(result.data.completed)] })
-    : initialGame();
+  if (!result.success) return initialGame();
+  const completed = [...new Set(result.data.completed)];
+  // Older saves only retain the last day's individual completions. Credit those
+  // known rewards once; never invent EXP for historical or sampled activity.
+  const experience =
+    result.data.experience ??
+    (result.data.sampleDay
+      ? 0
+      : quests.reduce(
+          (total, quest) => total + (completed.includes(quest.id) ? quest.experience : 0),
+          0,
+        ));
+  return rollDay({ ...result.data, completed, experience });
 }
 
 export function stageProgress(game: GameState): number {

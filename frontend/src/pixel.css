@@ -442,10 +442,46 @@
   font-size: 7px;
 }
 .pixel-battle .battle-hud {
+  --hp-height: 12px;
   width: 194px;
   height: auto;
   grid-template-columns: minmax(0, 1fr);
   gap: 6px;
+}
+.pixel-battle .hp-bar {
+  height: var(--hp-height);
+}
+.exp-bar {
+  position: relative;
+  height: calc(var(--hp-height) * 0.4);
+  margin-block: 3px;
+  background: #777d7d;
+  box-shadow: 0 0 0 1px #171b16;
+}
+.exp-bar > i {
+  display: block;
+  height: 100%;
+  background: #53a66e;
+  transition: width 350ms steps(12, end);
+}
+.exp-bar > strong {
+  position: absolute;
+  inset: -2px 0 auto;
+  color: #fff4ce;
+  font-size: 7px;
+  line-height: 9px;
+  text-align: center;
+  text-shadow:
+    1px 0 #171b16,
+    -1px 0 #171b16,
+    0 1px #171b16,
+    0 -1px #171b16;
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .exp-bar > i {
+    transition: none;
+  }
 }
 .battle-buffs {
   display: grid;
@@ -567,12 +603,28 @@
   left: 10px;
   width: 334px;
 }
-.pixel-stage-dot {
+.pixel-battle .stage-progress > b {
+  left: auto;
+  right: 10px;
+}
+.pixel-battle .stage-track {
   position: absolute;
-  top: 31px;
-  width: 5px;
-  height: 5px;
-  background: var(--gold);
+  left: 10px;
+  right: 10px;
+  top: 29px;
+  width: auto;
+  height: 10px;
+  margin: 0;
+  border: 0;
+  background-color: #c8bfa1;
+  background-image: repeating-linear-gradient(90deg, transparent 0 11px, #171b1612 11px 12px);
+}
+.pixel-battle .stage-track > i {
+  height: 100%;
+  background: var(--green);
+}
+.pixel-battle .stage-track::after {
+  background: repeating-linear-gradient(90deg, transparent 0 11px, #f8eed555 11px 12px);
 }
 .battle-dinosaur[data-moving="true"] {
   animation: rex-stomp 0.28s steps(2) infinite;

@@ -12,6 +12,7 @@ import { DinosaurArt } from "../components/DinosaurArt";
 import { StepConnection } from "../components/StepConnection";
 import { useDeviceStore } from "../stores/device-store";
 import { ProfileAvatar } from "../components/ProfileAvatar";
+import { experienceProgress } from "../domain/experience";
 
 export function QuestDetailPage() {
   const { id } = useParams();
@@ -135,7 +136,9 @@ export function BuffPage() {
         <img className="scene-background" src={assets.buff.imgRectangle} alt="초록 숲" />
         <DinosaurArt className="scene-dino" pose="buff" alt={dino.name} />
         <b className="scene-badge">BUFF + HEALTH</b>
-        <strong>{dino.name} · Lv.2 · HP 340 / 340</strong>
+        <strong>
+          {dino.name} · Lv.{experienceProgress(game.experience).level} · HP 340 / 340
+        </strong>
       </div>
       <div className="cream-card buff-message">
         <h2>좋아요! 몸에 힘이 돌아왔어요.</h2>
@@ -193,7 +196,9 @@ export function MyPage() {
         <ProfileAvatar />
         <div>
           <h2>민 님</h2>
-          <p>{dinosaurs[game.dinosaur].name} · Lv.12</p>
+          <p>
+            {dinosaurs[game.dinosaur].name} · Lv.{experienceProgress(game.experience).level}
+          </p>
         </div>
         <strong>{game.coins.toLocaleString("en-US")} COIN</strong>
       </section>
