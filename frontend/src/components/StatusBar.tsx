@@ -1,5 +1,6 @@
 import { assets } from "../design/assets";
 import { useDeviceStatus } from "./useDeviceStatus";
+import { PixelIcon } from "./PixelIcon";
 
 const connectionLabels: Record<string, string> = {
   wifi: "Wi-Fi",
@@ -39,30 +40,7 @@ export function StatusBar({ simple = false, camera }: { simple?: boolean; camera
             title={networkLabel}
             data-online={connected}
           >
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              {connected && network.type === "wifi" ? (
-                <>
-                  <path d="M3 9a14 14 0 0 1 18 0M6 12.5a9 9 0 0 1 12 0M9 16a4.5 4.5 0 0 1 6 0" />
-                  <circle cx="12" cy="20" r="1" fill="currentColor" stroke="none" />
-                </>
-              ) : (
-                <>
-                  <circle cx="12" cy="12" r="9" />
-                  <ellipse cx="12" cy="12" rx="4" ry="9" />
-                  <path d="M3 12h18" />
-                  {!connected && <path d="m3 3 18 18" strokeWidth="2.5" />}
-                </>
-              )}
-            </svg>
+            <PixelIcon name="network" />
           </span>
           <span
             className={`battery-status ${battery ? "" : "unavailable"}`}

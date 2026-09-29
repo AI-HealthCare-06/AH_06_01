@@ -1,5 +1,5 @@
 :root {
-  font-family: Inter, "Noto Sans KR", sans-serif;
+  font-family: "Galmuri11", "Galmuri11", sans-serif;
   color: #20211d;
   background: #282c28;
   font-synthesis: none;
@@ -10,7 +10,7 @@
   --red: #e84a3c;
   --green: #397a4b;
   --gold: #ffd34a;
-  --pixel: "Press Start 2P", "Noto Sans KR", sans-serif;
+  --pixel: "Press Start 2P", "Galmuri11", sans-serif;
 }
 * {
   box-sizing: border-box;
@@ -644,7 +644,7 @@ b {
   left: 239px;
   top: 184px;
   font:
-    400 24px/36px Anton,
+    400 24px/36px "Galmuri11",
     sans-serif;
   color: var(--red);
 }
@@ -887,7 +887,7 @@ b {
 }
 .radar-comparison text {
   font:
-    500 12px "Noto Sans KR",
+    500 12px "Galmuri11",
     sans-serif;
   fill: #575946;
 }
@@ -933,7 +933,7 @@ b {
 }
 .compact-quest-title h3 {
   font:
-    400 13px Anton,
+    400 13px "Galmuri11",
     sans-serif;
   flex: 1;
   white-space: nowrap;
@@ -956,7 +956,7 @@ b {
   font-size: 12px;
   line-height: 17px;
   white-space: nowrap;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: "Galmuri11", sans-serif;
 }
 .compact-quest small {
   display: block;
@@ -1130,12 +1130,12 @@ b {
 }
 .quest-row-copy h3 {
   font:
-    700 12px/18px "Noto Sans KR",
+    700 12px/18px "Galmuri11",
     sans-serif;
 }
 .quest-row-copy small {
   font:
-    400 9px/14px "Noto Sans KR",
+    400 9px/14px "Galmuri11",
     sans-serif;
   color: #946d54;
   display: block;
@@ -1172,7 +1172,7 @@ b {
   min-width: 28px;
   text-align: right;
   font:
-    700 9px/12px Inter,
+    700 9px/12px "Galmuri11",
     sans-serif;
 }
 .quest-exp {
@@ -1203,7 +1203,7 @@ b {
 }
 .weekly-reward p {
   font:
-    700 12px/18px "Noto Sans KR",
+    700 12px/18px "Galmuri11",
     sans-serif;
   margin-top: 11px;
 }
@@ -1250,7 +1250,7 @@ b {
   left: 12px;
   top: 31px;
   font:
-    400 46px/64px Anton,
+    400 46px/64px "Galmuri11",
     sans-serif;
   color: #f2d78c;
 }
@@ -1273,7 +1273,7 @@ b {
   left: 132px;
   top: 55px;
   font:
-    700 12px/18px "Noto Sans KR",
+    700 12px/18px "Galmuri11",
     sans-serif;
 }
 .score-track {
@@ -1453,7 +1453,7 @@ b {
   align-items: center;
   gap: 3px;
   font:
-    700 11px/14px Inter,
+    700 11px/14px "Galmuri11",
     sans-serif;
   white-space: nowrap;
 }
@@ -1465,7 +1465,7 @@ b {
 }
 .risk-change small {
   font:
-    400 9px/11px Inter,
+    400 9px/11px "Galmuri11",
     sans-serif;
   color: #706955;
 }
@@ -1506,12 +1506,12 @@ b {
 }
 .growth-insight h3 > span:first-child {
   font:
-    700 14px/20px "Noto Sans KR",
+    700 14px/20px "Galmuri11",
     sans-serif;
 }
 .growth-insight p {
   font:
-    700 11px/17px "Noto Sans KR",
+    700 11px/17px "Galmuri11",
     sans-serif;
   margin-top: 8px;
   word-break: keep-all;
@@ -1542,7 +1542,7 @@ b {
 .shop-wallet p {
   grid-column: 1 / -1;
   font:
-    400 10px/15px "Noto Sans KR",
+    400 10px/15px "Galmuri11",
     sans-serif;
 }
 .wallet-balance {
@@ -1558,7 +1558,7 @@ b {
 }
 .wallet-balance > strong {
   font:
-    400 34px/40px Anton,
+    400 34px/40px "Galmuri11",
     sans-serif;
   color: #f2d78c;
 }

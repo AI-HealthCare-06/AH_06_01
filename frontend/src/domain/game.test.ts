@@ -9,22 +9,34 @@ import {
   rollDay,
   seoulDate,
   stageProgress,
+  syncDeviceSteps,
 } from "./game";
 describe("demo reward rules", () => {
   it("awards a quest once, including retries", () => {
     const initial = initialGame();
-    const first = completeQuest(initial, "walk");
+    const first = syncDeviceSteps(initial, {
+      date: initial.date,
+      count: 6000,
+      source: "healthkit",
+      syncedAt: 100,
+    });
     expect(first.coins).toBe(1310);
     expect(first.completed).toContain("walk");
     expect(completeQuest(first, "walk")).toBe(first);
   });
   it("awards the all-done 50% bonus exactly once", () => {
     let game = initialGame();
+    game = syncDeviceSteps(game, {
+      date: game.date,
+      count: 6000,
+      source: "healthkit",
+      syncedAt: 100,
+    });
     for (const q of quests) game = completeQuest(game, q.id);
-    expect(game.coins).toBe(1400);
+    expect(game.coins).toBe(1430);
     expect(game.lastReward?.coins).toBe(70);
     expect(game.allDoneBonusClaimed).toBe(true);
-    expect(completeQuest(game, "sleep").coins).toBe(1400);
+    expect(completeQuest(game, "sleep").coins).toBe(1430);
     expect(stageProgress(game)).toBe(10);
   });
   it("daily coin is idempotent and available again next Seoul day", () => {
@@ -68,7 +80,7 @@ describe("demo reward rules", () => {
     const legacy: Record<string, unknown> = { ...initialGame(), coins: 1700, dinosaur: 3 };
     delete legacy.dinosaurStyles;
     const restored = restoreGame(legacy);
-    expect(restored).toMatchObject({ coins: 1700, dinosaur: 3, completed: ["medicine", "meal"] });
+    expect(restored).toMatchObject({ coins: 1700, dinosaur: 3, completed: [] });
     expect(restored.dinosaurStyles).toEqual(Array(6).fill("original"));
     expect(restoreGame({ ...legacy, dinosaurStyles: ["bad-skin"] })).toEqual(restored);
   });

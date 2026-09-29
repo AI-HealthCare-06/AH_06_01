@@ -5,10 +5,25 @@ import { LoginPage, ProfilePage, DinosaurPage, FirstResultPage } from "./pages/O
 import { QuestDetailPage, RewardPage, BuffPage, MyPage } from "./pages/ScenarioPages";
 import { RiskPage, WitheredPage } from "./pages/StatePages";
 import { useGameStore } from "./stores/game-store";
+import { useDeviceStore } from "./stores/device-store";
+import { CameraPage } from "./pages/CameraPage";
 
 export default function App() {
   const location = useLocation();
   const refreshDay = useGameStore((s) => s.refreshDay);
+  const syncSteps = useDeviceStore((s) => s.sync);
+  useEffect(() => {
+    void syncSteps();
+    const sync = () => {
+      if (document.visibilityState === "visible") void syncSteps();
+    };
+    const timer = window.setInterval(sync, 30_000);
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, [syncSteps]);
   useEffect(() => {
     window.scrollTo(0, 0);
     refreshDay();
@@ -30,6 +45,7 @@ export default function App() {
       <Route path="/home" element={<HomePage />} />
       <Route path="/quests" element={<QuestsPage />} />
       <Route path="/quests/:id" element={<QuestDetailPage />} />
+      <Route path="/camera" element={<CameraPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/shop" element={<ShopPage />} />
       <Route path="/shop/customize" element={<ShopPage />} />

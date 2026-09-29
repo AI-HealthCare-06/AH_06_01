@@ -6,8 +6,10 @@ import {
   initialGame,
   restoreGame,
   rollDay,
+  syncDeviceSteps,
+  collectBattleCoin,
 } from "../domain/game";
-import type { GameState, QuestId } from "../domain/game";
+import type { GameState, QuestId, StepSnapshot } from "../domain/game";
 import type { SkinId } from "../domain/appearance";
 
 const storageKey = "rexrun-demo-game-v1";
@@ -36,11 +38,25 @@ type GameStore = {
   togglePause: () => void;
   refreshDay: () => void;
   resetDemo: () => void;
+  syncSteps: (snapshot: StepSnapshot) => void;
+  collectCoin: (encounter: number) => void;
 };
 
 export const useGameStore = create<GameStore>((set) => ({
   game: loadGame(),
   paused: false,
+  syncSteps: (snapshot) =>
+    set((state) => {
+      const game = syncDeviceSteps(state.game, snapshot);
+      save(game);
+      return { game };
+    }),
+  collectCoin: (encounter) =>
+    set((state) => {
+      const game = collectBattleCoin(state.game, encounter);
+      save(game);
+      return { game };
+    }),
   complete: (id) =>
     set((state) => {
       const game = completeQuest(state.game, id);

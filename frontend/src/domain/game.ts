@@ -1,6 +1,15 @@
 import { z } from "zod";
 import { defaultDinosaurStyles, skinIds } from "./appearance";
 import type { SkinId } from "./appearance";
+import { calendarWeek, localDate } from "./calendar";
+
+export const stepSnapshotSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  count: z.number().int().nonnegative(),
+  source: z.enum(["health-connect", "healthkit"]),
+  syncedAt: z.number().finite().nonnegative(),
+});
+export type StepSnapshot = z.infer<typeof stepSnapshotSchema>;
 
 export const questIds = ["medicine", "meal", "walk", "water", "sleep"] as const;
 export type QuestId = (typeof questIds)[number];
@@ -77,6 +86,9 @@ export const gameSchema = z.object({
   bonusClaimed: z.boolean(),
   allDoneBonusClaimed: z.boolean(),
   sampleDay: z.boolean().default(true),
+  steps: stepSnapshotSchema.nullable().default(null),
+  completedDates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).default([]),
+  battleDefeats: z.number().int().nonnegative().default(0),
   dinosaur: z.number().int().min(0).max(5),
   dinosaurStyles: z
     .array(z.enum(skinIds))
@@ -98,22 +110,25 @@ export function seoulDate(date = new Date()): string {
   }).format(date);
 }
 
-export function initialGame(date = seoulDate()): GameState {
+export function initialGame(date = localDate()): GameState {
   return {
     version: 1,
     date,
-    completed: ["medicine", "meal"],
+    completed: [],
     coins: 1280,
     bonusClaimed: false,
     allDoneBonusClaimed: false,
-    sampleDay: true,
+    sampleDay: false,
+    steps: null,
+    completedDates: [],
+    battleDefeats: 0,
     dinosaur: 0,
     dinosaurStyles: defaultDinosaurStyles(),
     lastReward: null,
   };
 }
 
-export function rollDay(state: GameState, date = seoulDate()): GameState {
+export function rollDay(state: GameState, date = localDate()): GameState {
   if (state.date === date) return state;
   return {
     ...state,
@@ -122,13 +137,15 @@ export function rollDay(state: GameState, date = seoulDate()): GameState {
     bonusClaimed: false,
     allDoneBonusClaimed: false,
     sampleDay: false,
+    steps: null,
     lastReward: null,
   };
 }
 
-export function completeQuest(state: GameState, id: QuestId, date = seoulDate()): GameState {
+export function completeQuest(state: GameState, id: QuestId, date = localDate()): GameState {
   const current = rollDay(state, date);
   if (current.completed.includes(id)) return current;
+  if (id === "walk" && (!current.steps || current.steps.count < 6000)) return current;
   const quest = quests.find((item) => item.id === id);
   if (!quest) throw new Error("존재하지 않는 퀘스트입니다.");
   const completed = [...current.completed, id];
@@ -142,11 +159,15 @@ export function completeQuest(state: GameState, id: QuestId, date = seoulDate())
     completed,
     coins: current.coins + quest.reward + bonus,
     allDoneBonusClaimed: allDone || current.allDoneBonusClaimed,
+    completedDates:
+      allDone && !current.sampleDay
+        ? [...new Set([...current.completedDates, date])].slice(-365)
+        : current.completedDates,
     lastReward: { questId: id, coins: quest.reward + bonus },
   };
 }
 
-export function claimDailyBonus(state: GameState, date = seoulDate()): GameState {
+export function claimDailyBonus(state: GameState, date = localDate()): GameState {
   const current = rollDay(state, date);
   return current.bonusClaimed
     ? current
@@ -175,6 +196,8 @@ export function stageProgress(game: GameState): number {
 }
 
 export function questProgress(game: GameState, quest: Quest): number {
+  if (quest.id === "walk")
+    return game.completed.includes("walk") ? 1 : Math.min(1, (game.steps?.count ?? 0) / 6000);
   return game.completed.includes(quest.id)
     ? 1
     : game.sampleDay && quest.progress < 1
@@ -183,6 +206,8 @@ export function questProgress(game: GameState, quest: Quest): number {
 }
 
 export function questProgressLabel(game: GameState, quest: Quest): string {
+  if (quest.id === "walk")
+    return `${(game.steps?.count ?? 0).toLocaleString("ko-KR")} / 6,000걸음${game.completed.includes("walk") ? " · 완료" : ""}`;
   if (game.completed.includes(quest.id))
     return game.sampleDay && quest.progress === 1 ? quest.progressLabel : "완료";
   if (game.sampleDay && quest.progress < 1) return quest.progressLabel;
@@ -193,4 +218,28 @@ export function questProgressLabel(game: GameState, quest: Quest): string {
     water: "0 / 8잔",
     sleep: "0시간 / 7시간",
   }[quest.id];
+}
+
+export function syncDeviceSteps(state: GameState, value: unknown, today = localDate()): GameState {
+  const parsed = stepSnapshotSchema.safeParse(value);
+  if (!parsed.success || parsed.data.date !== today) return state;
+  const current = rollDay(state, today);
+  const snapshot = parsed.data;
+  if (current.steps && snapshot.syncedAt < current.steps.syncedAt) return current;
+  const next = { ...current, steps: snapshot };
+  return snapshot.count >= 6000 ? completeQuest(next, "walk", today) : next;
+}
+
+export function weeklyCompletedDays(game: GameState): number {
+  const week = new Set(calendarWeek(game.date).map((day) => day.date));
+  return Math.min(
+    5,
+    new Set(game.completedDates.filter((date) => week.has(date) && date <= game.date)).size,
+  );
+}
+
+export function collectBattleCoin(state: GameState, encounter: number): GameState {
+  // A finished encounter grants its coin once, even when a timer/callback is retried.
+  if (encounter !== state.battleDefeats) return state;
+  return { ...state, battleDefeats: state.battleDefeats + 1, coins: state.coins + 10 };
 }

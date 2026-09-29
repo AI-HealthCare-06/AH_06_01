@@ -21,7 +21,8 @@ for (const [index, name] of names.entries()) {
       for (const art of await page.locator(".dinosaur-art").all()) {
         await expect(art).toHaveAttribute("data-dinosaur", String(index));
         await expect(art).toHaveAttribute("alt", new RegExp(name));
-        if (index !== 0) await expect(art).toHaveAttribute("src", image!);
+        if (index !== 0 && (await art.getAttribute("data-pose")) !== "portrait")
+          await expect(art).toHaveAttribute("src", image!);
       }
       const text = {
         home: ".feedback-copy",
@@ -65,8 +66,8 @@ test("customization previews without spending coins and remembers each character
     page.getByRole("button", { name: "스테고 바다 탐험가 스타일 미리보기" }),
   ).toHaveAttribute("data-equipped", "true");
   await page.getByRole("link", { name: "Home", exact: true }).click();
-  await expect(page.locator(".idle-dino")).toHaveAttribute("data-dinosaur", "3");
-  await expect(page.locator(".idle-dino")).toHaveAttribute("data-skin", "ocean");
+  await expect(page.locator(".battle-dinosaur")).toHaveAttribute("data-dinosaur", "3");
+  await expect(page.locator(".battle-dinosaur")).toHaveAttribute("data-skin", "ocean");
   await expect(page.locator(".feedback-portrait")).toHaveAttribute("data-skin", "ocean");
   for (const route of ["reward", "buff", "withered"]) {
     await page.goto(`/${route}`);

@@ -39,7 +39,7 @@ test("tablet desktop mode and native shells do not show simulated device chrome"
     const context = await browser.newContext({ viewport: { width: 1024, height: 768 } });
     await context.addInitScript((target) => {
       if (target === "native") {
-        Reflect.set(window, "Capacitor", { isNativePlatform: () => true });
+        Reflect.set(window, "androidBridge", {});
       } else {
         Object.defineProperty(navigator, "platform", { get: () => "MacIntel" });
         Object.defineProperty(navigator, "maxTouchPoints", { get: () => 5 });

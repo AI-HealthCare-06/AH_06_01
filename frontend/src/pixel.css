@@ -1,0 +1,666 @@
+/* Shared pixel UI: square geometry, hard shadows, crisp icons and Hangul bitmap lettering. */
+@font-face {
+  font-family: "Galmuri11";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("galmuri/dist/Galmuri11.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Galmuri11";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("galmuri/dist/Galmuri11-Bold.woff2") format("woff2");
+}
+:root {
+  font-family: "Galmuri11", "Noto Sans KR", sans-serif;
+  --pixel: "Press Start 2P", "Galmuri11", sans-serif;
+}
+.mobile-screen *,
+.mobile-screen *::before,
+.mobile-screen *::after {
+  border-radius: 0 !important;
+}
+.mobile-screen {
+  border-radius: 0 !important;
+}
+.main-screen[data-device-preview] {
+  min-height: max(1000px, 100svh);
+}
+.main-screen .main-content {
+  min-height: 0;
+}
+.mobile-screen img,
+.battle-sprite {
+  image-rendering: pixelated;
+}
+.dark-shell {
+  border: 2px solid #20211d;
+  box-shadow: 4px 4px 0 #20211d;
+}
+.dark-shell::before {
+  height: 4px;
+}
+.dark-shell::after {
+  width: 6px;
+  height: 6px;
+}
+.cream-card,
+.quest-list,
+.quest-summary,
+.weekly-reward,
+.disease-card,
+.impact-card,
+.growth-insight,
+.shop-catalog,
+.health-score,
+.shop-wallet,
+.dino-option,
+.dino-select-card,
+.profile-control,
+.bmi-card,
+.logout-button,
+.product-card,
+.style-card {
+  box-shadow: 3px 3px 0 #171b1660;
+}
+.primary-button,
+.logout-button,
+.shop-tab,
+.camera-actions button,
+.step-actions button {
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.primary-button:active,
+.logout-button:active,
+.shop-tab:active,
+.camera-actions button:active,
+.step-actions button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+.primary-button:disabled {
+  opacity: 0.65;
+}
+.pixel-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+.greeting-copy p .pixel-icon {
+  width: 12px;
+  height: 12px;
+}
+.bottom-navigation {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 #171b1640;
+  height: 76px;
+}
+.bottom-navigation a {
+  font-size: 10px;
+  line-height: 14px;
+  gap: 7px;
+  padding: 8px 1px;
+}
+.bottom-navigation .pixel-icon {
+  width: 25px;
+  height: 25px;
+}
+.bottom-navigation a.active {
+  background: #f3e7c810;
+  box-shadow: inset 0 -4px var(--red);
+}
+.bottom-navigation a[href="/camera"] .pixel-icon {
+  color: var(--gold);
+}
+.bottom-navigation a[href="/camera"].active .pixel-icon {
+  color: var(--red);
+}
+.weekly-calendar {
+  margin-bottom: 8px;
+  height: 53px;
+}
+.weekly-calendar button {
+  text-align: center;
+  padding: 4px 1px;
+  border-bottom: 3px solid transparent;
+}
+.weekly-calendar strong {
+  padding: 0;
+  font-size: 18px;
+  line-height: 22px;
+}
+.weekly-calendar span {
+  font-size: 11px;
+}
+.weekly-calendar button[aria-current="date"] {
+  border-color: #a42b25;
+  box-shadow: 2px 2px 0 #20211d;
+}
+.weekly-calendar button:first-child:not([aria-current]) {
+  color: #b83930;
+}
+.weekly-calendar button:last-child:not([aria-current]) {
+  color: #286884;
+}
+.home-screen .main-content {
+  padding: 14px 4px 12px;
+}
+.home-screen .dino-feedback {
+  min-height: 52px;
+  margin: 0 0 12px;
+  box-shadow: 3px 3px 0 var(--ink);
+  border-width: 2px;
+}
+.feedback-copy {
+  left: 64px;
+  right: 24px;
+}
+.feedback-copy strong {
+  font-size: 12px;
+  line-height: 18px;
+}
+.feedback-copy small {
+  font-size: 9px;
+  line-height: 14px;
+}
+.feedback-portrait {
+  width: 54px;
+  height: 42px;
+}
+.dino-feedback > b {
+  right: 5px;
+}
+.dino-feedback > b .pixel-icon {
+  width: 17px;
+  height: 17px;
+}
+.home-panels {
+  gap: 8px;
+  margin-top: 10px;
+}
+.radar-card,
+.compact-quests {
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 #171b16;
+}
+.compact-quest .checkbox {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+}
+.compact-quest strong {
+  font-size: 11px;
+}
+.compact-quests {
+  padding-inline: 5px;
+}
+.radar-heading h3 {
+  font-size: 10px;
+}
+.compact-quest-title h3 {
+  font-family: var(--pixel);
+  font-size: 8px;
+}
+.quest-progress-track,
+.risk-track,
+.impact-bars > div,
+.summary-track,
+.compact-walk > span {
+  background-image: repeating-linear-gradient(90deg, transparent 0 11px, #171b1612 11px 12px);
+}
+.metric-fill,
+.quest-progress-fill {
+  transition-timing-function: steps(16, end);
+  animation-timing-function: steps(16, end);
+}
+.score-number,
+.wallet-balance > strong,
+.risk-tile strong,
+.reward-coins {
+  font-family: "Galmuri11", sans-serif;
+  font-weight: 700;
+}
+.wallet-balance > strong {
+  font-size: 38px;
+}
+.score-number {
+  font-size: 43px;
+}
+.quest-row {
+  border-block: 1px solid #e8ddbb;
+}
+.step-connection {
+  margin: 10px 2px;
+  padding: 12px;
+  border: 2px solid #b1bd9e;
+  background: #243b35;
+  color: #f8eed5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.step-connection strong {
+  font: 8px/15px var(--pixel);
+  color: #f3d274;
+}
+.step-connection p {
+  font-size: 11px;
+  line-height: 18px;
+  margin-top: 5px;
+  word-break: keep-all;
+}
+.step-connection small {
+  font-size: 9px;
+  color: #c1cebb;
+}
+.step-actions {
+  display: grid;
+  gap: 8px;
+  min-width: 82px;
+}
+.step-actions button {
+  padding: 8px;
+  background: var(--gold);
+  color: var(--ink);
+  font-size: 10px;
+}
+.step-actions button:last-child:not(:first-child) {
+  background: var(--paper);
+}
+.weekly-reward {
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+.weekly-reward > div > span > i {
+  transition: width 0.5s steps(12);
+}
+.quest-detail-screen .step-connection {
+  margin-top: 20px;
+}
+.quest-detail-screen .complete-quest {
+  margin-top: 44px;
+}
+.camera-screen .main-content {
+  min-height: 680px;
+  padding-bottom: 14px;
+}
+.camera-card {
+  margin: 0 4px;
+  padding: 14px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.camera-quest-select {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.camera-quest-select select {
+  border: 2px solid var(--ink);
+  padding: 12px;
+  width: 100%;
+  background: var(--paper);
+  color: var(--ink);
+}
+.camera-viewfinder {
+  position: relative;
+  margin-top: 16px;
+  aspect-ratio: 4/3;
+  background: #182c29;
+  border: 4px solid var(--ink);
+  overflow: hidden;
+}
+.camera-viewfinder video,
+.camera-viewfinder > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: auto;
+}
+.camera-placeholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  color: #c5d1ab;
+}
+.camera-placeholder .pixel-icon {
+  width: 64px;
+  height: 64px;
+}
+.camera-placeholder strong {
+  font: 9px/18px var(--pixel);
+}
+.viewfinder-corner {
+  position: absolute;
+  inset: 12px;
+  border: 3px solid #f3d274;
+  pointer-events: none;
+  clip-path: polygon(
+    0 0,
+    18% 0,
+    18% 3%,
+    3% 3%,
+    3% 18%,
+    0 18%,
+    0 82%,
+    3% 82%,
+    3% 97%,
+    18% 97%,
+    18% 100%,
+    82% 100%,
+    82% 97%,
+    97% 97%,
+    97% 82%,
+    100% 82%,
+    100% 18%,
+    97% 18%,
+    97% 3%,
+    82% 3%,
+    82% 0,
+    100% 0,
+    100% 100%,
+    0 100%
+  );
+}
+.camera-status {
+  margin: 14px 0;
+  min-height: 38px;
+  font-size: 12px;
+  line-height: 19px;
+  color: #285644;
+  word-break: keep-all;
+}
+.camera-card .primary-button {
+  width: 100%;
+  margin: 0;
+  height: 48px;
+  font-size: 15px;
+  gap: 10px;
+}
+.camera-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.camera-actions button {
+  background: var(--gold);
+  min-height: 45px;
+  font-size: 13px;
+}
+.camera-actions button:disabled {
+  background: #c4d6b8;
+}
+.camera-note {
+  margin-top: 18px;
+  font-size: 10px;
+  line-height: 18px;
+  color: #6a6556;
+  word-break: keep-all;
+}
+.camera-quest-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+  gap: 8px;
+  padding: 12px 0;
+  font-size: 12px;
+  color: #ba392b;
+}
+.camera-quest-link .pixel-icon {
+  width: 12px;
+  height: 12px;
+}
+.pixel-battle .design-canvas-inner {
+  margin: 0;
+}
+.pixel-battle .adventure-title {
+  width: 354px;
+}
+.pixel-battle .adventure-title h2 {
+  font-size: 12px;
+}
+.pixel-battle .adventure-title p {
+  font-size: 10px;
+}
+.pixel-battle .stage-label {
+  right: 7px;
+  width: 82px;
+}
+.pixel-battle .stage-label small {
+  font-size: 7px;
+}
+.pixel-battle .battle-hud {
+  width: 170px;
+}
+.battle-scenery {
+  position: absolute;
+  top: 58px;
+  left: 0;
+  width: 354px;
+  height: 218px;
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  image-rendering: pixelated;
+}
+.battle-sprite {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.battle-dinosaur {
+  position: absolute;
+  left: 52px;
+  bottom: 61px;
+  width: 125px;
+  height: 98px;
+  transform-origin: center bottom;
+}
+.battle-dinosaur[data-dinosaur="4"] {
+  bottom: 76px;
+}
+.battle-dinosaur[data-attacking="true"] {
+  left: 100px;
+}
+.battle-enemy {
+  position: absolute;
+  left: 235px;
+  bottom: 62px;
+  width: 82px;
+  height: 93px;
+}
+.battle-enemy small {
+  position: absolute;
+  top: -15px;
+  left: -16px;
+  width: 114px;
+  text-align: center;
+  background: #171b16bb;
+  color: var(--cream);
+  font-size: 8px;
+  line-height: 13px;
+}
+.battle-enemy[data-spawning="true"] {
+  animation: monster-enter 0.64s steps(8) both;
+}
+.battle-enemy[data-defeated="true"] {
+  animation: monster-defeat 0.4s steps(5) both;
+}
+.battle-damage {
+  position: absolute;
+  left: 246px;
+  top: 150px;
+  color: #ffedaa;
+  text-shadow: 2px 2px #a8342a;
+  font: 16px var(--pixel);
+  animation: battle-damage 0.4s steps(5) both;
+}
+.battle-coin {
+  position: absolute;
+  left: 253px;
+  top: 182px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #ffd34a;
+  animation: loot-drop 0.72s steps(8) both;
+}
+.battle-coin .pixel-icon {
+  width: 25px;
+  height: 25px;
+  filter: drop-shadow(2px 2px #5d3c1b);
+}
+.battle-coin b {
+  font: 10px var(--pixel);
+  text-shadow: 2px 2px #332313;
+}
+.pixel-battle .stage-progress {
+  left: 10px;
+  width: 334px;
+}
+.pixel-stage-dot {
+  position: absolute;
+  top: 31px;
+  width: 5px;
+  height: 5px;
+  background: var(--gold);
+}
+.battle-dinosaur[data-moving="true"] {
+  animation: rex-stomp 0.28s steps(2) infinite;
+}
+.battle-dinosaur[data-moving="true"][data-movement="trot"] {
+  animation-name: tricera-trot;
+  animation-duration: 0.22s;
+}
+.battle-dinosaur[data-moving="true"][data-movement="sprint"] {
+  animation-name: raptor-sprint;
+  animation-duration: 0.16s;
+}
+.battle-dinosaur[data-moving="true"][data-movement="waddle"] {
+  animation-name: stego-waddle;
+  animation-duration: 0.36s;
+}
+.battle-dinosaur[data-moving="true"][data-movement="fly"] {
+  animation-name: ptera-fly;
+  animation-duration: 0.4s;
+}
+.battle-dinosaur[data-moving="true"][data-movement="stride"] {
+  animation-name: bronto-stride;
+  animation-duration: 0.46s;
+}
+.pixel-battle.paused * {
+  animation-play-state: paused !important;
+}
+@keyframes monster-enter {
+  from {
+    transform: translateX(85px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes monster-defeat {
+  0% {
+    filter: brightness(2);
+  }
+  35% {
+    transform: translate(8px, -4px);
+    opacity: 1;
+  }
+  65% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(16px, 14px) scaleY(0.2);
+    opacity: 0;
+  }
+}
+@keyframes battle-damage {
+  to {
+    transform: translateY(-16px);
+    opacity: 0;
+  }
+}
+@keyframes loot-drop {
+  0% {
+    transform: translateY(-18px);
+  }
+  40% {
+    transform: translateY(24px);
+  }
+  60% {
+    transform: translateY(10px);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-110px, -45px);
+    opacity: 0;
+  }
+}
+@keyframes rex-stomp {
+  50% {
+    transform: translate(5px, -5px) rotate(-2deg);
+  }
+}
+@keyframes tricera-trot {
+  50% {
+    transform: translate(7px, -3px);
+  }
+}
+@keyframes raptor-sprint {
+  50% {
+    transform: translate(12px, -7px) rotate(4deg);
+  }
+}
+@keyframes stego-waddle {
+  50% {
+    transform: translate(3px, -2px) rotate(-3deg);
+  }
+}
+@keyframes ptera-fly {
+  50% {
+    transform: translate(8px, -12px) scaleY(0.9);
+  }
+}
+@keyframes bronto-stride {
+  50% {
+    transform: translate(4px, -4px) rotate(2deg);
+  }
+}
+@media (max-width: 350px) {
+  .bottom-navigation a {
+    font-size: 9px;
+  }
+  .feedback-copy strong {
+    font-size: 11px;
+  }
+  .feedback-copy small {
+    font-size: 8px;
+  }
+  .compact-quest strong {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pixel-battle *,
+  .metric-fill {
+    animation: none !important;
+    transition: none !important;
+  }
+}

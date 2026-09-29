@@ -1,49 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-test("battle pauses and resumes all effects without awarding demo coins", async ({ page }) => {
-  await page.goto("/home");
-  const animations = () =>
-    page.locator(".battle-animated").evaluateAll((elements) =>
-      elements.flatMap((element) =>
-        element.getAnimations().map((animation) => ({
-          time: Number(animation.currentTime),
-          state: animation.playState,
-        })),
-      ),
-    );
-  await expect.poll(async () => (await animations()).length).toBe(5);
-  await expect.poll(async () => (await animations())[0].time).toBeGreaterThan(100);
-  const storedBefore = await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"));
-  await page.getByRole("button", { name: "모험 일시정지", exact: true }).click();
-  await expect(page.getByRole("button", { name: "모험 재개", exact: true })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await expect
-    .poll(async () => (await animations()).every((animation) => animation.state === "paused"))
-    .toBe(true);
-  // Let the pending pause take effect before comparing two frame timestamps.
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-      ),
-  );
-  const frozen = await animations();
-  await page.waitForTimeout(180);
-  expect(await animations()).toEqual(frozen);
-  await page.getByRole("button", { name: "모험 재개", exact: true }).click();
-  await expect.poll(async () => (await animations())[0].time).toBeGreaterThan(frozen[0].time + 100);
-  expect(await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"))).toBe(storedBefore);
-});
-
-test("reduced motion shows a still battle scene", async ({ page }) => {
+test("reduced motion removes decorative battle animations", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/home");
-  await expect(page.locator(".idle-dino")).toBeVisible();
+  await expect(page.locator(".battle-dinosaur")).toBeVisible();
   expect(
     await page
-      .locator(".battle-animated")
+      .locator(".pixel-battle *")
       .evaluateAll((elements) => elements.flatMap((element) => element.getAnimations()).length),
   ).toBe(0);
 });

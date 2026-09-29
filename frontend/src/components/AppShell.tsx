@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { assets } from "../design/assets";
@@ -6,18 +5,22 @@ import { PaperTexture } from "../design/PaperTexture";
 import { useNotice } from "./NoticeProvider";
 import { useDevicePreview } from "./useDevicePreview";
 import { StatusBar } from "./StatusBar";
+import { PixelIcon } from "./PixelIcon";
+import { calendarWeek } from "../domain/calendar";
+import { useGameStore } from "../stores/game-store";
 
-export type TabName = "home" | "quests" | "dashboard" | "shop";
+export type TabName = "home" | "quests" | "camera" | "dashboard" | "shop";
 const destinations = [
-  { path: "/home", label: "Home", key: "imgNavigationItemHomePixelIcon" },
-  { path: "/quests", label: "Quest", key: "imgNavigationItemQuestPixelIcon" },
-  { path: "/dashboard", label: "Dashboard", key: "imgNavigationItemDashboardPixelIcon" },
-  { path: "/shop", label: "Shop", key: "imgNavigationItemShopPixelIcon" },
+  { path: "/home", label: "Home", key: "home" },
+  { path: "/quests", label: "Quest", key: "quests" },
+  { path: "/camera", label: "Camera", key: "camera" },
+  { path: "/dashboard", label: "Dashboard", key: "dashboard" },
+  { path: "/shop", label: "Shop", key: "shop" },
 ] as const;
 
 export function AppShell({ active, children }: { active: TabName; children: ReactNode }) {
-  const screenAssets = assets[active];
-  const [day, setDay] = useState(22);
+  const screenAssets = assets[active === "camera" ? "home" : active];
+  const game = useGameStore((state) => state.game);
   const notice = useNotice();
   const navigate = useNavigate();
   const devicePreview = useDevicePreview();
@@ -34,36 +37,41 @@ export function AppShell({ active, children }: { active: TabName; children: Reac
         </Link>
         <div className="greeting-copy">
           <h1>Hello, Min!</h1>
-          <p>오늘도 건강한 하루예요! ☀</p>
+          <p>
+            오늘도 건강한 하루예요! <PixelIcon name="sun" />
+          </p>
         </div>
         <button
           className="search-button"
           aria-label="퀘스트 찾기"
           onClick={() => navigate("/quests")}
         >
-          <span className="search-icon" aria-hidden="true" />
+          <PixelIcon name="search" />
         </button>
         <Link className="menu-button" to="/me" aria-label="메뉴 열기">
-          ☰
+          <PixelIcon name="menu" />
         </Link>
       </header>
-      {active !== "shop" && (
+      {active !== "shop" && active !== "camera" && (
         <div className="weekly-calendar" aria-label="주간 달력">
-          {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((label, index) => (
+          {calendarWeek(game.date).map((day) => (
             <button
-              key={label}
+              key={day.date}
               onClick={() => {
-                setDay(21 + index);
-                if (21 + index !== 22)
-                  notice(
-                    `${21 + index}일 기록은 아직 없어요. 현재 화면은 Figma의 예시 기록이에요.`,
-                  );
+                notice(
+                  day.date === game.date
+                    ? "오늘의 퀘스트를 확인해 보세요."
+                    : game.completedDates.includes(day.date)
+                      ? `${day.month}월 ${day.day}일 · 모든 퀘스트를 완료했어요!`
+                      : `${day.month}월 ${day.day}일 · 전체 완료 기록이 없어요.`,
+                );
               }}
-              aria-pressed={day === 21 + index}
-              aria-label={`9월 ${21 + index}일`}
+              aria-pressed={day.date === game.date}
+              aria-current={day.date === game.date ? "date" : undefined}
+              aria-label={`${day.month}월 ${day.day}일 ${day.label}요일${day.date === game.date ? " 오늘" : ""}`}
             >
-              <span>{label}</span>
-              <strong>{21 + index}</strong>
+              <span>{day.label}</span>
+              <strong>{day.day}</strong>
             </button>
           ))}
         </div>
@@ -75,7 +83,7 @@ export function AppShell({ active, children }: { active: TabName; children: Reac
       <nav className="bottom-navigation" aria-label="주요 메뉴">
         {destinations.map(({ path, label, key }) => (
           <NavLink key={path} to={path}>
-            <img src={screenAssets[key]} alt="" />
+            <PixelIcon name={key} />
             <span>{label}</span>
           </NavLink>
         ))}

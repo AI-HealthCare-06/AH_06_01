@@ -14,6 +14,9 @@ import { dinosaurs } from "../design/dinosaurs";
 import { quests, stageProgress, questProgress, questProgressLabel } from "../domain/game";
 import { useGameStore } from "../stores/game-store";
 import { dashboardService } from "../services/dashboard-service";
+import { weeklyCompletedDays } from "../domain/game";
+import { StepConnection } from "../components/StepConnection";
+import { PixelIcon } from "../components/PixelIcon";
 
 export function HomePage() {
   const { game, paused, togglePause } = useGameStore();
@@ -35,7 +38,9 @@ export function HomePage() {
           <strong>{dino.name}, 잘하고 있어요!</strong>
           <small>꾸준히 하면 더 강해질 수 있어요!</small>
         </span>
-        <b>›</b>
+        <b>
+          <PixelIcon name="chevron" />
+        </b>
         <span className="pixel-grass" />
       </Link>
       <AdventureScene game={game} paused={paused} onTogglePause={togglePause} />
@@ -51,10 +56,7 @@ export function HomePage() {
             const done = game.completed.includes(q.id);
             return (
               <Link className="compact-quest" key={q.id} to={`/quests/${q.id}`}>
-                <img
-                  src={done ? a.imgQuestItem0CheckboxIcon : a.imgQuestItem2CheckboxIcon}
-                  alt={done ? "완료" : "진행 중"}
-                />
+                <PixelCheckbox checked={done} />
                 <img src={icons[i]} alt="" />
                 <div>
                   <strong>{q.title}</strong>
@@ -108,7 +110,7 @@ export function QuestsPage() {
               onClick={() => notice("모든 퀘스트를 완료하면 기본 보상에 50% 추가 보상이 지급돼요.")}
             >
               <img src={assets.quests.imgDecorationRewardSpark} alt="" />
-              +60 COIN
+              +50% COIN
             </button>
           </div>
         </div>
@@ -134,18 +136,35 @@ export function QuestsPage() {
           );
         })}
       </section>
+      <StepConnection />
       <button
         className="weekly-reward"
-        onClick={() => notice("주간 보스전은 다음 개발 단계에서 연결할 예정이에요.")}
+        onClick={() =>
+          notice(
+            weeklyCompletedDays(game) === 5
+              ? "이번 주 5일 달성! 보스전 입장 조건을 충족했어요. 보스전은 준비 중이에요."
+              : `하루 5개 퀘스트를 모두 완료하면 1일 달성으로 기록돼요. 이번 주 ${weeklyCompletedDays(game)}일 달성했어요.`,
+          )
+        }
       >
         <h3>WEEKLY BOSS REWARD</h3>
-        <p>퀘스트 5일 달성 시 보스전 입장</p>
+        <p>
+          {weeklyCompletedDays(game) === 5
+            ? "5일 달성! 보스전 입장 조건 완료"
+            : "하루 퀘스트 모두 완료 · 주 5일 달성"}
+        </p>
         <div>
           <strong>
-            <AnimatedNumber value={3} /> / 5 DAYS
+            <AnimatedNumber value={weeklyCompletedDays(game)} /> / 5 DAYS
           </strong>
-          <span>
-            <i className="metric-fill" />
+          <span
+            role="progressbar"
+            aria-label="이번 주 퀘스트 달성일"
+            aria-valuemin={0}
+            aria-valuemax={5}
+            aria-valuenow={weeklyCompletedDays(game)}
+          >
+            <i className="metric-fill" style={{ width: `${weeklyCompletedDays(game) * 20}%` }} />
           </span>
         </div>
       </button>
@@ -304,7 +323,7 @@ export function ShopPage() {
         <h3>HEALTH COINS</h3>
         <p>퀘스트 완료로 코인을 모아요</p>
         <div className="wallet-balance">
-          <span aria-hidden="true">◉</span>
+          <PixelIcon name="coin" />
           <strong>
             <AnimatedNumber value={game.coins} separator />
           </strong>
