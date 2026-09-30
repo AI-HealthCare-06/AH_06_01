@@ -234,127 +234,130 @@ export function DashboardPage() {
           {isError ? "기록을 불러오지 못했어요." : "건강 기록을 불러오고 있어요."}
         </p>
       ) : (
-        <div key={period} className="dashboard-period-content">
-          <section className="health-growth-card" aria-label="건강 점수와 공룡 성장">
-            <div className="health-score">
-              <h3>{periodInfo.heading} HEALTH SCORE</h3>
-              <strong className="score-number">
-                <AnimatedNumber value={data.score} />
-              </strong>
-              <span className="score-total">/ 100</span>
-              <b className="score-rank">RANK: A</b>
-              <p>
-                {periodInfo.previous}보다 <AnimatedNumber value={periodInfo.delta} />점 올랐어요!
-              </p>
-              <div className="score-track">
-                <i className="metric-fill" style={{ width: `${data.score}%` }} />
-              </div>
-            </div>
-            <Link to="/buff" className="growth-insight">
-              <DinosaurArt pose="portrait" alt={`성장한 ${dino.name}`} />
-              <div>
-                <h3>
-                  <span>{dino.name} 성장</span>
-                  <span>
-                    +<AnimatedNumber value={12} />%
-                  </span>
-                </h3>
-                <p>
-                  건강 점수 {data.score - periodInfo.delta} → {data.score} · 공격력 100 → 112
-                </p>
-                <p>
-                  오늘 퀘스트 {game.completed.length}/5 · 이번 주 {weeklyCompletedDays(game)}일 달성
-                </p>
-                <small>꾸준한 실천이 성장으로 이어져요. 능력치는 데모예요.</small>
-              </div>
-            </Link>
-          </section>
+        <div className="dashboard-period-content" tabIndex={0} aria-label="대시보드 리포트 스크롤">
           <section className="health-report cream-card" aria-labelledby="report-title">
-            <header>
-              <h3 id="report-title">REPORT</h3>
-              <span>{periodInfo.label} 리포트 · 데모</span>
-            </header>
-            <p>
-              {periodInfo.previous} 대비 건강 점수 <b>+{periodInfo.delta}점</b>
-            </p>
-            <dl>
-              <div>
-                <dt>오늘 퀘스트</dt>
-                <dd>{game.completed.length} / 5</dd>
-              </div>
-              <div>
-                <dt>이번 주 달성</dt>
-                <dd>{weeklyCompletedDays(game)}일</dd>
-              </div>
-            </dl>
-            <p className="report-next">
-              {game.completed.length === 5
-                ? "오늘 퀘스트를 모두 완료했어요."
-                : `다음 실천 · ${quests.find((quest) => !game.completed.includes(quest.id))?.title}`}
-            </p>
-            <small>점수와 추이는 데모이며 퀘스트 현황은 이 기기의 실제 기록이에요.</small>
-            <HealthTrend period={period} today={game.date} />
-          </section>
-          <Link to="/risk" className="disease-card" aria-label="질환 위험도 상세 보기">
-            <header>
-              <h3>질환 위험도</h3>
-              <small>
-                {registeredOn ? `등록일 ${registeredOn.replaceAll("-", ".")}` : "등록일 미등록"}
-              </small>
-            </header>
-            <div className="risk-grid">
-              {data.risks.map((r) => (
-                <div className={`risk-tile ${r.tone}`} key={r.name}>
-                  <h4>{r.name}</h4>
-                  <strong>
-                    <AnimatedNumber value={r.current} />%
-                  </strong>
-                  <div className="risk-track">
-                    <i className="metric-fill" style={{ width: `${r.current}%` }} />
-                  </div>
-                  <small>{r.status}</small>
+            <section className="health-growth-card" aria-label="건강 점수와 공룡 성장">
+              <div className="health-score">
+                <h3>{periodInfo.heading} HEALTH SCORE</h3>
+                <strong className="score-number">
+                  <AnimatedNumber value={data.score} />
+                </strong>
+                <span className="score-total">/ 100</span>
+                <b className="score-rank">RANK: A</b>
+                <p>
+                  {periodInfo.previous}보다 {periodInfo.delta}점 올랐어요!
+                </p>
+                <div className="score-track">
+                  <i className="metric-fill" style={{ width: `${data.score}%` }} />
                 </div>
-              ))}
-            </div>
-          </Link>
-          {period === "week" && (
-            <section className="impact-card">
-              <header>
-                <h3>퀘스트 효과 예측</h3>
-              </header>
-              <div className="chart-legend">
-                <span>현재</span>
-                <span>완료 후</span>
               </div>
-              <div className="impact-rows">
-                {data.risks.map((r) => (
-                  <div className="impact-row" key={r.name}>
-                    <span>{r.name}</span>
-                    <div className="impact-bars">
-                      <div>
-                        <i className="metric-fill" style={{ width: `${r.current * 2}%` }} />
-                      </div>
-                      <div>
-                        <i className="metric-fill" style={{ width: `${r.projected * 2}%` }} />
-                      </div>
-                    </div>
-                    <RiskChange
-                      current={r.current}
-                      projected={r.projected}
-                      tone={r.tone}
-                      projectedTone={r.projectedTone}
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="chart-axis">
-                <span>0</span>
-                <span>25</span>
-                <span>50%</span>
-              </div>
-              <p className="prediction-note">데모 예상 수치로, 실제 결과와 다를 수 있어요.</p>
+              <Link to="/buff" className="growth-insight">
+                <DinosaurArt pose="portrait" alt={`성장한 ${dino.name}`} />
+                <div>
+                  <h3>
+                    <span>{dino.name} 성장</span>
+                    <span>
+                      +<AnimatedNumber value={12} />%
+                    </span>
+                  </h3>
+                  <p>
+                    건강 점수 {data.score - periodInfo.delta} → {data.score} · 공격력 100 → 112
+                  </p>
+                  <p>
+                    오늘 퀘스트 {game.completed.length}/5 · 이번 주 {weeklyCompletedDays(game)}일
+                    달성
+                  </p>
+                  <small>꾸준한 실천이 성장으로 이어져요. 능력치는 데모예요.</small>
+                </div>
+              </Link>
             </section>
-          )}
+            <div className="report-body" key={period}>
+              <header>
+                <h3 id="report-title">REPORT</h3>
+                <span>{periodInfo.label} 리포트 · 데모</span>
+              </header>
+              <p>
+                {periodInfo.previous} 대비 건강 점수 <b>+{periodInfo.delta}점</b>
+              </p>
+              <dl>
+                <div>
+                  <dt>오늘 퀘스트</dt>
+                  <dd>{game.completed.length} / 5</dd>
+                </div>
+                <div>
+                  <dt>이번 주 달성</dt>
+                  <dd>{weeklyCompletedDays(game)}일</dd>
+                </div>
+              </dl>
+              <p className="report-next">
+                {game.completed.length === 5
+                  ? "오늘 퀘스트를 모두 완료했어요."
+                  : `다음 실천 · ${quests.find((quest) => !game.completed.includes(quest.id))?.title}`}
+              </p>
+              <small>점수와 추이는 데모이며 퀘스트 현황은 이 기기의 실제 기록이에요.</small>
+              <HealthTrend period={period} today={game.date} />
+              <Link to="/risk" className="disease-card" aria-label="질환 위험도 상세 보기">
+                <header>
+                  <h3>질환 위험도</h3>
+                  <small>
+                    {registeredOn ? `등록일 ${registeredOn.replaceAll("-", ".")}` : "등록일 미등록"}
+                  </small>
+                </header>
+                <div className="risk-grid">
+                  {data.risks.map((r) => (
+                    <div className={`risk-tile ${r.tone}`} key={r.name}>
+                      <h4>{r.name}</h4>
+                      <strong>
+                        <AnimatedNumber value={r.current} />%
+                      </strong>
+                      <div className="risk-track">
+                        <i className="metric-fill" style={{ width: `${r.current}%` }} />
+                      </div>
+                      <small>{r.status}</small>
+                    </div>
+                  ))}
+                </div>
+              </Link>
+              {period === "week" && (
+                <section className="impact-card">
+                  <header>
+                    <h3>퀘스트 효과 예측</h3>
+                  </header>
+                  <div className="chart-legend">
+                    <span>현재</span>
+                    <span>완료 후</span>
+                  </div>
+                  <div className="impact-rows">
+                    {data.risks.map((r) => (
+                      <div className="impact-row" key={r.name}>
+                        <span>{r.name}</span>
+                        <div className="impact-bars">
+                          <div>
+                            <i className="metric-fill" style={{ width: `${r.current * 2}%` }} />
+                          </div>
+                          <div>
+                            <i className="metric-fill" style={{ width: `${r.projected * 2}%` }} />
+                          </div>
+                        </div>
+                        <RiskChange
+                          current={r.current}
+                          projected={r.projected}
+                          tone={r.tone}
+                          projectedTone={r.projectedTone}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="chart-axis">
+                    <span>0</span>
+                    <span>25</span>
+                    <span>50%</span>
+                  </div>
+                  <p className="prediction-note">데모 예상 수치로, 실제 결과와 다를 수 있어요.</p>
+                </section>
+              )}
+            </div>
+          </section>
         </div>
       )}
     </AppShell>

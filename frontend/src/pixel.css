@@ -1509,12 +1509,13 @@
   font: inherit;
 }
 .health-growth-card {
-  border: 2px solid #20211d;
+  border: 0;
   background: #35576b;
   color: #f8eed5;
 }
 .health-growth-card .health-score {
   border: 0;
+  box-shadow: none;
 }
 .health-growth-card .growth-insight {
   margin: 0 10px;
@@ -1537,24 +1538,35 @@
   color: #d2dfce;
 }
 .health-report {
-  margin-top: 10px;
-  padding: 12px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid #20211d;
+  background: #fffaf0;
+  box-shadow: none;
 }
-.health-report > header {
+.report-body {
+  padding: 14px 12px;
+  color: #223b36;
+  font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.report-body > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
-.health-report h3 {
-  font: 11px var(--pixel);
+.report-body > header h3 {
+  font: 12px var(--pixel);
+  color: #1c4c54;
 }
-.health-report > header span,
-.health-report > small {
-  font-size: 9px;
-  color: #6d644e;
+.report-body > header span,
+.report-body > small {
+  font-size: 11px;
+  color: #4b5b54;
 }
-.health-report > p {
+.report-body > p {
   font-size: 12px;
   margin: 9px 0;
 }
@@ -1565,23 +1577,95 @@
   margin: 10px 0;
 }
 .health-report dl > div {
-  border: 1px solid #b1aa8e;
-  background: #e9e1bf;
-  padding: 8px;
+  border: 1px solid #acbdb0;
+  background: #e8f0e6;
+  padding: 9px;
 }
 .health-report dt {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 600;
 }
 .health-report dd {
   margin: 4px 0 0;
-  font-size: 20px;
-  color: #397a4b;
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #205d40;
 }
-.health-report .health-trend {
+.health-report .health-trend,
+.health-report .disease-card,
+.health-report .impact-card {
   border: 0;
-  padding: 8px 0 0;
-  border-top: 1px solid #b1aa8e;
+  margin-top: 16px;
+  padding: 14px 0 0;
+  height: auto;
+  border-top: 1px solid #a7b6a9;
   background: transparent;
+  box-shadow: none;
+}
+.report-body .health-trend h3,
+.report-body .disease-card h3,
+.report-body .impact-card h3 {
+  font:
+    700 14px/1.5 "Noto Sans KR",
+    "Malgun Gothic",
+    sans-serif;
+  letter-spacing: 0;
+  color: #1c4c54;
+}
+.report-body .health-trend header span,
+.report-body .health-trend > p small,
+.report-body .disease-card header small,
+.report-body .prediction-note {
+  font-size: 10px;
+  color: #4b5b54;
+}
+.report-body .risk-tile {
+  height: auto;
+  min-height: 100px;
+  border-color: #acbdb0;
+  background: #f1f4e9;
+}
+.report-body .risk-tile strong {
+  font:
+    700 23px/1.4 "Noto Sans KR",
+    "Malgun Gothic",
+    sans-serif;
+}
+.report-body .risk-tile h4,
+.report-body .risk-tile small {
+  font-size: 11px;
+  font-weight: 600;
+}
+.report-body .risk-tile.amber {
+  color: #825500;
+}
+.report-body .risk-tile.green {
+  color: #205d40;
+}
+.report-body .risk-tile.red {
+  color: #aa3029;
+}
+.report-body .trend-column strong {
+  font-size: 12px;
+}
+.report-body .trend-column small {
+  color: #344840;
+  font-size: 9px;
+}
+.report-body .disease-card:focus-visible {
+  outline-offset: -2px;
+}
+@media (max-width: 359px) {
+  .report-body {
+    padding-inline: 10px;
+  }
+  .report-body .risk-tile {
+    padding: 5px;
+  }
+  .report-body .trend-column small {
+    font-size: 8px;
+  }
 }
 .shop-screen .shop-tabs {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1649,5 +1733,13 @@
   min-height: 560px;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.dashboard-period-content::-webkit-scrollbar {
+  display: none;
+}
+.dashboard-period-content:focus-visible {
+  outline: 2px solid #ffe486;
+  outline-offset: -2px;
 }

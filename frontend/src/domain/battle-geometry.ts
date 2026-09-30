@@ -30,7 +30,7 @@ export function enemyGeometry(distance: number, art: number, rank = "normal"): A
   const large = rank !== "normal";
   const sprite = {
     x: 68 + distance * arena.pixelsPerUnit,
-    y: arena.ground - (large ? 74.2 : 65.1),
+    y: arena.ground + 7 - (large ? 74.2 : 65.1),
     width: large ? 65.8 : 57.4,
     height: large ? 74.2 : 65.1,
   };
