@@ -1368,10 +1368,21 @@
 
 /* Main tabs and compact combat overlay. */
 .pixel-battle .battle-hud {
-  top: 58px;
-  left: 0;
+  top: 63px;
+  left: 5px;
   transform: scale(0.8);
   transform-origin: top left;
+}
+/* Keep the 32px visible tile at a 5px inset, with its 44px touch area extending inward. */
+.pixel-battle .pause-adventure {
+  top: 63px;
+  right: 5px;
+  padding: 0 0 12px 12px;
+}
+.pixel-battle .pause-adventure::before {
+  inset: 0 0 auto auto;
+  width: 32px;
+  height: 32px;
 }
 .battle-hud .hp-stats {
   position: relative;
@@ -1747,7 +1758,7 @@
 /* Only rendered by the development build; the overlay never intercepts controls. */
 .battle-debug-toggle {
   position: absolute;
-  top: 68px;
+  top: 63px;
   right: 57px;
   width: 56px;
   height: 32px;
