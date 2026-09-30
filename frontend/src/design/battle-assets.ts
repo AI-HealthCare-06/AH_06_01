@@ -87,3 +87,8 @@ export const villains = [
   { name: "아크메이지 팝", image: art("313-694"), hit: art("464-601") },
   { name: "닥터 파이어볼", image: art("313-699"), hit: art("464-606") },
 ];
+
+// DINO FACE ASSETS · FLIPPED, in the same character order as dinosaurs.
+export const dinosaurFaces = ["493-579", "493-582", "493-592", "493-585", "493-589", "493-595"].map(
+  art,
+);

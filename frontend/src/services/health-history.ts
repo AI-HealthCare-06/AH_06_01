@@ -1,5 +1,6 @@
 // Sample history only; the profile has no connected health-risk service yet.
 export const healthPeriods = {
+  day: { label: "일간", heading: "DAILY", previous: "어제", delta: 1, values: [76, 78, 80, 82] },
   week: {
     label: "주간",
     heading: "WEEKLY",

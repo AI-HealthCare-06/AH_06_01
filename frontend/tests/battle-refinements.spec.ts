@@ -106,7 +106,7 @@ test("Pteranodon flaps in place, attacks down-right and freezes when paused", as
   await expect(canvas).not.toHaveAttribute("data-frame", initial!);
   const idle = await dino.evaluate((e) => ({
     left: parseFloat(getComputedStyle(e).left),
-    bottom: parseFloat(getComputedStyle(e).bottom),
+    top: parseFloat(getComputedStyle(e).top),
   }));
   await page.clock.runFor(3350);
   await expect(dino).toHaveAttribute("data-attacking", "true");
@@ -114,10 +114,10 @@ test("Pteranodon flaps in place, attacks down-right and freezes when paused", as
   await expect(canvas).toHaveAttribute("data-frame", "4");
   const attack = await dino.evaluate((e) => ({
     left: parseFloat(getComputedStyle(e).left),
-    bottom: parseFloat(getComputedStyle(e).bottom),
+    top: parseFloat(getComputedStyle(e).top),
   }));
   expect(attack.left).toBeGreaterThan(idle.left + 30);
-  expect(attack.bottom).toBeLessThan(idle.bottom - 20);
+  expect(attack.top).toBeGreaterThan(idle.top + 20);
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   const frame = await canvas.getAttribute("data-frame");
   await page.clock.runFor(1000);

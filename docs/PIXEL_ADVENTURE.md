@@ -17,7 +17,7 @@ This feature continues the current REXRUN demo on `feature/pixel-adventure-devic
 - Attacks approach the visible enemy at impact. Pteranodon hovers and flies above the ground. Radar lines are straight with a thicker outer grid outline; point markers remain pixel squares.
 - Notices appear at the top safe area; dialogs remain modal. The account page shares the profile avatar, shows available battery/network status without a simulated punch hole, and includes back navigation, a pixel switch and wearable setup guidance.
 - Step-connection guidance sits above the quest list. Home prioritizes pending quests across all five types and shows up to four; completed quests fill any remaining slots. Walk/water bars and counts remain next to the title, without redundant completion text.
-- Dashboard radio controls switch between weekly prediction and monthly/yearly sample history. Growth details sit directly below the score. Risk cards show the actual latest profile registration date, or an unregistered state. Only that date is persisted, not the health inputs. History and predictions remain labeled demo data.
+- Dashboard's period dropdown selects daily, weekly, monthly or yearly sample history. Health score and dinosaur growth share one card. A separate Report includes the selected period's change/trend and locally recorded quest progress, with demo values explicitly identified. The report area scrolls internally to retain the shared navigation position. Risk cards show the actual latest profile registration date, or an unregistered state. Only that date is persisted, not the health inputs.
 - The greeting uses [Open-Meteo current weather](https://open-meteo.com/en/docs) after location permission. Coordinates are rounded to two decimals, used for the request and not persisted. Already-granted permission allows refresh on foreground return after 30 minutes; otherwise the user requests weather with the greeting button. Denied location and network errors keep a neutral fallback with retry.
 
 ## Original Figma art
@@ -27,7 +27,8 @@ The source is [REXRUN](https://www.figma.com/design/lCWaAEae4xccaADW0osrLx/REXRU
 | Section | Nodes | Use |
 | --- | --- | --- |
 | 08 — GameStage Background Variants | 258:697, 701, 705, 709, 713, 717 | Six scrolling stage backdrops |
-| 09 — Dino Character Assets | 276:699, 702, 705, 709, 712, 715 | Right-facing adventure and portrait artwork |
+| 09 — Dino Character Assets | 276:699, 702, 705, 709, 712, 715 | Right-facing adventure artwork |
+| DINO FACE ASSETS · FLIPPED | 493:579, 582, 592, 585, 589, 595 | Tyrannosaurus, Triceratops, Raptor, Stegosaurus, Pteranodon and Brachiosaurus portraits |
 | 10 — Character Attack Motions | 288:700, 290:697, 295:697, 308:697, 434:578 | Triceratops, Tyrannosaurus, Brachiosaurus, Raptor and Pteranodon attack sheets |
 | 10 — Character Attack Motions / Walking | 446:578 | Four Pteranodon wing poses |
 | 12 — Villain Hit Reactions | 464:581, 586, 591, 596, 601, 606 | Six 200ms hit poses |
@@ -60,15 +61,23 @@ Web builds, browser emulation and mocked adapter tests do not prove physical-dev
 
 ### Verification on 2026-09-30
 
-- `npm ci`, lint, format check, 36 unit tests and production build passed after the document-based game changes. The build reports one entry-chunk size advisory (about 503 kB, 156 kB gzip).
-- All 52 browser cases passed in the final full run. Unit coverage includes one-time Coin→GOLD migration; browser coverage includes multi-hit combat, wave/Boss transitions and reload, inline buff panels and keyboard focus, RP modal minimum/maximum limits, cosmetic purchases, ordered swipe navigation, 200ms hit reactions and collapsible HUD, EXP/level labels, all six character collisions, device quests, camera/weather/dashboard controls and shared tab geometry.
+- `npm ci`, lint, format check, 38 unit tests and production build passed after the latest review changes. The build reports one entry-chunk size advisory (506.64 kB, 157.36 kB gzip).
+- All 54 browser cases passed in the final full run. Unit coverage includes one-time Coin→GOLD migration and separate collider/hitbox geometry; browser coverage includes multi-hit combat, wave/Boss transitions and reload, inline buff panels and keyboard focus, RP modal minimum/maximum limits, cosmetic purchases, ordered swipe navigation, 200ms hit reactions and collapsible HUD, EXP/level labels, all six character attacks reaching different monster hitboxes, trimmed canvas edges, six flipped portraits, four dashboard periods/Report, product scroll and shared tab geometry.
 - Visually inspected all five attack sheets (40 poses), three Pteranodon wing positions and its in-scene impact. The downloaded Pteranodon source is non-empty and retains the original Figma image.
-- Main tab heights/navigation positions match at 320/390/526/1440px and in mobile emulation. The wallet opens its conversion/cosmetic details on demand; closed tabs retain the 1080px minimum height. Buff panels and enlarged stage labels were visually checked at 320/390px without horizontal overflow.
+- Main tab heights/navigation positions match at 320/390/526/1440px and in mobile emulation. The wallet opens its conversion/cosmetic details on demand; closed tabs retain the 1080px minimum height. The revised home, merged score/growth card, Report and six-product shop were visually checked, including the 320px dashboard and 390px shop. Browser assertions also cover shop/bonus containment at 320/390px.
 - Earlier in this feature, `npx cap sync` completed for both platforms and Android `:app:assembleDebug` succeeded; the merged manifest contains only `READ_STEPS` among health permissions. Native builds were not rerun for the later web UI/game refinements.
 - iOS signing/build and physical-device health/camera testing remain pending because the development host is Windows.
 
 ### Main tab and wallet updates
 
-Shop → Character → Home → Camera → Dashboard supports horizontal touch swipes, while forms, dialogs, vertical gestures and screen edges remain independent. Quests remain reachable from Home and the header search shortcut. The standalone wallet block is replaced by a GOLD-card conversion modal with minimum/maximum RP controls and no EXP/level fields. Gold cosmetics live on Character. Catalog rows fill the available height above the navigation.
+Shop → Character → Home → Camera → Dashboard supports horizontal touch swipes, while forms, dialogs, vertical gestures and screen edges remain independent. Quests remain reachable from Home and the pixel document shortcut in the header. The standalone wallet block is replaced by a GOLD-card conversion modal with minimum/maximum RP controls and no EXP/level fields. Gold cosmetics live on Character. The shop has Recommendation and Customization buttons; six products use the restored 206px rows in a scrollable catalog above navigation. The daily bonus and conversion use matching compact buttons. Added photographs and their licenses are listed in [ASSET_CREDITS.md](ASSET_CREDITS.md).
+
+### Battle geometry and trimmed artwork
+
+Sprite rendering crops each canvas to its nontransparent bounds while retaining a common frame scale and anchor, avoiding animation jitter. Original source files remain unchanged. The Pteranodon's resting position is slightly above the map midpoint, and the HUD buff toggle displays only its arrow while retaining an accessible name.
+
+`battle-geometry.ts` defines separate body colliders and receiving hitboxes in 354 × 336 design coordinates. Narrow cola, wider food monsters and larger Elite/Boss bodies have separate proportions. Enemy movement respects the body stop boundary as well as the existing melee/ranged stopping distances. These are logical game coordinates, independent of image padding and responsive CSS scaling.
+
+Each attack records its target ID, art and rank. The visual strike approaches that target's current hitbox, including knockback, and returns to the resting anchor; defeated targets use the saved position. Character-specific contact anchors place the impact at 30% of the animation. Existing damage, range and cooldown rules are unchanged. Old saved attacks without the new optional fields remain loadable.
 
 Chromium mobile emulation also verified native touch dispatch in both directions between Shop and Character. Physical iOS/Android swipe behavior has not been tested.

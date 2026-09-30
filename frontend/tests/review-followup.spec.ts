@@ -154,14 +154,28 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
   await expect(page.locator(".growth-insight")).toContainText("공격력 100 → 112");
   await expect(page.locator(".impact-card h3")).toHaveText("퀘스트 효과 예측");
   await expect(page.locator(".prediction-note")).toContainText("실제 결과와 다를 수");
-  await page.getByRole("radio", { name: "월간", exact: true }).check();
+  await expect(page.locator(".health-growth-card .health-score")).toHaveCount(1);
+  await expect(page.locator(".health-growth-card .growth-insight")).toHaveCount(1);
+  await expect(page.locator(".dashboard-period-select option")).toHaveText([
+    "일간",
+    "주간",
+    "월간",
+    "연간",
+  ]);
+  await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption("day");
+  await expect(page.locator(".health-score h3")).toHaveText("DAILY HEALTH SCORE");
+  await expect(page.getByRole("region", { name: "REPORT", exact: true })).toContainText(
+    "어제 대비 건강 점수 +1점",
+  );
+  await expect(page.locator(".trend-column")).toHaveCount(4);
+  await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption("month");
   await expect(page.locator(".health-score h3")).toHaveText("MONTHLY HEALTH SCORE");
   await expect(page.locator(".trend-column")).toHaveCount(4);
   await expect(page.locator(".health-trend")).toContainText("+14점");
-  await page.getByRole("radio", { name: "연간", exact: true }).check();
+  await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption("year");
   await expect(page.locator(".trend-column")).toHaveCount(12);
   await expect(page.locator(".health-trend")).toContainText("+26점");
-  await page.getByRole("radio", { name: "주간", exact: true }).check();
+  await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption("week");
   await expect(page.locator(".impact-card")).toBeVisible();
 });
 
@@ -201,8 +215,8 @@ test("home hides status copy, shows both progress bars and keeps the pteranodon 
   });
   await expect(page.locator(".battle-dinosaur")).toHaveAttribute("data-dinosaur", "4");
   expect(
-    await page.locator(".battle-dinosaur").evaluate((e) => parseInt(getComputedStyle(e).bottom)),
-  ).toBeGreaterThan(100);
+    await page.locator(".battle-dinosaur").evaluate((e) => parseInt(getComputedStyle(e).top)),
+  ).toBeLessThan(100);
   const points = await page.locator('[data-series="today"]').getAttribute("points");
   const vertices = points!.split(" ").map((p) => p.split(",").map(Number));
   expect(vertices).toHaveLength(6);

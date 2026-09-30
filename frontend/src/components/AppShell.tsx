@@ -78,7 +78,7 @@ export function AppShell({ active, children }: { active: TabName; children: Reac
           aria-label="퀘스트 찾기"
           onClick={() => navigate("/quests")}
         >
-          <PixelIcon name="search" />
+          <PixelIcon name="document" />
         </button>
         <Link className="menu-button" to="/me" aria-label="메뉴 열기">
           <PixelIcon name="menu" />

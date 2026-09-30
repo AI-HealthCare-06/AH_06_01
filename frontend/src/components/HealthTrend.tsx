@@ -6,6 +6,7 @@ import type { HealthPeriod } from "../services/health-history";
 export function HealthTrend({ period, today }: { period: HealthPeriod; today: string }) {
   const config = healthPeriods[period];
   const labels = config.values.map((_, index) => {
+    if (period === "day") return ["아침", "오전", "오후", "저녁"][index];
     const day = new Date(`${today}T12:00:00`);
     if (period === "year") {
       day.setDate(1);

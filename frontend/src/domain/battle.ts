@@ -1,3 +1,4 @@
+import { colliderStopDistance } from "./battle-geometry";
 import { z } from "zod";
 import type { GameState, QuestId } from "./game";
 import { experienceProgress } from "./experience";
@@ -80,7 +81,15 @@ export const combatSchema = z.object({
     }),
   ),
   lastAttack: z
-    .object({ time: z.number(), distance: z.number(), damage: z.number(), critical: z.boolean() })
+    .object({
+      time: z.number(),
+      distance: z.number(),
+      damage: z.number(),
+      critical: z.boolean(),
+      targetId: z.number().optional(),
+      art: z.number().optional(),
+      rank: z.enum(["normal", "elite", "boss"]).optional(),
+    })
     .nullable(),
   loot: z.object({ time: z.number(), gold: z.number() }).nullable(),
 });
@@ -177,7 +186,11 @@ export function advanceCombat(
     }
     for (const enemy of state.enemies) {
       const range = enemy.ranged ? 2 : 1;
-      enemy.distance = Math.max(range, enemy.distance - ((enemy.ranged ? 1.2 : 1.4) * dt) / 1000);
+      enemy.distance = Math.max(
+        range,
+        colliderStopDistance(enemy.art, enemy.rank),
+        enemy.distance - ((enemy.ranged ? 1.2 : 1.4) * dt) / 1000,
+      );
       enemy.attackIn = Math.max(0, enemy.attackIn - dt);
     }
     state.attackIn = Math.max(0, state.attackIn - dt);
@@ -188,7 +201,15 @@ export function advanceCombat(
       state.seed = (Math.imul(state.seed, 1664525) + 1013904223) >>> 0;
       const critical = state.seed / 4294967296 < buffs.crt;
       const damage = buffs.attack * (critical ? 2 : 1);
-      state.lastAttack = { time: state.clock, distance: target.distance, damage, critical };
+      state.lastAttack = {
+        time: state.clock,
+        distance: target.distance,
+        damage,
+        critical,
+        targetId: target.id,
+        art: target.art,
+        rank: target.rank,
+      };
       target.hp = Math.max(0, target.hp - damage);
       target.hitAt = state.clock;
       target.distance += monsterStats(state.stage, state.wave, target.rank).knockback;

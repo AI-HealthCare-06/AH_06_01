@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell, PageHeading } from "../components/AppShell";
@@ -215,60 +215,86 @@ export function DashboardPage() {
         title="HEALTH DASHBOARD"
         subtitle={`${periodInfo.label} 건강 기록과 ${dino.name}의 성장을 확인하세요`}
       />
-      <fieldset className="dashboard-period">
-        <legend>건강 변화 조회 기간</legend>
-        {(Object.keys(healthPeriods) as HealthPeriod[]).map((value) => (
-          <label key={value}>
-            <input
-              type="radio"
-              name="health-period"
-              value={value}
-              checked={period === value}
-              onChange={() => setPeriod(value)}
-            />
-            <span>{healthPeriods[value].label}</span>
-          </label>
-        ))}
-      </fieldset>
+      <label className="dashboard-period-select">
+        <span>조회 기간</span>
+        <select
+          aria-label="건강 변화 조회 기간"
+          value={period}
+          onChange={(event) => setPeriod(event.target.value as HealthPeriod)}
+        >
+          {(Object.keys(healthPeriods) as HealthPeriod[]).map((value) => (
+            <option key={value} value={value}>
+              {healthPeriods[value].label}
+            </option>
+          ))}
+        </select>
+      </label>
       {!data ? (
         <p role="status">
           {isError ? "기록을 불러오지 못했어요." : "건강 기록을 불러오고 있어요."}
         </p>
       ) : (
         <div key={period} className="dashboard-period-content">
-          <section className="health-score">
-            <h3>{periodInfo.heading} HEALTH SCORE</h3>
-            <strong className="score-number">
-              <AnimatedNumber value={data.score} />
-            </strong>
-            <span className="score-total">/ 100</span>
-            <b className="score-rank">RANK: A</b>
-            <p>
-              {periodInfo.previous}보다 <AnimatedNumber value={periodInfo.delta} />점 올랐어요!
-            </p>
-            <div className="score-track">
-              <i className="metric-fill" style={{ width: `${data.score}%` }} />
+          <section className="health-growth-card" aria-label="건강 점수와 공룡 성장">
+            <div className="health-score">
+              <h3>{periodInfo.heading} HEALTH SCORE</h3>
+              <strong className="score-number">
+                <AnimatedNumber value={data.score} />
+              </strong>
+              <span className="score-total">/ 100</span>
+              <b className="score-rank">RANK: A</b>
+              <p>
+                {periodInfo.previous}보다 <AnimatedNumber value={periodInfo.delta} />점 올랐어요!
+              </p>
+              <div className="score-track">
+                <i className="metric-fill" style={{ width: `${data.score}%` }} />
+              </div>
             </div>
+            <Link to="/buff" className="growth-insight">
+              <DinosaurArt pose="portrait" alt={`성장한 ${dino.name}`} />
+              <div>
+                <h3>
+                  <span>{dino.name} 성장</span>
+                  <span>
+                    +<AnimatedNumber value={12} />%
+                  </span>
+                </h3>
+                <p>
+                  건강 점수 {data.score - periodInfo.delta} → {data.score} · 공격력 100 → 112
+                </p>
+                <p>
+                  오늘 퀘스트 {game.completed.length}/5 · 이번 주 {weeklyCompletedDays(game)}일 달성
+                </p>
+                <small>꾸준한 실천이 성장으로 이어져요. 능력치는 데모예요.</small>
+              </div>
+            </Link>
           </section>
-          <Link to="/buff" className="growth-insight">
-            <DinosaurArt pose="portrait" alt={`성장한 ${dino.name}`} />
-            <div>
-              <h3>
-                <span>{dino.name} 성장</span>
-                <span>
-                  +<AnimatedNumber value={12} />%
-                </span>
-              </h3>
-              <p>
-                건강 점수 {data.score - periodInfo.delta} → {data.score} · 공격력 100 → 112
-              </p>
-              <p>
-                오늘 퀘스트 {game.completed.length}/5 · 이번 주 {weeklyCompletedDays(game)}일 달성
-              </p>
-              <small>꾸준한 실천이 성장으로 이어져요. 능력치는 데모예요.</small>
-            </div>
-          </Link>
-          {period !== "week" && <HealthTrend period={period} today={game.date} />}
+          <section className="health-report cream-card" aria-labelledby="report-title">
+            <header>
+              <h3 id="report-title">REPORT</h3>
+              <span>{periodInfo.label} 리포트 · 데모</span>
+            </header>
+            <p>
+              {periodInfo.previous} 대비 건강 점수 <b>+{periodInfo.delta}점</b>
+            </p>
+            <dl>
+              <div>
+                <dt>오늘 퀘스트</dt>
+                <dd>{game.completed.length} / 5</dd>
+              </div>
+              <div>
+                <dt>이번 주 달성</dt>
+                <dd>{weeklyCompletedDays(game)}일</dd>
+              </div>
+            </dl>
+            <p className="report-next">
+              {game.completed.length === 5
+                ? "오늘 퀘스트를 모두 완료했어요."
+                : `다음 실천 · ${quests.find((quest) => !game.completed.includes(quest.id))?.title}`}
+            </p>
+            <small>점수와 추이는 데모이며 퀘스트 현황은 이 기기의 실제 기록이에요.</small>
+            <HealthTrend period={period} today={game.date} />
+          </section>
           <Link to="/risk" className="disease-card" aria-label="질환 위험도 상세 보기">
             <header>
               <h3>질환 위험도</h3>
@@ -359,15 +385,20 @@ const products = [
     badge: "BEST 1",
     wide: true,
   },
+  { name: "오트밀", sub: "아침 식사 · 이미지 예시", price: 180, image: "/assets/shop/oatmeal.jpg" },
+  {
+    name: "아몬드 토핑",
+    sub: "견과류 · 이미지 예시",
+    price: 160,
+    image: "/assets/shop/almonds.jpg",
+  },
 ];
 export function ShopPage() {
   const { game, claimBonus } = useGameStore();
   const dino = dinosaurs[game.dinosaur];
   const notice = useNotice();
-  const location = useLocation();
   const navigate = useNavigate();
   const [walletTrigger, setWalletTrigger] = useState<HTMLElement | null>(null);
-  const category = new URLSearchParams(location.search).get("category") === "rewards" ? 1 : 0;
   return (
     <AppShell active="shop">
       <PageHeading title="REX SHOP" subtitle={`건강 퀘스트 보상으로 ${dino.name} 꾸미기`} />
@@ -399,14 +430,7 @@ export function ShopPage() {
             notice("오늘의 무료 GOLD 10개를 받았어요!");
           }}
         >
-          <span className="bonus-diamond" aria-hidden="true">
-            ◆
-          </span>
-          <span className="daily-bonus-copy">
-            <strong>DAILY FREE</strong>
-            <small>+10 GOLD</small>
-          </span>
-          <b>{game.bonusClaimed ? "완료" : "받기"}</b>
+          {game.bonusClaimed ? "오늘 보상 완료 ✓" : "일일 보상 +10 G"}
         </button>
       </section>
       {walletTrigger && (
@@ -414,19 +438,18 @@ export function ShopPage() {
       )}
       <section className="shop-catalog">
         <div className="shop-tabs" aria-label="상품 분류">
-          {["추천", "RRR", "꾸미기"].map((label, i) => (
+          {["추천", "꾸미기"].map((label, i) => (
             <button
               key={label}
-              className={`shop-tab shop-tab-${i}`}
-              aria-pressed={category === i}
-              onClick={() => navigate(["/shop", "/shop?category=rewards", "/character"][i])}
+              className={`shop-tab shop-tab-${i === 0 ? 0 : 2}`}
+              aria-pressed={i === 0}
+              onClick={() => navigate(["/shop", "/character"][i])}
             >
               <span className="shop-tab-content">
                 <img
                   src={
                     [
                       assets.shop.imgDecorationRecommendationStar,
-                      assets.shop.imgDecorationRrrCoin,
                       assets.shop.imgDecorationCustomizeSparkle,
                     ][i]
                   }
@@ -434,19 +457,12 @@ export function ShopPage() {
                 />
                 <span className="shop-tab-label">
                   <strong>{label}</strong>
-                  {i === 1 && <small>REAL REWARD</small>}
                 </span>
               </span>
             </button>
           ))}
         </div>
-        <div
-          key={category}
-          className="product-scroll"
-          role="region"
-          aria-label="상품 목록"
-          tabIndex={0}
-        >
+        <div className="product-scroll" role="region" aria-label="상품 목록" tabIndex={0}>
           <div className="product-grid">
             {products.map((p, i) => (
               <button
@@ -472,6 +488,31 @@ export function ShopPage() {
             ))}
           </div>
         </div>
+        <details className="shop-photo-credits">
+          <summary>상품 이미지 출처</summary>
+          <p>추가 품목과 RP 가격은 데모 예시입니다.</p>
+          <a
+            href="https://commons.wikimedia.org/wiki/File:Oatmeal_(1).jpg"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Oatmeal — Renee Comet / NCI · Public domain
+          </a>
+          <a
+            href="https://commons.wikimedia.org/wiki/File:Bowl_of_chopped_almonds.jpg"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Almonds — Douglas P Perkins
+          </a>
+          <a
+            href="https://creativecommons.org/licenses/by-sa/3.0/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            CC BY-SA 3.0 · 원본 이미지
+          </a>
+        </details>
       </section>
     </AppShell>
   );

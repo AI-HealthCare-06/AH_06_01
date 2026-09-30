@@ -9,6 +9,7 @@ const paths = {
   camera: "M8 3h8v3h6v15H2V6h6zM9 9v2H7v5h2v2h6v-2h2v-5h-2V9zM10 11h4v5h-4z",
   dashboard: "M2 16h5v6H2zM10 10h5v12h-5zM18 2h5v20h-5z",
   shop: "M8 2h8v2h2v4h4v14H2V8h4V4h2zM9 5v3h6V5zM5 11v8h14v-8z",
+  document: "M4 1h12v3h4v19H4zM7 4v16h10V7h-4V4zM8 9h7v2H8zM8 13h7v2H8zM8 17h5v2H8z",
   search:
     "M6 2h10v2h3v3h2v9h-3v3h-3v2H6v-2H3v-3H1V7h2V4h3zM6 6v3H5v5h2v3h7v-2h3V8h-3V6zM18 18h3v3h3v3h-5v-3h-1z",
   menu: "M3 4h18v3H3zM3 11h18v3H3zM3 18h18v3H3z",

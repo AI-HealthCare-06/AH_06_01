@@ -1,3 +1,4 @@
+import { attackPosition, enemyGeometry, playerGeometry } from "../domain/battle-geometry";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { DesignCanvas } from "./DesignCanvas";
@@ -60,14 +61,26 @@ export function AdventureScene({
   const skin = getSkin(game.dinosaurStyles[game.dinosaur]);
   const stage = stages[battle.stage - 1];
   const wave = wavePolicies[battle.wave - 1];
-  const target = waveTarget(battle.wave);
+  const waveTotal = waveTarget(battle.wave);
   const attackElapsed = battle.lastAttack ? battle.clock - battle.lastAttack.time : 1000;
   const attackDuration = Math.min(500, buffs.attackInterval);
   const attacking = attackElapsed < attackDuration && battle.recovery === 0;
   const attack = attacking && art.attack;
   const attackTime = attackElapsed / attackDuration;
-  const approach = attacking && !reducedMotion ? Math.sin(Math.PI * attackTime) : 0;
-  const flying = art.movement === "fly";
+  const target = battle.enemies.find((enemy) => enemy.id === battle.lastAttack?.targetId);
+  const targetGeometry = battle.lastAttack
+    ? enemyGeometry(
+        target?.distance ?? battle.lastAttack.distance,
+        target?.art ?? battle.lastAttack.art ?? 0,
+        target?.rank ?? battle.lastAttack.rank ?? "normal",
+      )
+    : null;
+  const player = playerGeometry(game.dinosaur);
+  const position = attackPosition(
+    game.dinosaur,
+    attacking && !reducedMotion ? (targetGeometry?.hitbox ?? null) : null,
+    attackTime,
+  );
   const phase = battle.recovery > 0 ? "recover" : attacking ? "attack" : "idle";
   const values = {
     medicine: `공격력 ${buffs.ad} → ${Number(buffs.attack.toFixed(1))} · +${Math.round(buffs.adBonus * 100)}%`,
@@ -131,7 +144,7 @@ export function AdventureScene({
                 setSelected(null);
               }}
             >
-              BUFF {buffsExpanded ? "▴" : "▾"}
+              {buffsExpanded ? "▴" : "▾"}
             </button>
             <div
               className="hp-bar"
@@ -231,12 +244,10 @@ export function AdventureScene({
           data-movement={art.movement}
           data-moving={false}
           data-attacking={!!attack}
-          style={{
-            left: 18 + approach * 80,
-            ...(flying
-              ? { bottom: 110 - approach * 24, rotate: `${approach * 12}deg` }
-              : { bottom: 90 }),
-          }}
+          data-collider={JSON.stringify(player.collider)}
+          data-hitbox={JSON.stringify(player.hitbox)}
+          data-attack-target={targetGeometry ? JSON.stringify(targetGeometry.hitbox) : undefined}
+          style={{ left: position.x, top: position.y, bottom: "auto" }}
         >
           <BattleSprite
             src={attack || art.walk || art.image}
@@ -257,6 +268,7 @@ export function AdventureScene({
         </div>
         {battle.enemies.map((monster) => {
           const enemy = villains[monster.art];
+          const geometry = enemyGeometry(monster.distance, monster.art, monster.rank);
           const hit = battle.clock - monster.hitAt >= 0 && battle.clock - monster.hitAt < 200;
           return (
             <div
@@ -264,7 +276,9 @@ export function AdventureScene({
               key={monster.id}
               data-rank={monster.rank}
               data-hit={hit}
-              style={{ left: 68 + monster.distance * 30, bottom: 90 }}
+              data-collider={JSON.stringify(geometry.collider)}
+              data-hitbox={JSON.stringify(geometry.hitbox)}
+              style={{ left: geometry.sprite.x, top: geometry.sprite.y, bottom: "auto" }}
             >
               <BattleSprite src={hit ? enemy.hit : enemy.image} label={enemy.name} backdrop />
               <small>
@@ -285,7 +299,16 @@ export function AdventureScene({
           );
         })}
         {attacking && (
-          <b className="battle-damage" key={`hit-${battle.lastAttack!.time}`} aria-hidden="true">
+          <b
+            className="battle-damage"
+            key={`hit-${battle.lastAttack!.time}`}
+            aria-hidden="true"
+            style={
+              targetGeometry
+                ? { left: targetGeometry.hitbox.x, top: targetGeometry.hitbox.y - 18 }
+                : undefined
+            }
+          >
             {battle.lastAttack!.critical && "CRT "}−{Math.round(battle.lastAttack!.damage)}
           </b>
         )}
@@ -307,17 +330,17 @@ export function AdventureScene({
         <div className="stage-progress">
           <span>WAVE PROGRESS</span>
           <b>
-            <AnimatedNumber value={battle.killed} /> / {target}
+            <AnimatedNumber value={battle.killed} /> / {waveTotal}
           </b>
           <div
             className="stage-track risk-track"
             role="progressbar"
             aria-label="스테이지 몬스터 처치"
             aria-valuemin={0}
-            aria-valuemax={target}
+            aria-valuemax={waveTotal}
             aria-valuenow={battle.killed}
           >
-            <i style={{ width: `${(battle.killed / target) * 100}%` }} />
+            <i style={{ width: `${(battle.killed / waveTotal) * 100}%` }} />
           </div>
           <small className="wave-caption">
             {farming

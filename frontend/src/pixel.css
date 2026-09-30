@@ -1429,13 +1429,13 @@
   padding-bottom: 6px;
 }
 .shop-screen .product-scroll {
-  display: flex;
-  overflow: visible;
-  flex: 1;
+  display: block;
+  overflow-y: auto;
+  flex: 1 1 0;
+  min-height: 432px;
 }
 .shop-screen .product-grid {
-  flex: 1;
-  grid-template-rows: repeat(2, minmax(206px, 1fr));
+  grid-template-rows: repeat(3, 206px);
 }
 .character-customization {
   padding: 12px;
@@ -1478,4 +1478,176 @@
 .shop-screen .product-badge {
   top: auto;
   bottom: 59px;
+}
+
+/* Face portraits and tightly cropped battle artwork use separate gameplay boxes. */
+.battle-sprite {
+  position: absolute;
+}
+.buffs-toggle {
+  min-width: 24px;
+  font-size: 14px;
+}
+.feedback-portrait {
+  object-fit: contain;
+}
+.dashboard-period-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0;
+  color: #f8eed5;
+  font-size: 12px;
+}
+.dashboard-period-select select {
+  min-width: 132px;
+  padding: 9px 12px;
+  border: 2px solid #242b22;
+  background: #f8eed5;
+  color: #20211d;
+  font: inherit;
+}
+.health-growth-card {
+  border: 2px solid #20211d;
+  background: #35576b;
+  color: #f8eed5;
+}
+.health-growth-card .health-score {
+  border: 0;
+}
+.health-growth-card .growth-insight {
+  margin: 0 10px;
+  padding: 9px 0;
+  border: 0;
+  border-top: 1px solid #93a49a;
+  background: transparent;
+  color: #f8eed5;
+  box-shadow: none;
+  min-height: 100px;
+}
+.health-growth-card .growth-insight img {
+  width: 50px;
+  height: 54px;
+}
+.health-growth-card .growth-insight h3 {
+  color: #ffe486;
+}
+.health-growth-card .growth-insight small {
+  color: #d2dfce;
+}
+.health-report {
+  margin-top: 10px;
+  padding: 12px;
+}
+.health-report > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.health-report h3 {
+  font: 11px var(--pixel);
+}
+.health-report > header span,
+.health-report > small {
+  font-size: 9px;
+  color: #6d644e;
+}
+.health-report > p {
+  font-size: 12px;
+  margin: 9px 0;
+}
+.health-report dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0;
+}
+.health-report dl > div {
+  border: 1px solid #b1aa8e;
+  background: #e9e1bf;
+  padding: 8px;
+}
+.health-report dt {
+  font-size: 10px;
+}
+.health-report dd {
+  margin: 4px 0 0;
+  font-size: 20px;
+  color: #397a4b;
+}
+.health-report .health-trend {
+  border: 0;
+  padding: 8px 0 0;
+  border-top: 1px solid #b1aa8e;
+  background: transparent;
+}
+.shop-screen .shop-tabs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.shop-screen .product-4 {
+  grid-column: 1 / 3;
+}
+.shop-screen .product-5 {
+  grid-column: 3;
+}
+.shop-wallet {
+  gap: 8px 10px;
+  background: #294c5c;
+  border-color: #162e36;
+  box-shadow: inset 0 3px #527580;
+}
+.shop-wallet .daily-bonus {
+  display: block;
+  width: auto;
+  height: auto;
+  padding: 8px 10px;
+  border: 1px solid #b8b68e;
+  background: #233f4e;
+  color: #ffe486;
+  font-size: 10px;
+  line-height: 18px;
+  box-shadow: none;
+  white-space: nowrap;
+}
+.shop-wallet .wallet-balance > strong {
+  font-size: clamp(22px, 6vw, 32px);
+}
+@media (max-width: 359px) {
+  .health-growth-card .score-total {
+    font-size: 12px;
+  }
+  .health-growth-card .health-score p,
+  .health-growth-card .score-track {
+    left: 128px;
+  }
+}
+.shop-wallet .daily-bonus:disabled {
+  opacity: 0.6;
+}
+.shop-photo-credits {
+  font-size: 9px;
+  color: #e9e1bf;
+  padding: 6px 2px 0;
+}
+.shop-photo-credits summary {
+  cursor: pointer;
+}
+.shop-photo-credits a {
+  display: block;
+  color: #ffe486;
+  margin-top: 4px;
+}
+
+.dashboard-screen .main-content {
+  display: flex;
+  flex-direction: column;
+}
+.dashboard-period-content {
+  flex: 1 1 0;
+  min-height: 560px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
 }

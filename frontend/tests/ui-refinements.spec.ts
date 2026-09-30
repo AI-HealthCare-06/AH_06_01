@@ -76,12 +76,53 @@ test("wallet contains its bonus action and catalog continues to the bottom navig
     expect(wallet.x + wallet.width - bonus.x - bonus.width).toBeGreaterThanOrEqual(12);
     expect(wallet.y + wallet.height - bonus.y - bonus.height).toBeGreaterThanOrEqual(12);
     const catalog = (await page.locator(".shop-catalog").boundingBox())!;
-    const lastProduct = (await page.locator(".product-3").boundingBox())!;
     const navigation = (await page.locator(".bottom-navigation").boundingBox())!;
     expect(navigation.y - catalog.y - catalog.height).toBeLessThan(24);
-    expect(catalog.y + catalog.height - lastProduct.y - lastProduct.height).toBeLessThan(24);
-    await page.locator(".product-3").scrollIntoViewIfNeeded();
-    await expect(page.locator(".product-3 > strong")).toBeInViewport();
+    await expect(page.locator(".product")).toHaveCount(6);
+    await expect(page.locator(".shop-tab")).toHaveText(["추천", "꾸미기"]);
+    expect(
+      await page
+        .locator(".daily-bonus")
+        .evaluate((element) => element.scrollWidth <= element.clientWidth),
+    ).toBe(true);
+    const region = page.getByRole("region", { name: "상품 목록" });
+    await region.focus();
+    await region.press("End");
+    await page.locator(".product-5").scrollIntoViewIfNeeded();
+    await expect(page.locator(".product-5 > strong")).toBeInViewport();
+    expect((await page.locator(".product-5").boundingBox())!.height).toBeCloseTo(206, 0);
     await expect(page.getByRole("link", { name: "Home", exact: true })).toBeVisible();
   }
+});
+
+test("feedback follows all flipped face assets and the arrow opens buffs", async ({ page }) => {
+  await page.clock.install();
+  await page.clock.pauseAt(new Date());
+  await page.goto("/home");
+  const faces = ["493-579", "493-582", "493-592", "493-585", "493-589", "493-595"];
+  for (let dinosaur = 0; dinosaur < faces.length; dinosaur++) {
+    await page.evaluate(async (index) => {
+      const path = "/src/stores/game-store.ts";
+      const { useGameStore } = await import(path);
+      useGameStore.getState().chooseDinosaur(index);
+    }, dinosaur);
+    await expect(page.locator(".feedback-portrait")).toHaveAttribute(
+      "src",
+      `/assets/battle/${faces[dinosaur]}.png`,
+    );
+    await expect
+      .poll(() =>
+        page
+          .locator(".feedback-portrait")
+          .evaluate((image) => (image as HTMLImageElement).naturalWidth),
+      )
+      .toBeGreaterThan(0);
+  }
+  const toggle = page.getByRole("button", { name: "버프 목록 펼치기" });
+  await expect(toggle).toHaveText("▾");
+  await toggle.click();
+  await expect(page.locator(".battle-buffs")).toBeVisible();
+  await expect(page.getByRole("button", { name: "버프 목록 접기" })).toHaveText("▴");
+  await page.getByRole("button", { name: "퀘스트 찾기" }).click();
+  await expect(page).toHaveURL(/\/quests$/);
 });

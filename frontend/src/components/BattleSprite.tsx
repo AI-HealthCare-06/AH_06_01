@@ -86,7 +86,10 @@ export function BattleSprite({
     void load(src)
       .then((image) => {
         if (!active || !canvas.current) return;
-        const context = canvas.current.getContext("2d")!;
+        const buffer = document.createElement("canvas");
+        buffer.width = 160;
+        buffer.height = 120;
+        const context = buffer.getContext("2d")!;
         let source: HTMLImageElement | HTMLCanvasElement = backdrop
           ? silhouette(image, src)
           : image;
@@ -113,11 +116,14 @@ export function BattleSprite({
             width = pose[2];
             height = pose[3];
           }
-        } else if (backdrop) {
+        } else {
           // Art-card whitespace is outside the character's gameplay box.
-          const pixels = (source as HTMLCanvasElement)
-            .getContext("2d")!
-            .getImageData(0, 0, width, height).data;
+          const boundsCanvas = document.createElement("canvas");
+          boundsCanvas.width = width;
+          boundsCanvas.height = height;
+          const boundsContext = boundsCanvas.getContext("2d")!;
+          boundsContext.drawImage(source, 0, 0);
+          const pixels = boundsContext.getImageData(0, 0, width, height).data;
           let left = width,
             top = height,
             right = 0,
@@ -157,6 +163,41 @@ export function BattleSprite({
             Math.round(height * scale),
           );
         draw();
+        const pixels = context.getImageData(0, 0, 160, 120).data;
+        let left = 160,
+          top = 120,
+          right = -1,
+          bottom = -1;
+        for (let row = 0; row < 120; row++)
+          for (let col = 0; col < 160; col++) {
+            if (pixels[(row * 160 + col) * 4 + 3] > 0) {
+              left = Math.min(left, col);
+              right = Math.max(right, col);
+              top = Math.min(top, row);
+              bottom = Math.max(bottom, row);
+            }
+          }
+        if (right < left) return;
+        const output = canvas.current;
+        output.width = right - left + 1;
+        output.height = bottom - top + 1;
+        output.style.left = `${(left / 160) * 100}%`;
+        output.style.top = `${(top / 120) * 100}%`;
+        output.style.width = `${(output.width / 160) * 100}%`;
+        output.style.height = `${(output.height / 120) * 100}%`;
+        const cropped = output.getContext("2d")!;
+        cropped.imageSmoothingEnabled = false;
+        cropped.drawImage(
+          buffer,
+          left,
+          top,
+          output.width,
+          output.height,
+          0,
+          0,
+          output.width,
+          output.height,
+        );
       })
       .catch(() => {
         /* Keep the accessible label when an asset cannot load. */
