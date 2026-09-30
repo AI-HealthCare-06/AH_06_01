@@ -19,6 +19,7 @@ import type { SkinId } from "../domain/appearance";
 import type { EffectId } from "../domain/economy";
 import { experienceForLevel, experienceProgress } from "../domain/experience";
 import { characterStats } from "../domain/game-policy";
+import { debugBuffLimits, type DebugBuffs } from "../domain/battle";
 
 const storageKey = "rexrun-demo-game-v1";
 function loadGame() {
@@ -30,7 +31,10 @@ function loadGame() {
 }
 function save(game: GameState) {
   try {
-    localStorage.setItem(storageKey, JSON.stringify(game));
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(game, (key, value) => (key === "debugBuffs" ? undefined : value)),
+    );
   } catch {
     /* The demo also works without persistent browser storage. */
   }
@@ -52,6 +56,8 @@ type GameStore = {
   repeat: (id: QuestId) => void;
   buyEffect: (id: EffectId) => void;
   debugChangeLevel: (delta: number) => void;
+  debugSetBuff: (key: keyof DebugBuffs, value: number) => void;
+  debugResetBuffs: () => void;
   buyAccessory: (id: string) => boolean;
   equipAccessory: (id: string) => void;
 };
@@ -62,6 +68,22 @@ let lastSaved = 0;
 export const useGameStore = create<GameStore>((set) => ({
   game: loadedGame,
   paused: loadedGame.battlePaused,
+  debugSetBuff: (key, value) =>
+    set((state) => {
+      if (!import.meta.env.DEV || !Number.isFinite(value) || !Object.hasOwn(debugBuffLimits, key))
+        return state;
+      const [min, max] = debugBuffLimits[key];
+      return {
+        game: {
+          ...tickBattle(state.game),
+          debugBuffs: { ...state.game.debugBuffs, [key]: Math.max(min, Math.min(max, value)) },
+        },
+      };
+    }),
+  debugResetBuffs: () =>
+    set((state) =>
+      import.meta.env.DEV ? { game: { ...tickBattle(state.game), debugBuffs: undefined } } : state,
+    ),
   buyAccessory: (id) => {
     let purchased = false;
     set((state) => {
@@ -104,7 +126,12 @@ export const useGameStore = create<GameStore>((set) => ({
   tick: () =>
     set((state) => {
       const game = tickBattle(state.game);
-      if (Date.now() - lastSaved >= 1000) {
+      if (
+        game.experience !== state.game.experience ||
+        game.gold !== state.game.gold ||
+        game.combat.pendingGold !== state.game.combat.pendingGold ||
+        Date.now() - lastSaved >= 1000
+      ) {
         save(game);
         lastSaved = Date.now();
       }

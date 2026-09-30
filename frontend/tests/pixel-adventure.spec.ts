@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("Sunday calendar follows today across midnight and month end", async ({ page }) => {
   await page.clock.install({ time: new Date(2026, 8, 30, 23, 59, 30) });
-  await page.goto("/quests");
+  await page.goto("/dashboard");
   await expect(page.locator(".weekly-calendar button span")).toHaveText([
     "일",
     "월",
@@ -13,10 +13,10 @@ test("Sunday calendar follows today across midnight and month end", async ({ pag
     "토",
   ]);
   await expect(page.locator('[aria-current="date"]')).toContainText("30");
-  await page.clock.runFor(61_000);
+  await page.clock.fastForward(61_000);
   await expect(page.locator('[aria-current="date"]')).toHaveAttribute(
     "aria-label",
-    "10월 1일 목요일 오늘",
+    "10월 1일 목요일 오늘 · 퀘스트 0/5",
   );
 });
 
@@ -44,7 +44,7 @@ test("device snapshots update the walk bar and complete without a manual button"
   await expect(page.locator(".quest-row").nth(2).locator(".pixel-check")).toBeVisible();
   await sync(6800);
   await page.goto("/shop");
-  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,280");
+  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,280G");
   await page.goto("/quests/walk");
   await expect(page.getByRole("button", { name: "오늘 완료한 퀘스트예요" })).toBeDisabled();
 });
@@ -72,7 +72,9 @@ test("wave combat pauses, requires multiple hits and awards Gold separately", as
   await page.clock.runFor(300);
   await expect(page.locator(".battle-enemy")).toHaveCount(1);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!));
-  expect(saved.gold).toBe(1310);
+  expect(saved.gold).toBe(1280);
+  expect(saved.combat.pendingGold).toBe(30);
+  expect(saved.experience).toBe(1);
 });
 
 test("camera requests on click, captures, and stops all tracks on navigation", async ({ page }) => {

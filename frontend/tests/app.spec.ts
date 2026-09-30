@@ -48,21 +48,21 @@ test("quest completion persists and cannot grant a duplicate reward", async ({ p
   await expect(page).toHaveURL(/\/reward$/);
   await expect(page.locator(".reward-coins")).toHaveText("+30 EXP");
   await page.goto("/shop");
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280G");
   await page.reload();
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280G");
   await page.goto("/quests/water");
   await expect(page.getByRole("button", { name: "오늘 완료한 퀘스트예요" })).toBeDisabled();
 });
 test("daily bonus can be claimed once and demo products never spend Gold", async ({ page }) => {
   await page.goto("/shop");
   await page.locator(".daily-bonus").click();
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,290");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,290G");
   await expect(page.locator(".daily-bonus")).toBeDisabled();
   await page.reload();
   await expect(page.locator(".daily-bonus")).toBeDisabled();
   await page.getByRole("button", { name: /닭가슴살 세트/ }).click();
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,290");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,290G");
 });
 test("onboarding validates input and keeps health and credentials out of storage", async ({
   page,

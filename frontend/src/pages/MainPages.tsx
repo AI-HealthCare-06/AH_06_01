@@ -5,8 +5,8 @@ import { AppShell, PageHeading } from "../components/AppShell";
 import { AdventureScene } from "../components/AdventureScene";
 import { DinoRadarCard } from "../components/DinoRadarCard";
 import { DinosaurArt } from "../components/DinosaurArt";
-import { AccessoryCatalog, EquippedAccessories } from "../components/AccessoryCatalog";
-import { DinosaurCustomization } from "../components/DinosaurCustomization";
+import { AccessoryCatalog } from "../components/AccessoryCatalog";
+import { CharacterVault } from "../components/CharacterVault";
 import { RiskChange } from "../components/RiskChange";
 import { AnimatedNumber } from "../components/AnimatedNumber";
 import { QuestProgress, PixelCheckbox } from "../components/QuestProgress";
@@ -16,10 +16,10 @@ import { dinosaurs } from "../design/dinosaurs";
 import { quests, stageProgress, questProgress, questProgressLabel } from "../domain/game";
 import { useGameStore } from "../stores/game-store";
 import { dashboardService } from "../services/dashboard-service";
-import { weeklyCompletedDays } from "../domain/game";
+import { weeklyCompletedDays, questCountOn } from "../domain/game";
 import { PixelIcon } from "../components/PixelIcon";
 import { HealthTrend } from "../components/HealthTrend";
-import { healthPeriods } from "../services/health-history";
+import { healthPeriods, reportDateRange } from "../services/health-history";
 import type { HealthPeriod } from "../services/health-history";
 import { useProfileStore } from "../stores/profile-store";
 import { GameWallet, GoldEffects } from "../components/GameWallet";
@@ -205,13 +205,25 @@ export function DashboardPage() {
   const dino = dinosaurs[game.dinosaur];
   const registeredOn = useProfileStore((s) => s.registeredOn);
   const [period, setPeriod] = useState<HealthPeriod>("week");
+  const [dateChoice, setSelectedDate] = useState<string | null>(null);
+  const selectedDate = dateChoice ?? game.date;
+  const [rangeStart, setRangeStart] = useState(game.date);
+  const range = reportDateRange(period, selectedDate, rangeStart);
+  const selectedQuests = questCountOn(game, selectedDate);
   const periodInfo = healthPeriods[period];
   const { data, isError } = useQuery({
     queryKey: ["dashboard", "demo"],
     queryFn: ({ signal }) => dashboardService.getSnapshot(signal),
   });
   return (
-    <AppShell active="dashboard">
+    <AppShell
+      active="dashboard"
+      calendarDate={selectedDate}
+      onSelectDate={(date) => {
+        setSelectedDate(date);
+        if (date < rangeStart) setRangeStart(date);
+      }}
+    >
       <div className="dashboard-heading">
         <PageHeading
           title="HEALTH DASHBOARD"
@@ -231,6 +243,41 @@ export function DashboardPage() {
             ))}
           </select>
         </label>
+      </div>
+      <div className="dashboard-date-controls" data-no-swipe>
+        {period === "custom" && (
+          <label>
+            시작일
+            <input
+              aria-label="조회 시작일"
+              type="date"
+              value={rangeStart}
+              max={selectedDate}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value && value <= selectedDate) setRangeStart(value);
+              }}
+            />
+          </label>
+        )}
+        <label>
+          {period === "custom" ? "종료일" : "기준 날짜"}
+          <input
+            aria-label={period === "custom" ? "조회 종료일" : "조회 기준 날짜"}
+            type="date"
+            value={selectedDate}
+            max={game.date}
+            onChange={(event) => {
+              const value = event.target.value;
+              if (!value || value > game.date) return;
+              setSelectedDate(value);
+              if (value < rangeStart) setRangeStart(value);
+            }}
+          />
+        </label>
+        <p aria-live="polite">
+          {range.start === range.end ? range.end : `${range.start} ~ ${range.end}`}
+        </p>
       </div>
       {!data ? (
         <p role="status">
@@ -274,7 +321,7 @@ export function DashboardPage() {
                 </div>
               </Link>
             </section>
-            <div className="report-body" key={period}>
+            <div className="report-body" key={`${period}-${range.start}-${range.end}`}>
               <header>
                 <h3 id="report-title">
                   <PixelIcon name="document" />
@@ -287,12 +334,12 @@ export function DashboardPage() {
               </p>
               <dl>
                 <div>
-                  <dt>오늘 퀘스트</dt>
-                  <dd>{game.completed.length} / 5</dd>
+                  <dt>{selectedDate === game.date ? "오늘 퀘스트" : "선택일 퀘스트"}</dt>
+                  <dd>{selectedQuests} / 5</dd>
                 </div>
                 <div>
-                  <dt>이번 주 달성</dt>
-                  <dd>{weeklyCompletedDays(game)}일</dd>
+                  <dt>{selectedDate === game.date ? "이번 주 달성" : "선택 주 달성"}</dt>
+                  <dd>{weeklyCompletedDays(game, selectedDate)}일</dd>
                 </div>
               </dl>
               <p className="report-next">
@@ -326,7 +373,7 @@ export function DashboardPage() {
                   ))}
                 </div>
               </Link>
-              <HealthTrend period={period} today={game.date} />
+              <HealthTrend period={period} today={selectedDate} from={range.start} />
               {period === "week" && (
                 <section className="impact-card">
                   <header>
@@ -416,7 +463,15 @@ export function ShopPage({ customize = false }: { customize?: boolean }) {
       <PageHeading title="REX SHOP" subtitle={`건강 퀘스트 보상으로 ${dino.name} 꾸미기`} />
       <section className="shop-wallet" aria-label="GOLD 지갑">
         <div className="wallet-heading">
-          <h3>GOLD</h3>
+          <h3>
+            <PixelIcon name="coin" /> GOLD
+          </h3>
+          <div className="wallet-balance">
+            <strong>
+              <AnimatedNumber value={game.gold} separator />
+              <small>G</small>
+            </strong>
+          </div>
           <button
             className="wallet-convert"
             onClick={(event) => setWalletTrigger(event.currentTarget)}
@@ -424,13 +479,11 @@ export function ShopPage({ customize = false }: { customize?: boolean }) {
             전환 ⇄
           </button>
         </div>
-        <p>전투와 레벨업으로 GOLD를 모아요 · 현실 상품에는 RP 사용</p>
-        <div className="wallet-balance">
-          <PixelIcon name="coin" />
-          <strong>
-            <AnimatedNumber value={game.gold} separator />
-          </strong>
-        </div>
+        <p>
+          전투 클리어와 레벨업으로 GOLD를 모아요
+          <br />
+          <span>현실 상품에는 RP 사용</span>
+        </p>
         <button
           className="daily-bonus"
           disabled={game.bonusClaimed}
@@ -545,22 +598,9 @@ export function ShopPage({ customize = false }: { customize?: boolean }) {
 }
 
 export function CharacterPage() {
-  const game = useGameStore((state) => state.game);
   return (
     <AppShell active="character">
-      <PageHeading
-        title="MY CHARACTER"
-        subtitle={`${dinosaurs[game.dinosaur].name} · GOLD ${game.gold.toLocaleString()} · 나만의 스타일`}
-      />
-      <section className="character-customization cream-card" aria-label="꾸미기 목록" tabIndex={0}>
-        <div className="character-equipped-preview">
-          <DinosaurArt />
-          <EquippedAccessories />
-        </div>
-        <AccessoryCatalog inventory />
-        <DinosaurCustomization />
-        <GoldEffects />
-      </section>
+      <CharacterVault />
     </AppShell>
   );
 }

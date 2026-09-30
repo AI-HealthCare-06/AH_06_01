@@ -52,14 +52,18 @@ describe("closest target and ranged pursuit", () => {
     expect(before.enemies[0].hp).toBe(1);
     const hit = advanceCombat(before, buffs, 1, 50);
     expect(hit.defeats).toBe(1);
-    expect(hit.gold).toBe(30);
+    expect(hit.gold).toBe(0);
+    expect(hit.combat.pendingGold).toBe(30);
     expect(hit.combat.enemies).toHaveLength(0);
     expect(hit.combat.transition).toBeNull();
     expect(before.lastAttack?.resolved).toBe(false);
     const returning = advanceCombat(hit.combat, buffs, 1, 750);
     expect(returning.defeats).toBe(0);
     expect(returning.combat.transition).toBeNull();
-    expect(advanceCombat(returning.combat, buffs, 1, 50).combat.transition?.kind).toBe("wave");
+    const clear = advanceCombat(returning.combat, buffs, 1, 50);
+    expect(clear.combat.transition?.kind).toBe("wave");
+    expect(clear.gold).toBe(30);
+    expect(clear.combat.pendingGold).toBe(0);
   });
   it("finishes its locked strike if a melee arrives, then targets that nearer enemy", () => {
     const started = advanceCombat(

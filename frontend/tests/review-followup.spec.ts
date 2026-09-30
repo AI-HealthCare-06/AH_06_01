@@ -161,6 +161,7 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
     "주간",
     "월간",
     "연간",
+    "기간",
   ]);
   await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption("day");
   await expect(page.locator(".health-score h3")).toHaveText("DAILY HEALTH SCORE");
@@ -173,7 +174,7 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
   await expect(page.locator(".trend-column")).toHaveCount(4);
   await expect(page.locator(".health-trend")).toContainText("+14점");
   await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption("year");
-  await expect(page.locator(".trend-column")).toHaveCount(12);
+  await expect(page.locator(".trend-column")).toHaveCount(9);
   await expect(page.locator(".health-trend")).toContainText("+26점");
   await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption("week");
   await expect(page.locator(".impact-card")).toBeVisible();

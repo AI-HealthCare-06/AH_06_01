@@ -1,6 +1,11 @@
 import { useEffect, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import type { CombatState } from "../domain/battle";
+import {
+  enemyAttackInterval,
+  type CombatState,
+  type DebugBuffs,
+  type battleBuffStats,
+} from "../domain/battle";
 import { enemyAttackRange } from "../domain/battle-range";
 import { villains } from "../design/battle-assets";
 
@@ -10,7 +15,7 @@ function panelPosition(anchor: HTMLButtonElement | null) {
   const top = Math.max(56, Math.min(window.innerHeight - 8, box?.top ?? 200));
   return {
     width,
-    left: Math.max(8, Math.min(window.innerWidth - width - 8, (box?.right ?? width) - width)),
+    left: (window.innerWidth - width) / 2,
     bottom: Math.max(8, window.innerHeight - top + 8),
     maxHeight: Math.max(40, Math.min(280, top - 16)),
   };
@@ -23,6 +28,9 @@ export function BattleDebugPanel({
   enemies,
   onChangeLevel,
   onClose,
+  buffs,
+  onChangeBuff,
+  onResetBuffs,
 }: {
   anchor: RefObject<HTMLButtonElement | null>;
   level: number;
@@ -30,6 +38,9 @@ export function BattleDebugPanel({
   enemies: CombatState["enemies"];
   onChangeLevel: (delta: number) => void;
   onClose: () => void;
+  buffs: ReturnType<typeof battleBuffStats>;
+  onChangeBuff: (key: keyof DebugBuffs, value: number) => void;
+  onResetBuffs: () => void;
 }) {
   const [placement, setPlacement] = useState(() => panelPosition(anchor.current));
   useEffect(() => {
@@ -107,13 +118,44 @@ export function BattleDebugPanel({
               {enemyAttackRange(enemy, dinosaur).toFixed(2)}u
             </span>
             <span>
-              공격 0.50s · 이동 {enemy.ranged ? "1.2" : "1.4"}u/s · 쿨타임{" "}
-              {Math.ceil(enemy.attackIn)}ms
+              공격 {(enemyAttackInterval(enemy.ranged) / 1000).toFixed(2)}s · 이동{" "}
+              {enemy.ranged ? "1.2" : "1.4"}u/s · 쿨타임 {Math.ceil(enemy.attackIn)}ms
             </span>
           </article>
         ))}
         {enemies.length === 0 && <p>몬스터 스폰 대기 중</p>}
       </div>
+      <fieldset className="debug-buff-controls">
+        <legend>버프 조정 · 이번 실행에만 적용</legend>
+        {(
+          [
+            ["adBonus", "공격력 증가", 0, 300],
+            ["defBonus", "피해 감소", 0, 90],
+            ["crt", "크리티컬 확률", 0, 100],
+            ["asBonus", "공격속도 증가", -80, 300],
+            ["gold", "추가 GOLD", -100, 300],
+          ] as const
+        ).map(([key, label, min, max]) => (
+          <label key={key}>
+            <span>{label} %</span>
+            <input
+              type="number"
+              aria-label={`디버그 ${label}`}
+              min={min}
+              max={max}
+              step={10}
+              value={Math.round((buffs[key] - (key === "gold" ? 1 : 0)) * 100)}
+              onChange={(event) => {
+                if (event.target.value !== "")
+                  onChangeBuff(key, Number(event.target.value) / 100 + (key === "gold" ? 1 : 0));
+              }}
+            />
+          </label>
+        ))}
+        <button type="button" onClick={onResetBuffs}>
+          실제 퀘스트 버프로 복원
+        </button>
+      </fieldset>
     </section>,
     document.body,
   );

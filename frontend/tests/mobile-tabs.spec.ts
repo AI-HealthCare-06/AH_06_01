@@ -120,7 +120,7 @@ test("compact HUD toggles buffs and hit art lasts 200ms without stopping attack 
     const { useGameStore } = await import(path);
     return useGameStore.getState().game.combat.enemies[0].attackIn;
   });
-  expect(cooldown).toBe(400);
+  expect(cooldown).toBe(900);
   await page.clock.runFor(50);
   await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaAttack.png");
   await expect(page.getByRole("meter", { name: "공룡 체력" })).toHaveAttribute(
@@ -137,6 +137,6 @@ test("compact HUD toggles buffs and hit art lasts 200ms without stopping attack 
   await page.clock.runFor(50);
   await expect(page.getByRole("meter", { name: "공룡 체력" })).toHaveAttribute(
     "aria-valuenow",
-    "30",
+    "40",
   );
 });

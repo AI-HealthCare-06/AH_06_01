@@ -53,6 +53,8 @@ export function AdventureScene({
   const [debugVisible, setDebugVisible] = useState(false);
   const debugToggle = useRef<HTMLButtonElement>(null);
   const debugChangeLevel = useGameStore((state) => state.debugChangeLevel);
+  const debugSetBuff = useGameStore((state) => state.debugSetBuff);
+  const debugResetBuffs = useGameStore((state) => state.debugResetBuffs);
   const hud = useRef<HTMLDivElement>(null);
   const [reducedMotion, setReducedMotion] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -86,20 +88,28 @@ export function AdventureScene({
   const skin = getSkin(game.dinosaurStyles[game.dinosaur]);
   const stage = stages[battle.stage - 1];
   const transition = battle.transition;
+  const sourceStage = stages[(transition?.fromStage ?? battle.stage) - 1];
+  const sourceWave = transition?.fromWave ?? battle.wave;
   const clearing = !!transition && transition.elapsed < clearDuration(transition.kind);
-  const walking = !!transition && !clearing;
+  const starting = !!transition?.arrived;
+  const walking = !!transition && !clearing && !starting;
   const travelProgress =
     transition && !reducedMotion
-      ? Math.min(1, transition.elapsed / (clearDuration(transition.kind) + travelDuration))
+      ? Math.max(
+          0,
+          Math.min(1, (transition.elapsed - clearDuration(transition.kind)) / travelDuration),
+        )
       : 0;
   const changingStage =
     transition?.kind === "stage" &&
-    battle.stage < 5 &&
-    experience.level >= stagePolicies[battle.stage].level;
+    (transition.fromStage ?? battle.stage) < 5 &&
+    experience.level >= stagePolicies[transition.fromStage ?? battle.stage].level;
   const stageTransition = transition?.kind === "stage";
-  const destinationStage = changingStage ? stages[battle.stage] : stage;
+  const destinationStage = changingStage
+    ? stages[transition!.fromStage ?? battle.stage]
+    : sourceStage;
   const nextStageOpacity =
-    stageTransition && walking
+    stageTransition && !clearing
       ? reducedMotion
         ? 1
         : Math.min(1, (transition.elapsed - clearDuration(transition.kind)) / travelDuration)
@@ -137,11 +147,13 @@ export function AdventureScene({
       ? "recover"
       : clearing
         ? "clear"
-        : walking
-          ? "walk"
-          : attacking
-            ? "attack"
-            : "idle";
+        : starting
+          ? "start"
+          : walking
+            ? "walk"
+            : attacking
+              ? "attack"
+              : "idle";
   const dinoSource = attack || (walking ? art.walk : art.idle) || art.image;
   const dinoFrames = attackFrames[dinoSource]?.length;
   const dinoFrame = dinoFrames
@@ -185,8 +197,8 @@ export function AdventureScene({
           role="img"
           aria-label={`${stage.name} 스테이지 배경`}
           style={{
-            backgroundImage: `url(${stage.image})`,
-            backgroundPositionX: `${(((-(battle.wave - 1 + travelProgress) * stage.width) / stage.height) * arena.height) / 10}px`,
+            backgroundImage: `url(${sourceStage.image})`,
+            backgroundPositionX: `${(((-(sourceWave - 1 + travelProgress) * sourceStage.width) / sourceStage.height) * arena.height) / 10}px`,
           }}
         />
         {stageTransition && (
@@ -197,7 +209,7 @@ export function AdventureScene({
               backgroundImage: `url(${destinationStage.image})`,
               backgroundPositionX: changingStage
                 ? "0px"
-                : `${(((-9 * stage.width) / stage.height) * arena.height) / 10}px`,
+                : `${(((-9 * sourceStage.width) / sourceStage.height) * arena.height) / 10}px`,
               opacity: nextStageOpacity,
             }}
           />
@@ -254,6 +266,28 @@ export function AdventureScene({
               </strong>
             </div>
           </div>
+          {buffsExpanded && (
+            <dl className="battle-stat-summary" aria-label="현재 공룡 능력치">
+              <div>
+                <dt>공격력</dt>
+                <dd>{Number(buffs.attack.toFixed(1))}</dd>
+              </div>
+              <div>
+                <dt>방어력</dt>
+                <dd>
+                  {buffs.def} <small>피해 −{Math.round(buffs.defBonus * 100)}%</small>
+                </dd>
+              </div>
+              <div>
+                <dt>추가 GOLD</dt>
+                <dd>{Math.round((buffs.gold - 1) * 100)}%</dd>
+              </div>
+              <div>
+                <dt>크리티컬</dt>
+                <dd>{Math.round(buffs.crt * 100)}%</dd>
+              </div>
+            </dl>
+          )}
           <div
             id="battle-buffs"
             className="battle-buffs"
@@ -445,14 +479,21 @@ export function AdventureScene({
             {battle.lastAttack!.critical && "CRT "}−{Math.round(battle.lastAttack!.damage)}
           </b>
         )}
+        {starting && (
+          <div className="battle-clear battle-start" role="status">
+            <span>STAGE {battle.stage}</span>
+            <strong>WAVE {battle.wave} START!</strong>
+            <small>준비 완료 · HP 회복</small>
+          </div>
+        )}
         {battle.loot && battle.clock - battle.loot.time < 720 && (
           <div
             className="battle-coin"
             key={`loot-${battle.loot.time}`}
-            aria-label={`몬스터 처치 보상 ${battle.loot.gold} Gold`}
+            aria-label={`몬스터 처치 EXP 1 · 미확정 ${battle.loot.gold} Gold`}
           >
             <PixelIcon name="coin" />
-            <b>+{battle.loot.gold} G</b>
+            <b>+1 EXP · +{battle.loot.gold} G</b>
           </div>
         )}
         {battle.recovery > 0 && (
@@ -489,6 +530,9 @@ export function AdventureScene({
           >
             <i style={{ width: `${(battle.killed / waveTotal) * 100}%` }} />
           </div>
+          <small className="wave-pending-gold">
+            클리어 보상 · {battle.pendingGold.toLocaleString()} G 대기
+          </small>
           {farming && (
             <small className="wave-caption">
               {farming
@@ -507,6 +551,9 @@ export function AdventureScene({
           dinosaur={game.dinosaur}
           enemies={battle.enemies}
           onChangeLevel={debugChangeLevel}
+          buffs={buffs}
+          onChangeBuff={debugSetBuff}
+          onResetBuffs={debugResetBuffs}
           onClose={() => {
             setDebugVisible(false);
             debugToggle.current?.focus({ preventScroll: true });

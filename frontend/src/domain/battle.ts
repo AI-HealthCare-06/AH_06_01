@@ -2,7 +2,7 @@ import { enemyAttackRange, playerAttackRange, selectPlayerTarget } from "./battl
 import { projectileHitsPlayer } from "./battle-geometry";
 import { z } from "zod";
 import type { GameState, QuestId } from "./game";
-import { experienceProgress } from "./experience";
+import { experienceProgress, levelUpGold } from "./experience";
 import {
   characterStats,
   hydrationPenalty,
@@ -28,21 +28,35 @@ export const questBuffs: { id: QuestId; label: string; stat: string; effect: str
     effect: "7시간 +10% · 8시간 이상 +20% · 5시간 미만 감소",
   },
 ];
+export type DebugBuffs = Partial<
+  Record<"adBonus" | "defBonus" | "asBonus" | "crt" | "gold", number>
+>;
+export const debugBuffLimits = {
+  adBonus: [0, 3],
+  defBonus: [0, 0.9],
+  asBonus: [-0.8, 3],
+  crt: [0, 1],
+  gold: [0, 4],
+} as const;
 export function battleBuffStats(
   game: Pick<
     GameState,
     "experience" | "completed" | "activity" | "steps" | "sleepHours" | "hydrationRatio" | "dinosaur"
-  >,
+  > & { debugBuffs?: DebugBuffs },
 ) {
   const base = characterStats(experienceProgress(game.experience).level);
   const count = (id: QuestId) => game.activity[id] ?? (game.completed.includes(id) ? 1 : 0);
-  const adBonus = Math.min(30, count("medicine") * 10) / 100;
-  const defBonus = Math.min(60, count("meal") * 20) / 100;
-  const asBonus = Math.min(2, count("water")) * 0.4 - hydrationPenalty(game.hydrationRatio);
-  const crt = Math.min(1, Math.max(0, Math.floor(((game.steps?.count ?? 0) - 6000) / 2000)) * 0.2);
-  const gold = sleepGoldMultiplier(
-    game.sleepHours ?? (game.completed.includes("sleep") ? 7 : null),
-  );
+  const debug = import.meta.env.DEV ? game.debugBuffs : undefined;
+  const adBonus = debug?.adBonus ?? Math.min(30, count("medicine") * 10) / 100;
+  const defBonus = debug?.defBonus ?? Math.min(60, count("meal") * 20) / 100;
+  const asBonus =
+    debug?.asBonus ?? Math.min(2, count("water")) * 0.4 - hydrationPenalty(game.hydrationRatio);
+  const crt =
+    debug?.crt ??
+    Math.min(1, Math.max(0, Math.floor(((game.steps?.count ?? 0) - 6000) / 2000)) * 0.2);
+  const gold =
+    debug?.gold ??
+    sleepGoldMultiplier(game.sleepHours ?? (game.completed.includes("sleep") ? 7 : null));
   return {
     ...base,
     dinosaur: game.dinosaur,
@@ -57,6 +71,7 @@ export function battleBuffStats(
   };
 }
 export const combatSchema = z.object({
+  pendingGold: z.number().int().nonnegative().default(0),
   stage: z.number().int().min(1).max(5),
   wave: z.number().int().min(1).max(10),
   killed: z.number().int().nonnegative(),
@@ -99,6 +114,9 @@ export const combatSchema = z.object({
     .object({
       kind: z.enum(["wave", "stage"]),
       elapsed: z.number().nonnegative(),
+      arrived: z.boolean().default(false),
+      fromStage: z.number().int().min(1).max(5).optional(),
+      fromWave: z.number().int().min(1).max(10).optional(),
     })
     .nullable()
     .default(null),
@@ -122,6 +140,7 @@ export const combatSchema = z.object({
 export type CombatState = z.infer<typeof combatSchema>;
 export function initialCombat(hp = 50): CombatState {
   return {
+    pendingGold: 0,
     stage: 1,
     wave: 1,
     killed: 0,
@@ -173,7 +192,9 @@ function nextWave(state: CombatState, level: number) {
 }
 export const projectileSpeed = 6; // world units / second (1u = 30 design px)
 export const clearDuration = (kind: "wave" | "stage") => (kind === "stage" ? 1600 : 1000);
-export const travelDuration = 1800;
+export const travelDuration = 3000;
+export const startDuration = 1000;
+export const enemyAttackInterval = (ranged: boolean) => (ranged ? 1000 : 500);
 export function isRangedSpawn(index: number) {
   return [2, 5, 9].includes(index % 10);
 }
@@ -183,6 +204,7 @@ export function advanceCombat(
   buffs: ReturnType<typeof battleBuffStats>,
   level: number,
   duration: number,
+  totalExperience?: number,
 ) {
   const state: CombatState = {
     ...input,
@@ -215,8 +237,18 @@ export function advanceCombat(
     attack.resolved = true;
     if (target.hp === 0) {
       const reward = monsterGold(state.stage, state.wave, target.rank, buffs.gold);
-      gold += reward;
+      state.pendingGold += reward;
       defeats++;
+      if (totalExperience !== undefined) {
+        const before = totalExperience++;
+        state.pendingGold += levelUpGold(before, totalExperience);
+        const nextLevel = experienceProgress(totalExperience).level;
+        if (nextLevel !== level) {
+          level = nextLevel;
+          const base = characterStats(level);
+          buffs = { ...buffs, ...base, maxHp: base.hp, attack: base.ad * (1 + buffs.adBonus) };
+        }
+      }
       state.killed++;
       state.loot = { time: state.clock, gold: reward };
       state.enemies = state.enemies.filter((enemy) => enemy.id !== target.id);
@@ -227,9 +259,18 @@ export function advanceCombat(
     state.clock += dt;
     state.hp = Math.min(state.hp, buffs.maxHp);
     if (state.transition) {
-      state.transition.elapsed += dt;
-      if (state.transition.elapsed >= clearDuration(state.transition.kind) + travelDuration)
+      const transition = state.transition;
+      transition.elapsed += dt;
+      const arrival = clearDuration(transition.kind) + travelDuration;
+      if (!transition.arrived && transition.elapsed >= arrival) {
+        transition.fromStage ??= state.stage;
+        transition.fromWave ??= state.wave;
         nextWave(state, level);
+        state.hp = buffs.maxHp;
+        transition.arrived = true;
+        state.transition = transition;
+      }
+      if (transition.elapsed >= arrival + startDuration) state.transition = null;
       continue;
     }
     if (state.recovery > 0) {
@@ -328,7 +369,7 @@ export function advanceCombat(
           else state.projectiles.push(projectile);
         } else state.hp = Math.max(0, state.hp - damage);
         enemy.attackedAt = state.clock;
-        enemy.attackIn = 500;
+        enemy.attackIn = enemyAttackInterval(enemy.ranged);
       }
     }
     if (state.hp <= 0) {
@@ -340,13 +381,23 @@ export function advanceCombat(
       state.spawned = 0;
       state.attackIn = 0;
       state.lastAttack = null;
+      state.pendingGold = 0;
+      state.loot = null;
     } else if (state.killed >= waveTarget(state.wave) && state.enemies.length === 0) {
       if (
         state.lastAttack?.impactAt !== undefined &&
         state.clock < state.lastAttack.time + state.lastAttack.duration!
       )
         continue;
-      state.transition = { kind: state.wave === 10 ? "stage" : "wave", elapsed: 0 };
+      gold += state.pendingGold;
+      state.pendingGold = 0;
+      state.transition = {
+        kind: state.wave === 10 ? "stage" : "wave",
+        elapsed: 0,
+        arrived: false,
+        fromStage: state.stage,
+        fromWave: state.wave,
+      };
       state.projectiles = [];
       state.lastAttack = null;
     }

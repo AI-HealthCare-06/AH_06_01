@@ -46,13 +46,25 @@ test("boss ends wave ten and changes background only when next stage is unlocked
   await page.clock.runFor(50);
   await expect(page.locator(".battle-clear")).toContainText("STAGE CLEAR!");
   await page.screenshot({ path: "test-results/stage-clear.png", animations: "disabled" });
-  await page.clock.runFor(3400);
+  await page.clock.runFor(1600);
+  await expect(page.locator(".battle-clear")).toHaveCount(0);
+  await expect(page.locator(".battle-scenery-next")).toHaveCSS("opacity", "0");
+  await page.clock.runFor(1500);
+  await expect(page.locator(".battle-scenery-next")).toHaveCSS("opacity", "0.5");
+  await page.clock.runFor(1500);
   await expect(page.locator(".adventure-title h2")).toContainText("STAGE 2");
   await expect(page.locator(".stage-label")).toContainText("WAVE 1 / 10");
-  await expect(page.locator(".battle-scenery")).toHaveAttribute(
+  await expect(page.locator(".battle-start")).toContainText("WAVE 1 START!");
+  await expect(page.locator(".battle-dinosaur canvas")).toHaveAttribute(
+    "data-src",
+    "/assets/battle/TrexIdleSpritesheet4X3Png.png",
+  );
+  await expect(page.locator('.battle-scenery[role="img"]')).toHaveAttribute(
     "aria-label",
     "FOREST RUINS 스테이지 배경",
   );
+  await page.clock.runFor(1000);
+  await expect(page.locator(".battle-start")).toHaveCount(0);
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   await page.reload();
   await expect(page.locator(".adventure-title h2")).toContainText("STAGE 2");
@@ -155,6 +167,7 @@ test("demo wallet limits conversion, preserves balances and purchases only cosme
   await page.keyboard.press("Escape");
   await expect(page.getByRole("button", { name: "전환 ⇄" })).toBeFocused();
   await page.getByRole("link", { name: "Character", exact: true }).click();
+  await page.getByRole("button", { name: "악세서리", exact: true }).click();
   await page.getByRole("button", { name: /에메랄드 타격/ }).click();
   await page.reload();
   await page.getByRole("link", { name: "Shop", exact: true }).click();

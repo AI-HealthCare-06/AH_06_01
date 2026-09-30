@@ -22,5 +22,24 @@ export const healthPeriods = {
     delta: 26,
     values: [58, 59, 62, 61, 65, 68, 69, 72, 74, 77, 80, 82],
   },
+  custom: {
+    label: "기간",
+    heading: "PERIOD",
+    previous: "이전 기간",
+    delta: 8,
+    values: [74, 76, 75, 78, 79, 81, 82],
+  },
 } as const;
 export type HealthPeriod = keyof typeof healthPeriods;
+
+export function reportDateRange(period: HealthPeriod, end: string, from?: string) {
+  const date = new Date(`${end}T12:00:00`);
+  if (period === "custom") return { start: from && from <= end ? from : end, end };
+  if (period === "week") date.setDate(date.getDate() - 6);
+  if (period === "month") date.setDate(1);
+  if (period === "year") date.setMonth(0, 1);
+  return {
+    start: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
+    end,
+  };
+}

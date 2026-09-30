@@ -102,7 +102,7 @@ test("debug panel opens above the toggle with monster stats and matching enlarge
   await page.getByRole("button", { name: "전투 디버그 표시" }).click();
   const panel = page.getByRole("region", { name: "전투 디버그 설정" });
   await expect(panel).toContainText("HP 70/100 · AD 23 · RANGE 7.00u");
-  await expect(panel).toContainText("공격 0.50s · 이동 1.2u/s · 쿨타임 250ms");
+  await expect(panel).toContainText("공격 1.00s · 이동 1.2u/s · 쿨타임 250ms");
   for (const width of [320, 390, 542]) {
     await page.setViewportSize({ width, height: 844 });
     await expect
@@ -116,6 +116,7 @@ test("debug panel opens above the toggle with monster stats and matching enlarge
     expect(popup.y).toBeGreaterThanOrEqual(0);
     expect(popup.x).toBeGreaterThanOrEqual(8);
     expect(popup.x + popup.width).toBeLessThanOrEqual(width - 8);
+    expect(popup.x + popup.width / 2).toBeCloseTo(width / 2, 1);
     const shot = page.locator('[data-projectile-id="test-shot"]');
     const box = JSON.parse((await shot.getAttribute("data-hitbox"))!);
     const debug = page.locator('[data-debug-projectile="test-shot"] rect');

@@ -114,6 +114,7 @@ export const gameSchema = z
     sampleDay: z.boolean().default(true),
     steps: stepSnapshotSchema.nullable().default(null),
     completedDates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).default([]),
+    questHistory: z.record(z.string(), z.number().int().min(0).max(5)).default({}),
     battleDefeats: z.number().int().nonnegative().default(0),
     dinosaur: z.number().int().min(0).max(5),
     dinosaurStyles: z
@@ -139,6 +140,7 @@ export const gameSchema = z
     gold: state.gold + (state.version === 1 ? (coins ?? 0) : 0),
   }));
 export type GameState = Omit<z.infer<typeof gameSchema>, "experience" | "combat"> & {
+  debugBuffs?: import("./battle").DebugBuffs;
   experience: number;
   combat: z.infer<typeof combatSchema>;
 };
@@ -178,6 +180,7 @@ export function initialGame(date = localDate()): GameState {
     sampleDay: false,
     steps: null,
     completedDates: [],
+    questHistory: {},
     battleDefeats: 0,
     dinosaur: 0,
     dinosaurStyles: defaultDinosaurStyles(),
@@ -190,6 +193,10 @@ export function rollDay(state: GameState, date = localDate()): GameState {
   return {
     ...state,
     date,
+    questHistory: {
+      ...state.questHistory,
+      [state.date]: state.sampleDay ? 0 : state.completed.length,
+    },
     completed: [],
     bonusClaimed: false,
     allDoneBonusClaimed: false,
@@ -246,6 +253,7 @@ export function completeQuest(
   return {
     ...current,
     completed,
+    questHistory: { ...current.questHistory, [date]: completed.length },
     gold: current.gold + gold,
     experience,
     activity: { ...current.activity, [id]: 1 },
@@ -338,12 +346,19 @@ export function syncDeviceSteps(state: GameState, value: unknown, today = localD
   return snapshot.count >= 6000 ? completeQuest(next, "walk", today) : next;
 }
 
-export function weeklyCompletedDays(game: GameState): number {
-  const week = new Set(calendarWeek(game.date).map((day) => day.date));
-  return Math.min(
-    5,
-    new Set(game.completedDates.filter((date) => week.has(date) && date <= game.date)).size,
-  );
+export function weeklyCompletedDays(game: GameState, anchor = game.date): number {
+  const week = new Set(calendarWeek(anchor).map((day) => day.date));
+  const completed = new Set([
+    ...game.completedDates,
+    ...Object.keys(game.questHistory).filter((date) => game.questHistory[date] === 5),
+  ]);
+  return Math.min(5, [...completed].filter((date) => week.has(date) && date <= game.date).length);
+}
+
+export function questCountOn(game: GameState, date: string): number {
+  if (date > game.date) return 0;
+  if (date === game.date) return game.sampleDay ? 0 : game.completed.length;
+  return game.questHistory[date] ?? (game.completedDates.includes(date) ? 5 : 0);
 }
 
 export function tickBattle(state: GameState, now = Date.now()): GameState {
@@ -364,11 +379,13 @@ export function tickBattle(state: GameState, now = Date.now()): GameState {
       battleBuffStats(current),
       experienceProgress(current.experience).level,
       end - cursor,
+      current.experience,
     );
     current = {
       ...current,
       combat: result.combat,
       gold: current.gold + result.gold,
+      experience: current.experience + result.defeats,
       battleDefeats: current.battleDefeats + result.defeats,
     };
     cursor = end;

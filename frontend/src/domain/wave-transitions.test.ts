@@ -8,6 +8,7 @@ import {
   isRangedSpawn,
   projectileSpeed,
   travelDuration,
+  startDuration,
   waveTarget,
 } from "./battle";
 import { initialGame, purchaseAccessory, equipAccessory, restoreGame } from "./game";
@@ -29,7 +30,7 @@ describe("mixed waves and travel", () => {
     expect(state.enemies.filter((e) => !e.ranged)).toHaveLength(21);
     expect(advanceCombat(initialCombat(), buffs, 1, 3000).combat.spawned).toBe(2);
   });
-  it("launches at 7u, respects the old 500ms cooldown, and applies damage only at impact", () => {
+  it("launches at 7u, uses a 1000ms ranged cooldown, and applies damage only at impact", () => {
     const enemy = {
       id: 1,
       art: 0,
@@ -52,7 +53,7 @@ describe("mixed waves and travel", () => {
     };
     const fired = advanceCombat(input, buffs, 1, 50).combat;
     expect(fired.hp).toBe(50);
-    expect(fired.enemies[0].attackIn).toBe(500);
+    expect(fired.enemies[0].attackIn).toBe(1000);
     expect(fired.projectiles).toHaveLength(1);
     const flying = advanceCombat(fired, buffs, 1, 700).combat;
     expect(flying.hp).toBe(50);
@@ -75,19 +76,22 @@ describe("mixed waves and travel", () => {
         killed: waveTarget(wave),
       };
       const clear = advanceCombat(input, buffs, 5, 50).combat;
-      expect(clear.transition).toEqual({ kind, elapsed: 0 });
+      expect(clear.transition).toMatchObject({ kind, elapsed: 0, arrived: false });
       const travel = advanceCombat(clear, buffs, 5, clearDuration(kind)).combat;
       expect(travel.enemies).toHaveLength(0);
       expect(travel.wave).toBe(wave);
       const saved = combatSchema.parse(JSON.parse(JSON.stringify(travel)));
       const next = advanceCombat(saved, buffs, 5, travelDuration).combat;
-      expect(next.transition).toBeNull();
+      expect(next.transition?.arrived).toBe(true);
       expect(next).toMatchObject({
         stage: wave === 10 ? 2 : 1,
         wave: wave === 10 ? 1 : 2,
         spawned: 0,
       });
-      expect(advanceCombat(next, buffs, 5, 50).combat.spawned).toBe(1);
+      const ready = advanceCombat(next, buffs, 5, startDuration).combat;
+      expect(ready.transition).toBeNull();
+      expect(ready.spawned).toBe(0);
+      expect(advanceCombat(ready, buffs, 5, 50).combat.spawned).toBe(1);
     }
   });
   it("restores old saved combat without losing progress", () => {
