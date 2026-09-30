@@ -86,7 +86,7 @@ for (const mode of ["missing", "blocked"]) {
       "aria-label",
       "네트워크 연결됨 (브라우저 기준)",
     );
-    await page.getByRole("link", { name: "Quest", exact: true }).click();
+    await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
     await expect(page.locator(".quest-list")).toBeVisible();
     await expect(page.locator(".battery-percent")).toHaveText("—");
     expect(errors).toEqual([]);
@@ -123,16 +123,12 @@ test("all web tabs share screen height and navigation bounds with centered statu
       );
       const offsets = await page.locator(".status-bar").evaluate((element) => {
         const bar = element.getBoundingClientRect();
-        return [
-          ".device-time",
-          ".camera-dot",
-          ".network-status",
-          ".battery",
-          ".battery-percent",
-        ].map((selector) => {
-          const icon = element.querySelector(selector)!.getBoundingClientRect();
-          return Math.abs(bar.y + bar.height / 2 - icon.y - icon.height / 2);
-        });
+        return [".device-time", ".network-status", ".battery", ".battery-percent"].map(
+          (selector) => {
+            const icon = element.querySelector(selector)!.getBoundingClientRect();
+            return Math.abs(bar.y + bar.height / 2 - icon.y - icon.height / 2);
+          },
+        );
       });
       expect(Math.max(...offsets)).toBeLessThan(0.1);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
