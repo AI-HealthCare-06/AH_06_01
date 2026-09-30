@@ -63,7 +63,7 @@ test("ranged body stops at reach and its shot disappears on the character hitbox
               art: 0,
               rank: "normal",
               ranged: true,
-              distance: 3.1,
+              distance: 7.1,
               hp: 1000,
               maxHp: 1000,
               ad: 20,
@@ -79,9 +79,10 @@ test("ranged body stops at reach and its shot disappears on the character hitbox
   const enemy = page.locator(".battle-enemy");
   const resting = await enemy.getAttribute("data-hitbox");
   await expect(page.locator(".enemy-projectile")).toHaveCount(1);
-  await page.clock.runFor(100);
+  const shotId = await page.locator(".enemy-projectile").getAttribute("data-projectile-id");
+  await page.clock.runFor(700);
   await expect(enemy).toHaveAttribute("data-hitbox", resting!);
-  const bounds = await page.locator(".enemy-projectile").getAttribute("data-hitbox");
+  const bounds = await page.locator(".enemy-projectile").first().getAttribute("data-hitbox");
   const projectile = JSON.parse(bounds!);
   const player = JSON.parse((await page.locator(".battle-dinosaur").getAttribute("data-hitbox"))!);
   expect(projectile.x).toBeGreaterThan(player.x + player.width);
@@ -90,7 +91,7 @@ test("ranged body stops at reach and its shot disappears on the character hitbox
     "50",
   );
   await page.clock.runFor(50);
-  await expect(page.locator(".enemy-projectile")).toHaveCount(0);
+  await expect(page.locator(`.enemy-projectile[data-projectile-id="${shotId}"]`)).toHaveCount(0);
   await expect(page.getByRole("meter", { name: "공룡 체력", exact: true })).toHaveAttribute(
     "aria-valuenow",
     "40",

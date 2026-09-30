@@ -120,19 +120,23 @@ test("compact HUD toggles buffs and hit art lasts 200ms without stopping attack 
     const { useGameStore } = await import(path);
     return useGameStore.getState().game.combat.enemies[0].attackIn;
   });
-  expect(cooldown).toBe(0);
+  expect(cooldown).toBe(400);
   await page.clock.runFor(50);
   await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaAttack.png");
   await expect(page.getByRole("meter", { name: "공룡 체력" })).toHaveAttribute(
     "aria-valuenow",
-    "50",
+    "40",
   );
   await page.clock.runFor(300);
+  // The first hit knocks this ranged enemy beyond 3u. The next strike travels
+  // to it before applying damage, while its own attack cooldown keeps ticking.
+  await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "980");
+  await page.clock.runFor(200);
   await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaHit.png");
   await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "960");
-  await page.clock.runFor(250);
+  await page.clock.runFor(50);
   await expect(page.getByRole("meter", { name: "공룡 체력" })).toHaveAttribute(
     "aria-valuenow",
-    "40",
+    "30",
   );
 });

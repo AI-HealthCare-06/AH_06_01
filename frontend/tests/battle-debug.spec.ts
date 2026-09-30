@@ -55,13 +55,13 @@ test("development debug boxes share combat coordinates, follow enemies and prese
     "P RANGE 3.00u",
   );
   await expect(overlay.locator('[data-range-actor="M1"] .debug-range-label')).toHaveText(
-    "M1 RANGE 3.00u IN",
+    "M1 RANGE 7.00u IN",
   );
   await expect(overlay.locator(".debug-player-range .debug-range-boundary")).toHaveAttribute(
     "x1",
     "158",
   );
-  await expect(overlay.locator('[data-range-actor="M1"]')).toHaveAttribute("data-range", "3");
+  await expect(overlay.locator('[data-range-actor="M1"]')).toHaveAttribute("data-range", "7");
   expect(
     Number(await overlay.locator('[data-range-actor="M2"]').getAttribute("data-range")),
   ).toBeGreaterThan(2);
@@ -150,7 +150,7 @@ test("development debug boxes share combat coordinates, follow enemies and prese
   await page.clock.runFor(1000);
   await expect(overlay.locator('[data-debug-actor="M1"]')).toHaveCount(0);
   await expect(overlay.locator('[data-range-actor="M1"]')).toHaveCount(0);
-  expect(Number(await elite.getAttribute("x"))).toBeLessThan(before);
+  expect(Number(await elite.getAttribute("x"))).toBe(before);
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   const frozen = await elite.getAttribute("x");
   await page.clock.runFor(1000);
@@ -282,7 +282,13 @@ test("monster debug boundary agrees with damage, cooldown and knockback for mele
             game.combat,
             battleBuffStats(game),
             1,
-            phase === "attack-again" ? 500 : 50,
+            phase === "attack-again"
+              ? art === 0
+                ? 400
+                : 500
+              : phase === "knockback" && art === 0
+                ? 450
+                : 50,
           );
           useGameStore.setState({
             paused: true,

@@ -4,7 +4,7 @@ import { playerGeometry, projectileGeometry } from "./battle-geometry";
 import { initialGame } from "./game";
 
 describe("ranged movement and first contact", () => {
-  it("stops all ranged appearances at 3u and approaches again only after knockback", () => {
+  it("stops all ranged appearances at 7u and approaches again only after knockback", () => {
     for (let dinosaur = 0; dinosaur < 6; dinosaur++) {
       const buffs = { ...battleBuffStats({ ...initialGame(), dinosaur }), attack: 0, defBonus: 1 };
       for (let art = 0; art < 6; art++) {
@@ -22,17 +22,17 @@ describe("ranged movement and first contact", () => {
               hp: 1000,
               maxHp: 1000,
               ad: 20,
-              distance: 3.12,
+              distance: 7.1,
               attackIn: 5000,
               hitAt: -1000,
             },
           ],
         };
         const stopped = advanceCombat(input, buffs, 1, 100).combat;
-        expect(stopped.enemies[0].distance).toBeCloseTo(3);
-        expect(advanceCombat(stopped, buffs, 1, 1000).combat.enemies[0].distance).toBe(3);
-        stopped.enemies[0].distance = 3.2;
-        expect(advanceCombat(stopped, buffs, 1, 200).combat.enemies[0].distance).toBe(3);
+        expect(stopped.enemies[0].distance).toBeCloseTo(7);
+        expect(advanceCombat(stopped, buffs, 1, 1000).combat.enemies[0].distance).toBe(7);
+        stopped.enemies[0].distance = 7.2;
+        expect(advanceCombat(stopped, buffs, 1, 200).combat.enemies[0].distance).toBe(7);
         stopped.enemies[0].distance = 2.8;
         expect(advanceCombat(stopped, buffs, 1, 500).combat.enemies[0].distance).toBe(2.8);
       }

@@ -2223,15 +2223,10 @@
   overflow: visible;
 }
 .battle-debug-legend {
-  position: absolute;
-  top: 105px;
-  width: 180px;
-  right: 6px;
-  padding: 4px 5px;
-  background: #10251df2;
+  padding: 8px 0;
   color: #fff;
   font:
-    8px/1.5 "Galmuri11",
+    10px/1.5 "Galmuri11",
     sans-serif;
   display: flex;
   flex-wrap: wrap;
@@ -2239,7 +2234,53 @@
 }
 .battle-debug-legend small {
   width: 100%;
-  font-size: 7px;
+  font-size: 9px;
+}
+.battle-debug-panel {
+  position: fixed;
+  z-index: 1000;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 10px;
+  background: #10251df5;
+  color: #fff4ce;
+  border: 2px solid #ffe486;
+  box-shadow: 4px 4px #17221c;
+  font:
+    11px/1.5 "Galmuri11",
+    sans-serif;
+}
+.battle-debug-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #ffe486;
+}
+.battle-debug-panel > header button {
+  width: 28px;
+  height: 28px;
+  background: #ffe486;
+  color: #17221c;
+}
+.debug-monster-stats article {
+  display: grid;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px dashed #91a382;
+  font-size: 10px;
+}
+.debug-monster-stats article strong {
+  color: #ffe486;
+}
+.debug-projectile {
+  fill: #c8a3ff33;
+  stroke: #c8a3ff;
+  stroke-width: 1.5;
+  stroke-dasharray: 2 2;
+}
+.debug-projectile-label {
+  color: #c8a3ff;
+  fill: #c8a3ff;
 }
 .debug-collider {
   fill: #48e9ff1a;

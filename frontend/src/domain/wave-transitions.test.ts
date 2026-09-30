@@ -29,7 +29,7 @@ describe("mixed waves and travel", () => {
     expect(state.enemies.filter((e) => !e.ranged)).toHaveLength(21);
     expect(advanceCombat(initialCombat(), buffs, 1, 3000).combat.spawned).toBe(2);
   });
-  it("launches at 3u, respects the old 500ms cooldown, and applies damage only at impact", () => {
+  it("launches at 7u, respects the old 500ms cooldown, and applies damage only at impact", () => {
     const enemy = {
       id: 1,
       art: 0,
@@ -37,12 +37,12 @@ describe("mixed waves and travel", () => {
       hp: 70,
       maxHp: 70,
       ad: 20,
-      distance: 3,
+      distance: 7,
       attackIn: 0,
       ranged: true,
       hitAt: -1000,
     };
-    expect(enemyAttackRange(enemy, 0)).toBe(3);
+    expect(enemyAttackRange(enemy, 0)).toBe(7);
     const input = {
       ...initialCombat(),
       spawned: 1,
@@ -54,13 +54,13 @@ describe("mixed waves and travel", () => {
     expect(fired.hp).toBe(50);
     expect(fired.enemies[0].attackIn).toBe(500);
     expect(fired.projectiles).toHaveLength(1);
-    const flying = advanceCombat(fired, buffs, 1, 100).combat;
+    const flying = advanceCombat(fired, buffs, 1, 700).combat;
     expect(flying.hp).toBe(50);
-    expect(flying.projectiles[0].distance).toBeCloseTo(3 - projectileSpeed * 0.1);
+    expect(flying.projectiles[0].distance).toBeCloseTo(7 - projectileSpeed * 0.7);
     const hit = advanceCombat(flying, buffs, 1, 50).combat;
     expect(hit.hp).toBe(40);
-    expect(hit.projectiles).toHaveLength(0);
-    expect(advanceCombat(hit, buffs, 1, 300).combat.hp).toBe(40);
+    expect(hit.projectiles.some((shot) => shot.id === fired.projectiles[0].id)).toBe(false);
+    expect(advanceCombat(hit, buffs, 1, 100).combat.hp).toBe(40);
     expect(input.enemies[0].attackIn).toBe(0);
   });
   it("persists clear/travel, prevents spawning during the effect, and unlocks the next stage after travel", () => {

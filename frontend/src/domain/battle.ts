@@ -1,4 +1,4 @@
-import { enemyAttackRange, playerAttackRange } from "./battle-range";
+import { enemyAttackRange, playerAttackRange, selectPlayerTarget } from "./battle-range";
 import { projectileHitsPlayer } from "./battle-geometry";
 import { z } from "zod";
 import type { GameState, QuestId } from "./game";
@@ -112,6 +112,9 @@ export const combatSchema = z.object({
       art: z.number().optional(),
       ranged: z.boolean().optional(),
       rank: z.enum(["normal", "elite", "boss"]).optional(),
+      duration: z.number().positive().optional(),
+      impactAt: z.number().nonnegative().optional(),
+      resolved: z.boolean().optional(),
     })
     .nullable(),
   loot: z.object({ time: z.number(), gold: z.number() }).nullable(),
@@ -186,6 +189,7 @@ export function advanceCombat(
     enemies: input.enemies.map((enemy) => ({ ...enemy })),
     projectiles: input.projectiles.map((projectile) => ({ ...projectile })),
     transition: input.transition ? { ...input.transition } : null,
+    lastAttack: input.lastAttack ? { ...input.lastAttack } : null,
   };
   // Expanded colliders can meet before the nominal melee range. Contact must still
   // allow attacking; otherwise a stopped melee monster could never hit the player.
@@ -201,6 +205,23 @@ export function advanceCombat(
   };
   let gold = 0;
   let defeats = 0;
+  const hitTarget = (
+    target: CombatState["enemies"][number],
+    attack: NonNullable<CombatState["lastAttack"]>,
+  ) => {
+    target.hp = Math.max(0, target.hp - attack.damage);
+    target.hitAt = state.clock;
+    target.distance += monsterStats(state.stage, state.wave, target.rank).knockback;
+    attack.resolved = true;
+    if (target.hp === 0) {
+      const reward = monsterGold(state.stage, state.wave, target.rank, buffs.gold);
+      gold += reward;
+      defeats++;
+      state.killed++;
+      state.loot = { time: state.clock, gold: reward };
+      state.enemies = state.enemies.filter((enemy) => enemy.id !== target.id);
+    }
+  };
   for (let elapsed = 0; elapsed < duration; elapsed += 50) {
     const dt = Math.min(50, duration - elapsed);
     state.clock += dt;
@@ -256,13 +277,23 @@ export function advanceCombat(
       enemy.attackIn = Math.max(0, enemy.attackIn - dt);
     }
     state.attackIn = Math.max(0, state.attackIn - dt);
-    const target = state.enemies
-      .filter((enemy) => enemy.distance <= playerAttackRange)
-      .sort((a, b) => a.distance - b.distance || a.id - b.id)[0];
-    if (target && state.attackIn === 0) {
+    const pending = state.lastAttack;
+    if (state.hp > 0 && pending?.resolved === false && state.clock >= pending.impactAt!) {
+      const victim = state.enemies.find((enemy) => enemy.id === pending.targetId);
+      if (victim) hitTarget(victim, pending);
+      else pending.resolved = true;
+    }
+    const target = selectPlayerTarget(state.enemies);
+    if (state.hp > 0 && target && state.attackIn === 0) {
       state.seed = (Math.imul(state.seed, 1664525) + 1013904223) >>> 0;
       const critical = state.seed / 4294967296 < buffs.crt;
       const damage = buffs.attack * (critical ? 2 : 1);
+      const distant = target.distance > playerAttackRange;
+      const duration = distant
+        ? Math.ceil(
+            (Math.min(500, buffs.attackInterval) * target.distance) / playerAttackRange / 50,
+          ) * 50
+        : Math.min(500, buffs.attackInterval);
       state.lastAttack = {
         time: state.clock,
         distance: target.distance,
@@ -272,19 +303,13 @@ export function advanceCombat(
         art: target.art,
         ranged: target.ranged,
         rank: target.rank,
+        duration,
+        ...(distant
+          ? { impactAt: state.clock + Math.ceil((duration * 0.3) / 50) * 50, resolved: false }
+          : {}),
       };
-      target.hp = Math.max(0, target.hp - damage);
-      target.hitAt = state.clock;
-      target.distance += monsterStats(state.stage, state.wave, target.rank).knockback;
-      state.attackIn = buffs.attackInterval;
-      if (target.hp === 0) {
-        const reward = monsterGold(state.stage, state.wave, target.rank, buffs.gold);
-        gold += reward;
-        defeats++;
-        state.killed++;
-        state.loot = { time: state.clock, gold: reward };
-        state.enemies = state.enemies.filter((enemy) => enemy.id !== target.id);
-      }
+      state.attackIn = Math.max(buffs.attackInterval, duration);
+      if (!distant) hitTarget(target, state.lastAttack);
     }
     for (const enemy of state.enemies) {
       if (enemy.distance <= enemyReach(enemy) && enemy.attackIn === 0) {
@@ -314,7 +339,13 @@ export function advanceCombat(
       state.killed = 0;
       state.spawned = 0;
       state.attackIn = 0;
+      state.lastAttack = null;
     } else if (state.killed >= waveTarget(state.wave) && state.enemies.length === 0) {
+      if (
+        state.lastAttack?.impactAt !== undefined &&
+        state.clock < state.lastAttack.time + state.lastAttack.duration!
+      )
+        continue;
       state.transition = { kind: state.wave === 10 ? "stage" : "wave", elapsed: 0 };
       state.projectiles = [];
       state.lastAttack = null;

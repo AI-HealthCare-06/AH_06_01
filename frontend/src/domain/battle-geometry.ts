@@ -82,16 +82,16 @@ export function enemyGeometry(
   return geometry(sprite, bounds);
 }
 type ProjectilePosition = { origin: number; distance: number; art: number; rank?: string };
+export const projectileSize = { width: 28 * 1.4, height: 21 * 1.4 };
 // Drawing and collision share the visible alpha bounds, excluding transparent padding.
 export function projectileGeometry(projectile: ProjectilePosition, dinosaur: number) {
   const source = enemyGeometry(projectile.origin, projectile.art, projectile.rank, true).hitbox;
   const target = center(playerGeometry(dinosaur).hitbox);
   const progress = Math.max(0, Math.min(1, 1 - projectile.distance / projectile.origin));
   const sprite = {
-    x: source.x + (target.x - source.x) * progress - 14,
-    y: center(source).y + (target.y - center(source).y) * progress - 10.5,
-    width: 28,
-    height: 21,
+    x: source.x + (target.x - source.x) * progress - projectileSize.width / 2,
+    y: center(source).y + (target.y - center(source).y) * progress - projectileSize.height / 2,
+    ...projectileSize,
   };
   const bounds = (atlases.bounds as Record<string, number[]>)[
     `Ranged${monsterNames[projectile.art]}Projectile`
@@ -106,7 +106,7 @@ export function projectileHitsPlayer(projectile: ProjectilePosition, dinosaur: n
   );
 }
 // The physical body must never cross the player, even after saved/custom input.
-// Nominal melee/ranged reach is 1 / 3 world units.
+// Nominal melee/ranged reach is 1 / 7 world units.
 export function colliderStopDistance(art: number, rank = "normal", dinosaur = 0, ranged = false) {
   const player = playerGeometry(dinosaur).collider;
   const enemy = enemyGeometry(0, art, rank, ranged).collider;

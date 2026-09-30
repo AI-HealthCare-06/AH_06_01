@@ -22,6 +22,7 @@ import { getSkin } from "../design/skins";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { BattleSprite } from "./BattleSprite";
 import { BattleDebugOverlay } from "./BattleDebugOverlay";
+import { BattleDebugPanel } from "./BattleDebugPanel";
 import { PixelIcon } from "./PixelIcon";
 import {
   battleBuffStats,
@@ -50,6 +51,7 @@ export function AdventureScene({
   const [selected, setSelected] = useState<QuestId | null>(null);
   const [buffsExpanded, setBuffsExpanded] = useState(false);
   const [debugVisible, setDebugVisible] = useState(false);
+  const debugToggle = useRef<HTMLButtonElement>(null);
   const debugChangeLevel = useGameStore((state) => state.debugChangeLevel);
   const hud = useRef<HTMLDivElement>(null);
   const [reducedMotion, setReducedMotion] = useState(
@@ -104,10 +106,17 @@ export function AdventureScene({
       : 0;
   const waveTotal = waveTarget(battle.wave);
   const attackElapsed = battle.lastAttack ? battle.clock - battle.lastAttack.time : 1000;
-  const attackDuration = Math.min(500, buffs.attackInterval);
+  const attackDuration = battle.lastAttack?.duration ?? Math.min(500, buffs.attackInterval);
   const attacking = attackElapsed < attackDuration && battle.recovery === 0 && !transition;
   const attack = attacking && art.attack;
-  const attackTime = attackElapsed / attackDuration;
+  const impactDelay =
+    battle.lastAttack?.impactAt !== undefined
+      ? battle.lastAttack.impactAt - battle.lastAttack.time
+      : attackDuration * 0.3;
+  const attackTime =
+    attackElapsed <= impactDelay
+      ? (attackElapsed / impactDelay) * 0.3
+      : 0.3 + ((attackElapsed - impactDelay) / (attackDuration - impactDelay)) * 0.7;
   const target = battle.enemies.find((enemy) => enemy.id === battle.lastAttack?.targetId);
   const targetGeometry = battle.lastAttack
     ? enemyGeometry(
@@ -310,10 +319,11 @@ export function AdventureScene({
         {import.meta.env.DEV && (
           <button
             type="button"
+            ref={debugToggle}
             className="battle-debug-toggle"
             aria-label={debugVisible ? "전투 디버그 숨기기" : "전투 디버그 표시"}
             aria-pressed={debugVisible}
-            aria-controls="battle-debug-overlay"
+            aria-controls="battle-debug-panel battle-debug-overlay"
             onClick={() => setDebugVisible((visible) => !visible)}
           >
             DEBUG
@@ -326,7 +336,7 @@ export function AdventureScene({
           data-movement={art.movement}
           data-moving={walking && !art.walk && !reducedMotion}
           data-animation={phase}
-          data-attacking={!!attack}
+          data-attacking={attacking}
           data-collider={JSON.stringify(player.collider)}
           data-hitbox={JSON.stringify(player.hitbox)}
           data-attack-target={targetGeometry ? JSON.stringify(targetGeometry.hitbox) : undefined}
@@ -393,6 +403,7 @@ export function AdventureScene({
             <img
               key={projectile.id}
               className="enemy-projectile"
+              data-projectile-id={projectile.id}
               data-hitbox={JSON.stringify(geometry.hitbox)}
               alt=""
               aria-hidden="true"
@@ -420,7 +431,7 @@ export function AdventureScene({
             {transition.kind === "stage" && <i aria-hidden="true" className="clear-sparks" />}
           </div>
         )}
-        {attacking && (
+        {attacking && battle.lastAttack?.resolved !== false && (
           <b
             className="battle-damage"
             key={`hit-${battle.lastAttack!.time}`}
@@ -451,10 +462,9 @@ export function AdventureScene({
         )}
         {import.meta.env.DEV && debugVisible && (
           <BattleDebugOverlay
-            level={experience.level}
-            onChangeLevel={debugChangeLevel}
             dinosaur={game.dinosaur}
             enemies={battle.enemies}
+            projectiles={battle.projectiles}
             actors={[
               { id: "P", geometry: player },
               ...battle.enemies.map((enemy) => ({
@@ -490,6 +500,19 @@ export function AdventureScene({
           )}
         </div>
       </DesignCanvas>
+      {import.meta.env.DEV && debugVisible && (
+        <BattleDebugPanel
+          anchor={debugToggle}
+          level={experience.level}
+          dinosaur={game.dinosaur}
+          enemies={battle.enemies}
+          onChangeLevel={debugChangeLevel}
+          onClose={() => {
+            setDebugVisible(false);
+            debugToggle.current?.focus({ preventScroll: true });
+          }}
+        />
+      )}
     </div>
   );
 }
