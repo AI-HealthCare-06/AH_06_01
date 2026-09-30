@@ -1845,12 +1845,36 @@
 .debug-range-boundary {
   stroke-dasharray: 4 3;
 }
-.debug-range-label {
+.debug-range-origin {
+  stroke: #fff;
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+.debug-enemy-range .debug-range-remaining,
+.debug-enemy-range .debug-range-anchor {
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
+}
+.debug-enemy-range .debug-range-position {
+  fill: #10251d;
+}
+.debug-enemy-range[data-in-range="true"] .debug-range-position {
+  fill: currentColor;
+}
+.debug-range-label,
+.debug-range-detail,
+.debug-range-origin-label {
   fill: currentColor;
   font: bold 8px monospace;
   paint-order: stroke;
   stroke: #10251d;
   stroke-width: 2.5px;
+}
+.debug-range-origin-label {
+  color: #fff;
+}
+.debug-range-detail {
+  font-size: 7px;
 }
 .debug-player-range-label {
   color: #ffe486;

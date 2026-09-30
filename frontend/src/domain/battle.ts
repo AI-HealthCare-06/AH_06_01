@@ -1,4 +1,4 @@
-import { enemyAttackRange, playerAttackRange } from "./battle-range";
+import { enemyAttackRange, isPlayerInEnemyRange, playerAttackRange } from "./battle-range";
 import { z } from "zod";
 import type { GameState, QuestId } from "./game";
 import { experienceProgress } from "./experience";
@@ -227,7 +227,7 @@ export function advanceCombat(
       }
     }
     for (const enemy of state.enemies) {
-      if (enemy.distance <= enemyReach(enemy) && enemy.attackIn === 0) {
+      if (isPlayerInEnemyRange(enemy, buffs.dinosaur) && enemy.attackIn === 0) {
         state.hp = Math.max(0, state.hp - incomingDamage(enemy.ad, buffs.def, buffs.defBonus));
         enemy.attackIn = 500;
       }

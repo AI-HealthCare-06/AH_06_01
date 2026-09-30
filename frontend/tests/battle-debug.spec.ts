@@ -57,7 +57,10 @@ test("development debug boxes share combat coordinates, follow enemies and prese
   await expect(overlay.locator('[data-range-actor="M1"] .debug-range-label')).toHaveText(
     "M1 RANGE 2.00u OUT",
   );
-  await expect(overlay.locator(".debug-range-boundary")).toHaveAttribute("x1", "158");
+  await expect(overlay.locator(".debug-player-range .debug-range-boundary")).toHaveAttribute(
+    "x1",
+    "158",
+  );
   await expect(overlay.locator('[data-range-actor="M1"]')).toHaveAttribute("data-range", "2");
   expect(
     Number(await overlay.locator('[data-range-actor="M2"]').getAttribute("data-range")),
@@ -73,7 +76,8 @@ test("development debug boxes share combat coordinates, follow enemies and prese
       const range = overlay.locator(`[data-range-actor="${id}"]`);
       const origin = Number(await range.locator('[data-range-tick="0"]').getAttribute("x1"));
       const tick = Number(await range.locator('[data-range-tick="1"]').getAttribute("x1"));
-      expect(tick - origin).toBe(id === "P" ? 30 : -30);
+      expect(tick - origin).toBe(30);
+      expect(origin).toBe(68);
       unitWidths.push(
         await range.evaluate((node) => {
           const a = node.querySelector('[data-range-tick="0"]')!.getBoundingClientRect();
@@ -94,9 +98,19 @@ test("development debug boxes share combat coordinates, follow enemies and prese
         const ruler = range.locator(".debug-range-ruler");
         const x1 = Number(await ruler.getAttribute("x1"));
         const x2 = Number(await ruler.getAttribute("x2"));
-        expect(x1 - x2).toBeCloseTo(reach * 30);
-        expect(x1).toBeCloseTo(
+        expect(x2 - x1).toBeCloseTo(reach * 30);
+        expect(x1).toBe(68);
+        const position = Number(
+          await range.locator(".debug-range-position").getAttribute("data-position-x"),
+        );
+        expect(position).toBeCloseTo(
           await actor.evaluate((node) => parseFloat((node as HTMLElement).style.left)),
+        );
+        expect(Number(await range.locator(".debug-range-boundary").getAttribute("x1"))).toBeCloseTo(
+          x2,
+        );
+        expect(Number(await range.locator(".debug-range-anchor").getAttribute("x2"))).toBeCloseTo(
+          JSON.parse((await actor.getAttribute("data-hitbox"))!).x,
         );
         const scale = await page
           .locator(".design-canvas-inner")
@@ -198,8 +212,108 @@ test("monster range status uses the exact combat threshold including body contac
     expect(range).toBeGreaterThan(1);
     await expect(indicator).toHaveAttribute("data-range", String(range));
     await expect(indicator).toHaveAttribute("data-in-range", String(offset <= 0));
-    await expect(indicator.locator("text")).toHaveText(
+    const marker = Number(
+      await indicator.locator(".debug-range-position").getAttribute("data-position-x"),
+    );
+    const boundary = Number(await indicator.locator(".debug-range-boundary").getAttribute("x1"));
+    expect(marker - boundary).toBeCloseTo(offset * 30, 8);
+    await expect(indicator.locator(".debug-range-label")).toHaveText(
       `M42 RANGE ${range.toFixed(2)}u ${offset <= 0 ? "IN" : "OUT"}`,
     );
+  }
+});
+
+test("monster debug boundary agrees with damage, cooldown and knockback for melee, ranged and boss", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.clock.pauseAt(new Date());
+  await page.goto("/home");
+  await page.getByRole("button", { name: "전투 디버그 표시" }).click();
+  for (const [art, dinosaur] of [
+    [0, 0],
+    [3, 4],
+    [5, 5],
+  ]) {
+    for (const [phase, hp, inside] of [
+      ["approach", 50, false],
+      ["attack", 40, true],
+      ["cooldown", 40, true],
+      ["knockback", 40, false],
+      ["attack-again", 30, true],
+    ] as const) {
+      const result = await page.evaluate(
+        async ({ art, dinosaur, phase }) => {
+          const storePath = "/src/stores/game-store.ts";
+          const gamePath = "/src/domain/game.ts";
+          const battlePath = "/src/domain/battle.ts";
+          const rangePath = "/src/domain/battle-range.ts";
+          const { useGameStore } = await import(storePath);
+          const { initialGame } = await import(gamePath);
+          const { advanceCombat, battleBuffStats } = await import(battlePath);
+          const { enemyAttackRange } = await import(rangePath);
+          let { game } = useGameStore.getState();
+          if (phase === "approach") {
+            game = { ...initialGame(), dinosaur, battlePaused: true };
+            const enemy = {
+              id: 42,
+              art,
+              rank: art === 5 ? "boss" : "normal",
+              ranged: art % 2 === 0,
+              hp: 1000,
+              maxHp: 1000,
+              ad: 20,
+              attackIn: 0,
+              hitAt: -1000,
+            };
+            game.combat = {
+              ...game.combat,
+              clock: 10000,
+              spawnIn: 5000,
+              spawned: 1,
+              serial: 43,
+              attackIn: 1000,
+              enemies: [{ ...enemy, distance: enemyAttackRange(enemy, dinosaur) + 0.1 }],
+            };
+          }
+          if (phase === "knockback") game.combat.attackIn = 0;
+          if (phase === "attack-again") game.combat.attackIn = 5000;
+          const { combat } = advanceCombat(
+            game.combat,
+            battleBuffStats(game),
+            1,
+            phase === "attack-again" ? 500 : 50,
+          );
+          useGameStore.setState({
+            paused: true,
+            game: { ...game, combat, battleUpdatedAt: Date.now() },
+          });
+          return {
+            hp: combat.hp,
+            enemy: combat.enemies[0],
+            range: enemyAttackRange(combat.enemies[0], dinosaur),
+          };
+        },
+        { art, dinosaur, phase },
+      );
+      expect(result.hp, `${art}/${dinosaur}: ${phase}`).toBe(hp);
+      const indicator = page.locator('[data-range-actor="M42"]');
+      await expect(indicator).toHaveAttribute("data-in-range", String(inside));
+      const position = Number(
+        await indicator.locator(".debug-range-position").getAttribute("data-position-x"),
+      );
+      const boundary = Number(await indicator.locator(".debug-range-boundary").getAttribute("x1"));
+      expect(position).toBeCloseTo(68 + result.enemy.distance * 30);
+      expect(boundary).toBeCloseTo(68 + result.range * 30);
+      expect(position <= boundary).toBe(inside);
+      if (inside)
+        await expect(indicator.locator(".debug-range-detail")).toContainText(
+          `쿨타임 ${result.enemy.attackIn}ms`,
+        );
+      else
+        await expect(indicator.locator(".debug-range-detail")).toContainText(
+          `남음 ${(result.enemy.distance - result.range).toFixed(2)}u`,
+        );
+    }
   }
 });

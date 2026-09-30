@@ -11,3 +11,10 @@ export function enemyAttackRange(
 ) {
   return Math.max(enemy.ranged ? 2 : 1, colliderStopDistance(enemy.art, enemy.rank, dinosaur));
 }
+
+export function isPlayerInEnemyRange(
+  enemy: { ranged: boolean; art: number; rank: MonsterRank; distance: number },
+  dinosaur: number,
+) {
+  return enemy.distance <= enemyAttackRange(enemy, dinosaur);
+}
