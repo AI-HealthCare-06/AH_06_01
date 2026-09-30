@@ -3,6 +3,9 @@
 export type BattleBox = { x: number; y: number; width: number; height: number };
 export type ActorGeometry = { sprite: BattleBox; collider: BattleBox; hitbox: BattleBox };
 export const arena = { top: 58, height: 218, ground: 253, pixelsPerUnit: 30 };
+export function distanceToX(distance: number) {
+  return 68 + distance * arena.pixelsPerUnit;
+}
 export function center(box: BattleBox) {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 }
@@ -58,7 +61,7 @@ export function playerGeometry(dinosaur: number): ActorGeometry {
 export function enemyGeometry(distance: number, art: number, rank = "normal"): ActorGeometry {
   const large = rank !== "normal";
   const sprite = {
-    x: 68 + distance * arena.pixelsPerUnit,
+    x: distanceToX(distance),
     y: arena.ground - (large ? 74.2 : 65.1),
     width: large ? 65.8 : 57.4,
     height: large ? 74.2 : 65.1,

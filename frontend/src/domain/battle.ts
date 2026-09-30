@@ -1,4 +1,4 @@
-import { colliderStopDistance } from "./battle-geometry";
+import { enemyAttackRange, playerAttackRange } from "./battle-range";
 import { z } from "zod";
 import type { GameState, QuestId } from "./game";
 import { experienceProgress } from "./experience";
@@ -153,7 +153,7 @@ export function advanceCombat(
   // Expanded colliders can meet before the nominal melee range. Contact must still
   // allow attacking; otherwise a stopped melee monster could never hit the player.
   const enemyReach = (enemy: CombatState["enemies"][number]) =>
-    Math.max(enemy.ranged ? 2 : 1, colliderStopDistance(enemy.art, enemy.rank, buffs.dinosaur));
+    enemyAttackRange(enemy, buffs.dinosaur);
   let gold = 0;
   let defeats = 0;
   for (let elapsed = 0; elapsed < duration; elapsed += 50) {
@@ -198,7 +198,7 @@ export function advanceCombat(
     }
     state.attackIn = Math.max(0, state.attackIn - dt);
     const target = state.enemies
-      .filter((enemy) => enemy.distance <= 3)
+      .filter((enemy) => enemy.distance <= playerAttackRange)
       .sort((a, b) => a.distance - b.distance || a.id - b.id)[0];
     if (target && state.attackIn === 0) {
       state.seed = (Math.imul(state.seed, 1664525) + 1013904223) >>> 0;

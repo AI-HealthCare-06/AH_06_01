@@ -343,6 +343,8 @@ export function AdventureScene({
         )}
         {import.meta.env.DEV && debugVisible && (
           <BattleDebugOverlay
+            dinosaur={game.dinosaur}
+            enemies={battle.enemies}
             actors={[
               { id: "P", geometry: player },
               ...battle.enemies.map((enemy) => ({

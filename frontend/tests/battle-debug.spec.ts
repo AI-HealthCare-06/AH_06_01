@@ -50,6 +50,15 @@ test("development debug boxes share combat coordinates, follow enemies and prese
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
   await expect(overlay.locator("rect")).toHaveCount(8);
   await expect(overlay).toHaveCSS("pointer-events", "none");
+  await expect(overlay.locator('[data-range-actor="P"]')).toHaveAttribute("data-range", "3");
+  await expect(overlay.locator(".debug-range-boundary")).toHaveAttribute("x1", "158");
+  await expect(overlay.locator('[data-range-actor="M1"]')).toHaveAttribute("data-range", "2");
+  expect(
+    Number(await overlay.locator('[data-range-actor="M2"]').getAttribute("data-range")),
+  ).toBeGreaterThan(2);
+  expect(
+    Number(await overlay.locator('[data-range-actor="M3"]').getAttribute("data-range")),
+  ).toBeGreaterThan(1);
 
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
@@ -58,6 +67,22 @@ test("development debug boxes share combat coordinates, follow enemies and prese
       ...(await page.locator(".battle-enemy").all()),
     ];
     for (const [i, actor] of actors.entries()) {
+      if (i > 0) {
+        const range = overlay.locator(`[data-range-actor="M${i}"]`);
+        const reach = Number(await range.getAttribute("data-range"));
+        const ruler = range.locator("line");
+        const x1 = Number(await ruler.getAttribute("x1"));
+        const x2 = Number(await ruler.getAttribute("x2"));
+        expect(x2 - x1).toBeCloseTo(reach * 30);
+        expect(x2).toBeCloseTo(
+          await actor.evaluate((node) => parseFloat((node as HTMLElement).style.left)),
+        );
+        const scale = await page
+          .locator(".design-canvas-inner")
+          .evaluate((node) => node.getBoundingClientRect().width / 354);
+        const width = await ruler.evaluate((node) => node.getBoundingClientRect().width);
+        expect(width).toBeCloseTo(reach * 30 * scale, 2);
+      }
       for (const kind of ["collider", "hitbox"]) {
         const box = JSON.parse((await actor.getAttribute(`data-${kind}`))!);
         const rect = overlay.locator(
@@ -89,6 +114,7 @@ test("development debug boxes share combat coordinates, follow enemies and prese
   await page.getByRole("button", { name: "모험 재개" }).click();
   await page.clock.runFor(1000);
   await expect(overlay.locator('[data-debug-actor="M1"]')).toHaveCount(0);
+  await expect(overlay.locator('[data-range-actor="M1"]')).toHaveCount(0);
   expect(Number(await elite.getAttribute("x"))).toBeLessThan(before);
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   const frozen = await elite.getAttribute("x");
@@ -103,4 +129,56 @@ test("development debug boxes share combat coordinates, follow enemies and prese
     "aria-pressed",
     "false",
   );
+});
+
+test("monster range status uses the exact combat threshold including body contact", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.clock.pauseAt(new Date());
+  await page.goto("/home");
+  await page.getByRole("button", { name: "전투 디버그 표시" }).click();
+  for (const offset of [0.001, 0, -0.001]) {
+    const range = await page.evaluate(async (offset) => {
+      const storePath = "/src/stores/game-store.ts";
+      const rangePath = "/src/domain/battle-range.ts";
+      const { useGameStore } = await import(storePath);
+      const { enemyAttackRange } = await import(rangePath);
+      const { game } = useGameStore.getState();
+      const enemy = {
+        id: 42,
+        art: 3,
+        rank: "normal",
+        ranged: false,
+        hp: 1000,
+        maxHp: 1000,
+        ad: 0,
+        attackIn: 0,
+        hitAt: -1000,
+      };
+      const range = enemyAttackRange(enemy, 0);
+      useGameStore.setState({
+        paused: true,
+        game: {
+          ...game,
+          dinosaur: 0,
+          battlePaused: true,
+          combat: {
+            ...game.combat,
+            recovery: 0,
+            lastAttack: null,
+            enemies: [{ ...enemy, distance: range + offset }],
+          },
+        },
+      });
+      return range;
+    }, offset);
+    const indicator = page.locator('[data-range-actor="M42"]');
+    expect(range).toBeGreaterThan(1);
+    await expect(indicator).toHaveAttribute("data-range", String(range));
+    await expect(indicator).toHaveAttribute("data-in-range", String(offset <= 0));
+    await expect(indicator.locator("text")).toHaveText(
+      `M42 ${range.toFixed(2)}u ${offset <= 0 ? "IN" : "OUT"}`,
+    );
+  }
 });

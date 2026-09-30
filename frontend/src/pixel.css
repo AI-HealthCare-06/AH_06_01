@@ -1817,3 +1817,33 @@
   stroke: #10251d;
   stroke-width: 2px;
 }
+.debug-player-range {
+  color: #ffe486;
+}
+.debug-enemy-range {
+  color: #ffa45d;
+}
+.debug-player-range line,
+.debug-player-range path,
+.debug-enemy-range line,
+.debug-enemy-range path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.debug-range-boundary {
+  stroke-dasharray: 4 3;
+}
+.debug-range-label {
+  fill: currentColor;
+  font: bold 8px monospace;
+  paint-order: stroke;
+  stroke: #10251d;
+  stroke-width: 2.5px;
+}
+.debug-player-range-label {
+  color: #ffe486;
+}
+.debug-enemy-range-label {
+  color: #ffa45d;
+}
