@@ -99,7 +99,7 @@ test("compact HUD toggles buffs and hit art lasts 200ms without stopping attack 
               hp: 1000,
               maxHp: 1000,
               ad: 20,
-              distance: 2,
+              distance: 3,
               attackIn: 100,
               ranged: true,
               hitAt: -1000,

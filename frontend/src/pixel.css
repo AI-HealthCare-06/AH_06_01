@@ -101,10 +101,6 @@
 .enemy-projectile {
   position: absolute;
   z-index: 4;
-  width: 28px;
-  height: 22px;
-  object-fit: contain;
-  transform: translate(-50%, -50%);
   pointer-events: none;
 }
 .battle-clear {
@@ -470,7 +466,16 @@
   color: #286884;
 }
 .home-screen .main-content {
+  padding: 0;
+}
+.home-content {
+  position: relative;
+  isolation: isolate;
+  min-height: 100%;
   padding: 14px 4px 12px;
+}
+.home-content > .dark-shell {
+  inset: 0;
 }
 .home-screen .dino-feedback {
   min-height: 52px;

@@ -40,6 +40,9 @@ test("all Figma routes render local assets with no browser errors", async ({ pag
   expect(errors).toEqual([]);
 });
 test("quest completion persists and cannot grant a duplicate reward", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.clock.install({ time: new Date("2026-09-30T00:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-09-30T00:01:00Z"));
   await page.goto("/quests/water");
   await page.getByRole("button", { name: "완료 체크하기" }).click();
   await expect(page).toHaveURL(/\/reward$/);

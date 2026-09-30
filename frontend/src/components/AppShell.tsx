@@ -111,8 +111,17 @@ export function AppShell({ active, children }: { active: TabName; children: Reac
         </div>
       )}
       <main className="main-content">
-        <div className="dark-shell" aria-hidden="true" />
-        {children}
+        {active === "home" ? (
+          <div className="home-content">
+            <div className="dark-shell" aria-hidden="true" />
+            {children}
+          </div>
+        ) : (
+          <>
+            <div className="dark-shell" aria-hidden="true" />
+            {children}
+          </>
+        )}
       </main>
       <nav className="bottom-navigation" aria-label="주요 메뉴">
         {destinations.map(({ path, label, key }) => (

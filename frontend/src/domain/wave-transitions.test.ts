@@ -54,10 +54,13 @@ describe("mixed waves and travel", () => {
     expect(fired.hp).toBe(50);
     expect(fired.enemies[0].attackIn).toBe(500);
     expect(fired.projectiles).toHaveLength(1);
-    const flying = advanceCombat(fired, buffs, 1, 450).combat;
+    const flying = advanceCombat(fired, buffs, 1, 100).combat;
     expect(flying.hp).toBe(50);
-    expect(flying.projectiles[0].distance).toBeCloseTo(3 - projectileSpeed * 0.45);
-    expect(advanceCombat(flying, buffs, 1, 50).combat.hp).toBe(40);
+    expect(flying.projectiles[0].distance).toBeCloseTo(3 - projectileSpeed * 0.1);
+    const hit = advanceCombat(flying, buffs, 1, 50).combat;
+    expect(hit.hp).toBe(40);
+    expect(hit.projectiles).toHaveLength(0);
+    expect(advanceCombat(hit, buffs, 1, 300).combat.hp).toBe(40);
     expect(input.enemies[0].attackIn).toBe(0);
   });
   it("persists clear/travel, prevents spawning during the effect, and unlocks the next stage after travel", () => {

@@ -1,4 +1,5 @@
-import { enemyAttackRange, isPlayerInEnemyRange, playerAttackRange } from "./battle-range";
+import { enemyAttackRange, playerAttackRange } from "./battle-range";
+import { projectileHitsPlayer } from "./battle-geometry";
 import { z } from "zod";
 import type { GameState, QuestId } from "./game";
 import { experienceProgress } from "./experience";
@@ -188,8 +189,16 @@ export function advanceCombat(
   };
   // Expanded colliders can meet before the nominal melee range. Contact must still
   // allow attacking; otherwise a stopped melee monster could never hit the player.
-  const enemyReach = (enemy: CombatState["enemies"][number]) =>
-    enemyAttackRange(enemy, buffs.dinosaur);
+  const reaches = new Map<string, number>();
+  const enemyReach = (enemy: CombatState["enemies"][number]) => {
+    const key = `${enemy.art}:${enemy.rank}:${enemy.ranged}`;
+    let reach = reaches.get(key);
+    if (reach === undefined) {
+      reach = enemyAttackRange(enemy, buffs.dinosaur);
+      reaches.set(key, reach);
+    }
+    return reach;
+  };
   let gold = 0;
   let defeats = 0;
   for (let elapsed = 0; elapsed < duration; elapsed += 50) {
@@ -234,15 +243,16 @@ export function advanceCombat(
     // Already launched projectiles travel independently from their shooter.
     for (const projectile of state.projectiles) {
       projectile.distance = Math.max(0, projectile.distance - (projectileSpeed * dt) / 1000);
-      if (projectile.distance < 1e-9) projectile.distance = 0;
-      if (projectile.distance === 0) state.hp = Math.max(0, state.hp - projectile.damage);
+      if (projectile.distance < 1e-9 || projectileHitsPlayer(projectile, buffs.dinosaur)) {
+        projectile.distance = 0;
+        state.hp = Math.max(0, state.hp - projectile.damage);
+      }
     }
     state.projectiles = state.projectiles.filter((projectile) => projectile.distance > 0);
     for (const enemy of state.enemies) {
-      enemy.distance = Math.max(
-        enemyReach(enemy),
-        enemy.distance - ((enemy.ranged ? 1.2 : 1.4) * dt) / 1000,
-      );
+      const reach = enemyReach(enemy);
+      if (enemy.distance > reach)
+        enemy.distance = Math.max(reach, enemy.distance - ((enemy.ranged ? 1.2 : 1.4) * dt) / 1000);
       enemy.attackIn = Math.max(0, enemy.attackIn - dt);
     }
     state.attackIn = Math.max(0, state.attackIn - dt);
@@ -277,18 +287,21 @@ export function advanceCombat(
       }
     }
     for (const enemy of state.enemies) {
-      if (isPlayerInEnemyRange(enemy, buffs.dinosaur) && enemy.attackIn === 0) {
+      if (enemy.distance <= enemyReach(enemy) && enemy.attackIn === 0) {
         const damage = incomingDamage(enemy.ad, buffs.def, buffs.defBonus);
-        if (enemy.ranged)
-          state.projectiles.push({
+        if (enemy.ranged) {
+          const projectile = {
             id: `${enemy.id}-${state.clock}`,
             art: enemy.art,
             rank: enemy.rank,
             distance: enemy.distance,
             origin: enemy.distance,
             damage,
-          });
-        else state.hp = Math.max(0, state.hp - damage);
+          };
+          if (projectileHitsPlayer(projectile, buffs.dinosaur))
+            state.hp = Math.max(0, state.hp - damage);
+          else state.projectiles.push(projectile);
+        } else state.hp = Math.max(0, state.hp - damage);
         enemy.attackedAt = state.clock;
         enemy.attackIn = 500;
       }

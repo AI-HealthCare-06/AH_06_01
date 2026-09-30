@@ -1,9 +1,9 @@
 import {
   arena,
-  center,
   attackPosition,
   enemyGeometry,
   playerGeometry,
+  projectileGeometry,
 } from "../domain/battle-geometry";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -388,24 +388,21 @@ export function AdventureScene({
           );
         })}
         {battle.projectiles.map((projectile) => {
-          const progress = 1 - projectile.distance / projectile.origin;
-          const target = center(player.hitbox);
-          const source = enemyGeometry(
-            projectile.origin,
-            projectile.art,
-            projectile.rank ?? "normal",
-            true,
-          ).hitbox;
-          const x = source.x + (target.x - source.x) * progress;
-          const y = center(source).y + (target.y - center(source).y) * progress;
+          const geometry = projectileGeometry(projectile, game.dinosaur);
           return (
             <img
               key={projectile.id}
               className="enemy-projectile"
+              data-hitbox={JSON.stringify(geometry.hitbox)}
               alt=""
               aria-hidden="true"
               src={villainAnimation(projectile.art, true).projectile}
-              style={{ left: x, top: y }}
+              style={{
+                left: geometry.sprite.x,
+                top: geometry.sprite.y,
+                width: geometry.sprite.width,
+                height: geometry.sprite.height,
+              }}
             />
           );
         })}
@@ -449,7 +446,7 @@ export function AdventureScene({
         )}
         {battle.recovery > 0 && (
           <div className="battle-recovery" role="status">
-            회복 중 · {Math.ceil(battle.recovery / 1000)}초 후 WAVE 재시작
+            {String(Math.ceil(battle.recovery / 1000)).padStart(2, "0")}초 후 재시작
           </div>
         )}
         {import.meta.env.DEV && debugVisible && (
