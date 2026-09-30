@@ -51,6 +51,12 @@ test("development debug boxes share combat coordinates, follow enemies and prese
   await expect(overlay.locator("rect")).toHaveCount(8);
   await expect(overlay).toHaveCSS("pointer-events", "none");
   await expect(overlay.locator('[data-range-actor="P"]')).toHaveAttribute("data-range", "3");
+  await expect(overlay.locator('[data-range-actor="P"] .debug-range-label')).toHaveText(
+    "P RANGE 3.00u",
+  );
+  await expect(overlay.locator('[data-range-actor="M1"] .debug-range-label')).toHaveText(
+    "M1 RANGE 2.00u OUT",
+  );
   await expect(overlay.locator(".debug-range-boundary")).toHaveAttribute("x1", "158");
   await expect(overlay.locator('[data-range-actor="M1"]')).toHaveAttribute("data-range", "2");
   expect(
@@ -62,6 +68,21 @@ test("development debug boxes share combat coordinates, follow enemies and prese
 
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
+    const unitWidths = [];
+    for (const id of ["P", "M1", "M2", "M3"]) {
+      const range = overlay.locator(`[data-range-actor="${id}"]`);
+      const origin = Number(await range.locator('[data-range-tick="0"]').getAttribute("x1"));
+      const tick = Number(await range.locator('[data-range-tick="1"]').getAttribute("x1"));
+      expect(tick - origin).toBe(id === "P" ? 30 : -30);
+      unitWidths.push(
+        await range.evaluate((node) => {
+          const a = node.querySelector('[data-range-tick="0"]')!.getBoundingClientRect();
+          const b = node.querySelector('[data-range-tick="1"]')!.getBoundingClientRect();
+          return Math.abs(b.x - a.x);
+        }),
+      );
+    }
+    for (const value of unitWidths) expect(value).toBeCloseTo(unitWidths[0], 2);
     const actors = [
       page.locator(".battle-dinosaur"),
       ...(await page.locator(".battle-enemy").all()),
@@ -70,11 +91,11 @@ test("development debug boxes share combat coordinates, follow enemies and prese
       if (i > 0) {
         const range = overlay.locator(`[data-range-actor="M${i}"]`);
         const reach = Number(await range.getAttribute("data-range"));
-        const ruler = range.locator("line");
+        const ruler = range.locator(".debug-range-ruler");
         const x1 = Number(await ruler.getAttribute("x1"));
         const x2 = Number(await ruler.getAttribute("x2"));
-        expect(x2 - x1).toBeCloseTo(reach * 30);
-        expect(x2).toBeCloseTo(
+        expect(x1 - x2).toBeCloseTo(reach * 30);
+        expect(x1).toBeCloseTo(
           await actor.evaluate((node) => parseFloat((node as HTMLElement).style.left)),
         );
         const scale = await page
@@ -178,7 +199,7 @@ test("monster range status uses the exact combat threshold including body contac
     await expect(indicator).toHaveAttribute("data-range", String(range));
     await expect(indicator).toHaveAttribute("data-in-range", String(offset <= 0));
     await expect(indicator.locator("text")).toHaveText(
-      `M42 ${range.toFixed(2)}u ${offset <= 0 ? "IN" : "OUT"}`,
+      `M42 RANGE ${range.toFixed(2)}u ${offset <= 0 ? "IN" : "OUT"}`,
     );
   }
 });

@@ -4,6 +4,53 @@ import { arena, distanceToX } from "../domain/battle-geometry";
 import type { CombatState } from "../domain/battle";
 import { enemyAttackRange, playerAttackRange } from "../domain/battle-range";
 
+// Both directions use the same unit conversion, ticks and label format.
+function RangeRuler({
+  label,
+  range,
+  origin,
+  direction,
+  y,
+  status,
+}: {
+  label: string;
+  range: number;
+  origin: number;
+  direction: 1 | -1;
+  y: number;
+  status?: string;
+}) {
+  const end = origin + direction * range * arena.pixelsPerUnit;
+  return (
+    <>
+      <line className="debug-range-ruler" x1={origin} x2={end} y1={y} y2={y} />
+      {Array.from({ length: Math.floor(range) + 1 }, (_, unit) => {
+        const x = origin + direction * unit * arena.pixelsPerUnit;
+        return (
+          <line
+            key={unit}
+            className="debug-range-tick"
+            data-range-tick={unit}
+            x1={x}
+            x2={x}
+            y1={y - 3}
+            y2={y + 3}
+          />
+        );
+      })}
+      <path d={`M${end - direction * 4},${y - 3} l${direction * 4},3 l${-direction * 4},3`} />
+      <text
+        className="debug-range-label"
+        x={origin}
+        y={y - 5}
+        textAnchor={direction === 1 ? "start" : "end"}
+      >
+        {label} RANGE {range.toFixed(2)}u{status ? ` ${status}` : ""}
+      </text>
+    </>
+  );
+}
+
 export function BattleDebugOverlay({
   actors,
   dinosaur,
@@ -21,7 +68,7 @@ export function BattleDebugOverlay({
         <b className="debug-player-range-label">━ P RANGE</b>
         <b className="debug-enemy-range-label">━ M RANGE</b>
         <span>P: 캐릭터 · M: 몬스터</span>
-        <small>X축 논리거리 · 1u = 30px · IN: 사거리 안</small>
+        <small>X축 공통 단위 · 1u = {arena.pixelsPerUnit}px · IN: 사거리 안</small>
         <small>플레이어 판정 위치 고정 · 공격 이동은 모션</small>
       </div>
       <svg
@@ -37,20 +84,17 @@ export function BattleDebugOverlay({
             y1={arena.top + 100}
             y2={arena.ground + 5}
           />
-          <path
-            d={`M${distanceToX(0)},180 v10 M${distanceToX(0)},185 H${distanceToX(playerAttackRange)} v-5 v10`}
+          <RangeRuler
+            label="P"
+            range={playerAttackRange}
+            origin={distanceToX(0)}
+            direction={1}
+            y={185}
           />
-          <text className="debug-range-label" x={distanceToX(0)} y={180}>
-            P RANGE {playerAttackRange.toFixed(2)}
-          </text>
-          <text className="debug-range-label" x={distanceToX(0)} y={197}>
-            0 → {playerAttackRange}u
-          </text>
         </g>
         {enemies.map((enemy, index) => {
           const range = enemyAttackRange(enemy, dinosaur);
           const x = distanceToX(enemy.distance);
-          const edge = distanceToX(enemy.distance - range);
           const y = 213 + (index % 3) * 16;
           const inside = enemy.distance <= range;
           return (
@@ -61,11 +105,14 @@ export function BattleDebugOverlay({
               data-range={range}
               data-in-range={inside}
             >
-              <line x1={edge} x2={x} y1={y} y2={y} />
-              <path d={`M${edge + 4},${y - 3} l-4,3 l4,3 M${x},${y - 4} v8`} />
-              <text className="debug-range-label" x={x} y={y - 5} textAnchor="end">
-                M{enemy.id} {range.toFixed(2)}u {inside ? "IN" : "OUT"}
-              </text>
+              <RangeRuler
+                label={`M${enemy.id}`}
+                range={range}
+                origin={x}
+                direction={-1}
+                y={y}
+                status={inside ? "IN" : "OUT"}
+              />
             </g>
           );
         })}
