@@ -2,50 +2,73 @@
 // transparent sprite margins. Colliders describe bodies; hitboxes receive hits.
 export type BattleBox = { x: number; y: number; width: number; height: number };
 export type ActorGeometry = { sprite: BattleBox; collider: BattleBox; hitbox: BattleBox };
-export const arena = { top: 58, height: 218, ground: 246, pixelsPerUnit: 30 };
+export const arena = { top: 58, height: 218, ground: 253, pixelsPerUnit: 30 };
 export function center(box: BattleBox) {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 }
 export function overlaps(a: BattleBox, b: BattleBox) {
   return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 }
-function inset(sprite: BattleBox, x: number, y: number, width: number, height: number) {
+// Nontransparent resting-pose bounds in BattleSprite's 160 × 120 render buffer.
+// Character order follows battleDinosaurs; Pteranodon uses walking frame zero.
+// Keep these stable during attacks/hit reactions so collision size does not pulse.
+const characterBounds = [
+  [0, 7, 160, 113],
+  [0, 8, 160, 112],
+  [0, 15, 160, 105],
+  [0, 19, 160, 101],
+  [0, 34, 160, 86],
+  [21, 0, 119, 120],
+] as const;
+const monsterBounds = [
+  [46, 0, 69, 120],
+  [47, 0, 66, 120],
+  [31, 0, 98, 120],
+  [20, 0, 119, 120],
+  [27, 0, 106, 120],
+  [32, 0, 97, 120],
+] as const;
+function geometry(
+  sprite: BattleBox,
+  bounds: readonly [number, number, number, number],
+): ActorGeometry {
+  const [x, y, width, height] = bounds;
+  const hitbox = {
+    x: sprite.x + (sprite.width * x) / 160,
+    y: sprite.y + (sprite.height * y) / 120,
+    width: (sprite.width * width) / 160,
+    height: (sprite.height * height) / 120,
+  };
   return {
-    x: sprite.x + sprite.width * x,
-    y: sprite.y + sprite.height * y,
-    width: sprite.width * width,
-    height: sprite.height * height,
+    sprite,
+    hitbox,
+    collider: {
+      x: hitbox.x - hitbox.width * 0.05,
+      y: hitbox.y - hitbox.height * 0.05,
+      width: hitbox.width * 1.1,
+      height: hitbox.height * 1.1,
+    },
   };
 }
 export function playerGeometry(dinosaur: number): ActorGeometry {
   const flying = dinosaur === 4;
-  const sprite = { x: 18, y: flying ? 84 : arena.ground - 98, width: 125, height: 98 };
-  return {
-    sprite,
-    collider: inset(sprite, 0.34, 0.55, 0.34, 0.35),
-    hitbox: inset(sprite, 0.3, 0.43, 0.48, 0.48),
-  };
+  const sprite = { x: 8, y: flying ? 84 : arena.ground - 98, width: 125, height: 98 };
+  return geometry(sprite, characterBounds[dinosaur]);
 }
 export function enemyGeometry(distance: number, art: number, rank = "normal"): ActorGeometry {
   const large = rank !== "normal";
   const sprite = {
     x: 68 + distance * arena.pixelsPerUnit,
-    y: arena.ground + 7 - (large ? 74.2 : 65.1),
+    y: arena.ground - (large ? 74.2 : 65.1),
     width: large ? 65.8 : 57.4,
     height: large ? 74.2 : 65.1,
   };
-  // Cola is slender; candy and the round food monsters have wider bodies.
-  const width = [0.26, 0.48, 0.68, 0.76, 0.66, 0.72][art] ?? 0.6;
-  return {
-    sprite,
-    collider: inset(sprite, 0.5 - width * 0.4, 0.65, width * 0.8, 0.34),
-    hitbox: inset(sprite, 0.5 - width / 2, 0.23, width, 0.65),
-  };
+  return geometry(sprite, monsterBounds[art]);
 }
 // The physical body must never cross the player, even after saved/custom input.
 // Normal melee/ranged stopping ranges remain the policy's 1 / 2 world units.
-export function colliderStopDistance(art: number, rank = "normal") {
-  const player = playerGeometry(0).collider;
+export function colliderStopDistance(art: number, rank = "normal", dinosaur = 0) {
+  const player = playerGeometry(dinosaur).collider;
   const enemy = enemyGeometry(0, art, rank).collider;
   return Math.max(0, (player.x + player.width - enemy.x) / arena.pixelsPerUnit);
 }

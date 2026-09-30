@@ -10,6 +10,7 @@ import {
   wavePolicies,
 } from "./game-policy";
 import { initialGame, rollDay, tickBattle } from "./game";
+import { colliderStopDistance } from "./battle-geometry";
 
 describe("document combat rules", () => {
   it("simulates a full 24 hours without reward attenuation and expires buffs at midnight", () => {
@@ -39,6 +40,14 @@ describe("document combat rules", () => {
     expect(across.activity).toEqual({});
   });
   it("matches the level milestones, damage floor and monster tables", () => {
+    expect([1, 2, 3, 4, 5, 6].map(characterStats)).toEqual([
+      { hp: 50, ad: 20, def: 10 },
+      { hp: 55, ad: 22, def: 11 },
+      { hp: 60, ad: 24, def: 12 },
+      { hp: 65, ad: 26, def: 13 },
+      { hp: 80, ad: 31, def: 16 },
+      { hp: 85, ad: 33, def: 17 },
+    ]);
     expect([1, 5, 10, 15, 20].map(characterStats)).toEqual([
       { hp: 50, ad: 20, def: 10 },
       { hp: 80, ad: 31, def: 16 },
@@ -69,6 +78,39 @@ describe("document combat rules", () => {
     expect(cleared.gold).toBe(30);
     expect(cleared.combat.serial).toBe(2);
     expect(cleared.combat.enemies[0].hp).toBe(70);
+  });
+  it("lets melee monsters attack at expanded collider contact, but never before contact", () => {
+    for (let dinosaur = 0; dinosaur < 6; dinosaur++)
+      for (const art of [1, 3, 5]) {
+        const rank = art === 5 ? ("boss" as const) : ("normal" as const);
+        const distance = Math.max(1, colliderStopDistance(art, rank, dinosaur));
+        const combat = {
+          ...initialCombat(),
+          spawned: 1,
+          spawnIn: 5000,
+          attackIn: 500,
+          enemies: [
+            {
+              id: 0,
+              art,
+              rank,
+              distance: distance + 0.1,
+              hp: 1000,
+              maxHp: 1000,
+              ad: 20,
+              attackIn: 0,
+              ranged: false,
+              hitAt: -1000,
+            },
+          ],
+        };
+        const buffs = battleBuffStats({ ...initialGame(), dinosaur });
+        const approaching = advanceCombat(combat, buffs, 1, 50).combat;
+        expect(approaching.hp).toBe(50);
+        const touching = advanceCombat(approaching, buffs, 1, 50).combat;
+        expect(touching.hp).toBe(40);
+        expect(touching.enemies[0].distance).toBeCloseTo(distance);
+      }
   });
   it("uses 690 ordinary mobs plus Elite/Boss and preserves locked final-wave farming", () => {
     expect(wavePolicies.reduce((sum, wave) => sum + wave.count, 0)).toBe(690);

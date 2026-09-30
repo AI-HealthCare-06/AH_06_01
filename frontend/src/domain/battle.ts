@@ -30,7 +30,7 @@ export const questBuffs: { id: QuestId; label: string; stat: string; effect: str
 export function battleBuffStats(
   game: Pick<
     GameState,
-    "experience" | "completed" | "activity" | "steps" | "sleepHours" | "hydrationRatio"
+    "experience" | "completed" | "activity" | "steps" | "sleepHours" | "hydrationRatio" | "dinosaur"
   >,
 ) {
   const base = characterStats(experienceProgress(game.experience).level);
@@ -44,6 +44,7 @@ export function battleBuffStats(
   );
   return {
     ...base,
+    dinosaur: game.dinosaur,
     maxHp: base.hp,
     attack: base.ad * (1 + adBonus),
     adBonus,
@@ -149,6 +150,10 @@ export function advanceCombat(
   duration: number,
 ) {
   const state: CombatState = { ...input, enemies: input.enemies.map((enemy) => ({ ...enemy })) };
+  // Expanded colliders can meet before the nominal melee range. Contact must still
+  // allow attacking; otherwise a stopped melee monster could never hit the player.
+  const enemyReach = (enemy: CombatState["enemies"][number]) =>
+    Math.max(enemy.ranged ? 2 : 1, colliderStopDistance(enemy.art, enemy.rank, buffs.dinosaur));
   let gold = 0;
   let defeats = 0;
   for (let elapsed = 0; elapsed < duration; elapsed += 50) {
@@ -185,10 +190,8 @@ export function advanceCombat(
       state.spawnIn += spawnInterval;
     }
     for (const enemy of state.enemies) {
-      const range = enemy.ranged ? 2 : 1;
       enemy.distance = Math.max(
-        range,
-        colliderStopDistance(enemy.art, enemy.rank),
+        enemyReach(enemy),
         enemy.distance - ((enemy.ranged ? 1.2 : 1.4) * dt) / 1000,
       );
       enemy.attackIn = Math.max(0, enemy.attackIn - dt);
@@ -224,7 +227,7 @@ export function advanceCombat(
       }
     }
     for (const enemy of state.enemies) {
-      if (enemy.distance <= (enemy.ranged ? 2 : 1) && enemy.attackIn === 0) {
+      if (enemy.distance <= enemyReach(enemy) && enemy.attackIn === 0) {
         state.hp = Math.max(0, state.hp - incomingDamage(enemy.ad, buffs.def, buffs.defBonus));
         enemy.attackIn = 500;
       }

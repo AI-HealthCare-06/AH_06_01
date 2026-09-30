@@ -18,9 +18,25 @@ describe("separate battle bodies and hit targets", () => {
     expect(cola.collider).not.toEqual(cola.hitbox);
     expect(cola.hitbox.width).toBeLessThan(burger.hitbox.width);
     expect(boss.hitbox.height).toBeGreaterThan(burger.hitbox.height);
-    for (let art = 0; art < 6; art++) {
-      const monster = enemyGeometry(colliderStopDistance(art) + 0.001, art);
-      expect(overlaps(playerGeometry(0).collider, monster.collider)).toBe(false);
+    for (let character = 0; character < 6; character++)
+      for (let art = 0; art < 6; art++) {
+        const monster = enemyGeometry(colliderStopDistance(art, "normal", character) + 0.001, art);
+        expect(overlaps(playerGeometry(character).collider, monster.collider)).toBe(false);
+      }
+  });
+  it("centers 110% colliders around full bodies and aligns ground characters to monster feet", () => {
+    for (let index = 0; index < 6; index++) {
+      const player = playerGeometry(index);
+      expect(player.sprite.x).toBeLessThan(18);
+      expect(player.collider.x).toBeGreaterThanOrEqual(0);
+      for (const actor of [player, enemyGeometry(3, index, index === 5 ? "boss" : "normal")]) {
+        expect(center(actor.collider).x).toBeCloseTo(center(actor.hitbox).x);
+        expect(center(actor.collider).y).toBeCloseTo(center(actor.hitbox).y);
+        expect(actor.collider.width / actor.hitbox.width).toBeCloseTo(1.1);
+        expect(actor.collider.height / actor.hitbox.height).toBeCloseTo(1.1);
+        if (actor !== player || index !== 4)
+          expect(actor.hitbox.y + actor.hitbox.height).toBeCloseTo(arena.ground);
+      }
     }
   });
   it("aligns every character's strike endpoint to each enemy hitbox and returns home", () => {
