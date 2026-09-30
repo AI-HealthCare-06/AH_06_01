@@ -9,6 +9,7 @@ import type { GameState, QuestId } from "../domain/game";
 import { getSkin } from "../design/skins";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { BattleSprite } from "./BattleSprite";
+import { BattleDebugOverlay } from "./BattleDebugOverlay";
 import { PixelIcon } from "./PixelIcon";
 import { battleBuffStats, questBuffs, waveTarget } from "../domain/battle";
 import { stagePolicies, wavePolicies } from "../domain/game-policy";
@@ -28,6 +29,7 @@ export function AdventureScene({
   const experience = experienceProgress(game.experience);
   const [selected, setSelected] = useState<QuestId | null>(null);
   const [buffsExpanded, setBuffsExpanded] = useState(false);
+  const [debugVisible, setDebugVisible] = useState(false);
   const hud = useRef<HTMLDivElement>(null);
   const [reducedMotion, setReducedMotion] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -237,6 +239,18 @@ export function AdventureScene({
         >
           <span aria-hidden="true" className={paused ? "play-symbol" : "pause-symbol"} />
         </button>
+        {import.meta.env.DEV && (
+          <button
+            type="button"
+            className="battle-debug-toggle"
+            aria-label={debugVisible ? "전투 디버그 숨기기" : "전투 디버그 표시"}
+            aria-pressed={debugVisible}
+            aria-controls="battle-debug-overlay"
+            onClick={() => setDebugVisible((visible) => !visible)}
+          >
+            DEBUG
+          </button>
+        )}
         <div
           className="battle-dinosaur"
           data-dinosaur={game.dinosaur}
@@ -326,6 +340,17 @@ export function AdventureScene({
           <div className="battle-recovery" role="status">
             회복 중 · {Math.ceil(battle.recovery / 1000)}초 후 WAVE 재시작
           </div>
+        )}
+        {import.meta.env.DEV && debugVisible && (
+          <BattleDebugOverlay
+            actors={[
+              { id: "P", geometry: player },
+              ...battle.enemies.map((enemy) => ({
+                id: `M${enemy.id}`,
+                geometry: enemyGeometry(enemy.distance, enemy.art, enemy.rank),
+              })),
+            ]}
+          />
         )}
         <div className="stage-progress">
           <span>WAVE PROGRESS</span>

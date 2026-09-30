@@ -1743,3 +1743,77 @@
   outline: 2px solid #ffe486;
   outline-offset: -2px;
 }
+
+/* Only rendered by the development build; the overlay never intercepts controls. */
+.battle-debug-toggle {
+  position: absolute;
+  top: 68px;
+  right: 57px;
+  width: 56px;
+  height: 32px;
+  z-index: 10;
+  border: 1px solid #f3e7c8aa;
+  background: #20211d;
+  color: #f8eed5;
+  font: 8px var(--pixel);
+}
+.battle-debug-toggle[aria-pressed="true"] {
+  color: #20211d;
+  background: #ffe486;
+  border-color: #ffe486;
+}
+.battle-debug-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+}
+.battle-debug-overlay svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.battle-debug-legend {
+  position: absolute;
+  top: 105px;
+  width: 180px;
+  right: 6px;
+  padding: 4px 5px;
+  background: #10251df2;
+  color: #fff;
+  font:
+    8px/1.5 "Galmuri11",
+    sans-serif;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px 10px;
+}
+.battle-debug-legend small {
+  width: 100%;
+  font-size: 7px;
+}
+.debug-collider {
+  fill: #48e9ff1a;
+  stroke: #48e9ff;
+  stroke-width: 1.5;
+}
+.debug-hitbox {
+  fill: #ff78ca14;
+  stroke: #ff78ca;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2;
+}
+.debug-collider-label {
+  color: #48e9ff;
+  fill: #48e9ff;
+}
+.debug-hitbox-label {
+  color: #ff78ca;
+  fill: #ff78ca;
+}
+.debug-box-label {
+  font: 7px monospace;
+  paint-order: stroke;
+  stroke: #10251d;
+  stroke-width: 2px;
+}
