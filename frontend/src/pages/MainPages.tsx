@@ -273,10 +273,13 @@ export function DashboardPage() {
             </section>
             <div className="report-body" key={period}>
               <header>
-                <h3 id="report-title">REPORT</h3>
+                <h3 id="report-title">
+                  <PixelIcon name="document" />
+                  REPORT
+                </h3>
                 <span>{periodInfo.label} 리포트 · 데모</span>
               </header>
-              <p>
+              <p className="report-score-change">
                 {periodInfo.previous} 대비 건강 점수 <b>+{periodInfo.delta}점</b>
               </p>
               <dl>
@@ -290,9 +293,12 @@ export function DashboardPage() {
                 </div>
               </dl>
               <p className="report-next">
-                {game.completed.length === 5
-                  ? "오늘 퀘스트를 모두 완료했어요."
-                  : `다음 실천 · ${quests.find((quest) => !game.completed.includes(quest.id))?.title}`}
+                <PixelIcon name="quests" />
+                <span>
+                  {game.completed.length === 5
+                    ? "오늘 퀘스트를 모두 완료했어요."
+                    : `다음 실천 · ${quests.find((quest) => !game.completed.includes(quest.id))?.title}`}
+                </span>
               </p>
               <small>점수와 추이는 데모이며 퀘스트 현황은 이 기기의 실제 기록이에요.</small>
               <HealthTrend period={period} today={game.date} />
