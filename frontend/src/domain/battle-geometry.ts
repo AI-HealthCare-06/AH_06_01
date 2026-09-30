@@ -1,6 +1,7 @@
 // Coordinates are in the 354 × 336 design canvas, independent of CSS scale and
 // transparent sprite margins. Colliders describe bodies; hitboxes receive hits.
 import atlases from "../design/animation-atlases.json";
+import motions from "../design/motion-atlases.json";
 export type BattleBox = { x: number; y: number; width: number; height: number };
 export type ActorGeometry = { sprite: BattleBox; collider: BattleBox; hitbox: BattleBox };
 export const arena = { top: 58, height: 218, ground: 253, pixelsPerUnit: 30 };
@@ -18,11 +19,11 @@ export function overlaps(a: BattleBox, b: BattleBox) {
 // Keep these stable during attacks/hit reactions so collision size does not pulse.
 const characterBounds = [
   atlases.bounds.TrexIdleSpritesheet4X3Png as [number, number, number, number],
-  [0, 8, 160, 112],
+  motions.bounds.DinoTriceraIdle as [number, number, number, number],
   atlases.bounds.RaptorIdleSpritesheet4X31Png as [number, number, number, number],
-  [0, 19, 160, 101],
-  [0, 28, 160, 92],
-  [21, 0, 119, 120],
+  motions.bounds.DinoStegoIdle as [number, number, number, number],
+  [0, 34, 160, 86],
+  motions.bounds.DinoBrachioIdle as [number, number, number, number],
 ] as const;
 const monsterNames = [
   "DarkCola",
@@ -54,9 +55,14 @@ function geometry(
     },
   };
 }
-export function playerGeometry(dinosaur: number): ActorGeometry {
+export function playerGeometry(dinosaur: number, offset = { x: 0, y: 0 }): ActorGeometry {
   const flying = dinosaur === 4;
-  const sprite = { x: 8, y: flying ? 84 : arena.ground - 98, width: 125, height: 98 };
+  const sprite = {
+    x: 8 + offset.x,
+    y: (flying ? 84 : arena.ground - 98) + offset.y,
+    width: 125,
+    height: 98,
+  };
   return geometry(sprite, characterBounds[dinosaur]);
 }
 export function enemyGeometry(
@@ -98,19 +104,95 @@ export function projectileGeometry(projectile: ProjectilePosition, dinosaur: num
   ] as [number, number, number, number];
   return geometry(sprite, bounds);
 }
-export function projectileHitsPlayer(projectile: ProjectilePosition, dinosaur: number) {
+export function projectileHitsPlayer(
+  projectile: ProjectilePosition,
+  dinosaur: number,
+  player = playerGeometry(dinosaur),
+) {
   const a = projectileGeometry(projectile, dinosaur).hitbox;
-  const b = playerGeometry(dinosaur).hitbox;
+  const b = player.hitbox;
   return (
     a.x <= b.x + b.width && a.x + a.width >= b.x && a.y <= b.y + b.height && a.y + a.height >= b.y
   );
 }
 // The physical body must never cross the player, even after saved/custom input.
 // Nominal melee/ranged reach is 1 / 7 world units.
-export function colliderStopDistance(art: number, rank = "normal", dinosaur = 0, ranged = false) {
-  const player = playerGeometry(dinosaur).collider;
+export function colliderStopDistance(
+  art: number,
+  rank = "normal",
+  dinosaur = 0,
+  ranged = false,
+  actor = playerGeometry(dinosaur),
+) {
+  const player = actor.collider;
   const enemy = enemyGeometry(0, art, rank, ranged).collider;
   return Math.max(0, (player.x + player.width - enemy.x) / arena.pixelsPerUnit);
+}
+
+export type AttackMotion = {
+  time: number;
+  duration?: number;
+  mode?: "melee" | "ranged";
+  offsetX?: number;
+  offsetY?: number;
+};
+export function combatPlayerGeometry(dinosaur: number, attack: AttackMotion | null, clock: number) {
+  const progress = attack ? (clock - attack.time) / (attack.duration ?? 500) : 1;
+  if (!attack || attack.mode !== "melee" || progress < 0 || progress >= 1)
+    return playerGeometry(dinosaur);
+  const amount = progress <= 0.3 ? progress / 0.3 : (1 - progress) / 0.7;
+  return playerGeometry(dinosaur, {
+    x: (attack.offsetX ?? 0) * amount,
+    y: (attack.offsetY ?? 0) * amount,
+  });
+}
+
+export type PlayerShotPosition = { x: number; y: number; dinosaur: number; age: number };
+const dinoNames = ["Trex", "Tricera", "Raptor", "Stego", "Ptera", "Brachio"];
+export const playerProjectileSize = { width: 36, height: 27 };
+export function playerProjectileGeometry(shot: PlayerShotPosition) {
+  const name = `Dino${dinoNames[shot.dinosaur]}Projectile`;
+  const frames = (motions.frameBounds as Record<string, number[][]>)[name];
+  const bounds = frames[Math.floor(shot.age / 80) % frames.length] as [
+    number,
+    number,
+    number,
+    number,
+  ];
+  return geometry(
+    {
+      x: shot.x - playerProjectileSize.width / 2,
+      y: shot.y - playerProjectileSize.height / 2,
+      ...playerProjectileSize,
+    },
+    bounds,
+  );
+}
+
+// Swept AABB: first contact time in [0, 1], including a moving target. This
+// prevents a fast shot crossing a thin cola hitbox between simulation ticks.
+export function sweptContact(
+  from: BattleBox,
+  to: BattleBox,
+  targetFrom: BattleBox,
+  targetTo = targetFrom,
+) {
+  let enter = 0,
+    leave = 1;
+  // Each separating edge must overlap. Interpolate both boxes' edges, including
+  // changing projectile alpha bounds, so animation cannot skip an impact.
+  for (const [start, end] of [
+    [from.x + from.width - targetFrom.x, to.x + to.width - targetTo.x],
+    [targetFrom.x + targetFrom.width - from.x, targetTo.x + targetTo.width - to.x],
+    [from.y + from.height - targetFrom.y, to.y + to.height - targetTo.y],
+    [targetFrom.y + targetFrom.height - from.y, targetTo.y + targetTo.height - to.y],
+  ]) {
+    if (start < 0 && end < 0) return null;
+    if (start < 0) enter = Math.max(enter, -start / (end - start));
+    else if (end < 0) leave = Math.min(leave, start / (start - end));
+    if (enter > leave) return null;
+  }
+  return enter <= 1 && leave >= 0 ? enter : null;
 }
 const strikePoints = [
   [0.9, 0.7],

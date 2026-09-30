@@ -101,12 +101,16 @@ describe("mixed waves and travel", () => {
       killed: 4,
       spawned: 4,
       projectiles: undefined,
+      playerProjectiles: undefined,
+      lastHit: undefined,
       transition: undefined,
     };
     expect(combatSchema.parse(old)).toMatchObject({
       wave: 2,
       killed: 4,
       projectiles: [],
+      playerProjectiles: [],
+      lastHit: null,
       transition: null,
     });
   });

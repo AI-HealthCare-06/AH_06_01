@@ -11,6 +11,8 @@ test("all resting hitboxes cover the trimmed artwork exactly with 110% body coll
       const path = "/src/stores/game-store.ts";
       const { useGameStore } = await import(path);
       const { game } = useGameStore.getState();
+      const rangePath = "/src/domain/battle-range.ts";
+      const { enemyAttackRange } = await import(rangePath);
       useGameStore.setState({
         paused: true,
         game: {
@@ -27,7 +29,14 @@ test("all resting hitboxes cover the trimmed artwork exactly with 110% body coll
                 id: 1,
                 art: dinosaur,
                 rank: dinosaur === 5 ? "boss" : dinosaur === 4 ? "elite" : "normal",
-                distance: 4,
+                distance: enemyAttackRange(
+                  {
+                    art: dinosaur,
+                    rank: dinosaur === 5 ? "boss" : dinosaur === 4 ? "elite" : "normal",
+                    ranged: false,
+                  },
+                  dinosaur,
+                ),
                 hp: 100,
                 maxHp: 100,
                 ad: 0,
@@ -73,7 +82,9 @@ test("all resting hitboxes cover the trimmed artwork exactly with 110% body coll
   }
 });
 
-test("trimmed character attacks reach six differently sized monster hitboxes", async ({ page }) => {
+test("melee motion moves sprite and both character boxes together for all six dinosaurs", async ({
+  page,
+}) => {
   await page.clock.install({ time: new Date("2026-09-30T00:00:00Z") });
   await page.clock.pauseAt(new Date("2026-09-30T00:01:00Z"));
   await page.goto("/home");
@@ -96,6 +107,9 @@ test("trimmed character attacks reach six differently sized monster hitboxes", a
             recovery: 0,
             lastAttack: {
               time: 9850,
+              mode: "melee",
+              offsetX: 12,
+              offsetY: 10,
               targetId: 1,
               art: dinosaur,
               rank,
@@ -129,25 +143,24 @@ test("trimmed character attacks reach six differently sized monster hitboxes", a
     expect(JSON.parse((await player.getAttribute("data-collider"))!)).not.toEqual(
       JSON.parse((await player.getAttribute("data-hitbox"))!),
     );
-    const scale = await page
-      .locator(".design-canvas-inner")
-      .evaluate((node) => node.getBoundingClientRect().width / 354);
-    const arena = (await page.locator(".design-canvas-inner").boundingBox())!;
-    const target = {
-      x: arena.x + (hitbox.x + hitbox.width / 2) * scale,
-      y: arena.y + (hitbox.y + hitbox.height / 2) * scale,
-    };
-    await expect
-      .poll(async () => {
-        const box = (await player.locator("canvas").boundingBox())!;
-        return (
-          target.x >= box.x &&
-          target.x <= box.x + box.width &&
-          target.y >= box.y &&
-          target.y <= box.y + box.height
-        );
-      })
-      .toBe(true);
+    const moved = await player.evaluate(async (node) => {
+      const path = "/src/domain/battle-geometry.ts";
+      const { playerGeometry } = await import(path);
+      const dinosaur = Number(node.getAttribute("data-dinosaur"));
+      return {
+        rest: playerGeometry(dinosaur),
+        hit: JSON.parse(node.getAttribute("data-hitbox")!),
+        collider: JSON.parse(node.getAttribute("data-collider")!),
+        x: parseFloat((node as HTMLElement).style.left),
+        y: parseFloat((node as HTMLElement).style.top),
+      };
+    });
+    expect(moved.x - moved.rest.sprite.x).toBeCloseTo(12);
+    expect(moved.y - moved.rest.sprite.y).toBeCloseTo(10);
+    expect(moved.hit.x - moved.rest.hitbox.x).toBeCloseTo(12);
+    expect(moved.hit.y - moved.rest.hitbox.y).toBeCloseTo(10);
+    expect(moved.collider.x - moved.rest.collider.x).toBeCloseTo(12);
+    expect(moved.collider.y - moved.rest.collider.y).toBeCloseTo(10);
     for (const sprite of [player.locator("canvas"), enemy.locator("canvas")]) {
       await expect
         .poll(() =>

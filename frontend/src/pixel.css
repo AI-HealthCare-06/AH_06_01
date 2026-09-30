@@ -103,6 +103,30 @@
   z-index: 4;
   pointer-events: none;
 }
+.player-projectile {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+}
+.battle-enemy .enemy-status {
+  font-size: 6px;
+  line-height: 9px;
+  white-space: nowrap;
+}
+.battle-enemy .enemy-status .enemy-hp {
+  width: calc(100% - 10px);
+  height: 3px;
+  margin: 2px auto 0;
+}
+.debug-player-melee {
+  stroke: #f7c86f;
+  fill: #f7c86f;
+}
+.debug-player-projectile {
+  fill: #7af7de22;
+  stroke: #7af7de;
+  stroke-width: 1;
+}
 .battle-clear {
   position: absolute;
   z-index: 5;

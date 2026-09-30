@@ -1,8 +1,19 @@
 import { Fragment } from "react";
 import type { ActorGeometry } from "../domain/battle-geometry";
-import { arena, distanceToX, enemyGeometry, projectileGeometry } from "../domain/battle-geometry";
+import {
+  arena,
+  distanceToX,
+  enemyGeometry,
+  projectileGeometry,
+  playerProjectileGeometry,
+} from "../domain/battle-geometry";
 import type { CombatState } from "../domain/battle";
-import { enemyAttackRange, isPlayerInEnemyRange, playerAttackRange } from "../domain/battle-range";
+import {
+  enemyAttackRange,
+  isPlayerInEnemyRange,
+  playerAttackRange,
+  playerMeleeRange,
+} from "../domain/battle-range";
 
 // Both actors use the simulation's fixed origin, not the artwork's body edges.
 function RangeRuler({
@@ -49,12 +60,15 @@ export function BattleDebugOverlay({
   dinosaur,
   enemies,
   projectiles,
+  playerProjectiles,
 }: {
   actors: { id: string; geometry: ActorGeometry }[];
   dinosaur: number;
   enemies: CombatState["enemies"];
   projectiles: CombatState["projectiles"];
+  playerProjectiles: CombatState["playerProjectiles"];
 }) {
+  const player = actors.find((actor) => actor.id === "P")!.geometry;
   return (
     <div id="battle-debug-overlay" className="battle-debug-overlay">
       <svg
@@ -82,12 +96,21 @@ export function BattleDebugOverlay({
           />
           <RangeRuler label="P" range={playerAttackRange} origin={distanceToX(0)} y={185} />
         </g>
+        <g className="debug-player-melee" data-range={playerMeleeRange}>
+          <RangeRuler
+            label="MELEE"
+            range={playerMeleeRange}
+            origin={player.collider.x + player.collider.width}
+            y={170}
+            status="CONTACT"
+          />
+        </g>
         {enemies.map((enemy, index) => {
-          const range = enemyAttackRange(enemy, dinosaur);
+          const range = enemyAttackRange(enemy, dinosaur, player);
           const x = distanceToX(enemy.distance);
           const boundary = distanceToX(range);
           const y = 209 + (index % 3) * 23;
-          const inside = isPlayerInEnemyRange(enemy, dinosaur);
+          const inside = isPlayerInEnemyRange(enemy, dinosaur, player);
           const remaining = Math.max(0, enemy.distance - range);
           const body = enemyGeometry(enemy.distance, enemy.art, enemy.rank, enemy.ranged).hitbox;
           return (
@@ -174,6 +197,21 @@ export function BattleDebugOverlay({
               <text className="debug-box-label debug-projectile-label" x={box.x} y={box.y - 3}>
                 S{index + 1} HIT
               </text>
+            </g>
+          );
+        })}
+        {playerProjectiles.map((shot) => {
+          const box = playerProjectileGeometry(shot).hitbox;
+          return (
+            <g key={shot.id} data-debug-projectile={shot.id}>
+              <rect
+                className="debug-player-projectile"
+                data-box="hitbox"
+                x={box.x}
+                y={box.y}
+                width={box.width}
+                height={box.height}
+              />
             </g>
           );
         })}

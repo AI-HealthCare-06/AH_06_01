@@ -1,5 +1,22 @@
-import { enemyAttackRange, playerAttackRange, selectPlayerTarget } from "./battle-range";
-import { projectileHitsPlayer } from "./battle-geometry";
+import {
+  enemyAttackRange,
+  playerAttackRange,
+  selectPlayerTarget,
+  meleeContact,
+  inPlayerMeleeRange,
+} from "./battle-range";
+import {
+  arena,
+  center,
+  enemyGeometry,
+  playerGeometry,
+  combatPlayerGeometry,
+  projectileGeometry,
+  playerProjectileGeometry,
+  sweptContact,
+  attackEndpoint,
+  colliderStopDistance,
+} from "./battle-geometry";
 import { z } from "zod";
 import type { GameState, QuestId } from "./game";
 import { experienceProgress, levelUpGold } from "./experience";
@@ -110,6 +127,32 @@ export const combatSchema = z.object({
       }),
     )
     .default([]),
+  playerProjectiles: z
+    .array(
+      z.object({
+        id: z.string(),
+        dinosaur: z.number().int().min(0).max(5),
+        x: z.number().finite(),
+        y: z.number().finite(),
+        vx: z.number().finite(),
+        vy: z.number().finite(),
+        age: z.number().nonnegative(),
+        travelled: z.number().nonnegative(),
+        damage: z.number().nonnegative(),
+        critical: z.boolean(),
+      }),
+    )
+    .default([]),
+  lastHit: z
+    .object({
+      time: z.number(),
+      x: z.number(),
+      y: z.number(),
+      damage: z.number(),
+      critical: z.boolean(),
+    })
+    .nullable()
+    .default(null),
   transition: z
     .object({
       kind: z.enum(["wave", "stage"]),
@@ -133,6 +176,11 @@ export const combatSchema = z.object({
       duration: z.number().positive().optional(),
       impactAt: z.number().nonnegative().optional(),
       resolved: z.boolean().optional(),
+      mode: z.enum(["melee", "ranged"]).optional(),
+      offsetX: z.number().finite().optional(),
+      offsetY: z.number().finite().optional(),
+      aimX: z.number().finite().optional(),
+      aimY: z.number().finite().optional(),
     })
     .nullable(),
   loot: z.object({ time: z.number(), gold: z.number() }).nullable(),
@@ -154,6 +202,8 @@ export function initialCombat(hp = 50): CombatState {
     seed: 42,
     enemies: [],
     projectiles: [],
+    playerProjectiles: [],
+    lastHit: null,
     transition: null,
     lastAttack: null,
     loot: null,
@@ -198,7 +248,10 @@ export const enemyAttackInterval = (ranged: boolean) => (ranged ? 1000 : 500);
 export function isRangedSpawn(index: number) {
   return [2, 5, 9].includes(index % 10);
 }
-// Fixed 50ms simulation. Range is checked on every hit. Hit art never stuns.
+export const playerProjectileSpeed = 240; // design pixels / second
+export const meleeDamageMultiplier = 1.15;
+
+// Fixed 50ms simulation; both rendered geometry and swept collisions use this clock.
 export function advanceCombat(
   input: CombatState,
   buffs: ReturnType<typeof battleBuffStats>,
@@ -209,53 +262,41 @@ export function advanceCombat(
   const state: CombatState = {
     ...input,
     enemies: input.enemies.map((enemy) => ({ ...enemy })),
-    projectiles: input.projectiles.map((projectile) => ({ ...projectile })),
+    projectiles: input.projectiles.map((shot) => ({ ...shot })),
+    playerProjectiles: (input.playerProjectiles ?? []).map((shot) => ({ ...shot })),
     transition: input.transition ? { ...input.transition } : null,
     lastAttack: input.lastAttack ? { ...input.lastAttack } : null,
   };
-  // Expanded colliders can meet before the nominal melee range. Contact must still
-  // allow attacking; otherwise a stopped melee monster could never hit the player.
-  const reaches = new Map<string, number>();
-  const enemyReach = (enemy: CombatState["enemies"][number]) => {
-    const key = `${enemy.art}:${enemy.rank}:${enemy.ranged}`;
-    let reach = reaches.get(key);
-    if (reach === undefined) {
-      reach = enemyAttackRange(enemy, buffs.dinosaur);
-      reaches.set(key, reach);
-    }
-    return reach;
-  };
-  let gold = 0;
-  let defeats = 0;
-  const hitTarget = (
-    target: CombatState["enemies"][number],
-    attack: NonNullable<CombatState["lastAttack"]>,
-  ) => {
-    target.hp = Math.max(0, target.hp - attack.damage);
+  let gold = 0,
+    defeats = 0;
+  const hitTarget = (target: CombatState["enemies"][number], damage: number, critical: boolean) => {
+    if (target.hp <= 0) return;
+    const body = enemyGeometry(target.distance, target.art, target.rank, target.ranged).hitbox;
+    state.lastHit = { time: state.clock, x: center(body).x, y: body.y - 12, damage, critical };
+    target.hp = Math.max(0, target.hp - damage);
     target.hitAt = state.clock;
     target.distance += monsterStats(state.stage, state.wave, target.rank).knockback;
-    attack.resolved = true;
-    if (target.hp === 0) {
-      const reward = monsterGold(state.stage, state.wave, target.rank, buffs.gold);
-      state.pendingGold += reward;
-      defeats++;
-      if (totalExperience !== undefined) {
-        const before = totalExperience++;
-        state.pendingGold += levelUpGold(before, totalExperience);
-        const nextLevel = experienceProgress(totalExperience).level;
-        if (nextLevel !== level) {
-          level = nextLevel;
-          const base = characterStats(level);
-          buffs = { ...buffs, ...base, maxHp: base.hp, attack: base.ad * (1 + buffs.adBonus) };
-        }
+    if (target.hp > 0) return;
+    const reward = monsterGold(state.stage, state.wave, target.rank, buffs.gold);
+    state.pendingGold += reward;
+    defeats++;
+    if (totalExperience !== undefined) {
+      const before = totalExperience++;
+      state.pendingGold += levelUpGold(before, totalExperience);
+      const nextLevel = experienceProgress(totalExperience).level;
+      if (nextLevel !== level) {
+        level = nextLevel;
+        const base = characterStats(level);
+        buffs = { ...buffs, ...base, maxHp: base.hp, attack: base.ad * (1 + buffs.adBonus) };
       }
-      state.killed++;
-      state.loot = { time: state.clock, gold: reward };
-      state.enemies = state.enemies.filter((enemy) => enemy.id !== target.id);
     }
+    state.killed++;
+    state.loot = { time: state.clock, gold: reward };
+    state.enemies = state.enemies.filter((enemy) => enemy.id !== target.id);
   };
   for (let elapsed = 0; elapsed < duration; elapsed += 50) {
     const dt = Math.min(50, duration - elapsed);
+    const previousPlayer = combatPlayerGeometry(buffs.dinosaur, state.lastAttack, state.clock);
     state.clock += dt;
     state.hp = Math.min(state.hp, buffs.maxHp);
     if (state.transition) {
@@ -285,78 +326,153 @@ export function advanceCombat(
     if (state.spawnIn <= 0 && state.spawned < waveTarget(state.wave)) {
       const policy = wavePolicies[state.wave - 1];
       const rank = state.spawned === policy.count ? policy.extra! : "normal";
+      const ranged = rank === "normal" ? isRangedSpawn(state.spawned) : rank === "elite";
       const stats = monsterStats(state.stage, state.wave, rank);
+      // Melee units trade their approach time for a modest HP/AD advantage.
+      const hp = ranged ? stats.hp : Math.round(stats.hp * 1.1);
       const art = rank === "boss" ? 5 : rank === "elite" ? 4 : state.serial % 4;
       state.enemies.push({
         id: state.serial++,
         art,
         rank,
-        hp: stats.hp,
-        maxHp: stats.hp,
-        ad: stats.ad,
+        hp,
+        maxHp: hp,
+        ad: stats.ad * (ranged ? 1 : 1.1),
         distance: 7,
         attackIn: 0,
-        ranged: rank === "normal" ? isRangedSpawn(state.spawned) : rank === "elite",
+        ranged,
         hitAt: -1000,
       });
       state.spawned++;
       state.spawnIn += spawnInterval;
     }
-    // Already launched projectiles travel independently from their shooter.
-    for (const projectile of state.projectiles) {
-      projectile.distance = Math.max(0, projectile.distance - (projectileSpeed * dt) / 1000);
-      if (projectile.distance < 1e-9 || projectileHitsPlayer(projectile, buffs.dinosaur)) {
-        projectile.distance = 0;
-        state.hp = Math.max(0, state.hp - projectile.damage);
-      }
-    }
-    state.projectiles = state.projectiles.filter((projectile) => projectile.distance > 0);
+    const player = combatPlayerGeometry(buffs.dinosaur, state.lastAttack, state.clock);
+    const previousEnemies = new Map(
+      state.enemies.map((enemy) => [
+        enemy.id,
+        enemyGeometry(enemy.distance, enemy.art, enemy.rank, enemy.ranged).hitbox,
+      ]),
+    );
     for (const enemy of state.enemies) {
-      const reach = enemyReach(enemy);
+      const reach = enemyAttackRange(enemy, buffs.dinosaur, player);
       if (enemy.distance > reach)
         enemy.distance = Math.max(reach, enemy.distance - ((enemy.ranged ? 1.2 : 1.4) * dt) / 1000);
+      // A melee lunge moves its physical body too; push intersecting bodies to contact.
+      enemy.distance = Math.max(
+        enemy.distance,
+        colliderStopDistance(enemy.art, enemy.rank, buffs.dinosaur, enemy.ranged, player),
+      );
       enemy.attackIn = Math.max(0, enemy.attackIn - dt);
     }
+    state.projectiles = state.projectiles.filter((shot) => {
+      const before = projectileGeometry(shot, buffs.dinosaur).hitbox;
+      shot.distance = Math.max(0, shot.distance - (projectileSpeed * dt) / 1000);
+      const after = projectileGeometry(shot, buffs.dinosaur).hitbox;
+      if (sweptContact(before, after, previousPlayer.hitbox, player.hitbox) !== null) {
+        state.hp = Math.max(0, state.hp - shot.damage);
+        return false;
+      }
+      return shot.distance > 1e-9;
+    });
+    state.playerProjectiles = state.playerProjectiles.filter((shot) => {
+      const before = playerProjectileGeometry(shot).hitbox;
+      shot.x += (shot.vx * dt) / 1000;
+      shot.y += (shot.vy * dt) / 1000;
+      shot.age += dt;
+      shot.travelled += (playerProjectileSpeed * dt) / 1000;
+      const after = playerProjectileGeometry(shot).hitbox;
+      let first: { enemy: CombatState["enemies"][number]; time: number } | undefined;
+      for (const enemy of state.enemies) {
+        const box = enemyGeometry(enemy.distance, enemy.art, enemy.rank, enemy.ranged).hitbox;
+        const time = sweptContact(before, after, previousEnemies.get(enemy.id) ?? box, box);
+        if (
+          time !== null &&
+          (!first || time < first.time || (time === first.time && enemy.id < first.enemy.id))
+        )
+          first = { enemy, time };
+      }
+      if (first) {
+        hitTarget(first.enemy, shot.damage, shot.critical);
+        return false;
+      }
+      return shot.travelled < playerAttackRange * arena.pixelsPerUnit;
+    });
     state.attackIn = Math.max(0, state.attackIn - dt);
     const pending = state.lastAttack;
     if (state.hp > 0 && pending?.resolved === false && state.clock >= pending.impactAt!) {
-      const victim = state.enemies.find((enemy) => enemy.id === pending.targetId);
-      if (victim) hitTarget(victim, pending);
-      else pending.resolved = true;
+      pending.resolved = true;
+      if (pending.mode === "ranged") {
+        const source = { x: player.hitbox.x + player.hitbox.width, y: center(player.hitbox).y };
+        const dx = (pending.aimX ?? source.x + 200) - source.x,
+          dy = (pending.aimY ?? source.y) - source.y;
+        const length = Math.max(1, Math.hypot(dx, dy));
+        const shot = {
+          id: `p-${state.clock}`,
+          dinosaur: buffs.dinosaur,
+          ...source,
+          vx: (dx / length) * playerProjectileSpeed,
+          vy: (dy / length) * playerProjectileSpeed,
+          age: 0,
+          travelled: 0,
+          damage: pending.damage,
+          critical: pending.critical,
+        };
+        const box = playerProjectileGeometry(shot).hitbox;
+        const touching = state.enemies
+          .filter((enemy) => {
+            const body = enemyGeometry(enemy.distance, enemy.art, enemy.rank, enemy.ranged).hitbox;
+            return sweptContact(box, box, body) !== null;
+          })
+          .sort((a, b) => a.distance - b.distance || a.id - b.id)[0];
+        if (touching) hitTarget(touching, shot.damage, shot.critical);
+        else state.playerProjectiles.push(shot);
+      } else if (pending.mode === "melee") {
+        for (const enemy of [...state.enemies])
+          if (inPlayerMeleeRange(enemy, player)) hitTarget(enemy, pending.damage, pending.critical);
+      } else {
+        // Preserve a saved pre-projectile strike once, then use the new rules.
+        const target = state.enemies.find((enemy) => enemy.id === pending.targetId);
+        if (target) hitTarget(target, pending.damage, pending.critical);
+      }
     }
     const target = selectPlayerTarget(state.enemies);
     if (state.hp > 0 && target && state.attackIn === 0) {
       state.seed = (Math.imul(state.seed, 1664525) + 1013904223) >>> 0;
       const critical = state.seed / 4294967296 < buffs.crt;
-      const damage = buffs.attack * (critical ? 2 : 1);
-      const distant = target.distance > playerAttackRange;
-      const duration = distant
-        ? Math.ceil(
-            (Math.min(500, buffs.attackInterval) * target.distance) / playerAttackRange / 50,
-          ) * 50
-        : Math.min(500, buffs.attackInterval);
+      const melee = state.enemies.some((enemy) => meleeContact(enemy, buffs.dinosaur, player));
+      const duration = Math.min(500, buffs.attackInterval);
+      const box = enemyGeometry(target.distance, target.art, target.rank, target.ranged).hitbox;
+      const aim = center(box),
+        end = attackEndpoint(buffs.dinosaur, box),
+        rest = playerGeometry(buffs.dinosaur).sprite;
       state.lastAttack = {
         time: state.clock,
         distance: target.distance,
-        damage,
+        damage: buffs.attack * (critical ? 2 : 1) * (melee ? meleeDamageMultiplier : 1),
         critical,
         targetId: target.id,
         art: target.art,
         ranged: target.ranged,
         rank: target.rank,
         duration,
-        ...(distant
-          ? { impactAt: state.clock + Math.ceil((duration * 0.3) / 50) * 50, resolved: false }
-          : {}),
+        impactAt: state.clock + Math.ceil((duration * 0.3) / 50) * 50,
+        resolved: false,
+        mode: melee ? "melee" : "ranged",
+        aimX: aim.x,
+        aimY: aim.y,
+        offsetX: melee ? Math.max(-12, Math.min(18, end.x - rest.x)) : 0,
+        offsetY: melee ? Math.max(-12, Math.min(75, end.y - rest.y)) : 0,
       };
       state.attackIn = Math.max(buffs.attackInterval, duration);
-      if (!distant) hitTarget(target, state.lastAttack);
     }
     for (const enemy of state.enemies) {
-      if (enemy.distance <= enemyReach(enemy) && enemy.attackIn === 0) {
+      if (
+        enemy.distance <= enemyAttackRange(enemy, buffs.dinosaur, player) + 1e-6 &&
+        enemy.attackIn === 0
+      ) {
         const damage = incomingDamage(enemy.ad, buffs.def, buffs.defBonus);
         if (enemy.ranged) {
-          const projectile = {
+          const shot = {
             id: `${enemy.id}-${state.clock}`,
             art: enemy.art,
             rank: enemy.rank,
@@ -364,9 +480,10 @@ export function advanceCombat(
             origin: enemy.distance,
             damage,
           };
-          if (projectileHitsPlayer(projectile, buffs.dinosaur))
+          const box = projectileGeometry(shot, buffs.dinosaur).hitbox;
+          if (sweptContact(box, box, player.hitbox) !== null)
             state.hp = Math.max(0, state.hp - damage);
-          else state.projectiles.push(projectile);
+          else state.projectiles.push(shot);
         } else state.hp = Math.max(0, state.hp - damage);
         enemy.attackedAt = state.clock;
         enemy.attackIn = enemyAttackInterval(enemy.ranged);
@@ -376,17 +493,18 @@ export function advanceCombat(
       state.recovery = revivalDelay;
       state.enemies = [];
       state.projectiles = [];
-      // Retry the current wave, so an unbeaten Elite cannot stop idle farming.
+      state.playerProjectiles = [];
       state.killed = 0;
       state.spawned = 0;
       state.attackIn = 0;
       state.lastAttack = null;
+      state.lastHit = null;
       state.pendingGold = 0;
       state.loot = null;
     } else if (state.killed >= waveTarget(state.wave) && state.enemies.length === 0) {
       if (
-        state.lastAttack?.impactAt !== undefined &&
-        state.clock < state.lastAttack.time + state.lastAttack.duration!
+        state.lastAttack &&
+        state.clock < state.lastAttack.time + (state.lastAttack.duration ?? 500)
       )
         continue;
       gold += state.pendingGold;
@@ -399,6 +517,7 @@ export function advanceCombat(
         fromWave: state.wave,
       };
       state.projectiles = [];
+      state.playerProjectiles = [];
       state.lastAttack = null;
     }
   }

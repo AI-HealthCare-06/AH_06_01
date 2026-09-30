@@ -1,11 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-test("all six dinosaurs extend the strike to a distant ranged target and hit on contact", async ({
+test("all six dinosaurs use their Figma projectile, stay in place and damage on impact", async ({
   page,
 }) => {
   await page.clock.install({ time: new Date("2026-09-30T00:00:00Z") });
   await page.clock.pauseAt(new Date("2026-09-30T00:01:00Z"));
   await page.goto("/home");
+  await expect(page.getByRole("button", { name: "모험 일시정지" })).toBeVisible();
   for (let dinosaur = 0; dinosaur < 6; dinosaur++) {
     await page.evaluate(async (dinosaur) => {
       const path = "/src/stores/game-store.ts";
@@ -27,6 +28,7 @@ test("all six dinosaurs extend the strike to a distant ranged target and hit on 
             transition: null,
             recovery: 0,
             projectiles: [],
+            playerProjectiles: [],
             enemies: [
               {
                 id: 42,
@@ -45,20 +47,32 @@ test("all six dinosaurs extend the strike to a distant ranged target and hit on 
         },
       });
     }, dinosaur);
-    await page.clock.runFor(50);
+    await page.clock.runFor(200);
     const player = page.locator(".battle-dinosaur");
-    await expect(player).toHaveAttribute("data-attacking", "true");
+    await expect(player).toHaveAttribute("data-attack-mode", "ranged");
     await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "1000");
-    await page.clock.runFor(400);
-    await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "980");
-    const left = await player.evaluate((node) => parseFloat((node as HTMLElement).style.left));
-    expect(left).toBeGreaterThan(170);
-    const frozenHitbox = JSON.parse((await player.getAttribute("data-hitbox"))!);
-    expect(frozenHitbox.x).toBeLessThan(40);
+    const names = ["Trex", "Tricera", "Raptor", "Stego", "Ptera", "Brachio"];
+    const shot = page.locator(".player-projectile").first();
+    await expect(shot.locator("canvas")).toHaveAttribute(
+      "data-src",
+      `/assets/battle/Dino${names[dinosaur]}Projectile.png`,
+    );
+    expect(await player.evaluate((node) => parseFloat((node as HTMLElement).style.left))).toBe(8);
+    await page.getByRole("button", { name: "모험 일시정지" }).click();
+    const frozen = await shot.getAttribute("style");
     await page.clock.runFor(300);
-    await expect(player).toHaveAttribute("data-attacking", "true");
+    await expect(shot).toHaveAttribute("style", frozen!);
+    await page.getByRole("button", { name: "모험 재개" }).click();
+    await page.evaluate(async () => {
+      const path = "/src/stores/game-store.ts";
+      const { useGameStore } = await import(path);
+      useGameStore.setState((state: { game: { combat: object } }) => ({
+        game: { ...state.game, combat: { ...state.game.combat, attackIn: 5000 } },
+      }));
+    });
+    await page.clock.runFor(1000);
     await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "980");
-    await page.clock.runFor(500);
+    await expect(page.locator(".player-projectile")).toHaveCount(0);
     expect(await player.evaluate((node) => parseFloat((node as HTMLElement).style.left))).toBe(8);
   }
 });

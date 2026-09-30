@@ -37,7 +37,7 @@ const seed = (): GameState => {
 
 describe("wave rewards and saved history", () => {
   it("keeps kill EXP and level after defeat, discards only unbanked battle GOLD, and saves safely", () => {
-    const first = tickBattle(seed(), now + 50);
+    const first = tickBattle(seed(), now + 200);
     expect(first.experience).toBe(100);
     expect(battleBuffStats(first)).toMatchObject({ maxHp: 55, attack: 22 });
     expect(first.gold).toBe(1280);
@@ -49,7 +49,7 @@ describe("wave rewards and saved history", () => {
         ...saved,
         combat: { ...saved.combat, hp: 1, enemies: [{ ...target, hp: 70, ad: 1000, attackIn: 0 }] },
       },
-      now + 100,
+      now + 250,
     );
     expect(failed.combat.recovery).toBe(10000);
     expect(failed.combat.pendingGold).toBe(0);
@@ -59,11 +59,11 @@ describe("wave rewards and saved history", () => {
   it("banks one clear reward, restores HP at the next wave, and holds spawns until the start banner ends", () => {
     const game = seed();
     game.combat = { ...game.combat, hp: 5, spawned: 30, killed: 29, pendingGold: 870 };
-    const cleared = tickBattle(game, now + 50);
+    const cleared = tickBattle(game, now + 550);
     expect(cleared.gold).toBe(1280 + 1900);
     expect(cleared.combat.pendingGold).toBe(0);
     expect(cleared.combat.hp).toBe(5);
-    const arrival = now + 50 + clearDuration("wave") + travelDuration;
+    const arrival = now + 550 + clearDuration("wave") + travelDuration;
     const started = tickBattle(restoreGame(JSON.parse(JSON.stringify(cleared))), arrival);
     expect(started.combat).toMatchObject({
       wave: 2,

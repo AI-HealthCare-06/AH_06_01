@@ -1,11 +1,12 @@
 import atlases from "./animation-atlases.json";
+import motions from "./motion-atlases.json";
 const art = (node: string) => `/assets/battle/${node}.png`;
 export type SpriteFrame = readonly [x: number, y: number, width: number, height: number];
 // These sheets are hand laid out, not an equal-width grid. Keep the whole pose and
 // a shared scale/baseline so crouches, extended horns and effects do not get clipped.
 export const attackFrames: Record<string, readonly SpriteFrame[]> = {
   ...Object.fromEntries(
-    Object.entries(atlases.frames).map(([src, frames]) => [
+    Object.entries({ ...atlases.frames, ...motions.frames }).map(([src, frames]) => [
       src,
       frames.map(([x, y, width, height]): SpriteFrame => [x, y, width, height]),
     ]),
@@ -86,7 +87,13 @@ export const battleDinosaurs = [
     walk: art("TrexWalkSpritesheet4X4Png"),
     movement: "stomp",
   },
-  { image: art("276-702"), attack: art("288-700"), movement: "trot" },
+  {
+    image: art("276-702"),
+    attack: art("288-700"),
+    idle: art("DinoTriceraIdle"),
+    walk: art("DinoTriceraWalk"),
+    movement: "trot",
+  },
   {
     image: art("276-712"),
     attack: art("308-697"),
@@ -94,10 +101,31 @@ export const battleDinosaurs = [
     walk: art("RaptorWalkSpritesheet4X4Png"),
     movement: "sprint",
   },
-  { image: art("276-705"), attack: null, movement: "waddle" },
-  { image: art("276-709"), attack: art("434-578"), walk: art("446-578"), movement: "fly" },
-  { image: art("276-715"), attack: art("295-697"), movement: "stride" },
+  {
+    image: art("276-705"),
+    attack: art("DinoStegoAttack"),
+    idle: art("DinoStegoIdle"),
+    walk: art("DinoStegoWalk"),
+    movement: "waddle",
+  },
+  {
+    image: art("276-709"),
+    attack: art("434-578"),
+    idle: art("446-578"),
+    walk: art("446-578"),
+    movement: "fly",
+  },
+  {
+    image: art("276-715"),
+    attack: art("295-697"),
+    idle: art("DinoBrachioIdle"),
+    walk: art("DinoBrachioWalk"),
+    movement: "stride",
+  },
 ];
+export const dinosaurProjectiles = ["Trex", "Tricera", "Raptor", "Stego", "Ptera", "Brachio"].map(
+  (name) => art(`Dino${name}Projectile`),
+);
 const villainNames = [
   "DarkCola",
   "HardCandy",
@@ -112,6 +140,7 @@ export function villainAnimation(index: number, ranged: boolean) {
     image: art(`${prefix}Idle`),
     hit: art(`${prefix}Hit`),
     attack: art(`${prefix}Attack`),
+    walk: art(`${prefix}Walk`),
     projectile: art(`${prefix}Projectile`),
   };
 }

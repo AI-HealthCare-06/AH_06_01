@@ -43,7 +43,7 @@ test("boss ends wave ten and changes background only when next stage is unlocked
     "aria-valuemax",
     "101",
   );
-  await page.clock.runFor(50);
+  await page.clock.runFor(550);
   await expect(page.locator(".battle-clear")).toContainText("STAGE CLEAR!");
   await page.screenshot({ path: "test-results/stage-clear.png", animations: "disabled" });
   await page.clock.runFor(1600);
@@ -112,25 +112,60 @@ test("Pteranodon idles in place, attacks down-right and freezes when paused", as
     const path = "/src/stores/game-store.ts";
     const { useGameStore } = await import(path);
     useGameStore.getState().chooseDinosaur(4);
+    const { game } = useGameStore.getState();
+    useGameStore.setState({
+      game: {
+        ...game,
+        combat: { ...game.combat, spawned: 1, spawnIn: 5000, enemies: [], lastAttack: null },
+      },
+    });
   });
   const dino = page.locator(".battle-dinosaur"),
     canvas = dino.locator("canvas");
-  await expect(canvas).toHaveAttribute("data-src", "/assets/battle/276-709.png");
+  await expect(canvas).toHaveAttribute("data-src", "/assets/battle/446-578.png");
   await page.clock.runFor(250);
   await expect(dino).toHaveAttribute("data-animation", "idle");
   const idle = await dino.evaluate((e) => ({
     left: parseFloat(getComputedStyle(e).left),
     top: parseFloat(getComputedStyle(e).top),
   }));
-  await page.clock.runFor(2900);
+  await page.evaluate(async () => {
+    const path = "/src/stores/game-store.ts";
+    const { useGameStore } = await import(path);
+    const { game } = useGameStore.getState();
+    useGameStore.setState({
+      game: {
+        ...game,
+        combat: {
+          ...game.combat,
+          attackIn: 0,
+          enemies: [
+            {
+              id: 1,
+              art: 3,
+              rank: "normal",
+              hp: 1000,
+              maxHp: 1000,
+              ad: 0,
+              distance: 1,
+              attackIn: 5000,
+              ranged: false,
+              hitAt: -1000,
+            },
+          ],
+        },
+      },
+    });
+  });
+  await page.clock.runFor(200);
   await expect(dino).toHaveAttribute("data-attacking", "true");
   await expect(canvas).toHaveAttribute("data-src", "/assets/battle/434-578.png");
-  await expect(canvas).toHaveAttribute("data-frame", "4");
+  await expect(canvas).toHaveAttribute("data-frame", "2");
   const attack = await dino.evaluate((e) => ({
     left: parseFloat(getComputedStyle(e).left),
     top: parseFloat(getComputedStyle(e).top),
   }));
-  expect(attack.left).toBeGreaterThan(idle.left + 30);
+  expect(attack.left).toBeGreaterThan(idle.left);
   expect(attack.top).toBeGreaterThan(idle.top + 20);
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   const frame = await canvas.getAttribute("data-frame");

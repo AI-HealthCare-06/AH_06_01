@@ -1,62 +1,73 @@
 import { test, expect } from "@playwright/test";
 
-test("all dinosaurs reach the visible monster during the impact pose", async ({ page }) => {
+test("all four player projectile poses share visible bounds with collision and debug geometry", async ({
+  page,
+}) => {
   await page.clock.install();
   await page.clock.pauseAt(new Date());
-  for (let dinosaur = 0; dinosaur < 6; dinosaur++) {
-    await page.goto("/home");
-    await page.evaluate(async (index) => {
-      const path = "/src/stores/game-store.ts";
-      const { useGameStore } = await import(path);
-      useGameStore.getState().resetDemo();
-      useGameStore.getState().chooseDinosaur(index);
-    }, dinosaur);
-    await page.clock.runFor(3050);
-    await expect(page.locator(".battle-enemy").first()).toHaveAttribute("data-hit", "true");
-    await page.getByRole("button", { name: "모험 일시정지" }).click();
-    await expect
-      .poll(
-        async () =>
-          page.locator(".battle-dinosaur canvas,.battle-enemy canvas").evaluateAll((elements) => {
-            const bounds = elements.slice(0, 2).map((element) => {
-              const canvas = element as HTMLCanvasElement,
-                box = canvas.getBoundingClientRect();
-              const pixels = canvas
-                .getContext("2d")!
-                .getImageData(0, 0, canvas.width, canvas.height).data;
-              let left = canvas.width,
-                top = canvas.height,
-                right = 0,
-                bottom = 0;
-              for (let y = 0; y < canvas.height; y++)
-                for (let x = 0; x < canvas.width; x++)
-                  if (pixels[(y * canvas.width + x) * 4 + 3] > 80) {
-                    left = Math.min(left, x);
-                    right = Math.max(right, x);
-                    top = Math.min(top, y);
-                    bottom = Math.max(bottom, y);
-                  }
-              return {
-                left: box.x + (left * box.width) / canvas.width,
-                right: box.x + (right * box.width) / canvas.width,
-                top: box.y + (top * box.height) / canvas.height,
-                bottom: box.y + (bottom * box.height) / canvas.height,
-                loaded: right > left,
-              };
-            });
-            return (
-              bounds.length === 2 &&
-              bounds.every((b) => b.loaded) &&
-              bounds[0].right > bounds[1].left &&
-              bounds[0].left < bounds[1].right &&
-              bounds[0].bottom > bounds[1].top &&
-              bounds[0].top < bounds[1].bottom
+  await page.goto("/home");
+  await page.getByRole("button", { name: "전투 디버그 표시" }).click();
+  for (let dinosaur = 0; dinosaur < 6; dinosaur++)
+    for (let frame = 0; frame < 4; frame++) {
+      await page.evaluate(
+        async ({ dinosaur, frame }) => {
+          const path = "/src/stores/game-store.ts";
+          const { useGameStore } = await import(path);
+          const { game } = useGameStore.getState();
+          useGameStore.setState({
+            paused: true,
+            game: {
+              ...game,
+              dinosaur,
+              battlePaused: true,
+              combat: {
+                ...game.combat,
+                lastAttack: null,
+                enemies: [],
+                projectiles: [],
+                playerProjectiles: [
+                  {
+                    id: "pose",
+                    dinosaur,
+                    x: 200,
+                    y: 200,
+                    vx: 240,
+                    vy: 0,
+                    age: frame * 80,
+                    travelled: 0,
+                    damage: 20,
+                    critical: false,
+                  },
+                ],
+              },
+            },
+          });
+        },
+        { dinosaur, frame },
+      );
+      const shot = page.locator(".player-projectile");
+      await expect(shot.locator("canvas")).toHaveAttribute("data-frame", String(frame));
+      const box = JSON.parse((await shot.getAttribute("data-hitbox"))!);
+      const rect = page.locator('[data-debug-projectile="pose"] rect');
+      for (const [key, value] of Object.entries(box))
+        await expect(rect).toHaveAttribute(key, String(value));
+      await expect
+        .poll(() =>
+          shot.evaluate((node) => {
+            const hit = JSON.parse(node.getAttribute("data-hitbox")!);
+            const arena = node.closest(".design-canvas-inner")!.getBoundingClientRect();
+            const scale = arena.width / 354,
+              canvas = node.querySelector("canvas")!.getBoundingClientRect();
+            return Math.max(
+              Math.abs(canvas.x - arena.x - hit.x * scale),
+              Math.abs(canvas.y - arena.y - hit.y * scale),
+              Math.abs(canvas.width - hit.width * scale),
+              Math.abs(canvas.height - hit.height * scale),
             );
           }),
-        { message: `dinosaur ${dinosaur} must visually reach the enemy` },
-      )
-      .toBe(true);
-  }
+        )
+        .toBeLessThan(0.2);
+    }
 });
 
 test("camera picks the quest lens, switches a live stream and saves portrait framing", async ({

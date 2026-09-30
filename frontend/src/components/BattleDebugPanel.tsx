@@ -7,6 +7,7 @@ import {
   type battleBuffStats,
 } from "../domain/battle";
 import { enemyAttackRange } from "../domain/battle-range";
+import type { ActorGeometry } from "../domain/battle-geometry";
 import { villains } from "../design/battle-assets";
 
 function panelPosition(anchor: HTMLButtonElement | null) {
@@ -25,6 +26,7 @@ export function BattleDebugPanel({
   anchor,
   level,
   dinosaur,
+  player,
   enemies,
   onChangeLevel,
   onClose,
@@ -35,6 +37,7 @@ export function BattleDebugPanel({
   anchor: RefObject<HTMLButtonElement | null>;
   level: number;
   dinosaur: number;
+  player: ActorGeometry;
   enemies: CombatState["enemies"];
   onChangeLevel: (delta: number) => void;
   onClose: () => void;
@@ -104,7 +107,7 @@ export function BattleDebugPanel({
         <b className="debug-player-range-label">━ P RANGE</b>
         <b className="debug-enemy-range-label">━ M RANGE</b>
         <small>공통 0u · 1u = 30px · ◆ 몹 현재 위치 · IN: 사거리 안</small>
-        <small>플레이어 판정 고정 · 원거리만 남으면 거리 밖까지 돌진</small>
+        <small>기본 원거리 7u · 근접 접촉 시 몸체 앞 2u 광역 · 판정은 캐릭터와 이동</small>
       </div>
       <div className="debug-monster-stats" aria-label="몬스터 스탯">
         {enemies.map((enemy) => (
@@ -115,7 +118,7 @@ export function BattleDebugPanel({
             </strong>
             <span>
               HP {Math.ceil(enemy.hp)}/{enemy.maxHp} · AD {Number(enemy.ad.toFixed(2))} · RANGE{" "}
-              {enemyAttackRange(enemy, dinosaur).toFixed(2)}u
+              {enemyAttackRange(enemy, dinosaur, player).toFixed(2)}u
             </span>
             <span>
               공격 {(enemyAttackInterval(enemy.ranged) / 1000).toFixed(2)}s · 이동{" "}

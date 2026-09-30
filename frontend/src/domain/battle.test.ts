@@ -80,23 +80,25 @@ describe("document combat rules", () => {
     expect(monsterGold(1, 10, "boss")).toBe(495);
     expect(monsterGold(2, 1, "normal", 1.2)).toBe(40);
   });
-  it("spawns at distance 7 every 3 seconds, requires four hits and never attacks outside range", () => {
+  it("spawns at 7u every 3s, strengthens melee HP/AD by 10%, and fires ranged attacks immediately", () => {
     const buffs = battleBuffStats(initialGame());
     const first = advanceCombat(initialCombat(), buffs, 1, 50);
-    expect(first.combat.enemies[0].hp).toBe(70);
+    expect(first.combat.enemies[0].hp).toBe(77);
+    expect(first.combat.enemies[0].ad).toBe(22);
     expect(first.combat.enemies[0].distance).toBeCloseTo(6.93);
-    const beforeRange = advanceCombat(initialCombat(), buffs, 1, 2800);
-    expect(beforeRange.combat.lastAttack).toBeNull();
-    const attack = advanceCombat(beforeRange.combat, buffs, 1, 100);
-    expect(attack.combat.enemies[0].hp).toBe(50);
-    expect(attack.combat.enemies[0].distance).toBeGreaterThan(3);
-    expect(advanceCombat(attack.combat, buffs, 1, 50).combat.enemies[0].hp).toBe(50);
-    const cleared = advanceCombat(initialCombat(), buffs, 1, 5100);
+    expect(first.combat.lastAttack?.mode).toBe("ranged");
+    const launched = advanceCombat(first.combat, buffs, 1, 150).combat;
+    expect(launched.playerProjectiles).toHaveLength(1);
+    expect(launched.enemies[0].hp).toBe(77);
+    const cleared = advanceCombat(initialCombat(), buffs, 1, 2500);
     expect(cleared.defeats).toBe(1);
     expect(cleared.gold).toBe(0);
     expect(cleared.combat.pendingGold).toBe(30);
-    expect(cleared.combat.serial).toBe(2);
-    expect(cleared.combat.enemies[0].hp).toBe(70);
+    expect(cleared.combat.serial).toBe(1);
+    expect(cleared.combat.enemies).toHaveLength(0);
+    const ranged = advanceCombat({ ...initialCombat(), spawned: 2 }, buffs, 1, 50).combat
+      .enemies[0];
+    expect(ranged).toMatchObject({ ranged: true, hp: 70, ad: 20 });
   });
   it("lets melee monsters attack at expanded collider contact, but never before contact", () => {
     for (let dinosaur = 0; dinosaur < 6; dinosaur++)
@@ -143,7 +145,7 @@ describe("document combat rules", () => {
     const next = advanceCombat(end, high, 5, 8500);
     expect(next.combat).toMatchObject({ stage: 2, wave: 1 });
     expect(next.gold).toBe(495);
-    expect(advanceCombat(end, high, 1, 8500).combat).toMatchObject({
+    expect(advanceCombat(end, high, 1, 6500).combat).toMatchObject({
       stage: 1,
       wave: 10,
       killed: 0,

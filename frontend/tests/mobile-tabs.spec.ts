@@ -110,31 +110,30 @@ test("compact HUD toggles buffs and hit art lasts 200ms without stopping attack 
     });
   });
   const enemy = page.locator(".battle-enemy canvas");
-  await page.clock.runFor(50);
+  // Wait for actual projectile impact, rather than damage at attack windup.
+  for (let i = 0; i < 15; i++) {
+    await page.clock.runFor(50);
+    if ((await page.locator(".enemy-hp").getAttribute("aria-valuenow")) === "980") break;
+  }
   await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaHit.png");
   await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "980");
+  const cooldown = await page.evaluate(async () => {
+    const path = "/src/stores/game-store.ts";
+    const { useGameStore } = await import(path);
+    const { game } = useGameStore.getState();
+    useGameStore.setState({ game: { ...game, combat: { ...game.combat, attackIn: 5000 } } });
+    return game.combat.enemies[0].attackIn;
+  });
   await page.clock.runFor(150);
   await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaHit.png");
-  const cooldown = await page.evaluate(async () => {
+  const later = await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
     const { useGameStore } = await import(path);
     return useGameStore.getState().game.combat.enemies[0].attackIn;
   });
-  expect(cooldown).toBe(900);
+  expect(later).toBe(cooldown - 150);
   await page.clock.runFor(50);
-  await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaAttack.png");
-  await expect(page.getByRole("meter", { name: "공룡 체력" })).toHaveAttribute(
-    "aria-valuenow",
-    "40",
-  );
-  await page.clock.runFor(300);
-  // The first hit knocks this ranged enemy beyond 3u. The next strike travels
-  // to it before applying damage, while its own attack cooldown keeps ticking.
-  await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "980");
-  await page.clock.runFor(200);
-  await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaHit.png");
-  await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "960");
-  await page.clock.runFor(50);
+  await expect(enemy).not.toHaveAttribute("data-src", "/assets/battle/RangedDarkColaHit.png");
   await expect(page.getByRole("meter", { name: "공룡 체력" })).toHaveAttribute(
     "aria-valuenow",
     "40",

@@ -108,7 +108,7 @@ export function BattleSprite({
                   image,
                   attackFrames[src],
                   /434-578|446-578/.test(src),
-                  !/446-578|Spritesheet|Melee|Ranged/.test(src),
+                  !/446-578|Spritesheet|Melee|Ranged|Dino/.test(src),
                 ),
               );
             source =

@@ -1,8 +1,8 @@
 import {
   arena,
-  attackPosition,
   enemyGeometry,
-  playerGeometry,
+  combatPlayerGeometry,
+  playerProjectileGeometry,
   projectileGeometry,
 } from "../domain/battle-geometry";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +15,7 @@ import {
   stages,
   villains,
   villainAnimation,
+  dinosaurProjectiles,
 } from "../design/battle-assets";
 import { quests } from "../domain/game";
 import type { GameState, QuestId } from "../domain/game";
@@ -33,6 +34,7 @@ import {
   travelDuration,
 } from "../domain/battle";
 import { stagePolicies } from "../domain/game-policy";
+import { enemyAttackRange } from "../domain/battle-range";
 import { experienceProgress } from "../domain/experience";
 import { EquippedAccessories } from "./AccessoryCatalog";
 import { useGameStore } from "../stores/game-store";
@@ -141,12 +143,8 @@ export function AdventureScene({
         target?.ranged ?? battle.lastAttack.ranged ?? false,
       )
     : null;
-  const player = playerGeometry(game.dinosaur);
-  const position = attackPosition(
-    game.dinosaur,
-    attacking && !reducedMotion ? (targetGeometry?.hitbox ?? null) : null,
-    attackTime,
-  );
+  const player = combatPlayerGeometry(game.dinosaur, battle.lastAttack, battle.clock);
+  const position = player.sprite;
   const phase =
     battle.recovery > 0
       ? "recover"
@@ -406,6 +404,7 @@ export function AdventureScene({
           data-moving={walking && !art.walk && !reducedMotion}
           data-animation={phase}
           data-attacking={attacking}
+          data-attack-mode={attacking ? battle.lastAttack?.mode : undefined}
           data-collider={JSON.stringify(player.collider)}
           data-hitbox={JSON.stringify(player.hitbox)}
           data-attack-target={targetGeometry ? JSON.stringify(targetGeometry.hitbox) : undefined}
@@ -419,6 +418,8 @@ export function AdventureScene({
           const animation = villainAnimation(monster.art, monster.ranged);
           const attackAge = battle.clock - (monster.attackedAt ?? -1000);
           const enemyAttacking = attackAge >= 0 && attackAge < 450;
+          const enemyWalking =
+            monster.distance > enemyAttackRange(monster, game.dinosaur, player) + 1e-6;
           const geometry = enemyGeometry(
             monster.distance,
             monster.art,
@@ -433,23 +434,42 @@ export function AdventureScene({
               data-rank={monster.rank}
               data-hit={hit}
               data-unit={monster.ranged ? "ranged" : "melee"}
-              data-animation={hit ? "hit" : enemyAttacking ? "attack" : "idle"}
+              data-animation={
+                hit ? "hit" : enemyAttacking ? "attack" : enemyWalking ? "walk" : "idle"
+              }
               data-collider={JSON.stringify(geometry.collider)}
               data-hitbox={JSON.stringify(geometry.hitbox)}
               style={{ left: geometry.sprite.x, top: geometry.sprite.y, bottom: "auto" }}
             >
               <BattleSprite
-                src={hit ? animation.hit : enemyAttacking ? animation.attack : animation.image}
+                src={
+                  hit
+                    ? animation.hit
+                    : enemyAttacking
+                      ? animation.attack
+                      : enemyWalking
+                        ? animation.walk
+                        : animation.image
+                }
                 frame={
                   !hit && enemyAttacking
                     ? reducedMotion
                       ? 0
                       : Math.min(7, Math.floor((attackAge / 450) * 8))
-                    : 0
+                    : !hit && enemyWalking && !reducedMotion
+                      ? Math.floor(battle.clock / 110) % 8
+                      : 0
                 }
                 label={enemy.name}
               />
-              <small>
+              <small
+                className="enemy-status"
+                style={{
+                  left: geometry.hitbox.x - geometry.sprite.x + geometry.hitbox.width / 2,
+                  top: geometry.hitbox.y - geometry.sprite.y - 16,
+                  width: Math.max(58, geometry.hitbox.width + 8),
+                }}
+              >
                 {monster.rank !== "normal" && `${monster.rank.toUpperCase()} · `}
                 {enemy.name}
                 <span
@@ -463,6 +483,29 @@ export function AdventureScene({
                   <i style={{ width: `${(monster.hp / monster.maxHp) * 100}%` }} />
                 </span>
               </small>
+            </div>
+          );
+        })}
+        {(battle.playerProjectiles ?? []).map((shot) => {
+          const geometry = playerProjectileGeometry(shot);
+          return (
+            <div
+              key={shot.id}
+              className="player-projectile"
+              data-projectile-id={shot.id}
+              data-hitbox={JSON.stringify(geometry.hitbox)}
+              style={{
+                left: geometry.sprite.x,
+                top: geometry.sprite.y,
+                width: geometry.sprite.width,
+                height: geometry.sprite.height,
+              }}
+            >
+              <BattleSprite
+                src={dinosaurProjectiles[shot.dinosaur]}
+                frame={Math.floor(shot.age / 80) % 4}
+                label={`${dinosaurs[shot.dinosaur].name} 원거리 투사체`}
+              />
             </div>
           );
         })}
@@ -500,18 +543,14 @@ export function AdventureScene({
             {transition.kind === "stage" && <i aria-hidden="true" className="clear-sparks" />}
           </div>
         )}
-        {attacking && battle.lastAttack?.resolved !== false && (
+        {battle.lastHit && battle.clock - battle.lastHit.time < 320 && (
           <b
             className="battle-damage"
-            key={`hit-${battle.lastAttack!.time}`}
+            key={`hit-${battle.lastHit.time}`}
             aria-hidden="true"
-            style={
-              targetGeometry
-                ? { left: targetGeometry.hitbox.x, top: targetGeometry.hitbox.y - 18 }
-                : undefined
-            }
+            style={{ left: battle.lastHit.x, top: battle.lastHit.y }}
           >
-            {battle.lastAttack!.critical && "CRT "}−{Math.round(battle.lastAttack!.damage)}
+            {battle.lastHit.critical && "CRT "}−{Math.round(battle.lastHit.damage)}
           </b>
         )}
         {starting && (
@@ -545,6 +584,7 @@ export function AdventureScene({
             dinosaur={game.dinosaur}
             enemies={battle.enemies}
             projectiles={battle.projectiles}
+            playerProjectiles={battle.playerProjectiles ?? []}
             actors={[
               { id: "P", geometry: player },
               ...battle.enemies.map((enemy) => ({
@@ -636,6 +676,7 @@ export function AdventureScene({
           anchor={debugToggle}
           level={experience.level}
           dinosaur={game.dinosaur}
+          player={player}
           enemies={battle.enemies}
           onChangeLevel={debugChangeLevel}
           buffs={buffs}
