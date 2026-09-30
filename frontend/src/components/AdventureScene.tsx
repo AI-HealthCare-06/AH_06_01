@@ -24,6 +24,7 @@ import { BattleSprite } from "./BattleSprite";
 import { BattleDebugOverlay } from "./BattleDebugOverlay";
 import { BattleDebugPanel } from "./BattleDebugPanel";
 import { PixelIcon } from "./PixelIcon";
+import { InfoDialog } from "./InfoDialog";
 import {
   battleBuffStats,
   questBuffs,
@@ -51,6 +52,8 @@ export function AdventureScene({
   const [selected, setSelected] = useState<QuestId | null>(null);
   const [buffsExpanded, setBuffsExpanded] = useState(false);
   const [debugVisible, setDebugVisible] = useState(false);
+  const [stagePicker, setStagePicker] = useState<HTMLButtonElement | null>(null);
+  const selectBattle = useGameStore((state) => state.selectBattle);
   const debugToggle = useRef<HTMLButtonElement>(null);
   const debugChangeLevel = useGameStore((state) => state.debugChangeLevel);
   const debugSetBuff = useGameStore((state) => state.debugSetBuff);
@@ -114,6 +117,8 @@ export function AdventureScene({
         ? 1
         : Math.min(1, (transition.elapsed - clearDuration(transition.kind)) / travelDuration)
       : 0;
+  const sceneryStage = starting ? stage : sourceStage;
+  const sceneryWaveOffset = starting ? battle.wave - 1 : sourceWave - 1 + travelProgress;
   const waveTotal = waveTarget(battle.wave);
   const attackElapsed = battle.lastAttack ? battle.clock - battle.lastAttack.time : 1000;
   const attackDuration = battle.lastAttack?.duration ?? Math.min(500, buffs.attackInterval);
@@ -197,8 +202,8 @@ export function AdventureScene({
           role="img"
           aria-label={`${stage.name} 스테이지 배경`}
           style={{
-            backgroundImage: `url(${sourceStage.image})`,
-            backgroundPositionX: `${(((-(sourceWave - 1 + travelProgress) * sourceStage.width) / sourceStage.height) * arena.height) / 10}px`,
+            backgroundImage: `url(${sceneryStage.image})`,
+            backgroundPositionX: `${(((-sceneryWaveOffset * sceneryStage.width) / sceneryStage.height) * arena.height) / 10}px`,
           }}
         />
         {stageTransition && (
@@ -216,9 +221,39 @@ export function AdventureScene({
         )}
         <div className="adventure-title">
           <h2>
-            STAGE {battle.stage} - <span>{stage.name}</span>
+            <button
+              className="battle-stage-select"
+              aria-label={`스테이지 선택 · STAGE ${battle.stage} ${stage.name}`}
+              aria-haspopup="dialog"
+              aria-expanded={!!stagePicker}
+              onClick={(event) => {
+                setDebugVisible(false);
+                setStagePicker(event.currentTarget);
+              }}
+            >
+              <span>
+                STAGE {battle.stage} <i aria-hidden="true">▾</i>
+              </span>
+              <small>{stage.name}</small>
+            </button>
           </h2>
-          <strong className="stage-label">WAVE {battle.wave} / 10</strong>
+          <div className="battle-wave-navigation" aria-label="웨이브 이동" data-no-swipe>
+            <button
+              aria-label="이전 웨이브"
+              disabled={battle.wave <= 1}
+              onClick={() => selectBattle(battle.stage, battle.wave - 1)}
+            >
+              ‹
+            </button>
+            <strong className="stage-label">WAVE {battle.wave} / 10</strong>
+            <button
+              aria-label="다음 웨이브"
+              disabled={battle.wave >= 10}
+              onClick={() => selectBattle(battle.stage, battle.wave + 1)}
+            >
+              ›
+            </button>
+          </div>
         </div>
         <div className="battle-hud" ref={hud}>
           <div className="hp-stats">
@@ -497,8 +532,12 @@ export function AdventureScene({
           </div>
         )}
         {battle.recovery > 0 && (
-          <div className="battle-recovery" role="status">
-            {String(Math.ceil(battle.recovery / 1000)).padStart(2, "0")}초 후 재시작
+          <div className="battle-clear battle-recovery" role="status">
+            <span>
+              STAGE {battle.stage} · WAVE {battle.wave}
+            </span>
+            <strong>DEFEAT</strong>
+            <small>{String(Math.ceil(battle.recovery / 1000)).padStart(2, "0")}초 후 재시작</small>
           </div>
         )}
         {import.meta.env.DEV && debugVisible && (
@@ -544,6 +583,54 @@ export function AdventureScene({
           )}
         </div>
       </DesignCanvas>
+      {stagePicker && (
+        <InfoDialog
+          title="STAGE SELECT"
+          onClose={() => setStagePicker(null)}
+          returnFocusTo={stagePicker}
+          confirmLabel="닫기"
+        >
+          <div className="battle-stage-picker">
+            <p>도전할 스테이지를 선택하세요.</p>
+            <div className="battle-stage-options">
+              {stagePolicies.map((policy, index) => (
+                <button
+                  key={index}
+                  disabled={experience.level < policy.level}
+                  aria-label={`STAGE ${index + 1} · ${stages[index].name}`}
+                  aria-pressed={battle.stage === index + 1}
+                  onClick={() => {
+                    selectBattle(index + 1, 1);
+                    setStagePicker(null);
+                  }}
+                >
+                  <span
+                    className="stage-option-art"
+                    aria-hidden="true"
+                    style={{ backgroundImage: `url(${stages[index].image})` }}
+                  />
+                  <span>
+                    <strong>STAGE {index + 1}</strong>
+                    <small>{stages[index].name}</small>
+                  </span>
+                  <b>
+                    {experience.level < policy.level
+                      ? `Lv.${policy.level} 해제`
+                      : battle.stage === index + 1
+                        ? "현재"
+                        : "선택"}
+                  </b>
+                </button>
+              ))}
+            </div>
+            <small>
+              이동하면 HP가 회복되고 1초 후 전투가 시작돼요.
+              <br />
+              EXP는 유지되며 클리어 전 GOLD는 사라져요.
+            </small>
+          </div>
+        </InfoDialog>
+      )}
       {import.meta.env.DEV && debugVisible && (
         <BattleDebugPanel
           anchor={debugToggle}

@@ -13,6 +13,7 @@ import {
   purchaseEffect,
   purchaseAccessory,
   equipAccessory,
+  selectBattleLocation,
 } from "../domain/game";
 import type { GameState, QuestId, StepSnapshot } from "../domain/game";
 import type { SkinId } from "../domain/appearance";
@@ -48,6 +49,7 @@ type GameStore = {
   chooseDinosaur: (index: number) => void;
   customizeDinosaur: (index: number, skin: SkinId) => void;
   togglePause: () => void;
+  selectBattle: (stage: number, wave: number) => void;
   refreshDay: () => void;
   resetDemo: () => void;
   syncSteps: (snapshot: StepSnapshot) => void;
@@ -68,6 +70,13 @@ let lastSaved = 0;
 export const useGameStore = create<GameStore>((set) => ({
   game: loadedGame,
   paused: loadedGame.battlePaused,
+  selectBattle: (stage, wave) =>
+    set((state) => {
+      const game = selectBattleLocation(state.game, stage, wave);
+      if (game === state.game) return state;
+      save(game);
+      return { game };
+    }),
   debugSetBuff: (key, value) =>
     set((state) => {
       if (!import.meta.env.DEV || !Number.isFinite(value) || !Object.hasOwn(debugBuffLimits, key))

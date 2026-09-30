@@ -9,7 +9,10 @@ import {
   combatSchema,
   initialCombat,
   migrateCombat,
+  clearDuration,
+  travelDuration,
 } from "./battle";
+import { stagePolicies, wavePolicies } from "./game-policy";
 import { experienceProgress, levelUpGold, questExperience } from "./experience";
 import { effectCatalog, rpAllowance, rpPolicy } from "./economy";
 import type { EffectId } from "./economy";
@@ -391,6 +394,46 @@ export function tickBattle(state: GameState, now = Date.now()): GameState {
     cursor = end;
   }
   return { ...rollDay(current, localDate(new Date(now))), battleUpdatedAt: now };
+}
+
+export function selectBattleLocation(
+  state: GameState,
+  stage: number,
+  wave: number,
+  now = Date.now(),
+): GameState {
+  if (
+    !Number.isInteger(stage) ||
+    !Number.isInteger(wave) ||
+    stage < 1 ||
+    stage > stagePolicies.length ||
+    wave < 1 ||
+    wave > wavePolicies.length ||
+    experienceProgress(state.experience).level < stagePolicies[stage - 1].level ||
+    (stage === state.combat.stage && wave === state.combat.wave)
+  )
+    return state;
+  const current = tickBattle(state, now);
+  return {
+    ...current,
+    battleUpdatedAt: now,
+    combat: {
+      ...initialCombat(battleBuffStats(current).maxHp),
+      stage,
+      wave,
+      clock: current.combat.clock,
+      serial: current.combat.serial,
+      seed: current.combat.seed,
+      // A manual selection starts at the destination without a false clear reward.
+      transition: {
+        kind: "wave",
+        elapsed: clearDuration("wave") + travelDuration,
+        arrived: true,
+        fromStage: stage,
+        fromWave: wave,
+      },
+    },
+  };
 }
 
 export function convertDemoRp(state: GameState, requested: number, date = localDate()): GameState {

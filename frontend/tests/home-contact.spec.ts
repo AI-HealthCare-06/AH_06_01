@@ -19,7 +19,8 @@ test("home background encloses both quest panels after scrolling and recovery us
       },
     });
   });
-  await expect(page.locator(".battle-recovery")).toHaveText("05초 후 재시작");
+  await expect(page.locator(".battle-recovery")).toContainText("DEFEAT");
+  await expect(page.locator(".battle-recovery small")).toHaveText("05초 후 재시작");
   for (const width of [320, 390, 542]) {
     await page.setViewportSize({ width, height: 694 });
     await page.locator(".main-content").evaluate((el) => {
@@ -36,7 +37,7 @@ test("home background encloses both quest panels after scrolling and recovery us
   await page.screenshot({ path: "test-results/home-background.png", fullPage: true });
   await page.getByRole("button", { name: "모험 재개" }).click();
   await page.clock.runFor(1000);
-  await expect(page.locator(".battle-recovery")).toHaveText("04초 후 재시작");
+  await expect(page.locator(".battle-recovery small")).toHaveText("04초 후 재시작");
 });
 
 test("ranged body stops at reach and its shot disappears on the character hitbox", async ({
