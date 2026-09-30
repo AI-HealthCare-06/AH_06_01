@@ -62,14 +62,14 @@ describe("document combat rules", () => {
     expect(monsterGold(1, 10, "boss")).toBe(495);
     expect(monsterGold(2, 1, "normal", 1.2)).toBe(40);
   });
-  it("spawns at distance 7 every 5 seconds, requires four hits and never attacks outside range", () => {
+  it("spawns at distance 7 every 3 seconds, requires four hits and never attacks outside range", () => {
     const buffs = battleBuffStats(initialGame());
     const first = advanceCombat(initialCombat(), buffs, 1, 50);
     expect(first.combat.enemies[0].hp).toBe(70);
-    expect(first.combat.enemies[0].distance).toBeCloseTo(6.94);
-    const beforeRange = advanceCombat(initialCombat(), buffs, 1, 3300);
+    expect(first.combat.enemies[0].distance).toBeCloseTo(6.93);
+    const beforeRange = advanceCombat(initialCombat(), buffs, 1, 2800);
     expect(beforeRange.combat.lastAttack).toBeNull();
-    const attack = advanceCombat(beforeRange.combat, buffs, 1, 50);
+    const attack = advanceCombat(beforeRange.combat, buffs, 1, 100);
     expect(attack.combat.enemies[0].hp).toBe(50);
     expect(attack.combat.enemies[0].distance).toBeGreaterThan(3);
     expect(advanceCombat(attack.combat, buffs, 1, 50).combat.enemies[0].hp).toBe(50);
@@ -121,10 +121,10 @@ describe("document combat rules", () => {
     expect(migrateCombat(692, 1)).toMatchObject({ stage: 1, wave: 10, killed: 0 });
     const end = { ...initialCombat(), wave: 10, killed: 100, spawned: 100 };
     const high = { ...battleBuffStats(initialGame()), attack: 10000 };
-    const next = advanceCombat(end, high, 5, 5000);
+    const next = advanceCombat(end, high, 5, 7000);
     expect(next.combat).toMatchObject({ stage: 2, wave: 1 });
     expect(next.gold).toBe(495);
-    expect(advanceCombat(end, high, 1, 5000).combat).toMatchObject({
+    expect(advanceCombat(end, high, 1, 7000).combat).toMatchObject({
       stage: 1,
       wave: 10,
       killed: 0,
@@ -181,9 +181,9 @@ describe("document combat rules", () => {
           hp: 70,
           maxHp: 70,
           ad: 20,
-          distance: 2,
+          distance: 0,
           attackIn: 0,
-          ranged: true,
+          ranged: false,
           hitAt: -1000,
         },
       ],

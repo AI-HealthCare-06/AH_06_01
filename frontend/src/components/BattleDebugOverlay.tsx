@@ -48,10 +48,14 @@ export function BattleDebugOverlay({
   actors,
   dinosaur,
   enemies,
+  level,
+  onChangeLevel,
 }: {
   actors: { id: string; geometry: ActorGeometry }[];
   dinosaur: number;
   enemies: CombatState["enemies"];
+  level: number;
+  onChangeLevel: (delta: number) => void;
 }) {
   return (
     <div id="battle-debug-overlay" className="battle-debug-overlay">
@@ -64,6 +68,26 @@ export function BattleDebugOverlay({
         <small>공통 0u 기준 · 1u = {arena.pixelsPerUnit}px · ◆ 몹 현재 위치</small>
         <small>◆가 공격 경계 안이면 IN · 쿨타임은 별도</small>
         <small>플레이어 판정 위치 고정 · 공격 이동은 모션</small>
+        <div className="debug-level-controls" data-no-swipe>
+          <button
+            type="button"
+            aria-label="디버그 레벨 다운"
+            disabled={level <= 1}
+            onClick={() => onChangeLevel(-1)}
+          >
+            −
+          </button>
+          <strong>Lv.{level}</strong>
+          <button
+            type="button"
+            aria-label="디버그 레벨 업"
+            disabled={level >= 100}
+            onClick={() => onChangeLevel(1)}
+          >
+            +
+          </button>
+          <span>HP 회복 · 보상 없음</span>
+        </div>
       </div>
       <svg
         viewBox="0 0 354 336"
@@ -97,7 +121,7 @@ export function BattleDebugOverlay({
           const y = 209 + (index % 3) * 23;
           const inside = isPlayerInEnemyRange(enemy, dinosaur);
           const remaining = Math.max(0, enemy.distance - range);
-          const body = enemyGeometry(enemy.distance, enemy.art, enemy.rank).hitbox;
+          const body = enemyGeometry(enemy.distance, enemy.art, enemy.rank, enemy.ranged).hitbox;
           return (
             <g
               key={enemy.id}

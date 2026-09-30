@@ -24,7 +24,7 @@ export const rankPolicies = {
   elite: { hp: 2.5, ad: 1.3, gold: 5, knockback: 0.1 },
   boss: { hp: 6.5, ad: 1.5, gold: 15, knockback: 0.05 },
 };
-export const spawnInterval = 5000;
+export const spawnInterval = 3000;
 export const revivalDelay = 10000;
 export function characterStats(level: number) {
   const milestone = Math.floor(level / 5);

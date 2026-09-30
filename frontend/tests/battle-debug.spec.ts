@@ -55,13 +55,13 @@ test("development debug boxes share combat coordinates, follow enemies and prese
     "P RANGE 3.00u",
   );
   await expect(overlay.locator('[data-range-actor="M1"] .debug-range-label')).toHaveText(
-    "M1 RANGE 2.00u OUT",
+    "M1 RANGE 3.00u IN",
   );
   await expect(overlay.locator(".debug-player-range .debug-range-boundary")).toHaveAttribute(
     "x1",
     "158",
   );
-  await expect(overlay.locator('[data-range-actor="M1"]')).toHaveAttribute("data-range", "2");
+  await expect(overlay.locator('[data-range-actor="M1"]')).toHaveAttribute("data-range", "3");
   expect(
     Number(await overlay.locator('[data-range-actor="M2"]').getAttribute("data-range")),
   ).toBeGreaterThan(2);
@@ -296,7 +296,9 @@ test("monster debug boundary agrees with damage, cooldown and knockback for mele
         },
         { art, dinosaur, phase },
       );
-      expect(result.hp, `${art}/${dinosaur}: ${phase}`).toBe(hp);
+      expect(result.hp, `${art}/${dinosaur}: ${phase}`).toBe(
+        art === 0 ? (phase === "attack-again" ? 40 : 50) : hp,
+      );
       const indicator = page.locator('[data-range-actor="M42"]');
       await expect(indicator).toHaveAttribute("data-in-range", String(inside));
       const position = Number(

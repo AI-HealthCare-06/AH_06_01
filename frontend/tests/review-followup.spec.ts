@@ -11,14 +11,14 @@ test("all dinosaurs reach the visible monster during the impact pose", async ({ 
       useGameStore.getState().resetDemo();
       useGameStore.getState().chooseDinosaur(index);
     }, dinosaur);
-    await page.clock.runFor(3500);
-    await expect(page.locator(".battle-enemy")).toHaveAttribute("data-hit", "true");
+    await page.clock.runFor(3050);
+    await expect(page.locator(".battle-enemy").first()).toHaveAttribute("data-hit", "true");
     await page.getByRole("button", { name: "모험 일시정지" }).click();
     await expect
       .poll(
         async () =>
           page.locator(".battle-dinosaur canvas,.battle-enemy canvas").evaluateAll((elements) => {
-            const bounds = elements.map((element) => {
+            const bounds = elements.slice(0, 2).map((element) => {
               const canvas = element as HTMLCanvasElement,
                 box = canvas.getBoundingClientRect();
               const pixels = canvas

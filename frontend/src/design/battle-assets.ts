@@ -1,8 +1,15 @@
+import atlases from "./animation-atlases.json";
 const art = (node: string) => `/assets/battle/${node}.png`;
 export type SpriteFrame = readonly [x: number, y: number, width: number, height: number];
 // These sheets are hand laid out, not an equal-width grid. Keep the whole pose and
 // a shared scale/baseline so crouches, extended horns and effects do not get clipped.
 export const attackFrames: Record<string, readonly SpriteFrame[]> = {
+  ...Object.fromEntries(
+    Object.entries(atlases.frames).map(([src, frames]) => [
+      src,
+      frames.map(([x, y, width, height]): SpriteFrame => [x, y, width, height]),
+    ]),
+  ),
   // Section 10 walking sheet: four authored wing poses, read row by row.
   [art("446-578")]: [
     [114, 53, 551, 297],
@@ -64,21 +71,50 @@ export const attackFrames: Record<string, readonly SpriteFrame[]> = {
 
 // Original image fills exported from REXRUN sections 08–11. Node IDs keep the source traceable.
 export const stages = [
-  { name: "ALPINE DAY", image: art("258-697") },
-  { name: "FOREST RUINS", image: art("258-701") },
-  { name: "ISLAND COAST", image: art("258-705") },
-  { name: "MEADOW VILLAGE", image: art("258-709") },
-  { name: "SUNSET KINGDOM", image: art("258-713") },
-  { name: "MOONLIT NIGHT", image: art("258-717") },
+  { name: "ALPINE DAY", image: art("258-697"), width: 1459, height: 175 },
+  { name: "FOREST RUINS", image: art("258-701"), width: 1459, height: 152 },
+  { name: "ISLAND COAST", image: art("258-705"), width: 1459, height: 154 },
+  { name: "MEADOW VILLAGE", image: art("258-709"), width: 1459, height: 159 },
+  { name: "SUNSET KINGDOM", image: art("258-713"), width: 1459, height: 149 },
+  { name: "MOONLIT NIGHT", image: art("258-717"), width: 1459, height: 183 },
 ];
 export const battleDinosaurs = [
-  { image: art("276-699"), attack: art("290-697"), movement: "stomp" },
+  {
+    image: art("276-699"),
+    attack: art("290-697"),
+    idle: art("TrexIdleSpritesheet4X3Png"),
+    walk: art("TrexWalkSpritesheet4X4Png"),
+    movement: "stomp",
+  },
   { image: art("276-702"), attack: art("288-700"), movement: "trot" },
-  { image: art("276-712"), attack: art("308-697"), movement: "sprint" },
+  {
+    image: art("276-712"),
+    attack: art("308-697"),
+    idle: art("RaptorIdleSpritesheet4X31Png"),
+    walk: art("RaptorWalkSpritesheet4X4Png"),
+    movement: "sprint",
+  },
   { image: art("276-705"), attack: null, movement: "waddle" },
   { image: art("276-709"), attack: art("434-578"), walk: art("446-578"), movement: "fly" },
   { image: art("276-715"), attack: art("295-697"), movement: "stride" },
 ];
+const villainNames = [
+  "DarkCola",
+  "HardCandy",
+  "SmokyMarshmallow",
+  "RottenBurger",
+  "ArchmagePop",
+  "DrFireball",
+];
+export function villainAnimation(index: number, ranged: boolean) {
+  const prefix = `${ranged ? "Ranged" : "Melee"}${villainNames[index]}`;
+  return {
+    image: art(`${prefix}Idle`),
+    hit: art(`${prefix}Hit`),
+    attack: art(`${prefix}Attack`),
+    projectile: art(`${prefix}Projectile`),
+  };
+}
 export const villains = [
   { name: "다크 콜라", image: art("300-700"), hit: art("464-581") },
   { name: "하드 캔디", image: art("300-705"), hit: art("464-586") },

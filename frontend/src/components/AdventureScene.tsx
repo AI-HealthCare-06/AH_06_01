@@ -1,9 +1,21 @@
-import { attackPosition, enemyGeometry, playerGeometry } from "../domain/battle-geometry";
+import {
+  arena,
+  center,
+  attackPosition,
+  enemyGeometry,
+  playerGeometry,
+} from "../domain/battle-geometry";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { DesignCanvas } from "./DesignCanvas";
 import { dinosaurs } from "../design/dinosaurs";
-import { battleDinosaurs, stages, villains } from "../design/battle-assets";
+import {
+  attackFrames,
+  battleDinosaurs,
+  stages,
+  villains,
+  villainAnimation,
+} from "../design/battle-assets";
 import { quests } from "../domain/game";
 import type { GameState, QuestId } from "../domain/game";
 import { getSkin } from "../design/skins";
@@ -11,9 +23,17 @@ import { AnimatedNumber } from "./AnimatedNumber";
 import { BattleSprite } from "./BattleSprite";
 import { BattleDebugOverlay } from "./BattleDebugOverlay";
 import { PixelIcon } from "./PixelIcon";
-import { battleBuffStats, questBuffs, waveTarget } from "../domain/battle";
-import { stagePolicies, wavePolicies } from "../domain/game-policy";
+import {
+  battleBuffStats,
+  questBuffs,
+  waveTarget,
+  clearDuration,
+  travelDuration,
+} from "../domain/battle";
+import { stagePolicies } from "../domain/game-policy";
 import { experienceProgress } from "../domain/experience";
+import { EquippedAccessories } from "./AccessoryCatalog";
+import { useGameStore } from "../stores/game-store";
 
 export function AdventureScene({
   game,
@@ -30,6 +50,7 @@ export function AdventureScene({
   const [selected, setSelected] = useState<QuestId | null>(null);
   const [buffsExpanded, setBuffsExpanded] = useState(false);
   const [debugVisible, setDebugVisible] = useState(false);
+  const debugChangeLevel = useGameStore((state) => state.debugChangeLevel);
   const hud = useRef<HTMLDivElement>(null);
   const [reducedMotion, setReducedMotion] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -62,11 +83,29 @@ export function AdventureScene({
   const art = battleDinosaurs[game.dinosaur];
   const skin = getSkin(game.dinosaurStyles[game.dinosaur]);
   const stage = stages[battle.stage - 1];
-  const wave = wavePolicies[battle.wave - 1];
+  const transition = battle.transition;
+  const clearing = !!transition && transition.elapsed < clearDuration(transition.kind);
+  const walking = !!transition && !clearing;
+  const travelProgress =
+    transition && !reducedMotion
+      ? Math.min(1, transition.elapsed / (clearDuration(transition.kind) + travelDuration))
+      : 0;
+  const changingStage =
+    transition?.kind === "stage" &&
+    battle.stage < 5 &&
+    experience.level >= stagePolicies[battle.stage].level;
+  const stageTransition = transition?.kind === "stage";
+  const destinationStage = changingStage ? stages[battle.stage] : stage;
+  const nextStageOpacity =
+    stageTransition && walking
+      ? reducedMotion
+        ? 1
+        : Math.min(1, (transition.elapsed - clearDuration(transition.kind)) / travelDuration)
+      : 0;
   const waveTotal = waveTarget(battle.wave);
   const attackElapsed = battle.lastAttack ? battle.clock - battle.lastAttack.time : 1000;
   const attackDuration = Math.min(500, buffs.attackInterval);
-  const attacking = attackElapsed < attackDuration && battle.recovery === 0;
+  const attacking = attackElapsed < attackDuration && battle.recovery === 0 && !transition;
   const attack = attacking && art.attack;
   const attackTime = attackElapsed / attackDuration;
   const target = battle.enemies.find((enemy) => enemy.id === battle.lastAttack?.targetId);
@@ -75,6 +114,7 @@ export function AdventureScene({
         target?.distance ?? battle.lastAttack.distance,
         target?.art ?? battle.lastAttack.art ?? 0,
         target?.rank ?? battle.lastAttack.rank ?? "normal",
+        target?.ranged ?? battle.lastAttack.ranged ?? false,
       )
     : null;
   const player = playerGeometry(game.dinosaur);
@@ -83,7 +123,25 @@ export function AdventureScene({
     attacking && !reducedMotion ? (targetGeometry?.hitbox ?? null) : null,
     attackTime,
   );
-  const phase = battle.recovery > 0 ? "recover" : attacking ? "attack" : "idle";
+  const phase =
+    battle.recovery > 0
+      ? "recover"
+      : clearing
+        ? "clear"
+        : walking
+          ? "walk"
+          : attacking
+            ? "attack"
+            : "idle";
+  const dinoSource = attack || (walking ? art.walk : art.idle) || art.image;
+  const dinoFrames = attackFrames[dinoSource]?.length;
+  const dinoFrame = dinoFrames
+    ? reducedMotion
+      ? 0
+      : attack
+        ? Math.min(dinoFrames - 1, Math.floor(attackTime * dinoFrames))
+        : Math.floor(battle.clock / 90) % dinoFrames
+    : undefined;
   const values = {
     medicine: `공격력 ${buffs.ad} → ${Number(buffs.attack.toFixed(1))} · +${Math.round(buffs.adBonus * 100)}%`,
     meal: `기본 방어력 ${buffs.def} · 받는 피해 −${Math.round(buffs.defBonus * 100)}%`,
@@ -119,17 +177,27 @@ export function AdventureScene({
           aria-label={`${stage.name} 스테이지 배경`}
           style={{
             backgroundImage: `url(${stage.image})`,
-            backgroundPositionX: `${-(battle.wave - 1) * 70}px`,
+            backgroundPositionX: `${(((-(battle.wave - 1 + travelProgress) * stage.width) / stage.height) * arena.height) / 10}px`,
           }}
         />
+        {stageTransition && (
+          <div
+            className="battle-scenery battle-scenery-next"
+            aria-hidden="true"
+            style={{
+              backgroundImage: `url(${destinationStage.image})`,
+              backgroundPositionX: changingStage
+                ? "0px"
+                : `${(((-9 * stage.width) / stage.height) * arena.height) / 10}px`,
+              opacity: nextStageOpacity,
+            }}
+          />
+        )}
         <div className="adventure-title">
-          <h2>DAILY ADVENTURE</h2>
-          <p>건강한 습관이 더 강한 나를 만들어요!</p>
-          <strong className="stage-label">
-            STAGE {battle.stage}
-            <span>WAVE {battle.wave} / 10</span>
-            <small>{stage.name}</small>
-          </strong>
+          <h2>
+            STAGE {battle.stage} - <span>{stage.name}</span>
+          </h2>
+          <strong className="stage-label">WAVE {battle.wave} / 10</strong>
         </div>
         <div className="battle-hud" ref={hud}>
           <div className="hp-stats">
@@ -256,33 +324,28 @@ export function AdventureScene({
           data-dinosaur={game.dinosaur}
           data-skin={skin.id}
           data-movement={art.movement}
-          data-moving={false}
+          data-moving={walking && !art.walk && !reducedMotion}
+          data-animation={phase}
           data-attacking={!!attack}
           data-collider={JSON.stringify(player.collider)}
           data-hitbox={JSON.stringify(player.hitbox)}
           data-attack-target={targetGeometry ? JSON.stringify(targetGeometry.hitbox) : undefined}
           style={{ left: position.x, top: position.y, bottom: "auto" }}
         >
-          <BattleSprite
-            src={attack || art.walk || art.image}
-            frame={
-              attack && !reducedMotion
-                ? Math.min(7, Math.floor(attackTime * 8))
-                : art.walk
-                  ? reducedMotion
-                    ? 0
-                    : Math.floor((battle.clock % 640) / 160)
-                  : attack
-                    ? 0
-                    : undefined
-            }
-            label={dino.name}
-            filter={skin.filter}
-          />
+          <BattleSprite src={dinoSource} frame={dinoFrame} label={dino.name} filter={skin.filter} />
+          <EquippedAccessories />
         </div>
         {battle.enemies.map((monster) => {
           const enemy = villains[monster.art];
-          const geometry = enemyGeometry(monster.distance, monster.art, monster.rank);
+          const animation = villainAnimation(monster.art, monster.ranged);
+          const attackAge = battle.clock - (monster.attackedAt ?? -1000);
+          const enemyAttacking = attackAge >= 0 && attackAge < 450;
+          const geometry = enemyGeometry(
+            monster.distance,
+            monster.art,
+            monster.rank,
+            monster.ranged,
+          );
           const hit = battle.clock - monster.hitAt >= 0 && battle.clock - monster.hitAt < 200;
           return (
             <div
@@ -290,11 +353,23 @@ export function AdventureScene({
               key={monster.id}
               data-rank={monster.rank}
               data-hit={hit}
+              data-unit={monster.ranged ? "ranged" : "melee"}
+              data-animation={hit ? "hit" : enemyAttacking ? "attack" : "idle"}
               data-collider={JSON.stringify(geometry.collider)}
               data-hitbox={JSON.stringify(geometry.hitbox)}
               style={{ left: geometry.sprite.x, top: geometry.sprite.y, bottom: "auto" }}
             >
-              <BattleSprite src={hit ? enemy.hit : enemy.image} label={enemy.name} backdrop />
+              <BattleSprite
+                src={hit ? animation.hit : enemyAttacking ? animation.attack : animation.image}
+                frame={
+                  !hit && enemyAttacking
+                    ? reducedMotion
+                      ? 0
+                      : Math.min(7, Math.floor((attackAge / 450) * 8))
+                    : 0
+                }
+                label={enemy.name}
+              />
               <small>
                 {monster.rank !== "normal" && `${monster.rank.toUpperCase()} · `}
                 {enemy.name}
@@ -312,6 +387,42 @@ export function AdventureScene({
             </div>
           );
         })}
+        {battle.projectiles.map((projectile) => {
+          const progress = 1 - projectile.distance / projectile.origin;
+          const target = center(player.hitbox);
+          const source = enemyGeometry(
+            projectile.origin,
+            projectile.art,
+            projectile.rank ?? "normal",
+            true,
+          ).hitbox;
+          const x = source.x + (target.x - source.x) * progress;
+          const y = center(source).y + (target.y - center(source).y) * progress;
+          return (
+            <img
+              key={projectile.id}
+              className="enemy-projectile"
+              alt=""
+              aria-hidden="true"
+              src={villainAnimation(projectile.art, true).projectile}
+              style={{ left: x, top: y }}
+            />
+          );
+        })}
+        {clearing && (
+          <div
+            className={`battle-clear battle-clear-${transition.kind}`}
+            role="status"
+            key={`${battle.stage}-${battle.wave}`}
+          >
+            <span aria-hidden="true">{transition.kind === "stage" ? "✦ ★ ✦" : "◆ ◆ ◆"}</span>
+            <strong>{transition.kind === "stage" ? "STAGE CLEAR!" : "WAVE CLEAR!"}</strong>
+            <small>
+              STAGE {battle.stage} · WAVE {battle.wave} / 10
+            </small>
+            {transition.kind === "stage" && <i aria-hidden="true" className="clear-sparks" />}
+          </div>
+        )}
         {attacking && (
           <b
             className="battle-damage"
@@ -343,13 +454,15 @@ export function AdventureScene({
         )}
         {import.meta.env.DEV && debugVisible && (
           <BattleDebugOverlay
+            level={experience.level}
+            onChangeLevel={debugChangeLevel}
             dinosaur={game.dinosaur}
             enemies={battle.enemies}
             actors={[
               { id: "P", geometry: player },
               ...battle.enemies.map((enemy) => ({
                 id: `M${enemy.id}`,
-                geometry: enemyGeometry(enemy.distance, enemy.art, enemy.rank),
+                geometry: enemyGeometry(enemy.distance, enemy.art, enemy.rank, enemy.ranged),
               })),
             ]}
           />
@@ -369,13 +482,15 @@ export function AdventureScene({
           >
             <i style={{ width: `${(battle.killed / waveTotal) * 100}%` }} />
           </div>
-          <small className="wave-caption">
-            {farming
-              ? battle.stage === 5
-                ? "최종 웨이브 반복 파밍"
-                : `다음 STAGE · Lv.${stagePolicies[battle.stage].level} 해제`
-              : `일반 ${wave.count}${wave.extra ? ` + ${wave.extra.toUpperCase()} 1` : ""} · 5초마다 출현`}
-          </small>
+          {farming && (
+            <small className="wave-caption">
+              {farming
+                ? battle.stage === 5
+                  ? "최종 웨이브 반복 파밍"
+                  : `다음 STAGE · Lv.${stagePolicies[battle.stage].level} 해제`
+                : ""}
+            </small>
+          )}
         </div>
       </DesignCanvas>
     </div>

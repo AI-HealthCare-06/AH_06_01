@@ -16,6 +16,16 @@ export function questExperience(base: number, total: number, repeat = false) {
   return Math.floor(base * multiplier * (repeat ? 0.1 : 1));
 }
 
+export function experienceForLevel(level: number) {
+  let total = 0;
+  let required = 100;
+  for (let current = 1; current < Math.max(1, Math.min(100, Math.floor(level))); current++) {
+    total += required;
+    required = Math.floor(required * 1.22);
+  }
+  return total;
+}
+
 export function levelUpGold(before: number, after: number) {
   const first = experienceProgress(before).level;
   const last = experienceProgress(after).level;

@@ -37,14 +37,17 @@ test("boss ends wave ten and changes background only when next stage is unlocked
       },
     }));
   });
-  await expect(page.locator(".stage-label")).toContainText("STAGE 1");
+  await expect(page.locator(".adventure-title h2")).toContainText("STAGE 1");
   await expect(page.locator(".stage-label")).toContainText("WAVE 10 / 10");
   await expect(page.getByRole("progressbar", { name: "스테이지 몬스터 처치" })).toHaveAttribute(
     "aria-valuemax",
     "101",
   );
   await page.clock.runFor(50);
-  await expect(page.locator(".stage-label")).toContainText("STAGE 2");
+  await expect(page.locator(".battle-clear")).toContainText("STAGE CLEAR!");
+  await page.screenshot({ path: "test-results/stage-clear.png", animations: "disabled" });
+  await page.clock.runFor(3400);
+  await expect(page.locator(".adventure-title h2")).toContainText("STAGE 2");
   await expect(page.locator(".stage-label")).toContainText("WAVE 1 / 10");
   await expect(page.locator(".battle-scenery")).toHaveAttribute(
     "aria-label",
@@ -52,7 +55,7 @@ test("boss ends wave ten and changes background only when next stage is unlocked
   );
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   await page.reload();
-  await expect(page.locator(".stage-label")).toContainText("STAGE 2");
+  await expect(page.locator(".adventure-title h2")).toContainText("STAGE 2");
 });
 
 test("pending quests and compact buff explanations reflect the actual linked stat", async ({
@@ -89,7 +92,7 @@ test("pending quests and compact buff explanations reflect the actual linked sta
   await expect(page).toHaveURL(/quests\/sleep$/);
 });
 
-test("Pteranodon flaps in place, attacks down-right and freezes when paused", async ({ page }) => {
+test("Pteranodon idles in place, attacks down-right and freezes when paused", async ({ page }) => {
   await page.clock.install();
   await page.clock.pauseAt(new Date());
   await page.goto("/home");
@@ -100,15 +103,14 @@ test("Pteranodon flaps in place, attacks down-right and freezes when paused", as
   });
   const dino = page.locator(".battle-dinosaur"),
     canvas = dino.locator("canvas");
-  await expect(canvas).toHaveAttribute("data-src", "/assets/battle/446-578.png");
-  const initial = await canvas.getAttribute("data-frame");
+  await expect(canvas).toHaveAttribute("data-src", "/assets/battle/276-709.png");
   await page.clock.runFor(250);
-  await expect(canvas).not.toHaveAttribute("data-frame", initial!);
+  await expect(dino).toHaveAttribute("data-animation", "idle");
   const idle = await dino.evaluate((e) => ({
     left: parseFloat(getComputedStyle(e).left),
     top: parseFloat(getComputedStyle(e).top),
   }));
-  await page.clock.runFor(3350);
+  await page.clock.runFor(2900);
   await expect(dino).toHaveAttribute("data-attacking", "true");
   await expect(canvas).toHaveAttribute("data-src", "/assets/battle/434-578.png");
   await expect(canvas).toHaveAttribute("data-frame", "4");

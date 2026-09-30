@@ -57,7 +57,9 @@ export function AppShell({ active, children }: { active: TabName; children: Reac
         if (!touch) return;
         const dx = touch.clientX - start.x,
           dy = touch.clientY - start.y;
-        const current = destinations.findIndex((tab) => tab.path === location.pathname);
+        const current = destinations.findIndex(
+          (tab) => tab.path === location.pathname || location.pathname.startsWith(`${tab.path}/`),
+        );
         if (current < 0 || Math.abs(dx) < 65 || Math.abs(dx) < Math.abs(dy) * 1.7) return;
         const next = destinations[current + (dx < 0 ? 1 : -1)];
         if (next) navigate(next.path);

@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 test("all resting hitboxes cover the trimmed artwork exactly with 110% body colliders", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-09-30T00:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-09-30T00:01:00Z"));
   await page.goto("/home");
   for (let dinosaur = 0; dinosaur < 6; dinosaur++) {
     await page.evaluate(async (dinosaur) => {
@@ -74,8 +74,8 @@ test("all resting hitboxes cover the trimmed artwork exactly with 110% body coll
 });
 
 test("trimmed character attacks reach six differently sized monster hitboxes", async ({ page }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-09-30T00:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-09-30T00:01:00Z"));
   await page.goto("/home");
   for (let index = 0; index < 6; index++) {
     await page.evaluate(async (dinosaur) => {

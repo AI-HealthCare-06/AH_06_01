@@ -55,14 +55,14 @@ test("wave combat pauses, requires multiple hits and awards Gold separately", as
   await page.goto("/home");
   await page.clock.runFor(50);
   await expect(page.locator(".battle-enemy")).toHaveCount(1);
-  await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "70");
+  await expect(page.locator(".enemy-hp").first()).toHaveAttribute("aria-valuenow", "70");
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   const enemyPosition = await page.locator(".battle-enemy").getAttribute("style");
   await page.clock.runFor(10_000);
   await expect(page.locator(".battle-enemy")).toHaveAttribute("style", enemyPosition!);
   await page.getByRole("button", { name: "모험 재개" }).click();
   await page.clock.runFor(3300);
-  await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "50");
+  await expect(page.locator(".enemy-hp").first()).toHaveAttribute("aria-valuenow", "50");
   await page.clock.runFor(1500);
   await expect(page.locator(".battle-coin")).toContainText("+30 G");
   await expect(page.getByRole("progressbar", { name: "스테이지 몬스터 처치" })).toHaveAttribute(

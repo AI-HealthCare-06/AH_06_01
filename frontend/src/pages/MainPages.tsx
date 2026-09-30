@@ -5,6 +5,7 @@ import { AppShell, PageHeading } from "../components/AppShell";
 import { AdventureScene } from "../components/AdventureScene";
 import { DinoRadarCard } from "../components/DinoRadarCard";
 import { DinosaurArt } from "../components/DinosaurArt";
+import { AccessoryCatalog, EquippedAccessories } from "../components/AccessoryCatalog";
 import { DinosaurCustomization } from "../components/DinosaurCustomization";
 import { RiskChange } from "../components/RiskChange";
 import { AnimatedNumber } from "../components/AnimatedNumber";
@@ -211,24 +212,26 @@ export function DashboardPage() {
   });
   return (
     <AppShell active="dashboard">
-      <PageHeading
-        title="HEALTH DASHBOARD"
-        subtitle={`${periodInfo.label} 건강 기록과 ${dino.name}의 성장을 확인하세요`}
-      />
-      <label className="dashboard-period-select">
-        <span>조회 기간</span>
-        <select
-          aria-label="건강 변화 조회 기간"
-          value={period}
-          onChange={(event) => setPeriod(event.target.value as HealthPeriod)}
-        >
-          {(Object.keys(healthPeriods) as HealthPeriod[]).map((value) => (
-            <option key={value} value={value}>
-              {healthPeriods[value].label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="dashboard-heading">
+        <PageHeading
+          title="HEALTH DASHBOARD"
+          subtitle={`${periodInfo.label} 건강 기록과 ${dino.name}의 성장을 확인하세요`}
+        />
+        <label className="dashboard-period-select">
+          <span>조회 기간</span>
+          <select
+            aria-label="건강 변화 조회 기간"
+            value={period}
+            onChange={(event) => setPeriod(event.target.value as HealthPeriod)}
+          >
+            {(Object.keys(healthPeriods) as HealthPeriod[]).map((value) => (
+              <option key={value} value={value}>
+                {healthPeriods[value].label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       {!data ? (
         <p role="status">
           {isError ? "기록을 불러오지 못했어요." : "건강 기록을 불러오고 있어요."}
@@ -301,7 +304,6 @@ export function DashboardPage() {
                 </span>
               </p>
               <small>점수와 추이는 데모이며 퀘스트 현황은 이 기기의 실제 기록이에요.</small>
-              <HealthTrend period={period} today={game.date} />
               <Link to="/risk" className="disease-card" aria-label="질환 위험도 상세 보기">
                 <header>
                   <h3>질환 위험도</h3>
@@ -324,6 +326,7 @@ export function DashboardPage() {
                   ))}
                 </div>
               </Link>
+              <HealthTrend period={period} today={game.date} />
               {period === "week" && (
                 <section className="impact-card">
                   <header>
@@ -402,7 +405,7 @@ const products = [
     image: "/assets/shop/almonds.jpg",
   },
 ];
-export function ShopPage() {
+export function ShopPage({ customize = false }: { customize?: boolean }) {
   const { game, claimBonus } = useGameStore();
   const dino = dinosaurs[game.dinosaur];
   const notice = useNotice();
@@ -451,8 +454,8 @@ export function ShopPage() {
             <button
               key={label}
               className={`shop-tab shop-tab-${i === 0 ? 0 : 2}`}
-              aria-pressed={i === 0}
-              onClick={() => navigate(["/shop", "/character"][i])}
+              aria-pressed={customize ? i === 1 : i === 0}
+              onClick={() => navigate(["/shop", "/shop/customize"][i])}
             >
               <span className="shop-tab-content">
                 <img
@@ -471,57 +474,71 @@ export function ShopPage() {
             </button>
           ))}
         </div>
-        <div className="product-scroll" role="region" aria-label="상품 목록" tabIndex={0}>
-          <div className="product-grid">
-            {products.map((p, i) => (
-              <button
-                key={p.name}
-                className={`product product-${i} ${p.wide ? "wide" : ""}`}
-                onClick={() =>
-                  notice(
-                    `${p.name} · ${p.price} RP — 실제 상품 교환은 서버 연동 후 제공됩니다. RP는 차감되지 않아요.`,
-                  )
-                }
-              >
-                <span className="product-photo">
-                  <img src={p.image} alt={p.name} />
-                </span>
-                <span className="rrr-badge">RRR</span>
-                <span className="product-price">{p.price} RP</span>
-                {p.badge && (
-                  <span className={`product-badge ${i === 0 ? "sale" : ""}`}>{p.badge}</span>
-                )}
-                <strong>{p.name}</strong>
-                <small>{p.sub}</small>
-              </button>
-            ))}
+        {customize ? (
+          <div
+            className="customize-scroll"
+            tabIndex={0}
+            role="region"
+            aria-label="꾸미기 상품 목록"
+          >
+            <AccessoryCatalog />
+            <GoldEffects />
           </div>
-        </div>
-        <details className="shop-photo-credits">
-          <summary>상품 이미지 출처</summary>
-          <p>추가 품목과 RP 가격은 데모 예시입니다.</p>
-          <a
-            href="https://commons.wikimedia.org/wiki/File:Oatmeal_(1).jpg"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Oatmeal — Renee Comet / NCI · Public domain
-          </a>
-          <a
-            href="https://commons.wikimedia.org/wiki/File:Bowl_of_chopped_almonds.jpg"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Almonds — Douglas P Perkins
-          </a>
-          <a
-            href="https://creativecommons.org/licenses/by-sa/3.0/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            CC BY-SA 3.0 · 원본 이미지
-          </a>
-        </details>
+        ) : (
+          <>
+            <div className="product-scroll" role="region" aria-label="상품 목록" tabIndex={0}>
+              <div className="product-grid">
+                {products.map((p, i) => (
+                  <button
+                    key={p.name}
+                    className={`product product-${i} ${p.wide ? "wide" : ""}`}
+                    onClick={() =>
+                      notice(
+                        `${p.name} · ${p.price} RP — 실제 상품 교환은 서버 연동 후 제공됩니다. RP는 차감되지 않아요.`,
+                      )
+                    }
+                  >
+                    <span className="product-photo">
+                      <img src={p.image} alt={p.name} />
+                    </span>
+                    <span className="rrr-badge">RRR</span>
+                    <span className="product-price">{p.price} RP</span>
+                    {p.badge && (
+                      <span className={`product-badge ${i === 0 ? "sale" : ""}`}>{p.badge}</span>
+                    )}
+                    <strong>{p.name}</strong>
+                    <small>{p.sub}</small>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <details className="shop-photo-credits">
+              <summary>상품 이미지 출처</summary>
+              <p>추가 품목과 RP 가격은 데모 예시입니다.</p>
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Oatmeal_(1).jpg"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Oatmeal — Renee Comet / NCI · Public domain
+              </a>
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Bowl_of_chopped_almonds.jpg"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Almonds — Douglas P Perkins
+              </a>
+              <a
+                href="https://creativecommons.org/licenses/by-sa/3.0/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                CC BY-SA 3.0 · 원본 이미지
+              </a>
+            </details>
+          </>
+        )}
       </section>
     </AppShell>
   );
@@ -536,6 +553,11 @@ export function CharacterPage() {
         subtitle={`${dinosaurs[game.dinosaur].name} · GOLD ${game.gold.toLocaleString()} · 나만의 스타일`}
       />
       <section className="character-customization cream-card" aria-label="꾸미기 목록" tabIndex={0}>
+        <div className="character-equipped-preview">
+          <DinosaurArt />
+          <EquippedAccessories />
+        </div>
+        <AccessoryCatalog inventory />
         <DinosaurCustomization />
         <GoldEffects />
       </section>

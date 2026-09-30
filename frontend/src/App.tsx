@@ -66,7 +66,7 @@ export default function App() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/shop" element={<ShopPage />} />
       <Route path="/character" element={<CharacterPage />} />
-      <Route path="/shop/customize" element={<Navigate to="/character" replace />} />
+      <Route path="/shop/customize" element={<ShopPage customize />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/dinosaur" element={<DinosaurPage />} />

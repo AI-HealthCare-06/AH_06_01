@@ -56,6 +56,8 @@ test("main tabs follow the requested order and swipe respects direction, edges a
   await expect(page).toHaveURL(/\/camera$/);
   await expect(page.locator(".camera-screen")).toBeVisible();
   await page.goto("/shop/customize");
+  await expect(page).toHaveURL(/\/shop\/customize$/);
+  await swipe(page, -100);
   await expect(page).toHaveURL(/\/character$/);
 });
 
@@ -74,8 +76,8 @@ test("compact HUD toggles buffs and hit art lasts 200ms without stopping attack 
   await expect(page.locator(".battle-buff-detail")).toHaveCount(0);
   const hud = (await page.locator(".battle-hud").boundingBox())!;
   const scenery = (await page.locator(".battle-scenery").boundingBox())!;
-  expect(hud.x).toBeCloseTo(scenery.x, 0);
-  expect(hud.y).toBeCloseTo(scenery.y, 0);
+  expect(hud.x - scenery.x).toBeCloseTo((5 * scenery.width) / 354, 1);
+  expect(hud.y - scenery.y).toBeCloseTo((5 * scenery.width) / 354, 1);
   expect(hud.width / scenery.width).toBeCloseTo((194 * 0.8) / 354, 2);
   await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
@@ -109,10 +111,10 @@ test("compact HUD toggles buffs and hit art lasts 200ms without stopping attack 
   });
   const enemy = page.locator(".battle-enemy canvas");
   await page.clock.runFor(50);
-  await expect(enemy).toHaveAttribute("data-src", "/assets/battle/464-581.png");
+  await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaHit.png");
   await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "980");
   await page.clock.runFor(150);
-  await expect(enemy).toHaveAttribute("data-src", "/assets/battle/464-581.png");
+  await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaHit.png");
   const cooldown = await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
     const { useGameStore } = await import(path);
@@ -120,12 +122,17 @@ test("compact HUD toggles buffs and hit art lasts 200ms without stopping attack 
   });
   expect(cooldown).toBe(0);
   await page.clock.runFor(50);
-  await expect(enemy).toHaveAttribute("data-src", "/assets/battle/300-700.png");
+  await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaAttack.png");
+  await expect(page.getByRole("meter", { name: "공룡 체력" })).toHaveAttribute(
+    "aria-valuenow",
+    "50",
+  );
+  await page.clock.runFor(300);
+  await expect(enemy).toHaveAttribute("data-src", "/assets/battle/RangedDarkColaHit.png");
+  await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "960");
+  await page.clock.runFor(250);
   await expect(page.getByRole("meter", { name: "공룡 체력" })).toHaveAttribute(
     "aria-valuenow",
     "40",
   );
-  await page.clock.runFor(300);
-  await expect(enemy).toHaveAttribute("data-src", "/assets/battle/464-581.png");
-  await expect(page.locator(".enemy-hp")).toHaveAttribute("aria-valuenow", "960");
 });

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { accessories } from "../design/accessories";
 import { defaultDinosaurStyles, skinIds } from "./appearance";
 import type { SkinId } from "./appearance";
 import { calendarWeek, localDate } from "./calendar";
@@ -104,6 +105,10 @@ export const gameSchema = z
     battlePaused: z.boolean().default(false),
     ownedEffects: z.array(z.enum(["original", "emerald", "violet"])).default(["original"]),
     battleEffect: z.enum(["original", "emerald", "violet"]).default("original"),
+    ownedAccessories: z.array(z.string()).default([]),
+    equippedAccessories: z
+      .object({ head: z.string().nullable(), pet: z.string().nullable() })
+      .default({ head: null, pet: null }),
     bonusClaimed: z.boolean(),
     allDoneBonusClaimed: z.boolean(),
     sampleDay: z.boolean().default(true),
@@ -166,6 +171,8 @@ export function initialGame(date = localDate()): GameState {
     battlePaused: false,
     ownedEffects: ["original"],
     battleEffect: "original",
+    ownedAccessories: [],
+    equippedAccessories: { head: null, pet: null },
     bonusClaimed: false,
     allDoneBonusClaimed: false,
     sampleDay: false,
@@ -193,6 +200,28 @@ export function rollDay(state: GameState, date = localDate()): GameState {
     sleepHours: null,
     hydrationRatio: null,
     lastReward: null,
+  };
+}
+
+export function purchaseAccessory(state: GameState, id: string): GameState {
+  const item = accessories.find((item) => item.id === id);
+  if (!item || state.ownedAccessories.includes(id) || state.gold < item.price) return state;
+  return {
+    ...state,
+    gold: state.gold - item.price,
+    ownedAccessories: [...state.ownedAccessories, id],
+  };
+}
+
+export function equipAccessory(state: GameState, id: string): GameState {
+  const item = accessories.find((item) => item.id === id);
+  if (!item || !state.ownedAccessories.includes(id)) return state;
+  return {
+    ...state,
+    equippedAccessories: {
+      ...state.equippedAccessories,
+      [item.category]: state.equippedAccessories[item.category] === id ? null : id,
+    },
   };
 }
 

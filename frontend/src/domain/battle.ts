@@ -79,8 +79,28 @@ export const combatSchema = z.object({
       attackIn: z.number().finite(),
       ranged: z.boolean(),
       hitAt: z.number(),
+      attackedAt: z.number().optional(),
     }),
   ),
+  projectiles: z
+    .array(
+      z.object({
+        id: z.string(),
+        art: z.number().int().min(0).max(5),
+        rank: z.enum(["normal", "elite", "boss"]).optional(),
+        distance: z.number().nonnegative(),
+        origin: z.number().positive(),
+        damage: z.number().nonnegative(),
+      }),
+    )
+    .default([]),
+  transition: z
+    .object({
+      kind: z.enum(["wave", "stage"]),
+      elapsed: z.number().nonnegative(),
+    })
+    .nullable()
+    .default(null),
   lastAttack: z
     .object({
       time: z.number(),
@@ -89,6 +109,7 @@ export const combatSchema = z.object({
       critical: z.boolean(),
       targetId: z.number().optional(),
       art: z.number().optional(),
+      ranged: z.boolean().optional(),
       rank: z.enum(["normal", "elite", "boss"]).optional(),
     })
     .nullable(),
@@ -109,6 +130,8 @@ export function initialCombat(hp = 50): CombatState {
     clock: 0,
     seed: 42,
     enemies: [],
+    projectiles: [],
+    transition: null,
     lastAttack: null,
     loot: null,
   };
@@ -140,7 +163,15 @@ function nextWave(state: CombatState, level: number) {
   }
   state.killed = 0;
   state.spawned = 0;
-  state.spawnIn = Math.max(0, state.spawnIn);
+  state.spawnIn = 0;
+  state.attackIn = 0;
+  state.transition = null;
+}
+export const projectileSpeed = 6; // world units / second (1u = 30 design px)
+export const clearDuration = (kind: "wave" | "stage") => (kind === "stage" ? 1600 : 1000);
+export const travelDuration = 1800;
+export function isRangedSpawn(index: number) {
+  return [2, 5, 9].includes(index % 10);
 }
 // Fixed 50ms simulation. Range is checked on every hit. Hit art never stuns.
 export function advanceCombat(
@@ -149,7 +180,12 @@ export function advanceCombat(
   level: number,
   duration: number,
 ) {
-  const state: CombatState = { ...input, enemies: input.enemies.map((enemy) => ({ ...enemy })) };
+  const state: CombatState = {
+    ...input,
+    enemies: input.enemies.map((enemy) => ({ ...enemy })),
+    projectiles: input.projectiles.map((projectile) => ({ ...projectile })),
+    transition: input.transition ? { ...input.transition } : null,
+  };
   // Expanded colliders can meet before the nominal melee range. Contact must still
   // allow attacking; otherwise a stopped melee monster could never hit the player.
   const enemyReach = (enemy: CombatState["enemies"][number]) =>
@@ -160,6 +196,12 @@ export function advanceCombat(
     const dt = Math.min(50, duration - elapsed);
     state.clock += dt;
     state.hp = Math.min(state.hp, buffs.maxHp);
+    if (state.transition) {
+      state.transition.elapsed += dt;
+      if (state.transition.elapsed >= clearDuration(state.transition.kind) + travelDuration)
+        nextWave(state, level);
+      continue;
+    }
     if (state.recovery > 0) {
       state.recovery = Math.max(0, state.recovery - dt);
       if (state.recovery === 0) {
@@ -183,12 +225,19 @@ export function advanceCombat(
         ad: stats.ad,
         distance: 7,
         attackIn: 0,
-        ranged: art % 2 === 0,
+        ranged: rank === "normal" ? isRangedSpawn(state.spawned) : rank === "elite",
         hitAt: -1000,
       });
       state.spawned++;
       state.spawnIn += spawnInterval;
     }
+    // Already launched projectiles travel independently from their shooter.
+    for (const projectile of state.projectiles) {
+      projectile.distance = Math.max(0, projectile.distance - (projectileSpeed * dt) / 1000);
+      if (projectile.distance < 1e-9) projectile.distance = 0;
+      if (projectile.distance === 0) state.hp = Math.max(0, state.hp - projectile.damage);
+    }
+    state.projectiles = state.projectiles.filter((projectile) => projectile.distance > 0);
     for (const enemy of state.enemies) {
       enemy.distance = Math.max(
         enemyReach(enemy),
@@ -211,6 +260,7 @@ export function advanceCombat(
         critical,
         targetId: target.id,
         art: target.art,
+        ranged: target.ranged,
         rank: target.rank,
       };
       target.hp = Math.max(0, target.hp - damage);
@@ -228,19 +278,33 @@ export function advanceCombat(
     }
     for (const enemy of state.enemies) {
       if (isPlayerInEnemyRange(enemy, buffs.dinosaur) && enemy.attackIn === 0) {
-        state.hp = Math.max(0, state.hp - incomingDamage(enemy.ad, buffs.def, buffs.defBonus));
+        const damage = incomingDamage(enemy.ad, buffs.def, buffs.defBonus);
+        if (enemy.ranged)
+          state.projectiles.push({
+            id: `${enemy.id}-${state.clock}`,
+            art: enemy.art,
+            rank: enemy.rank,
+            distance: enemy.distance,
+            origin: enemy.distance,
+            damage,
+          });
+        else state.hp = Math.max(0, state.hp - damage);
+        enemy.attackedAt = state.clock;
         enemy.attackIn = 500;
       }
     }
     if (state.hp <= 0) {
       state.recovery = revivalDelay;
       state.enemies = [];
+      state.projectiles = [];
       // Retry the current wave, so an unbeaten Elite cannot stop idle farming.
       state.killed = 0;
       state.spawned = 0;
       state.attackIn = 0;
     } else if (state.killed >= waveTarget(state.wave) && state.enemies.length === 0) {
-      nextWave(state, level);
+      state.transition = { kind: state.wave === 10 ? "stage" : "wave", elapsed: 0 };
+      state.projectiles = [];
+      state.lastAttack = null;
     }
   }
   return { combat: state, gold, defeats };

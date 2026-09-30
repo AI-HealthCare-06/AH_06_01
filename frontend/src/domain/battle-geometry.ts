@@ -1,5 +1,6 @@
 // Coordinates are in the 354 × 336 design canvas, independent of CSS scale and
 // transparent sprite margins. Colliders describe bodies; hitboxes receive hits.
+import atlases from "../design/animation-atlases.json";
 export type BattleBox = { x: number; y: number; width: number; height: number };
 export type ActorGeometry = { sprite: BattleBox; collider: BattleBox; hitbox: BattleBox };
 export const arena = { top: 58, height: 218, ground: 253, pixelsPerUnit: 30 };
@@ -16,21 +17,21 @@ export function overlaps(a: BattleBox, b: BattleBox) {
 // Character order follows battleDinosaurs; Pteranodon uses walking frame zero.
 // Keep these stable during attacks/hit reactions so collision size does not pulse.
 const characterBounds = [
-  [0, 7, 160, 113],
+  atlases.bounds.TrexIdleSpritesheet4X3Png as [number, number, number, number],
   [0, 8, 160, 112],
-  [0, 15, 160, 105],
+  atlases.bounds.RaptorIdleSpritesheet4X31Png as [number, number, number, number],
   [0, 19, 160, 101],
-  [0, 34, 160, 86],
+  [0, 28, 160, 92],
   [21, 0, 119, 120],
 ] as const;
-const monsterBounds = [
-  [46, 0, 69, 120],
-  [47, 0, 66, 120],
-  [31, 0, 98, 120],
-  [20, 0, 119, 120],
-  [27, 0, 106, 120],
-  [32, 0, 97, 120],
-] as const;
+const monsterNames = [
+  "DarkCola",
+  "HardCandy",
+  "SmokyMarshmallow",
+  "RottenBurger",
+  "ArchmagePop",
+  "DrFireball",
+];
 function geometry(
   sprite: BattleBox,
   bounds: readonly [number, number, number, number],
@@ -58,21 +59,33 @@ export function playerGeometry(dinosaur: number): ActorGeometry {
   const sprite = { x: 8, y: flying ? 84 : arena.ground - 98, width: 125, height: 98 };
   return geometry(sprite, characterBounds[dinosaur]);
 }
-export function enemyGeometry(distance: number, art: number, rank = "normal"): ActorGeometry {
+export function enemyGeometry(
+  distance: number,
+  art: number,
+  rank = "normal",
+  ranged = false,
+): ActorGeometry {
   const large = rank !== "normal";
+  const name = `${ranged ? "Ranged" : "Melee"}${monsterNames[art]}Idle`;
+  const bounds = (atlases.bounds as Record<string, number[]>)[name] as [
+    number,
+    number,
+    number,
+    number,
+  ];
   const sprite = {
     x: distanceToX(distance),
-    y: arena.ground - (large ? 74.2 : 65.1),
+    y: arena.ground - ((large ? 74.2 : 65.1) * (bounds[1] + bounds[3])) / 120,
     width: large ? 65.8 : 57.4,
     height: large ? 74.2 : 65.1,
   };
-  return geometry(sprite, monsterBounds[art]);
+  return geometry(sprite, bounds);
 }
 // The physical body must never cross the player, even after saved/custom input.
-// Normal melee/ranged stopping ranges remain the policy's 1 / 2 world units.
-export function colliderStopDistance(art: number, rank = "normal", dinosaur = 0) {
+// Nominal melee/ranged reach is 1 / 3 world units.
+export function colliderStopDistance(art: number, rank = "normal", dinosaur = 0, ranged = false) {
   const player = playerGeometry(dinosaur).collider;
-  const enemy = enemyGeometry(0, art, rank).collider;
+  const enemy = enemyGeometry(0, art, rank, ranged).collider;
   return Math.max(0, (player.x + player.width - enemy.x) / arena.pixelsPerUnit);
 }
 const strikePoints = [

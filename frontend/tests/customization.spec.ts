@@ -84,7 +84,7 @@ test("customization has three rows per character on narrow and desktop screens",
 }) => {
   for (const width of [320, 390, 526]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto("/shop/customize");
+    await page.goto("/character");
     await page.evaluate(() => document.fonts.ready);
     for (const group of await page.locator(".character-collection").all()) {
       await expect(group.locator(".style-card")).toHaveCount(6);

@@ -11,10 +11,14 @@ import {
   convertDemoRp,
   repeatDemoQuest,
   purchaseEffect,
+  purchaseAccessory,
+  equipAccessory,
 } from "../domain/game";
 import type { GameState, QuestId, StepSnapshot } from "../domain/game";
 import type { SkinId } from "../domain/appearance";
 import type { EffectId } from "../domain/economy";
+import { experienceForLevel, experienceProgress } from "../domain/experience";
+import { characterStats } from "../domain/game-policy";
 
 const storageKey = "rexrun-demo-game-v1";
 function loadGame() {
@@ -47,6 +51,9 @@ type GameStore = {
   convertRp: (amount: number) => void;
   repeat: (id: QuestId) => void;
   buyEffect: (id: EffectId) => void;
+  debugChangeLevel: (delta: number) => void;
+  buyAccessory: (id: string) => boolean;
+  equipAccessory: (id: string) => void;
 };
 
 const loadedGame = loadGame();
@@ -55,6 +62,39 @@ let lastSaved = 0;
 export const useGameStore = create<GameStore>((set) => ({
   game: loadedGame,
   paused: loadedGame.battlePaused,
+  buyAccessory: (id) => {
+    let purchased = false;
+    set((state) => {
+      const current = tickBattle(state.game);
+      const game = purchaseAccessory(current, id);
+      purchased = game !== current;
+      save(game);
+      return { game };
+    });
+    return purchased;
+  },
+  equipAccessory: (id) =>
+    set((state) => {
+      const game = equipAccessory(state.game, id);
+      save(game);
+      return { game };
+    }),
+  debugChangeLevel: (delta) =>
+    set((state) => {
+      if (!import.meta.env.DEV || ![1, -1].includes(delta)) return state;
+      const level = Math.max(
+        1,
+        Math.min(100, experienceProgress(state.game.experience).level + delta),
+      );
+      const game = {
+        ...state.game,
+        experience: experienceForLevel(level),
+        battleUpdatedAt: Date.now(),
+        combat: { ...state.game.combat, hp: characterStats(level).hp, recovery: 0 },
+      };
+      save(game);
+      return { game };
+    }),
   syncSteps: (snapshot) =>
     set((state) => {
       const game = syncDeviceSteps(tickBattle(state.game), snapshot);
