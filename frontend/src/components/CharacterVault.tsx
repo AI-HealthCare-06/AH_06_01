@@ -52,7 +52,7 @@ export function CharacterVault() {
               ‹
             </button>
             <div className="character-equipped-preview">
-              <DinosaurArt dinosaur={selected} pose="withered" skin={skin} />
+              <DinosaurArt dinosaur={selected} pose="adventure" skin={skin} />
               <EquippedAccessories />
             </div>
             <button aria-label="다음 공룡" onClick={() => choose(selected + 1)}>
