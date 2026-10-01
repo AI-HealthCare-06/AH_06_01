@@ -148,7 +148,7 @@ test("game controls open three working, persistent settings and account page has
   await expect(page.getByText("Wave 자동 재시작", { exact: true })).toHaveCount(0);
 });
 
-test("each dinosaur releases its projectile from the visible mouth or foreclaw of its contact pose", async ({
+test("each dinosaur releases from its horn, foreclaw or just ahead of its visible mouth", async ({
   page,
 }) => {
   await page.clock.install();
@@ -189,7 +189,11 @@ test("each dinosaur releases its projectile from the visible mouth or foreclaw o
         paused: true,
         game: { ...game, dinosaur, battlePaused: true, combat },
       });
-      return combat.playerProjectiles[0];
+      return {
+        ...combat.playerProjectiles[0],
+        mouthOffsetX: dinosaur === 1 || dinosaur === 2 ? 0 : 4,
+        dinosaur,
+      };
     }, dinosaur);
     const canvas = page.locator(".battle-dinosaur canvas");
     await expect(canvas).toHaveAttribute("data-rendered-frame", "2");
@@ -201,7 +205,7 @@ test("each dinosaur releases its projectile from the visible mouth or foreclaw o
           const width = parseFloat(wrap.style.width),
             height = parseFloat(wrap.style.height);
           const x =
-            ((source.x - parseFloat(wrap.style.left)) / width) * 160 -
+            ((source.x - source.mouthOffsetX - parseFloat(wrap.style.left)) / width) * 160 -
             parseFloat(canvas.style.left) * 1.6;
           const y =
             ((source.y - parseFloat(wrap.style.top)) / height) * 120 -
@@ -215,7 +219,17 @@ test("each dinosaur releases its projectile from the visible mouth or foreclaw o
               const px = Math.round(x) + dx,
                 py = Math.round(y) + dy;
               if (px >= 0 && px < canvas.width && py >= 0 && py < canvas.height)
-                opaque += pixels[(py * canvas.width + px) * 4 + 3] > 0 ? 1 : 0;
+                if (pixels[(py * canvas.width + px) * 4 + 3] > (source.dinosaur === 1 ? 128 : 0)) {
+                  const index = (py * canvas.width + px) * 4;
+                  // Tricera's source must touch cream horn pixels, above its blue mouth.
+                  if (
+                    source.dinosaur !== 1 ||
+                    (pixels[index] > 180 &&
+                      pixels[index + 1] > 145 &&
+                      pixels[index] - pixels[index + 2] > 15)
+                  )
+                    opaque++;
+                }
             }
           return opaque;
         }, source),

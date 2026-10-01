@@ -94,7 +94,7 @@ export const battleDinosaurs = [
   {
     image: art("276-702"),
     attack: art("288-700"),
-    rangedAttack: art("DinoTriceraRangedAttack"),
+    rangedAttack: art("DinoTriceraHornRangedAttack"),
     idle: art("DinoTriceraIdle"),
     walk: art("DinoTriceraWalk"),
     movement: "trot",

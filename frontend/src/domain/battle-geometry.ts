@@ -89,15 +89,19 @@ export function playerGeometry(dinosaur: number, offset = { x: 0, y: 0 }): Actor
   restingPlayers[dinosaur] = geometry(sprite, bounds);
   return translateActor(restingPlayers[dinosaur], offset.x, offset.y);
 }
-// IDLE-sized anchors on ranged release pose 02. Raptor casts from its
-// forward foreclaws; the other dinosaurs release from their mouths.
+// IDLE-sized anchors on ranged release pose 02. Tricera uses its brow horn,
+// Raptor its forward foreclaws; mouth casts begin just ahead of the lip.
+export const mouthProjectileOffsetX = 4; // design pixels, independent of character size
 const projectileReleasePoints = ["Trex", "Tricera", "Raptor", "Stego", "Ptera", "Brachio"].map(
   (name) => attackMotions.releasePoints[name as keyof typeof attackMotions.releasePoints],
 );
 export function playerReleasePosition(dinosaur: number, actor = playerGeometry(dinosaur)) {
   const [x, y] = projectileReleasePoints[dinosaur];
   return {
-    x: actor.sprite.x + (actor.sprite.width * x) / 160,
+    x:
+      actor.sprite.x +
+      (actor.sprite.width * x) / 160 +
+      (dinosaur === 1 || dinosaur === 2 ? 0 : mouthProjectileOffsetX),
     y: actor.sprite.y + (actor.sprite.height * y) / 120,
   };
 }

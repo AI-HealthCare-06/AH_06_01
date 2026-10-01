@@ -8,9 +8,28 @@ import {
   enemyGeometry,
   overlaps,
   playerGeometry,
+  playerReleasePosition,
 } from "./battle-geometry";
+import attackMotions from "../design/dino-attack-atlases.json";
 
 describe("separate battle bodies and hit targets", () => {
+  it("moves mouth releases 4 design px forward without shifting horn or claw anchors", () => {
+    for (const [dinosaur, name, offset] of [
+      [0, "Trex", 4],
+      [1, "Tricera", 0],
+      [2, "Raptor", 0],
+      [3, "Stego", 4],
+      [4, "Ptera", 4],
+      [5, "Brachio", 4],
+    ] as const) {
+      const actor = playerGeometry(dinosaur, { x: 12, y: -10 });
+      const [x, y] = attackMotions.releasePoints[name];
+      const released = playerReleasePosition(dinosaur, actor);
+      expect(released.x - (actor.sprite.x + (actor.sprite.width * x) / 160)).toBeCloseTo(offset);
+      expect(released.y).toBeCloseTo(actor.sprite.y + (actor.sprite.height * y) / 120);
+    }
+    expect(attackMotions.releasePoints.Tricera[1]).toBeLessThan(70); // horn above the mouth
+  });
   it("enlarges Brachio by 20% while keeping its feet on the ground and body boxes in sync", () => {
     const brachio = playerGeometry(5),
       translated = playerGeometry(5, { x: 12, y: -10 });
