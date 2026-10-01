@@ -166,6 +166,8 @@ Three melee walk layer names in Figma differ from the pictured creature; the map
 
 Stego's 12 authored poses run row by row. Pose 06 is the contact pose; animation wind-up and recovery map to the existing combat impact time and attack interval, keeping damage and attack cadence unchanged. Its melee movement carries the sprite, body hitbox and collider together. The original Figma preview is 1.08s; runtime follows the configured combat duration.
 
+Tricera completes its visual attack within the first 75% of each attack cycle, then plays its authored IDLE sheet during the remaining 25%. The release/contact frame stays at the existing impact time; actual attack cooldowns, damage and melee body recovery remain unchanged.
+
 Ptera's visible resting center now sits at 60% of the battle background height (y=188.8 design pixels). Its projectile follows the stored target aim and rotates along its velocity; the shared hitbox is the AABB of the rotated visible canvas and grows with the projectile. Debug shows mint `P# HIT` labels for player shots alongside purple enemy shot labels. All six melee enemies across normal/elite/boss ranks can reach and damage Ptera with their existing sizes.
 
 Brachio's sprite is 20% larger on both axes (150×117.6 design pixels), retaining its ground foot anchor at y=253. Body boxes and the release-pose mouth coordinate share that scale. Its projectile also rotates along the mouth-to-target velocity, with the rotated artwork's AABB shared by collisions and debug display.

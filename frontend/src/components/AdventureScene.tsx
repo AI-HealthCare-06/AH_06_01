@@ -128,7 +128,14 @@ export function AdventureScene({
   const waveTotal = waveTarget(battle.wave);
   const attackElapsed = battle.lastAttack ? battle.clock - battle.lastAttack.time : 1000;
   const attackDuration = battle.lastAttack?.duration ?? Math.min(500, buffs.attackInterval);
-  const attacking = attackElapsed < attackDuration && battle.recovery === 0 && !transition;
+  // Tricera finishes its visual recovery early, leaving the last quarter of
+  // each attack cycle for IDLE without changing combat cooldown or impact time.
+  const attackMotionDuration = game.dinosaur === 1 ? attackDuration * 0.75 : attackDuration;
+  const attacking =
+    attackElapsed >= 0 &&
+    attackElapsed < attackMotionDuration &&
+    battle.recovery === 0 &&
+    !transition;
   const attack = attacking && art.attack;
   // The new Stego sheet contacts on pose 06; map its authored wind-up/recovery
   // to the existing combat impact time without changing attack speed or damage.
@@ -144,7 +151,8 @@ export function AdventureScene({
     attackElapsed <= impactDelay
       ? (attackElapsed / impactDelay) * contactProgress
       : contactProgress +
-        ((attackElapsed - impactDelay) / (attackDuration - impactDelay)) * (1 - contactProgress);
+        ((attackElapsed - impactDelay) / (attackMotionDuration - impactDelay)) *
+          (1 - contactProgress);
   const target = battle.enemies.find((enemy) => enemy.id === battle.lastAttack?.targetId);
   const targetGeometry = battle.lastAttack
     ? enemyGeometry(

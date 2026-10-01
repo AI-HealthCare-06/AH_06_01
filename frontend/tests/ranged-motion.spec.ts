@@ -1,5 +1,89 @@
 import { expect, test } from "@playwright/test";
 
+for (const ranged of [true, false])
+  for (const asBonus of [0, 0.8])
+    test(`Tricera plays IDLE between ${ranged ? "ranged" : "melee"} attacks at AS +${asBonus * 100}%`, async ({
+      page,
+    }) => {
+      await page.clock.install();
+      await page.clock.pauseAt(new Date());
+      await page.goto("/home");
+      await page.evaluate(
+        async ({ ranged, asBonus }) => {
+          const storePath = "/src/stores/game-store.ts";
+          const battlePath = "/src/domain/battle.ts";
+          const rangePath = "/src/domain/battle-range.ts";
+          const { useGameStore } = await import(storePath);
+          const { initialCombat } = await import(battlePath);
+          const { enemyAttackRange } = await import(rangePath);
+          const { game } = useGameStore.getState();
+          const enemy = {
+            id: 42,
+            art: 0,
+            rank: "normal" as const,
+            ranged,
+            distance: 7,
+            hp: 1000,
+            maxHp: 1000,
+            ad: 0,
+            attackIn: 5000,
+            hitAt: -1000,
+          };
+          if (!ranged) enemy.distance = enemyAttackRange(enemy, 1);
+          useGameStore.setState({
+            paused: false,
+            game: {
+              ...game,
+              dinosaur: 1,
+              battlePaused: false,
+              battleUpdatedAt: Date.now(),
+              debugBuffs: { asBonus, crt: 0, adBonus: 0 },
+              combat: { ...initialCombat(), spawnIn: 5000, spawned: 1, enemies: [enemy] },
+            },
+          });
+        },
+        { ranged, asBonus },
+      );
+      const player = page.locator(".battle-dinosaur"),
+        canvas = player.locator("canvas");
+      await page.clock.runFor(50);
+      await expect(player).toHaveAttribute("data-attack-mode", ranged ? "ranged" : "melee");
+      const first = await page.evaluate(async () => {
+        const path = "/src/stores/game-store.ts";
+        const { useGameStore } = await import(path);
+        return useGameStore.getState().game.combat.lastAttack!;
+      });
+      await page.clock.runFor(first.impactAt! - first.time);
+      await expect(canvas).toHaveAttribute("data-src", "/assets/battle/288-700.png");
+      await expect(canvas).toHaveAttribute("data-frame", "2");
+      const idleAt = first.time + Math.ceil((first.duration! * 0.75) / 50) * 50;
+      await page.clock.runFor(idleAt - first.impactAt!);
+      await expect(player).toHaveAttribute("data-animation", "idle");
+      await expect(player).toHaveAttribute("data-attacking", "false");
+      await expect(canvas).toHaveAttribute("data-src", "/assets/battle/DinoTriceraIdle.png");
+      await page.getByRole("button", { name: "모험 일시정지", exact: true }).click();
+      const frame = await canvas.getAttribute("data-frame");
+      await page.clock.runFor(1000);
+      await expect(canvas).toHaveAttribute("data-frame", frame!);
+      await page.locator(".pixel-battle").screenshot({
+        path: `test-results/tricera-idle-${ranged ? "ranged" : "melee"}-${asBonus}.png`,
+      });
+      await page.getByRole("button", { name: "모험 재개", exact: true }).click();
+      const nextAt = first.time + Math.ceil(500 / (1 + asBonus) / 50) * 50;
+      await page.clock.runFor(nextAt - idleAt);
+      await expect(player).toHaveAttribute("data-animation", "attack");
+      await expect(canvas).toHaveAttribute("data-src", "/assets/battle/288-700.png");
+      const next = await page.evaluate(async () => {
+        const path = "/src/stores/game-store.ts";
+        const { useGameStore } = await import(path);
+        return useGameStore.getState().game.combat.lastAttack!;
+      });
+      expect(next.time).toBe(nextAt);
+      expect(first.damage).toBe(ranged ? 20 : 23);
+      expect(next.damage).toBe(next.mode === "melee" ? 23 : 20);
+      expect(next.impactAt! - next.time).toBe(first.impactAt! - first.time);
+    });
+
 test("Stego tail sweep renders all twelve poses, contacts on pose six, and moves body boxes together", async ({
   page,
 }) => {
