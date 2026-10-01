@@ -291,7 +291,7 @@ test("all twelve villain walk sheets animate during approach with compact body-c
         };
       });
       expect(sizes.height).toBeCloseTo(3, 1);
-      expect(sizes.width).toBeLessThan(65);
+      expect(sizes.width).toBeCloseTo(Math.max(58, sizes.hitWidth + 8) - 10, 1);
       expect(sizes.centerOffset).toBeCloseTo(0, 1);
       await page.locator(".pixel-battle").screenshot({
         path: `test-results/villain-walk-${ranged ? "ranged" : "melee"}-${art}.png`,

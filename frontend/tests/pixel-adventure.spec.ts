@@ -55,22 +55,23 @@ test("wave combat pauses, requires multiple hits and awards Gold separately", as
   await page.goto("/home");
   await page.clock.runFor(50);
   await expect(page.locator(".battle-enemy")).toHaveCount(1);
-  await expect(page.locator(".enemy-hp").first()).toHaveAttribute("aria-valuenow", "77");
+  await expect(page.locator(".enemy-hp").first()).toHaveAttribute("aria-valuenow", "96");
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   const enemyPosition = await page.locator(".battle-enemy").getAttribute("style");
   await page.clock.runFor(10_000);
   await expect(page.locator(".battle-enemy")).toHaveAttribute("style", enemyPosition!);
   await page.getByRole("button", { name: "모험 재개" }).click();
   await page.clock.runFor(800);
-  await expect(page.locator(".enemy-hp").first()).toHaveAttribute("aria-valuenow", "57");
-  await page.clock.runFor(1600);
+  await expect(page.locator(".enemy-hp").first()).toHaveAttribute("aria-valuenow", "76");
+  await page.clock.runFor(2000);
   await expect(page.locator(".battle-coin")).toContainText("+30 G");
   await expect(page.getByRole("progressbar", { name: "스테이지 몬스터 처치" })).toHaveAttribute(
     "aria-valuenow",
     "1",
   );
   await page.clock.runFor(600);
-  await expect(page.locator(".battle-enemy")).toHaveCount(1);
+  expect(await page.locator(".battle-enemy").count()).toBeGreaterThanOrEqual(1);
+  expect(await page.locator(".battle-enemy").count()).toBeLessThanOrEqual(3);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!));
   expect(saved.gold).toBe(1280);
   expect(saved.combat.pendingGold).toBe(30);

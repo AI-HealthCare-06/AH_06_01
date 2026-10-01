@@ -211,6 +211,16 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
 });
 
 test("account controls, top notices and step guidance keep dialogs separate", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "Notification", {
+      value: class {
+        static permission = "default";
+        static async requestPermission() {
+          throw new Error("Notification permission unavailable");
+        }
+      },
+    });
+  });
   await page.goto("/quests");
   await expect(page.locator(".step-connection")).toHaveCount(0);
   const hint = (await page.locator(".step-connection-note").boundingBox())!;
@@ -224,7 +234,10 @@ test("account controls, top notices and step guidance keep dialogs separate", as
   await page.getByRole("button", { name: /웨어러블 장비/ }).click();
   await expect(page.getByRole("dialog")).toContainText("수면 시간");
   await page.keyboard.press("Escape");
-  await page.getByRole("switch", { name: "일일 상태 초기화 안내" }).click();
+  await expect(page.getByRole("switch", { name: "일일 상태 초기화 안내" })).toHaveCount(0);
+  await page.getByRole("button", { name: /알림 설정/ }).click();
+  await page.getByRole("button", { name: "브라우저 알림 켜기" }).click();
+  await page.keyboard.press("Escape");
   await expect(page.locator(".notice.visible")).toBeVisible();
   expect((await page.locator(".notice").boundingBox())!.y).toBeLessThan(25);
   await page.getByRole("button", { name: "← 뒤로가기" }).click();

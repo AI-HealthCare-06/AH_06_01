@@ -21,6 +21,7 @@ const paths = {
   calendar:
     "M5 1h3v4h8V1h3v4h3v18H2V5h3zM5 9v11h14V9zM7 11h3v3H7zM13 11h3v3h-3zM7 16h3v2H7zM13 16h3v2h-3z",
   alert: "M10 5h4v10h-4zM10 18h4v3h-4z",
+  settings: "M9 1h6v4h3V3h3v6h2v6h-4v3h2v3h-6v2H9v-4H6v2H3v-6H1V9h4V6H3V3h6zM9 9v6h6V9z",
 } as const;
 export type PixelIconName = keyof typeof paths;
 export function PixelIcon({ name, className = "" }: { name: PixelIconName; className?: string }) {

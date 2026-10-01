@@ -5,6 +5,7 @@ import { enemyAttackRange, selectPlayerTarget } from "./battle-range";
 import {
   combatPlayerGeometry,
   playerGeometry,
+  playerMouthPosition,
   enemyGeometry,
   center,
   sweptContact,
@@ -61,7 +62,7 @@ describe("ranged attacks and contact melee", () => {
     const started = advanceCombat(scenario(), stats, 1, 50).combat;
     const launched = advanceCombat(started, stats, 1, 150).combat;
     const shot = launched.playerProjectiles[0];
-    expect(shot.y).toBeCloseTo(188.8, 5);
+    expect(shot).toMatchObject(playerMouthPosition(4));
     expect(shot.vx).toBeGreaterThan(0);
     expect(shot.vy).toBeGreaterThan(0);
     expect(Math.hypot(shot.vx, shot.vy)).toBeCloseTo(240, 5);
@@ -97,6 +98,7 @@ describe("ranged attacks and contact melee", () => {
       const launched = advanceCombat(started, stats, 1, 150).combat;
       expect(launched.playerProjectiles).toHaveLength(1);
       expect(launched.playerProjectiles[0].dinosaur).toBe(dinosaur);
+      expect(launched.playerProjectiles[0]).toMatchObject(playerMouthPosition(dinosaur));
       expect(launched.enemies[0].hp).toBe(1000);
       expect(combatPlayerGeometry(dinosaur, launched.lastAttack, launched.clock)).toEqual(
         playerGeometry(dinosaur),
@@ -125,7 +127,7 @@ describe("ranged attacks and contact melee", () => {
       { ...launched, enemies: [], attackIn: 5000 },
       buffs,
       1,
-      1000,
+      2000,
     ).combat;
     expect(result.playerProjectiles).toHaveLength(0);
     expect(result.lastHit).toBeNull();

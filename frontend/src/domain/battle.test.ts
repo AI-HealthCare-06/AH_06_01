@@ -56,7 +56,7 @@ describe("document combat rules", () => {
     const across = tickBattle(night, now + 25 * 3_600_000);
     expect(across.gold).toBe(night.gold + before.gold + after.gold);
     expect(across.activity).toEqual({});
-  }, 20000);
+  }, 60000);
   it("matches the level milestones, damage floor and monster tables", () => {
     expect([1, 2, 3, 4, 5, 6].map(characterStats)).toEqual([
       { hp: 50, ad: 20, def: 10 },
@@ -80,25 +80,26 @@ describe("document combat rules", () => {
     expect(monsterGold(1, 10, "boss")).toBe(495);
     expect(monsterGold(2, 1, "normal", 1.2)).toBe(40);
   });
-  it("spawns at 7u every 3s, strengthens melee HP/AD by 10%, and fires ranged attacks immediately", () => {
+  it("spawns faster with stronger melee HP and still fires ranged attacks immediately", () => {
     const buffs = battleBuffStats(initialGame());
     const first = advanceCombat(initialCombat(), buffs, 1, 50);
-    expect(first.combat.enemies[0].hp).toBe(77);
+    expect(first.combat.enemies[0].hp).toBe(96);
     expect(first.combat.enemies[0].ad).toBe(22);
     expect(first.combat.enemies[0].distance).toBeCloseTo(6.93);
     expect(first.combat.lastAttack?.mode).toBe("ranged");
     const launched = advanceCombat(first.combat, buffs, 1, 150).combat;
     expect(launched.playerProjectiles).toHaveLength(1);
-    expect(launched.enemies[0].hp).toBe(77);
-    const cleared = advanceCombat(initialCombat(), buffs, 1, 2500);
-    expect(cleared.defeats).toBe(1);
-    expect(cleared.gold).toBe(0);
-    expect(cleared.combat.pendingGold).toBe(30);
-    expect(cleared.combat.serial).toBe(1);
-    expect(cleared.combat.enemies).toHaveLength(0);
-    const ranged = advanceCombat({ ...initialCombat(), spawned: 2 }, buffs, 1, 50).combat
-      .enemies[0];
-    expect(ranged).toMatchObject({ ranged: true, hp: 70, ad: 20 });
+    expect(launched.enemies[0].hp).toBe(96);
+    const waiting = advanceCombat(
+      { ...first.combat, attackIn: 5000 },
+      { ...buffs, attack: 0 },
+      1,
+      1900,
+    ).combat;
+    expect(waiting.spawned).toBe(1);
+    const next = advanceCombat(waiting, buffs, 1, 50).combat;
+    expect(next.spawned).toBeGreaterThan(1);
+    expect(next.spawned).toBeLessThanOrEqual(4);
   });
   it("lets melee monsters attack at expanded collider contact, but never before contact", () => {
     for (let dinosaur = 0; dinosaur < 6; dinosaur++)

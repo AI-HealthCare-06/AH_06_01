@@ -82,12 +82,13 @@ test("failed wave sends one alert, OFF persists and holds combat until a manual 
   });
   await page.clock.install({ time: new Date("2026-10-01T03:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-01T03:00:01Z"));
-  await page.goto("/me");
+  await page.goto("/home");
+  await page.getByRole("button", { name: "게임 설정", exact: true }).click();
   const setting = page.getByRole("switch", { name: "Wave 자동 재시작", exact: true });
   await expect(setting).toBeChecked();
   await setting.click();
   await expect(setting).not.toBeChecked();
-  await page.goto("/home");
+  await page.getByRole("dialog").getByRole("button", { name: "닫기", exact: true }).click();
   await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
     const { useGameStore } = await import(path);

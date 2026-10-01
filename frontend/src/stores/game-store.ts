@@ -53,6 +53,10 @@ type GameStore = {
   togglePause: () => void;
   selectBattle: (stage: number, wave: number) => void;
   setWaveAutoRestart: (enabled: boolean) => void;
+  setBattleDisplaySetting: (
+    key: "showBattleDamage" | "showMonsterHealth",
+    enabled: boolean,
+  ) => void;
   retryWave: () => void;
   refreshDay: () => void;
   resetDemo: () => void;
@@ -77,6 +81,12 @@ export const useGameStore = create<GameStore>((set) => ({
   setWaveAutoRestart: (enabled) =>
     set((state) => {
       const game = { ...tickBattle(state.game), waveAutoRestart: enabled };
+      save(game);
+      return { game };
+    }),
+  setBattleDisplaySetting: (key, enabled) =>
+    set((state) => {
+      const game = { ...tickBattle(state.game), [key]: enabled };
       save(game);
       return { game };
     }),

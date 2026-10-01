@@ -2,6 +2,7 @@
 // transparent sprite margins. Colliders describe bodies; hitboxes receive hits.
 import atlases from "../design/animation-atlases.json";
 import motions from "../design/motion-atlases.json";
+import { meleeSizeMultiplier } from "./game-policy";
 export type BattleBox = { x: number; y: number; width: number; height: number };
 export type ActorGeometry = { sprite: BattleBox; collider: BattleBox; hitbox: BattleBox };
 export const arena = { top: 58, height: 218, ground: 253, pixelsPerUnit: 30 };
@@ -55,18 +56,51 @@ function geometry(
     },
   };
 }
+const restingPlayers: ActorGeometry[] = [];
+const enemyBodies: ActorGeometry[] = [];
+// Reuse stable body dimensions in dense/offline combat; callers only read them.
+function translateActor(actor: ActorGeometry, x: number, y = 0): ActorGeometry {
+  if (x === 0 && y === 0) return actor;
+  return {
+    sprite: translateBox(actor.sprite, x, y),
+    hitbox: translateBox(actor.hitbox, x, y),
+    collider: translateBox(actor.collider, x, y),
+  };
+}
+function translateBox(box: BattleBox, x: number, y: number): BattleBox {
+  return { x: box.x + x, y: box.y + y, width: box.width, height: box.height };
+}
 export function playerGeometry(dinosaur: number, offset = { x: 0, y: 0 }): ActorGeometry {
+  if (restingPlayers[dinosaur]) return translateActor(restingPlayers[dinosaur], offset.x, offset.y);
   const flying = dinosaur === 4;
   const bounds = characterBounds[dinosaur];
   // Anchor the visible flying body at 60% of the battle background's height.
   const flyingY = arena.top + arena.height * 0.6 - ((bounds[1] + bounds[3] / 2) * 98) / 120;
   const sprite = {
-    x: 8 + offset.x,
-    y: (flying ? flyingY : arena.ground - 98) + offset.y,
+    x: 8,
+    y: flying ? flyingY : arena.ground - 98,
     width: 125,
     height: 98,
   };
-  return geometry(sprite, bounds);
+  restingPlayers[dinosaur] = geometry(sprite, bounds);
+  return translateActor(restingPlayers[dinosaur], offset.x, offset.y);
+}
+// Mouth anchors in BattleSprite's 160 × 120 buffer at the authored release
+// pose: frame 02 for the eight-pose attacks, frame 05 for Stego's tail sweep.
+const projectileMouthPoints = [
+  [154, 85],
+  [155, 104],
+  [139, 82],
+  [9, 99],
+  [148, 103],
+  [134, 61],
+] as const;
+export function playerMouthPosition(dinosaur: number, actor = playerGeometry(dinosaur)) {
+  const [x, y] = projectileMouthPoints[dinosaur];
+  return {
+    x: actor.sprite.x + (actor.sprite.width * x) / 160,
+    y: actor.sprite.y + (actor.sprite.height * y) / 120,
+  };
 }
 export function enemyGeometry(
   distance: number,
@@ -75,6 +109,8 @@ export function enemyGeometry(
   ranged = false,
 ): ActorGeometry {
   const large = rank !== "normal";
+  const key = (ranged ? 12 : 0) + (large ? 6 : 0) + art;
+  if (enemyBodies[key]) return translateActor(enemyBodies[key], distance * arena.pixelsPerUnit);
   const name = `${ranged ? "Ranged" : "Melee"}${monsterNames[art]}Idle`;
   const bounds = (atlases.bounds as Record<string, number[]>)[name] as [
     number,
@@ -82,13 +118,17 @@ export function enemyGeometry(
     number,
     number,
   ];
+  const scale = ranged ? 1 : meleeSizeMultiplier;
+  const width = (large ? 65.8 : 57.4) * scale;
+  const height = (large ? 74.2 : 65.1) * scale;
   const sprite = {
-    x: distanceToX(distance),
-    y: arena.ground - ((large ? 74.2 : 65.1) * (bounds[1] + bounds[3])) / 120,
-    width: large ? 65.8 : 57.4,
-    height: large ? 74.2 : 65.1,
+    x: distanceToX(0),
+    y: arena.ground - (height * (bounds[1] + bounds[3])) / 120,
+    width,
+    height,
   };
-  return geometry(sprite, bounds);
+  enemyBodies[key] = geometry(sprite, bounds);
+  return translateActor(enemyBodies[key], distance * arena.pixelsPerUnit);
 }
 type ProjectilePosition = { origin: number; distance: number; art: number; rank?: string };
 export const projectileSize = { width: 28 * 1.4, height: 21 * 1.4 };

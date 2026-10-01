@@ -1562,10 +1562,6 @@
   padding: 0 0 14px;
   font-size: 12px;
 }
-.daily-reset-setting button {
-  border: 2px solid var(--ink);
-  box-shadow: 2px 2px 0 var(--ink);
-}
 .pixel-toggle-thumb {
   position: absolute;
   left: 3px;
@@ -1858,11 +1854,11 @@
   padding-left: 8px;
 }
 .impact-card .impact-row {
-  grid-template-columns: 48px minmax(0, 1fr) 94px;
+  grid-template-columns: 48px minmax(0, 1fr) 100px;
   gap: 7px;
 }
 .impact-card .chart-axis {
-  margin-right: 101px;
+  margin-right: 107px;
   margin-left: 55px;
 }
 .prediction-note {
@@ -1929,17 +1925,6 @@
   left: 5px;
   transform: scale(0.8);
   transform-origin: top left;
-}
-/* Keep the 32px visible tile at a 5px inset, with its 44px touch area extending inward. */
-.pixel-battle .pause-adventure {
-  top: 63px;
-  right: 5px;
-  padding: 0 0 12px 12px;
-}
-.pixel-battle .pause-adventure::before {
-  inset: 0 0 auto auto;
-  width: 32px;
-  height: 32px;
 }
 .battle-hud .hp-stats {
   position: relative;
@@ -2417,23 +2402,110 @@
   outline-offset: -2px;
 }
 
-/* Only rendered by the development build; the overlay never intercepts controls. */
-.battle-debug-toggle {
+/* 32px pixel tiles with 44px touch targets, ordered DEBUG / pause / settings. */
+.battle-controls {
   position: absolute;
   top: 63px;
-  right: 57px;
-  width: 56px;
-  height: 32px;
+  right: 5px;
+  display: flex;
+  gap: 2px;
   z-index: 10;
-  border: 1px solid #f3e7c8aa;
-  background: #20211d;
+}
+.pixel-battle .battle-controls > button {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 44px;
+  height: 44px;
+  padding: 0 0 12px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
   color: #f8eed5;
   font: 8px var(--pixel);
 }
-.battle-debug-toggle[aria-pressed="true"] {
+.pixel-battle .battle-controls > button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 6px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #f3e7c8aa;
+  border-radius: 0;
+  background: #20211d;
+}
+.pixel-battle .battle-controls .battle-debug-toggle {
+  width: 56px;
+}
+.pixel-battle .battle-controls .battle-debug-toggle::before {
+  width: 56px;
+  left: 0;
+}
+.battle-debug-toggle span,
+.battle-settings-toggle svg {
+  position: relative;
+}
+.battle-settings-toggle .pixel-icon {
+  width: 18px;
+  height: 18px;
+}
+.pixel-battle .battle-controls .battle-debug-toggle[aria-pressed="true"] {
   color: #20211d;
+}
+.pixel-battle .battle-controls .battle-debug-toggle[aria-pressed="true"]::before {
   background: #ffe486;
   border-color: #ffe486;
+}
+.battle-settings {
+  display: grid;
+  gap: 12px;
+}
+.battle-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px dashed #b5ae96;
+  padding-bottom: 12px;
+}
+.battle-setting h3 {
+  font:
+    700 13px/1.5 "Galmuri11",
+    sans-serif;
+}
+.battle-setting p,
+.battle-settings > small {
+  color: #706955;
+  font:
+    11px/1.6 "Galmuri11",
+    sans-serif;
+}
+.battle-setting p {
+  margin-top: 5px;
+}
+.battle-setting button {
+  position: relative;
+  width: 52px;
+  height: 44px;
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+}
+.battle-setting button::before {
+  content: "";
+  position: absolute;
+  inset: 8px 0;
+  background: #818675;
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.battle-setting button.enabled::before {
+  background: #57a768;
+}
+.battle-setting .pixel-toggle-thumb {
+  top: 13px;
 }
 .battle-debug-overlay {
   position: absolute;
@@ -2859,12 +2931,36 @@
 .pixel-date-grid button[data-in-range="true"]:not([aria-pressed="true"]) {
   background: #f3dea0;
 }
-.impact-card .risk-change small,
 .impact-card .chart-axis {
   font: 8px/1.8 var(--pixel);
 }
+.impact-card .risk-change small {
+  font: 7px/1.8 var(--pixel);
+}
 .impact-card .risk-change-values {
   font: 9px/1.8 var(--pixel);
+}
+.impact-card .risk-change-arrow {
+  font-size: 12px;
+  line-height: 1;
+  min-width: 16px;
+  text-align: center;
+}
+@media (max-width: 350px) {
+  .impact-card .impact-row {
+    grid-template-columns: 41px minmax(0, 1fr) 90px;
+  }
+  .impact-card .risk-change-values {
+    font-size: 8px;
+    gap: 2px;
+  }
+  .impact-card .risk-change small {
+    font-size: 6px;
+  }
+  .impact-card .chart-axis {
+    margin-left: 46px;
+    margin-right: 95px;
+  }
 }
 .pixel-date-dialog {
   width: 330px;

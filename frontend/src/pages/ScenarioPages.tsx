@@ -215,11 +215,10 @@ export function BuffPage() {
 }
 
 export function MyPage() {
-  const { game, resetDemo, setWaveAutoRestart } = useGameStore();
+  const { game, resetDemo } = useGameStore();
   const clearProfile = useProfileStore((s) => s.clear);
   const navigate = useNavigate();
   const notice = useNotice();
-  const [resetEnabled, setResetEnabled] = useState(true);
   const [dialog, setDialog] = useState<string | null>(null);
   const [dialogTrigger, setDialogTrigger] = useState<HTMLButtonElement | null>(null);
   const [notificationPermission, setNotificationPermission] = useState(
@@ -297,43 +296,6 @@ export function MyPage() {
             <span>›</span>
           </button>
         ))}
-      </div>
-      <div className="cream-card daily-reset-setting wave-restart-setting">
-        <div>
-          <h3>Wave 자동 재시작</h3>
-          <p>
-            {game.waveAutoRestart
-              ? "ON · 실패 후 회복하면 다시 도전해요"
-              : "OFF · 실패 후 직접 재도전해요"}
-          </p>
-        </div>
-        <button
-          role="switch"
-          aria-label="Wave 자동 재시작"
-          aria-checked={game.waveAutoRestart}
-          className={game.waveAutoRestart ? "enabled" : ""}
-          onClick={() => setWaveAutoRestart(!game.waveAutoRestart)}
-        >
-          <span className="pixel-toggle-thumb" aria-hidden="true" />
-        </button>
-      </div>
-      <div className="cream-card daily-reset-setting">
-        <div>
-          <h3>일일 상태 초기화</h3>
-          <p>매일 00:00에 공룡 상태만 초기화</p>
-        </div>
-        <button
-          role="switch"
-          aria-checked={resetEnabled}
-          aria-label="일일 상태 초기화 안내"
-          onClick={() => {
-            setResetEnabled(!resetEnabled);
-            notice("초기화 설정은 화면 체험용이에요. 데모 퀘스트는 날짜가 바뀌면 초기화돼요.");
-          }}
-          className={resetEnabled ? "enabled" : ""}
-        >
-          <span className="pixel-toggle-thumb" aria-hidden="true" />
-        </button>
       </div>
       <button className="logout-button" onClick={logout}>
         <svg viewBox="0 0 24 24" aria-hidden="true" shapeRendering="crispEdges">

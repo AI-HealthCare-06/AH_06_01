@@ -10,6 +10,7 @@ import {
   center,
   enemyGeometry,
   playerGeometry,
+  playerMouthPosition,
   combatPlayerGeometry,
   projectileGeometry,
   playerProjectileGeometry,
@@ -26,6 +27,7 @@ import {
   incomingDamage,
   monsterGold,
   monsterStats,
+  meleeHpMultiplier,
   revivalDelay,
   sleepGoldMultiplier,
   spawnInterval,
@@ -146,6 +148,7 @@ export const combatSchema = z.object({
         vy: z.number().finite(),
         age: z.number().nonnegative(),
         travelled: z.number().nonnegative(),
+        maxTravel: z.number().positive().optional(),
         damage: z.number().nonnegative(),
         critical: z.boolean(),
       }),
@@ -254,8 +257,13 @@ export const clearDuration = (kind: "wave" | "stage") => (kind === "stage" ? 160
 export const travelDuration = 3000;
 export const startDuration = 1000;
 export const enemyAttackInterval = (ranged: boolean) => (ranged ? 1000 : 500);
-export function isRangedSpawn(index: number) {
-  return [2, 5, 9].includes(index % 10);
+export function spawnBatchLimit(wave: number) {
+  return waveTarget(wave) > 50 ? 5 : 3;
+}
+// Saved RNG state makes random groups consistent across offline/reloaded ticks.
+function nextRandom(state: CombatState) {
+  state.seed = (Math.imul(state.seed, 1664525) + 1013904223) >>> 0;
+  return state.seed / 4294967296;
 }
 export const playerProjectileSpeed = 240; // design pixels / second
 export const meleeDamageMultiplier = 1.15;
@@ -339,25 +347,31 @@ export function advanceCombat(
     state.spawnIn -= dt;
     if (state.spawnIn <= 0 && state.spawned < waveTarget(state.wave)) {
       const policy = wavePolicies[state.wave - 1];
-      const rank = state.spawned === policy.count ? policy.extra! : "normal";
-      const ranged = rank === "normal" ? isRangedSpawn(state.spawned) : rank === "elite";
-      const stats = monsterStats(state.stage, state.wave, rank);
-      // Melee units trade their approach time for a modest HP/AD advantage.
-      const hp = ranged ? stats.hp : Math.round(stats.hp * 1.1);
-      const art = rank === "boss" ? 5 : rank === "elite" ? 4 : state.serial % 4;
-      state.enemies.push({
-        id: state.serial++,
-        art,
-        rank,
-        hp,
-        maxHp: hp,
-        ad: stats.ad * (ranged ? 1 : 1.1),
-        distance: 7,
-        attackIn: 0,
-        ranged,
-        hitAt: -1000,
-      });
-      state.spawned++;
+      const count = Math.min(
+        1 + Math.floor(nextRandom(state) * spawnBatchLimit(state.wave)),
+        waveTarget(state.wave) - state.spawned,
+      );
+      for (let i = 0; i < count; i++) {
+        const rank = state.spawned === policy.count ? policy.extra! : "normal";
+        const ranged = rank === "normal" ? nextRandom(state) >= 0.7 : rank === "elite";
+        const stats = monsterStats(state.stage, state.wave, rank);
+        const hp = ranged ? stats.hp : Math.round(stats.hp * meleeHpMultiplier);
+        const art = rank === "boss" ? 5 : rank === "elite" ? 4 : state.serial % 4;
+        state.enemies.push({
+          id: state.serial++,
+          art,
+          rank,
+          hp,
+          maxHp: hp,
+          ad: stats.ad * (ranged ? 1 : 1.1),
+          // Small horizontal spacing makes a simultaneous group readable.
+          distance: 7 + i * 0.45,
+          attackIn: 0,
+          ranged,
+          hitAt: -1000,
+        });
+        state.spawned++;
+      }
       state.spawnIn += spawnInterval;
     }
     const player = combatPlayerGeometry(buffs.dinosaur, state.lastAttack, state.clock);
@@ -409,14 +423,14 @@ export function advanceCombat(
         hitTarget(first.enemy, shot.damage, shot.critical);
         return false;
       }
-      return shot.travelled < playerAttackRange * arena.pixelsPerUnit;
+      return shot.travelled < (shot.maxTravel ?? playerAttackRange * arena.pixelsPerUnit);
     });
     state.attackIn = Math.max(0, state.attackIn - dt);
     const pending = state.lastAttack;
     if (state.hp > 0 && pending?.resolved === false && state.clock >= pending.impactAt!) {
       pending.resolved = true;
       if (pending.mode === "ranged") {
-        const source = { x: player.hitbox.x + player.hitbox.width, y: center(player.hitbox).y };
+        const source = playerMouthPosition(buffs.dinosaur, player);
         const dx = (pending.aimX ?? source.x + 200) - source.x,
           dy = (pending.aimY ?? source.y) - source.y;
         const length = Math.max(1, Math.hypot(dx, dy));
@@ -428,6 +442,11 @@ export function advanceCombat(
           vy: (dy / length) * playerProjectileSpeed,
           age: 0,
           travelled: 0,
+          // Targeting remains 7u; include the distance from the mouth through
+          // the player's body so a rear-facing release can still reach 7u.
+          maxTravel:
+            playerAttackRange * arena.pixelsPerUnit +
+            Math.max(0, player.hitbox.x + player.hitbox.width - source.x),
           damage: pending.damage,
           critical: pending.critical,
         };
@@ -451,8 +470,7 @@ export function advanceCombat(
     }
     const target = selectPlayerTarget(state.enemies);
     if (state.hp > 0 && target && state.attackIn === 0) {
-      state.seed = (Math.imul(state.seed, 1664525) + 1013904223) >>> 0;
-      const critical = state.seed / 4294967296 < buffs.crt;
+      const critical = nextRandom(state) < buffs.crt;
       const melee = state.enemies.some((enemy) => meleeContact(enemy, buffs.dinosaur, player));
       const duration = Math.min(500, buffs.attackInterval);
       const box = enemyGeometry(target.distance, target.art, target.rank, target.ranged).hitbox;

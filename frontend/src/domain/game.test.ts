@@ -84,8 +84,16 @@ describe("demo reward rules", () => {
   it("restores older saves without losing currency, quests or selected character", () => {
     const legacy: Record<string, unknown> = { ...initialGame(), gold: 1700, dinosaur: 3 };
     delete legacy.dinosaurStyles;
+    delete legacy.showBattleDamage;
+    delete legacy.showMonsterHealth;
     const restored = restoreGame(legacy);
-    expect(restored).toMatchObject({ gold: 1700, dinosaur: 3, completed: [] });
+    expect(restored).toMatchObject({
+      gold: 1700,
+      dinosaur: 3,
+      completed: [],
+      showBattleDamage: true,
+      showMonsterHealth: true,
+    });
     expect(restored.dinosaurStyles).toEqual(Array(6).fill("original"));
     expect(restoreGame({ ...legacy, dinosaurStyles: ["bad-skin"] })).toEqual(restored);
   });

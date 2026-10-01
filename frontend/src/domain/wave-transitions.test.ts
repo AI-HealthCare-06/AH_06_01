@@ -5,7 +5,7 @@ import {
   clearDuration,
   combatSchema,
   initialCombat,
-  isRangedSpawn,
+  spawnBatchLimit,
   projectileSpeed,
   travelDuration,
   startDuration,
@@ -17,18 +17,61 @@ import { experienceForLevel, experienceProgress } from "./experience";
 
 const buffs = battleBuffStats(initialGame());
 describe("mixed waves and travel", () => {
-  it("spawns exactly 7 melee and 3 ranged per ten, independently of appearance", () => {
-    expect(Array.from({ length: 30 }, (_, i) => isRangedSpawn(i)).filter(Boolean)).toHaveLength(9);
-    const state = advanceCombat(
-      initialCombat(100000),
-      { ...buffs, maxHp: 100000, attack: 0, defBonus: 1 },
-      1,
-      87050,
-    ).combat;
-    expect(state.spawned).toBe(30);
-    expect(state.enemies.filter((e) => e.ranged)).toHaveLength(9);
-    expect(state.enemies.filter((e) => !e.ranged)).toHaveLength(21);
-    expect(advanceCombat(initialCombat(), buffs, 1, 3000).combat.spawned).toBe(2);
+  it("randomizes group sizes and melee/ranged members, expands only above 50, and caps the quota", () => {
+    const harmless = { ...buffs, maxHp: 100000, attack: 0, defBonus: 1 };
+    for (const wave of [1, 3, 4, 5, 10]) {
+      const cap = waveTarget(wave) > 50 ? 5 : 3;
+      expect(spawnBatchLimit(wave)).toBe(cap);
+      const sizes = new Set<number>();
+      let mixed = false;
+      for (let sample = 0; sample < 50; sample++) {
+        const state = advanceCombat(
+          { ...initialCombat(100000), wave, seed: 999 + sample * 100003, attackIn: 100000 },
+          harmless,
+          1,
+          50,
+        ).combat;
+        expect(state.spawned).toBeGreaterThanOrEqual(1);
+        expect(state.spawned).toBeLessThanOrEqual(cap);
+        sizes.add(state.spawned);
+        mixed ||= state.enemies.some((e) => e.ranged) && state.enemies.some((e) => !e.ranged);
+        const baseHp = { 1: 70, 3: 77, 4: 81, 5: 84, 10: 105 }[wave]!;
+        for (const enemy of state.enemies) {
+          expect(enemy.hp).toBe(enemy.maxHp);
+          expect(enemy.hp).toBe(Math.round(baseHp * (enemy.ranged ? 1 : 1.375)));
+        }
+      }
+      expect([...sizes].sort()).toEqual(Array.from({ length: cap }, (_, i) => i + 1));
+      expect(mixed).toBe(true);
+      let state = { ...initialCombat(100000), wave, attackIn: 100000 };
+      while (state.spawned < waveTarget(wave)) {
+        const remaining = waveTarget(wave) - state.spawned;
+        const before = state.spawned;
+        state = advanceCombat({ ...state, spawnIn: 0 }, harmless, 1, 50).combat;
+        expect(state.spawned - before).toBeGreaterThanOrEqual(1);
+        expect(state.spawned - before).toBeLessThanOrEqual(Math.min(remaining, cap));
+      }
+      expect(state.spawned).toBe(waveTarget(wave));
+      const final = advanceCombat({ ...state, spawnIn: 0 }, harmless, 1, 50).combat;
+      expect(final.spawned).toBe(waveTarget(wave));
+      expect(final.enemies.filter((e) => e.rank !== "normal").map((e) => e.rank)).toEqual(
+        wave === 5 ? ["elite"] : wave === 10 ? ["boss"] : [],
+      );
+    }
+  });
+  it("preserves random spawn sequences across saved/offline simulation chunks", () => {
+    const input = { ...initialCombat(100000), wave: 4 };
+    const harmless = { ...buffs, maxHp: 100000, attack: 0, defBonus: 1 };
+    const direct = advanceCombat(input, harmless, 1, 18000).combat;
+    let chunked = input;
+    for (let i = 0; i < 3; i++)
+      chunked = advanceCombat(
+        combatSchema.parse(JSON.parse(JSON.stringify(chunked))),
+        harmless,
+        1,
+        6000,
+      ).combat;
+    expect(chunked).toEqual(direct);
   });
   it("launches at 7u, uses a 1000ms ranged cooldown, and applies damage only at impact", () => {
     const enemy = {

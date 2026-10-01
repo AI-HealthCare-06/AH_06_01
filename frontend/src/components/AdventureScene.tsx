@@ -28,6 +28,7 @@ import { BattleDebugOverlay } from "./BattleDebugOverlay";
 import { BattleDebugPanel } from "./BattleDebugPanel";
 import { PixelIcon } from "./PixelIcon";
 import { InfoDialog } from "./InfoDialog";
+import { BattleSettingsDialog } from "./BattleSettingsDialog";
 import {
   battleBuffStats,
   questBuffs,
@@ -57,6 +58,7 @@ export function AdventureScene({
   const [buffsExpanded, setBuffsExpanded] = useState(false);
   const [debugVisible, setDebugVisible] = useState(false);
   const [stagePicker, setStagePicker] = useState<HTMLButtonElement | null>(null);
+  const [settingsTrigger, setSettingsTrigger] = useState<HTMLButtonElement | null>(null);
   const selectBattle = useGameStore((state) => state.selectBattle);
   const debugToggle = useRef<HTMLButtonElement>(null);
   const debugChangeLevel = useGameStore((state) => state.debugChangeLevel);
@@ -384,27 +386,43 @@ export function AdventureScene({
             </section>
           )}
         </div>
-        <button
-          className="pause-adventure"
-          onClick={onTogglePause}
-          aria-label={paused ? "모험 재개" : "모험 일시정지"}
-          aria-pressed={paused}
-        >
-          <span aria-hidden="true" className={paused ? "play-symbol" : "pause-symbol"} />
-        </button>
-        {import.meta.env.DEV && (
+        <div className="battle-controls" aria-label="전투 제어" data-no-swipe>
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              ref={debugToggle}
+              className="battle-debug-toggle"
+              aria-label={debugVisible ? "전투 디버그 숨기기" : "전투 디버그 표시"}
+              aria-pressed={debugVisible}
+              aria-controls="battle-debug-panel battle-debug-overlay"
+              onClick={() => setDebugVisible((visible) => !visible)}
+            >
+              <span>DEBUG</span>
+            </button>
+          )}
           <button
             type="button"
-            ref={debugToggle}
-            className="battle-debug-toggle"
-            aria-label={debugVisible ? "전투 디버그 숨기기" : "전투 디버그 표시"}
-            aria-pressed={debugVisible}
-            aria-controls="battle-debug-panel battle-debug-overlay"
-            onClick={() => setDebugVisible((visible) => !visible)}
+            className="pause-adventure"
+            onClick={onTogglePause}
+            aria-label={paused ? "모험 재개" : "모험 일시정지"}
+            aria-pressed={paused}
           >
-            DEBUG
+            <span aria-hidden="true" className={paused ? "play-symbol" : "pause-symbol"} />
           </button>
-        )}
+          <button
+            type="button"
+            className="battle-settings-toggle"
+            aria-label="게임 설정"
+            aria-haspopup="dialog"
+            aria-expanded={!!settingsTrigger}
+            onClick={(event) => {
+              setDebugVisible(false);
+              setSettingsTrigger(event.currentTarget);
+            }}
+          >
+            <PixelIcon name="settings" />
+          </button>
+        </div>
         <div
           className="battle-dinosaur"
           data-dinosaur={game.dinosaur}
@@ -448,7 +466,13 @@ export function AdventureScene({
               }
               data-collider={JSON.stringify(geometry.collider)}
               data-hitbox={JSON.stringify(geometry.hitbox)}
-              style={{ left: geometry.sprite.x, top: geometry.sprite.y, bottom: "auto" }}
+              style={{
+                left: geometry.sprite.x,
+                top: geometry.sprite.y,
+                width: geometry.sprite.width,
+                height: geometry.sprite.height,
+                bottom: "auto",
+              }}
             >
               <BattleSprite
                 src={
@@ -481,16 +505,18 @@ export function AdventureScene({
               >
                 {monster.rank !== "normal" && `${monster.rank.toUpperCase()} · `}
                 {enemy.name}
-                <span
-                  className="enemy-hp"
-                  role="meter"
-                  aria-label={`${enemy.name} 체력`}
-                  aria-valuemin={0}
-                  aria-valuemax={monster.maxHp}
-                  aria-valuenow={Math.ceil(monster.hp)}
-                >
-                  <i style={{ width: `${(monster.hp / monster.maxHp) * 100}%` }} />
-                </span>
+                {game.showMonsterHealth && (
+                  <span
+                    className="enemy-hp"
+                    role="meter"
+                    aria-label={`${enemy.name} 체력`}
+                    aria-valuemin={0}
+                    aria-valuemax={monster.maxHp}
+                    aria-valuenow={Math.ceil(monster.hp)}
+                  >
+                    <i style={{ width: `${(monster.hp / monster.maxHp) * 100}%` }} />
+                  </span>
+                )}
               </small>
             </div>
           );
@@ -554,7 +580,7 @@ export function AdventureScene({
             {transition.kind === "stage" && <i aria-hidden="true" className="clear-sparks" />}
           </div>
         )}
-        {battle.lastHit && battle.clock - battle.lastHit.time < 320 && (
+        {game.showBattleDamage && battle.lastHit && battle.clock - battle.lastHit.time < 320 && (
           <b
             className="battle-damage"
             key={`hit-${battle.lastHit.time}`}
@@ -648,6 +674,13 @@ export function AdventureScene({
           )}
         </div>
       </DesignCanvas>
+      {settingsTrigger && (
+        <BattleSettingsDialog
+          game={game}
+          trigger={settingsTrigger}
+          onClose={() => setSettingsTrigger(null)}
+        />
+      )}
       {stagePicker && (
         <InfoDialog
           title="STAGE SELECT"
