@@ -3,6 +3,7 @@ import {
   enemyGeometry,
   combatPlayerGeometry,
   playerProjectileGeometry,
+  playerProjectileFrame,
   projectileGeometry,
 } from "../domain/battle-geometry";
 import { useEffect, useRef, useState } from "react";
@@ -126,14 +127,21 @@ export function AdventureScene({
   const attackDuration = battle.lastAttack?.duration ?? Math.min(500, buffs.attackInterval);
   const attacking = attackElapsed < attackDuration && battle.recovery === 0 && !transition;
   const attack = attacking && art.attack;
+  // The new Stego sheet contacts on pose 06; map its authored wind-up/recovery
+  // to the existing combat impact time without changing attack speed or damage.
+  const contactProgress =
+    art.contactFrame === undefined
+      ? 0.3
+      : (art.contactFrame + 0.5) / attackFrames[art.attack].length;
   const impactDelay =
     battle.lastAttack?.impactAt !== undefined
       ? battle.lastAttack.impactAt - battle.lastAttack.time
       : attackDuration * 0.3;
   const attackTime =
     attackElapsed <= impactDelay
-      ? (attackElapsed / impactDelay) * 0.3
-      : 0.3 + ((attackElapsed - impactDelay) / (attackDuration - impactDelay)) * 0.7;
+      ? (attackElapsed / impactDelay) * contactProgress
+      : contactProgress +
+        ((attackElapsed - impactDelay) / (attackDuration - impactDelay)) * (1 - contactProgress);
   const target = battle.enemies.find((enemy) => enemy.id === battle.lastAttack?.targetId);
   const targetGeometry = battle.lastAttack
     ? enemyGeometry(
@@ -503,7 +511,7 @@ export function AdventureScene({
             >
               <BattleSprite
                 src={dinosaurProjectiles[shot.dinosaur]}
-                frame={Math.floor(shot.age / 80) % 4}
+                frame={playerProjectileFrame(shot.age)}
                 label={`${dinosaurs[shot.dinosaur].name} 원거리 투사체`}
               />
             </div>

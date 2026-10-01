@@ -8,6 +8,7 @@ import {
   center,
   sweptContact,
   projectileGeometry,
+  playerProjectileGeometry,
 } from "./battle-geometry";
 import { initialGame } from "./game";
 const buffs = battleBuffStats(initialGame());
@@ -171,6 +172,33 @@ describe("ranged attacks and contact melee", () => {
     const hit = advanceCombat(input, buffs, 1, 50).combat;
     expect(hit.enemies[0].hp).toBe(980);
     expect(hit.playerProjectiles).toHaveLength(0);
+  });
+  it("registers first contact caused by projectile growth and removes it after one hit", () => {
+    const body = enemyGeometry(7, 0, "normal", true).hitbox;
+    const input = {
+      ...scenario([ranged, { ...ranged, id: 2, distance: 7.5 }]),
+      attackIn: 5000,
+      playerProjectiles: [
+        {
+          id: "growing",
+          dinosaur: 0,
+          x: body.x - 24.52,
+          y: center(body).y,
+          vx: 0,
+          vy: 0,
+          age: 70,
+          travelled: 0,
+          damage: 20,
+          critical: false,
+        },
+      ],
+    };
+    const before = playerProjectileGeometry(input.playerProjectiles[0]).hitbox;
+    expect(before.x + before.width).toBeLessThan(body.x);
+    const hit = advanceCombat(input, buffs, 1, 50).combat;
+    expect(hit.enemies.map((enemy) => enemy.hp)).toEqual([980, 1000]);
+    expect(hit.playerProjectiles).toHaveLength(0);
+    expect(advanceCombat(hit, buffs, 1, 50).combat.enemies[0].hp).toBe(980);
   });
   it("receives a shot on the moving melee hitbox before it reaches the resting body", () => {
     const rest = playerGeometry(0).hitbox;

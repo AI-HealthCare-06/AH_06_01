@@ -1,16 +1,18 @@
 import { test, expect } from "@playwright/test";
 
-test("all four player projectile poses share visible bounds with collision and debug geometry", async ({
+test("all player projectile poses grow through loop wrap with matching collision and debug geometry", async ({
   page,
 }) => {
   await page.clock.install();
   await page.clock.pauseAt(new Date());
   await page.goto("/home");
   await page.getByRole("button", { name: "전투 디버그 표시" }).click();
-  for (let dinosaur = 0; dinosaur < 6; dinosaur++)
-    for (let frame = 0; frame < 4; frame++) {
+  for (let dinosaur = 0; dinosaur < 6; dinosaur++) {
+    let previousSize = 0;
+    for (const step of [0, 1, 2, 3, 4, 10, 11]) {
+      const frame = step % 4;
       await page.evaluate(
-        async ({ dinosaur, frame }) => {
+        async ({ dinosaur, step }) => {
           const path = "/src/stores/game-store.ts";
           const { useGameStore } = await import(path);
           const { game } = useGameStore.getState();
@@ -35,7 +37,7 @@ test("all four player projectile poses share visible bounds with collision and d
                     y: 200,
                     vx: 240,
                     vy: 0,
-                    age: frame * 80,
+                    age: step * 80,
                     travelled: 0,
                     damage: 20,
                     critical: false,
@@ -45,20 +47,25 @@ test("all four player projectile poses share visible bounds with collision and d
             },
           });
         },
-        { dinosaur, frame },
+        { dinosaur, step },
       );
       const shot = page.locator(".player-projectile");
       await expect(shot.locator("canvas")).toHaveAttribute("data-frame", String(frame));
       const sizes = await page.evaluate(() => {
-        const player = document.querySelector<HTMLElement>(".player-projectile")!.style;
+        const player = JSON.parse(
+          document.querySelector(".player-projectile")!.getAttribute("data-hitbox")!,
+        );
         const enemy = document.querySelector<HTMLElement>(".enemy-projectile")!.style;
-        return [
-          parseFloat(player.width) / parseFloat(enemy.width),
-          parseFloat(player.height) / parseFloat(enemy.height),
-        ];
+        return [player.width / parseFloat(enemy.width), player.height / parseFloat(enemy.height)];
       });
-      for (const ratio of sizes) expect(ratio).toBeCloseTo(1.2, 5);
+      const size = Math.max(...sizes);
+      if (step === 0) expect(size).toBeCloseTo(1.2, 5);
+      if (step > 0 && step <= 10) expect(size).toBeGreaterThan(previousSize);
+      if (step >= 10) expect(size).toBeCloseTo(2.4, 5);
+      previousSize = size;
       const box = JSON.parse((await shot.getAttribute("data-hitbox"))!);
+      expect(box.x + box.width / 2).toBeCloseTo(200, 5);
+      expect(box.y + box.height / 2).toBeCloseTo(200, 5);
       const rect = page.locator('[data-debug-projectile="pose"] rect');
       for (const [key, value] of Object.entries(box))
         await expect(rect).toHaveAttribute(key, String(value));
@@ -79,6 +86,7 @@ test("all four player projectile poses share visible bounds with collision and d
         )
         .toBeLessThan(0.2);
     }
+  }
 });
 
 test("camera picks the quest lens, switches a live stream and saves portrait framing", async ({

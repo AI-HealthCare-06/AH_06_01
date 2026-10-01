@@ -103,7 +103,9 @@ export const battleDinosaurs = [
   },
   {
     image: art("276-705"),
-    attack: art("DinoStegoAttack"),
+    // Section 10 · 678:594 · 360° Tail Sweep v2 · Head + Tail, 12 poses.
+    attack: art("DinoStegoTailSweepV2"),
+    contactFrame: 5,
     idle: art("DinoStegoIdle"),
     walk: art("DinoStegoWalk"),
     movement: "waddle",

@@ -15,7 +15,7 @@ manifest = {'frames': {}, 'bounds': {}, 'frameBounds': {}}
 names = ['Brachio', 'Tricera', 'Stego']
 specs = [(f'{name}{mode}', f'Dino{name}{mode}', 4, 3 if mode == 'Idle' else 4, None)
          for name in names for mode in ['Idle', 'Walk']]
-specs += [('StegoAttack', 'DinoStegoAttack', 6, 4, 22)]
+specs += [('StegoTailSweepV2', 'DinoStegoTailSweepV2', 4, 3, 12)]
 specs += [(p.stem, p.stem, 4, 2, None) for p in source.glob('*Walk.png')
           if p.stem.startswith(('Melee', 'Ranged'))]
 specs += [(f'{name}Projectile', f'Dino{name}Projectile', 4, 1, None)

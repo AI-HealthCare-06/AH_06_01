@@ -153,20 +153,27 @@ export const playerProjectileSize = {
   width: projectileSize.width * 1.2,
   height: projectileSize.height * 1.2,
 };
+export function playerProjectileFrame(age: number) {
+  return Math.floor(Math.max(0, age) / 80) % 4;
+}
 export function playerProjectileGeometry(shot: PlayerShotPosition) {
   const name = `Dino${dinoNames[shot.dinosaur]}Projectile`;
   const frames = (motions.frameBounds as Record<string, number[][]>)[name];
-  const bounds = frames[Math.floor(shot.age / 80) % frames.length] as [
-    number,
-    number,
-    number,
-    number,
-  ];
+  const bounds = frames[playerProjectileFrame(shot.age)] as [number, number, number, number];
+  // Fit the visible pose, preserving its aspect ratio. Authored transparent
+  // margins vary, so scaling the padded canvas alone would shrink at loop wrap.
+  // Grow 10% of the base envelope every 80ms, up to 2×; age survives save/resume.
+  const growth = 1 + Math.min(10, Math.floor(Math.max(0, shot.age) / 80)) * 0.1;
+  const fit = Math.min(160 / bounds[2], 120 / bounds[3]) * growth;
+  const size = {
+    width: playerProjectileSize.width * fit,
+    height: playerProjectileSize.height * fit,
+  };
   return geometry(
     {
-      x: shot.x - playerProjectileSize.width / 2,
-      y: shot.y - playerProjectileSize.height / 2,
-      ...playerProjectileSize,
+      x: shot.x - (size.width * (bounds[0] + bounds[2] / 2)) / 160,
+      y: shot.y - (size.height * (bounds[1] + bounds[3] / 2)) / 120,
+      ...size,
     },
     bounds,
   );
