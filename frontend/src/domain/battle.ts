@@ -35,6 +35,8 @@ import {
   simultaneousSpawnCooldownMultiplier,
   stagePolicies,
   wavePolicies,
+  healthOrbDropChance,
+  healthOrbRecovery,
 } from "./game-policy";
 
 export const questBuffs: { id: QuestId; label: string; stat: string; effect: string }[] = [
@@ -131,11 +133,24 @@ export const combatSchema = z.object({
     .array(
       z.object({
         id: z.string(),
+        ownerId: z.number().int().nonnegative().optional(),
         art: z.number().int().min(0).max(5),
         rank: z.enum(["normal", "elite", "boss"]).optional(),
         distance: z.number().nonnegative(),
         origin: z.number().positive(),
         damage: z.number().nonnegative(),
+      }),
+    )
+    .default([]),
+  healthOrbs: z
+    .array(
+      z.object({
+        id: z.string(),
+        time: z.number().nonnegative(),
+        x: z.number().finite(),
+        y: z.number().finite(),
+        fraction: z.union([z.literal(0.1), z.literal(0.2), z.literal(0.4), z.literal(1)]),
+        healed: z.number().finite().nonnegative(),
       }),
     )
     .default([]),
@@ -216,6 +231,7 @@ export function initialCombat(hp = 50): CombatState {
     seed: 42,
     enemies: [],
     projectiles: [],
+    healthOrbs: [],
     playerProjectiles: [],
     lastHit: null,
     transition: null,
@@ -266,6 +282,14 @@ function nextRandom(state: CombatState) {
 }
 export const playerProjectileSpeed = 240; // design pixels / second
 export const meleeDamageMultiplier = 1.15;
+export const healthOrbDuration = 900;
+export const healthOrbAbsorptionDuration = 400;
+
+export function enemyProjectileOwner(shot: CombatState["projectiles"][number]) {
+  // Previously saved shots encode the owner's numeric ID before the dash.
+  const legacy = /^(\d+)-\d+$/.exec(shot.id);
+  return shot.ownerId ?? (legacy ? Number(legacy[1]) : undefined);
+}
 
 // Fixed 50ms simulation; both rendered geometry and swept collisions use this clock.
 export function advanceCombat(
@@ -281,6 +305,7 @@ export function advanceCombat(
     enemies: input.enemies.map((enemy) => ({ ...enemy })),
     projectiles: input.projectiles.map((shot) => ({ ...shot })),
     playerProjectiles: (input.playerProjectiles ?? []).map((shot) => ({ ...shot })),
+    healthOrbs: [...(input.healthOrbs ?? [])],
     transition: input.transition ? { ...input.transition } : null,
     lastAttack: input.lastAttack ? { ...input.lastAttack } : null,
   };
@@ -310,11 +335,27 @@ export function advanceCombat(
     state.killed++;
     state.loot = { time: state.clock, gold: reward };
     state.enemies = state.enemies.filter((enemy) => enemy.id !== target.id);
+    state.projectiles = state.projectiles.filter(
+      (shot) => enemyProjectileOwner(shot) !== target.id,
+    );
+    if (nextRandom(state) < healthOrbDropChance) {
+      const fraction = healthOrbRecovery(nextRandom(state));
+      const healed = Math.max(0, buffs.maxHp - state.hp) * fraction;
+      state.hp = Math.min(buffs.maxHp, state.hp + healed);
+      state.healthOrbs.push({
+        id: `heal-${target.id}-${state.clock}`,
+        time: state.clock,
+        ...center(body),
+        fraction,
+        healed,
+      });
+    }
   };
   for (let elapsed = 0; elapsed < duration; elapsed += 50) {
     const dt = Math.min(50, duration - elapsed);
     const previousPlayer = combatPlayerGeometry(buffs.dinosaur, state.lastAttack, state.clock);
     state.clock += dt;
+    state.healthOrbs = state.healthOrbs.filter((orb) => state.clock - orb.time < healthOrbDuration);
     state.hp = Math.min(state.hp, buffs.maxHp);
     if (state.transition) {
       const transition = state.transition;
@@ -392,16 +433,6 @@ export function advanceCombat(
       );
       enemy.attackIn = Math.max(0, enemy.attackIn - dt);
     }
-    state.projectiles = state.projectiles.filter((shot) => {
-      const before = projectileGeometry(shot, buffs.dinosaur).hitbox;
-      shot.distance = Math.max(0, shot.distance - (projectileSpeed * dt) / 1000);
-      const after = projectileGeometry(shot, buffs.dinosaur).hitbox;
-      if (sweptContact(before, after, previousPlayer.hitbox, player.hitbox) !== null) {
-        state.hp = Math.max(0, state.hp - shot.damage);
-        return false;
-      }
-      return shot.distance > 1e-9;
-    });
     state.playerProjectiles = state.playerProjectiles.filter((shot) => {
       const before = playerProjectileGeometry(shot).hitbox;
       shot.x += (shot.vx * dt) / 1000;
@@ -468,6 +499,22 @@ export function advanceCombat(
         if (target) hitTarget(target, pending.damage, pending.critical);
       }
     }
+    // Resolve all player kills before incoming shots, including same-tick contact.
+    const livingOwners = new Set(
+      state.enemies.filter((enemy) => enemy.hp > 0).map((enemy) => enemy.id),
+    );
+    state.projectiles = state.projectiles.filter((shot) => {
+      const owner = enemyProjectileOwner(shot);
+      if (owner === undefined || !livingOwners.has(owner)) return false;
+      const before = projectileGeometry(shot, buffs.dinosaur).hitbox;
+      shot.distance = Math.max(0, shot.distance - (projectileSpeed * dt) / 1000);
+      const after = projectileGeometry(shot, buffs.dinosaur).hitbox;
+      if (sweptContact(before, after, previousPlayer.hitbox, player.hitbox) !== null) {
+        state.hp = Math.max(0, state.hp - shot.damage);
+        return false;
+      }
+      return shot.distance > 1e-9;
+    });
     const target = selectPlayerTarget(state.enemies);
     if (state.hp > 0 && target && state.attackIn === 0) {
       const critical = nextRandom(state) < buffs.crt;
@@ -506,6 +553,7 @@ export function advanceCombat(
         if (enemy.ranged) {
           const shot = {
             id: `${enemy.id}-${state.clock}`,
+            ownerId: enemy.id,
             art: enemy.art,
             rank: enemy.rank,
             distance: enemy.distance,
@@ -532,6 +580,7 @@ export function advanceCombat(
       state.attackIn = 0;
       state.lastAttack = null;
       state.lastHit = null;
+      state.healthOrbs = [];
       state.pendingGold = 0;
       state.loot = null;
     } else if (state.killed >= waveTarget(state.wave) && state.enemies.length === 0) {

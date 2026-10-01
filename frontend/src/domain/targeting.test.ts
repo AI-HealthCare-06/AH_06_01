@@ -261,12 +261,12 @@ describe("ranged attacks and contact melee", () => {
     let distance = 7;
     while (projectileGeometry({ art: 0, origin: 7, distance }, 0).hitbox.x > edge + 15)
       distance -= 0.01;
-    const shot = { id: "moving-contact", art: 0, origin: 7, distance, damage: 10 };
+    const shot = { id: "moving-contact", ownerId: 1, art: 0, origin: 7, distance, damage: 10 };
     const after = projectileGeometry({ ...shot, distance: distance - 0.3 }, 0).hitbox;
     expect(after.x).toBeGreaterThan(edge);
     const hit = advanceCombat(
       {
-        ...scenario([]),
+        ...scenario(),
         clock: 100,
         attackIn: 5000,
         projectiles: [shot],

@@ -62,7 +62,9 @@ describe("wave rewards and saved history", () => {
     const cleared = tickBattle(game, now + 550);
     expect(cleared.gold).toBe(1280 + 1900);
     expect(cleared.combat.pendingGold).toBe(0);
-    expect(cleared.combat.hp).toBe(5);
+    // This seeded kill drops a 20% orb after leveling to maximum HP 55.
+    expect(cleared.combat.hp).toBe(15);
+    expect(cleared.combat.healthOrbs[0]).toMatchObject({ fraction: 0.2, healed: 10 });
     const arrival = now + 550 + clearDuration("wave") + travelDuration;
     const started = tickBattle(restoreGame(JSON.parse(JSON.stringify(cleared))), arrival);
     expect(started.combat).toMatchObject({

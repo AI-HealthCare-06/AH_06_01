@@ -112,6 +112,34 @@
   z-index: 4;
   pointer-events: none;
 }
+.battle-health-orb {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  color: #85f1a1;
+}
+.battle-health-orb-large {
+  color: #6de3f2;
+}
+.battle-health-orb-full {
+  color: #ffe486;
+}
+.battle-health-orb svg {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 0 3px currentColor);
+}
+.battle-health-orb b {
+  position: absolute;
+  transform: translateX(-50%);
+  font: 8px/14px var(--pixel);
+  white-space: nowrap;
+  text-shadow:
+    1px 1px #142e24,
+    -1px -1px #142e24;
+}
 .battle-enemy .enemy-status {
   font-size: 6px;
   line-height: 9px;

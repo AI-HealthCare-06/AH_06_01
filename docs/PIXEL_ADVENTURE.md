@@ -181,3 +181,9 @@ The five ground dinosaurs retain section 10 attacks for melee and use separate s
 Each attack sheet is calibrated once from its first body pose to the selected dinosaur's IDLE alpha bounds. That scale remains constant through the motion, sharing IDLE's horizontal center and ground/hover anchor. Extended wings, horns and tails can render beyond the actor wrapper without clipping. Collision dimensions remain stable. Ranged release is pose 03; only Stego's melee sweep uses pose 06. All six projectile artworks rotate along the stored release-to-target velocity, and collision/debug boxes follow their rotated visible bounds.
 
 Dashboard period labels now use Galmuri14 at its native 15px size; date digits use Galmuri11 at its native 12px size, with tabular digits and no wrapping. The controls keep their existing 36px height and fit narrow mobile layouts without shrinking the glyphs.
+
+### Enemy shot ownership and health drops (2026-10-01)
+
+Every enemy shot records its owner. Killing that monster removes all its shots before the same tick's incoming collisions, so a simultaneous collision cannot deal damage. Legacy saves infer ownership from the existing numeric enemy ID in the shot ID; orphan shots are discarded. Damage already applied in earlier ticks remains applied.
+
+Each kill independently has a 10% health-orb drop chance. Conditional tiers are 50% for 10% of missing HP, 30% for 20%, 15% for 40%, and 5% for 100%. Healing applies immediately, preserves fractional HP and clamps at the current maximum. The pixel orb travels from the defeated enemy toward the dinosaur for 400ms, with +HP feedback for 900ms. Reduced motion shows a stationary orb at the dinosaur. The seeded combat RNG and already-applied visual events persist across pause/reload/offline simulation without rerolling or healing twice. Multiple kills can show multiple absorption effects.

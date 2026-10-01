@@ -30,6 +30,17 @@ export const simultaneousSpawnCooldownMultiplier = 1.8;
 export const meleeSizeMultiplier = 1.2;
 export const meleeHpMultiplier = 1.1 * 1.25;
 export const revivalDelay = 10000;
+export const healthOrbDropChance = 0.1;
+// Conditional on a drop: 50% / 30% / 15% / 5%, healing missing HP.
+export const healthOrbTiers = [
+  { upTo: 0.5, fraction: 0.1 },
+  { upTo: 0.8, fraction: 0.2 },
+  { upTo: 0.95, fraction: 0.4 },
+  { upTo: 1, fraction: 1 },
+] as const;
+export function healthOrbRecovery(roll: number) {
+  return healthOrbTiers.find((tier) => roll < tier.upTo)!.fraction;
+}
 export function characterStats(level: number) {
   const milestone = Math.floor(level / 5);
   return {

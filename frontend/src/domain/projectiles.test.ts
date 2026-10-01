@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { advanceCombat, battleBuffStats, initialCombat, projectileSpeed } from "./battle";
+import type { CombatState } from "./battle";
 import { playerGeometry, projectileGeometry } from "./battle-geometry";
 import { initialGame } from "./game";
 
@@ -44,11 +45,26 @@ describe("ranged movement and first contact", () => {
       const buffs = battleBuffStats({ ...initialGame(), dinosaur });
       const player = playerGeometry(dinosaur).hitbox;
       for (let art = 0; art < 6; art++) {
-        let state = {
+        let state: CombatState = {
           ...initialCombat(),
           spawned: 1,
           spawnIn: 5000,
-          projectiles: [{ id: "shot", art, origin: 3, distance: 3, damage: 10 }],
+          attackIn: 5000,
+          enemies: [
+            {
+              id: 1,
+              art,
+              rank: "normal" as const,
+              ranged: true,
+              hp: 1000,
+              maxHp: 1000,
+              ad: 0,
+              distance: 7,
+              attackIn: 5000,
+              hitAt: -1000,
+            },
+          ],
+          projectiles: [{ id: "shot", ownerId: 1, art, origin: 3, distance: 3, damage: 10 }],
         };
         let impact = false;
         for (let tick = 0; tick < 10 && !impact; tick++) {

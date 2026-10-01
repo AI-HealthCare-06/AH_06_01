@@ -7,6 +7,7 @@ import {
   playerProjectileAngle,
   projectileGeometry,
   dinosaurBodyBounds,
+  center,
 } from "../domain/battle-geometry";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -36,6 +37,8 @@ import {
   waveTarget,
   clearDuration,
   travelDuration,
+  healthOrbDuration,
+  healthOrbAbsorptionDuration,
 } from "../domain/battle";
 import { stagePolicies } from "../domain/game-policy";
 import { enemyAttackRange } from "../domain/battle-range";
@@ -587,6 +590,57 @@ export function AdventureScene({
                 height: geometry.sprite.height,
               }}
             />
+          );
+        })}
+        {(battle.healthOrbs ?? []).map((orb) => {
+          const age = battle.clock - orb.time;
+          if (age < 0 || age >= healthOrbDuration) return null;
+          const target = center(player.hitbox);
+          const progress = reducedMotion ? 1 : Math.min(1, age / healthOrbAbsorptionDuration);
+          const eased = 1 - (1 - progress) ** 2;
+          const tier = orb.fraction === 1 ? "full" : orb.fraction === 0.4 ? "large" : "normal";
+          const healed = Number(orb.healed.toFixed(1));
+          return (
+            <div
+              key={orb.id}
+              className={`battle-health-orb battle-health-orb-${tier}`}
+              data-orb-id={orb.id}
+              data-healed={orb.healed}
+              data-heal-fraction={orb.fraction}
+              role="status"
+              aria-label={`체력 구슬 · 잃은 체력의 ${orb.fraction * 100}% 회복 · +${healed} HP`}
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 16 16"
+                shapeRendering="crispEdges"
+                style={{
+                  left: Math.round(orb.x + (target.x - orb.x) * eased - 10),
+                  top: Math.round(orb.y + (target.y - orb.y) * eased - 10),
+                  opacity: progress < 1 || reducedMotion ? 1 : 0,
+                }}
+              >
+                <path
+                  d="M5 1h6v1h2v2h2v2h1v4h-1v2h-2v2h-2v1H5v-1H3v-2H1v-2H0V6h1V4h2V2h2Z"
+                  fill="#142e24"
+                />
+                <path d="M5 3h6v1h2v2h1v4h-1v2h-2v1H5v-1H3v-2H2V6h1V4h2Z" fill="currentColor" />
+                <path d="M7 5h2v2h2v2H9v2H7V9H5V7h2Z" fill="#fff8d8" />
+                <path d="M4 4h2v2H4Z" fill="#fff8d8" />
+              </svg>
+              <b
+                aria-hidden="true"
+                style={{
+                  left: Math.round(target.x),
+                  top: Math.round(
+                    player.hitbox.y - 10 - (reducedMotion ? 0 : (age / healthOrbDuration) * 18),
+                  ),
+                  opacity: Math.min(1, (healthOrbDuration - age) / 250),
+                }}
+              >
+                +{healed} HP
+              </b>
+            </div>
           );
         })}
         {clearing && (
