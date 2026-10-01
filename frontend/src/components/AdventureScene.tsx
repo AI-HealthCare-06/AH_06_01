@@ -571,12 +571,26 @@ export function AdventureScene({
           </div>
         )}
         {battle.recovery > 0 && (
-          <div className="battle-clear battle-recovery" role="status">
+          <div
+            className="battle-clear battle-recovery"
+            data-manual={!game.waveAutoRestart}
+            data-no-swipe
+            role="status"
+          >
             <span>
               STAGE {battle.stage} · WAVE {battle.wave}
             </span>
             <strong>DEFEAT</strong>
-            <small>{String(Math.ceil(battle.recovery / 1000)).padStart(2, "0")}초 후 재시작</small>
+            <small>
+              {game.waveAutoRestart
+                ? `${String(Math.ceil(battle.recovery / 1000)).padStart(2, "0")}초 후 재시작`
+                : "자동 재시작 OFF · 쉬어가는 중"}
+            </small>
+            {!game.waveAutoRestart && (
+              <button type="button" onClick={() => useGameStore.getState().retryWave()}>
+                다시 도전하기
+              </button>
+            )}
           </div>
         )}
         {import.meta.env.DEV && debugVisible && (

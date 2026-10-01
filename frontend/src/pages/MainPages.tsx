@@ -39,6 +39,24 @@ export function HomePage() {
   const homeQuests = [...quests]
     .sort((a, b) => Number(game.completed.includes(a.id)) - Number(game.completed.includes(b.id)))
     .slice(0, 4);
+  const doneCount = game.completed.length;
+  const nextQuest = quests.find((q) => !game.completed.includes(q.id));
+  const feedbackTitle =
+    game.combat.recovery > 0
+      ? `${dino.name}: 잠깐 쉬어가도 괜찮아요!`
+      : doneCount === 5
+        ? `${dino.name}, 오늘 모두 해냈어요!`
+        : doneCount >= 3
+          ? `${dino.name}, 오늘 잘하고 있어요!`
+          : doneCount > 0
+            ? `${dino.name}, 조금씩 성장하고 있어요!`
+            : `${dino.name}, 오늘의 실천을 기다려요!`;
+  const feedbackDetail =
+    game.combat.recovery > 0
+      ? `WAVE ${game.combat.wave} 실패 · 퀘스트로 힘을 모아 다시 도전해요.`
+      : nextQuest
+        ? `오늘 ${doneCount}/5 완료 · 다음 실천: ${nextQuest.title}`
+        : "오늘 5/5 완료 · 모든 퀘스트 버프가 활성화됐어요!";
   return (
     <AppShell active="home">
       <Link to={game.completed.length ? "/buff" : "/withered"} className="dino-feedback">
@@ -46,8 +64,8 @@ export function HomePage() {
         <span className="feedback-wash" />
         <DinosaurArt className="feedback-portrait" pose="portrait" />
         <span className="feedback-copy">
-          <strong>{dino.name}, 잘하고 있어요!</strong>
-          <small>꾸준히 하면 더 강해질 수 있어요!</small>
+          <strong>{feedbackTitle}</strong>
+          <small>{feedbackDetail}</small>
         </span>
         <b>
           <PixelIcon name="chevron" />
@@ -224,13 +242,8 @@ export function DashboardPage() {
         setSelectedDate(date);
         if (date < rangeStart) setRangeStart(date);
       }}
-    >
-      <div className="dashboard-heading">
-        <PageHeading
-          title="HEALTH DASHBOARD"
-          subtitle={`${periodInfo.label} 건강 기록과 ${dino.name}의 성장을 확인하세요`}
-        />
-        <div className="dashboard-date-controls" data-no-swipe data-custom={period === "custom"}>
+      calendarControls={
+        <div className="dashboard-date-controls" data-no-swipe>
           <label className="dashboard-period-select">
             <span>조회 기간</span>
             <select
@@ -245,25 +258,23 @@ export function DashboardPage() {
               ))}
             </select>
           </label>
-          {period === "custom" && (
-            <div className="dashboard-date-field">
-              <span>시작일</span>
-              <PixelDatePicker
-                label="조회 시작일"
-                value={rangeStart}
-                max={selectedDate}
-                onChange={(value) => {
-                  if (value && value <= selectedDate) setRangeStart(value);
-                }}
-              />
-            </div>
-          )}
           <div className="dashboard-date-field">
-            <span>{period === "custom" ? "종료일" : "기준 날짜"}</span>
+            <span>{period === "custom" ? "날짜 범위" : "기준 날짜"}</span>
             <PixelDatePicker
-              label={period === "custom" ? "조회 종료일" : "조회 기준 날짜"}
+              label={period === "custom" ? "조회 날짜 범위" : "조회 기준 날짜"}
               value={selectedDate}
               max={game.date}
+              range={
+                period === "custom"
+                  ? {
+                      start: rangeStart,
+                      onChange: (start, end) => {
+                        setRangeStart(start);
+                        setSelectedDate(end);
+                      },
+                    }
+                  : undefined
+              }
               onChange={(value) => {
                 if (!value || value > game.date) return;
                 setSelectedDate(value);
@@ -271,10 +282,17 @@ export function DashboardPage() {
               }}
             />
           </div>
-          <p aria-live="polite">
-            {range.start === range.end ? range.end : `${range.start} ~ ${range.end}`}
-          </p>
         </div>
+      }
+    >
+      <div className="dashboard-heading">
+        <PageHeading
+          title="HEALTH DASHBOARD"
+          subtitle={`${periodInfo.label} 건강 기록과 ${dino.name}의 성장을 확인하세요`}
+        />
+        <p className="dashboard-range-label" aria-live="polite">
+          {range.start === range.end ? range.end : `${range.start} ~ ${range.end}`}
+        </p>
       </div>
       {!data ? (
         <p role="status">

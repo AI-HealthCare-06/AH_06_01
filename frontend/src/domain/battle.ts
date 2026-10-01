@@ -97,6 +97,14 @@ export const combatSchema = z.object({
   attackIn: z.number().finite(),
   hp: z.number().finite().nonnegative(),
   recovery: z.number().nonnegative(),
+  lastFailure: z
+    .object({
+      stage: z.number().int().min(1).max(5),
+      wave: z.number().int().min(1).max(10),
+      time: z.number().nonnegative(),
+    })
+    .nullable()
+    .default(null),
   serial: z.number().int().nonnegative(),
   clock: z.number().nonnegative(),
   seed: z.number().int().nonnegative(),
@@ -197,6 +205,7 @@ export function initialCombat(hp = 50): CombatState {
     attackIn: 0,
     hp,
     recovery: 0,
+    lastFailure: null,
     serial: 0,
     clock: 0,
     seed: 42,
@@ -258,6 +267,7 @@ export function advanceCombat(
   level: number,
   duration: number,
   totalExperience?: number,
+  autoRestart = true,
 ) {
   const state: CombatState = {
     ...input,
@@ -315,6 +325,10 @@ export function advanceCombat(
       continue;
     }
     if (state.recovery > 0) {
+      if (!autoRestart) {
+        state.clock += duration - elapsed - dt;
+        break;
+      }
       state.recovery = Math.max(0, state.recovery - dt);
       if (state.recovery === 0) {
         state.hp = buffs.maxHp;
@@ -490,6 +504,7 @@ export function advanceCombat(
       }
     }
     if (state.hp <= 0) {
+      state.lastFailure = { stage: state.stage, wave: state.wave, time: state.clock };
       state.recovery = revivalDelay;
       state.enemies = [];
       state.projectiles = [];

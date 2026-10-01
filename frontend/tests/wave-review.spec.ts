@@ -80,15 +80,23 @@ test("dashboard alone shows quest borders and selected dates/ranges drive the re
   );
   await expect(page.locator(".report-body dl")).toContainText("선택일 퀘스트4 / 5");
   await page.getByLabel("건강 변화 조회 기간").selectOption("custom");
-  await page.getByRole("button", { name: "조회 시작일" }).click();
+  await page.getByRole("button", { name: "조회 날짜 범위" }).click();
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "2026년 9월 20일", exact: true })
     .click();
-  await expect(page.locator(".dashboard-date-controls p")).toHaveText("2026-09-20 ~ 2026-09-29");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "2026년 9월 29일", exact: true })
+    .click();
+  await expect(page.locator(".dashboard-range-label")).toHaveText("2026-09-20 ~ 2026-09-29");
   await expect(page.locator(".trend-column small").first()).toHaveText("09.20");
   await expect(page.locator(".trend-column small").last()).toHaveText("09.29");
-  await page.getByRole("button", { name: "조회 종료일" }).click();
+  await page.getByRole("button", { name: "조회 날짜 범위" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "2026년 9월 20일", exact: true })
+    .click();
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "2026년 9월 26일", exact: true })
@@ -155,7 +163,7 @@ test("pixel date picker limits future dates, handles leap years and returns keyb
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toHaveAttribute("data-date", "2024-02-28");
   await expect(trigger).toBeFocused();
-  await expect(page.locator(".dashboard-date-controls p")).toHaveText("2024-02-22 ~ 2024-02-28");
+  await expect(page.locator(".dashboard-range-label")).toHaveText("2024-02-22 ~ 2024-02-28");
   await trigger.click();
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Escape");

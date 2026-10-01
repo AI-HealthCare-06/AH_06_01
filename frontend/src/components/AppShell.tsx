@@ -23,11 +23,13 @@ export function AppShell({
   children,
   calendarDate,
   onSelectDate,
+  calendarControls,
 }: {
   active: TabName;
   children: ReactNode;
   calendarDate?: string;
   onSelectDate?: (date: string) => void;
+  calendarControls?: ReactNode;
 }) {
   const game = useGameStore((state) => state.game);
   const navigate = useNavigate();
@@ -95,7 +97,12 @@ export function AppShell({
         </Link>
       </header>
       {active === "dashboard" && (
-        <QuestCalendar game={game} selected={calendarDate ?? game.date} onSelect={onSelectDate} />
+        <QuestCalendar
+          game={game}
+          selected={calendarDate ?? game.date}
+          onSelect={onSelectDate}
+          controls={calendarControls}
+        />
       )}
       <main className="main-content">
         {active === "home" ? (

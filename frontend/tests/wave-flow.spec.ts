@@ -139,8 +139,10 @@ test("compact report controls, risk ordering and Galaxy-shaped preview fit narro
     const heading = (await page.locator(".dashboard-heading .page-heading").boundingBox())!;
     const control = (await select.boundingBox())!;
     const label = (await page.locator(".dashboard-period-select > span").boundingBox())!;
-    expect(control.width).toBeLessThanOrEqual(66);
-    expect(control.x).toBeGreaterThan(heading.x + heading.width);
+    const week = (await page.locator(".weekly-calendar").boundingBox())!;
+    expect(control.width).toBeGreaterThanOrEqual(64);
+    expect(control.y + control.height).toBeLessThanOrEqual(week.y);
+    expect(week.y + week.height).toBeLessThan(heading.y);
     expect(label.y + label.height).toBeLessThan(control.y);
     const risk = (await page.locator(".disease-card").boundingBox())!;
     const trend = (await page.locator(".health-trend").boundingBox())!;

@@ -20,11 +20,13 @@ export function PixelDatePicker({
   value,
   max,
   onChange,
+  range,
 }: {
   label: string;
   value: string;
   max: string;
   onChange: (value: string) => void;
+  range?: { start: string; onChange: (start: string, end: string) => void };
 }) {
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -38,9 +40,14 @@ export function PixelDatePicker({
         aria-haspopup="dialog"
         aria-expanded={open}
         data-date={value}
+        data-start={range?.start}
         onClick={() => setOpen(true)}
       >
-        <span>{value.replaceAll("-", ".")}</span>
+        <span>
+          {range
+            ? `${range.start.slice(5).replace("-", ".")} ~ ${value.slice(5).replace("-", ".")}`
+            : value.replaceAll("-", ".")}
+        </span>
         <PixelIcon name="calendar" />
       </button>
       {open && (
@@ -48,6 +55,17 @@ export function PixelDatePicker({
           label={label}
           value={value}
           max={max}
+          range={
+            range
+              ? {
+                  start: range.start,
+                  onChange: (start, end) => {
+                    range.onChange(start, end);
+                    setOpen(false);
+                  },
+                }
+              : undefined
+          }
           returnFocusTo={trigger}
           onClose={() => setOpen(false)}
           onSelect={(date) => {
@@ -67,6 +85,7 @@ function DateDialog({
   onSelect,
   onClose,
   returnFocusTo,
+  range,
 }: {
   label: string;
   value: string;
@@ -74,12 +93,22 @@ function DateDialog({
   onSelect: (value: string) => void;
   onClose: () => void;
   returnFocusTo: RefObject<HTMLButtonElement | null>;
+  range?: { start: string; onChange: (start: string, end: string) => void };
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const dayFocus = useRef<HTMLButtonElement>(null);
   const titleId = useId();
   const [month, setMonth] = useState(parse(value));
   const [focused, setFocused] = useState(value);
+  const [start, setStart] = useState<string | null>(null);
+  const selectDate = (date: string) => {
+    if (!range) {
+      onSelect(date);
+      return;
+    }
+    if (!start || date < start) setStart(date);
+    else range.onChange(start, date);
+  };
   const year = month.getFullYear();
   const monthIndex = month.getMonth();
   const latest = parse(max);
@@ -132,6 +161,13 @@ function DateDialog({
           ×
         </button>
       </header>
+      {range && (
+        <p className="pixel-date-range-hint" aria-live="polite">
+          {start
+            ? `${start.replaceAll("-", ".")}부터 · 종료일을 선택하세요`
+            : "시작일과 종료일을 차례로 선택하세요"}
+        </p>
+      )}
       <div className="pixel-date-month">
         <button
           type="button"
@@ -203,11 +239,16 @@ function DateDialog({
               data-today={key === today}
               data-weekday={date.getDay()}
               aria-label={`${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`}
-              aria-pressed={key === value}
+              data-in-range={Boolean(
+                range && key >= (start ?? range.start) && key <= (start ? focused : value),
+              )}
+              aria-pressed={
+                range ? key === (start ?? range.start) || (!start && key === value) : key === value
+              }
               disabled={key > max}
               tabIndex={key === focused ? 0 : -1}
               onFocus={() => setFocused(key)}
-              onClick={() => onSelect(key)}
+              onClick={() => selectDate(key)}
               onKeyDown={(event) => {
                 const delta = dayOffsets[event.key];
                 if (
@@ -235,7 +276,11 @@ function DateDialog({
         })}
       </div>
       <footer>
-        <button type="button" disabled={today > max} onClick={() => onSelect(today)}>
+        <button
+          type="button"
+          disabled={today > max}
+          onClick={() => (range ? range.onChange(today, today) : onSelect(today))}
+        >
           오늘
         </button>
         <button type="button" onClick={onClose}>

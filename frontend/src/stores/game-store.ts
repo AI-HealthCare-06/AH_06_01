@@ -14,6 +14,7 @@ import {
   purchaseAccessory,
   equipAccessory,
   selectBattleLocation,
+  retryBattle,
 } from "../domain/game";
 import type { GameState, QuestId, StepSnapshot } from "../domain/game";
 import type { SkinId } from "../domain/appearance";
@@ -50,6 +51,8 @@ type GameStore = {
   customizeDinosaur: (index: number, skin: SkinId) => void;
   togglePause: () => void;
   selectBattle: (stage: number, wave: number) => void;
+  setWaveAutoRestart: (enabled: boolean) => void;
+  retryWave: () => void;
   refreshDay: () => void;
   resetDemo: () => void;
   syncSteps: (snapshot: StepSnapshot) => void;
@@ -70,6 +73,18 @@ let lastSaved = 0;
 export const useGameStore = create<GameStore>((set) => ({
   game: loadedGame,
   paused: loadedGame.battlePaused,
+  setWaveAutoRestart: (enabled) =>
+    set((state) => {
+      const game = { ...tickBattle(state.game), waveAutoRestart: enabled };
+      save(game);
+      return { game };
+    }),
+  retryWave: () =>
+    set((state) => {
+      const game = retryBattle(state.game);
+      save(game);
+      return { game };
+    }),
   selectBattle: (stage, wave) =>
     set((state) => {
       const game = selectBattleLocation(state.game, stage, wave);
@@ -139,6 +154,7 @@ export const useGameStore = create<GameStore>((set) => ({
         game.experience !== state.game.experience ||
         game.gold !== state.game.gold ||
         game.combat.pendingGold !== state.game.combat.pendingGold ||
+        game.combat.lastFailure?.time !== state.game.combat.lastFailure?.time ||
         Date.now() - lastSaved >= 1000
       ) {
         save(game);

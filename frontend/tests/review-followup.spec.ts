@@ -216,7 +216,7 @@ test("account controls, top notices and step guidance keep dialogs separate", as
   await page.getByRole("button", { name: /웨어러블 장비/ }).click();
   await expect(page.getByRole("dialog")).toContainText("수면 시간");
   await page.keyboard.press("Escape");
-  await page.getByRole("switch").click();
+  await page.getByRole("switch", { name: "일일 상태 초기화 안내" }).click();
   await expect(page.locator(".notice.visible")).toBeVisible();
   expect((await page.locator(".notice").boundingBox())!.y).toBeLessThan(25);
   await page.getByRole("button", { name: "← 뒤로가기" }).click();

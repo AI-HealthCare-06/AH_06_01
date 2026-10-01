@@ -106,6 +106,7 @@ export const gameSchema = z
     combat: combatSchema.optional(),
     battleUpdatedAt: z.number().nonnegative().default(0),
     battlePaused: z.boolean().default(false),
+    waveAutoRestart: z.boolean().default(true),
     ownedEffects: z.array(z.enum(["original", "emerald", "violet"])).default(["original"]),
     battleEffect: z.enum(["original", "emerald", "violet"]).default("original"),
     ownedAccessories: z.array(z.string()).default([]),
@@ -174,6 +175,7 @@ export function initialGame(date = localDate()): GameState {
     combat: initialCombat(),
     battleUpdatedAt: Date.now(),
     battlePaused: false,
+    waveAutoRestart: true,
     ownedEffects: ["original"],
     battleEffect: "original",
     ownedAccessories: [],
@@ -383,6 +385,7 @@ export function tickBattle(state: GameState, now = Date.now()): GameState {
       experienceProgress(current.experience).level,
       end - cursor,
       current.experience,
+      current.waveAutoRestart,
     );
     current = {
       ...current,
@@ -423,8 +426,35 @@ export function selectBattleLocation(
       wave,
       clock: current.combat.clock,
       serial: current.combat.serial,
+      lastFailure: current.combat.lastFailure,
       seed: current.combat.seed,
       // A manual selection starts at the destination without a false clear reward.
+      transition: {
+        kind: "wave",
+        elapsed: clearDuration("wave") + travelDuration,
+        arrived: true,
+        fromStage: stage,
+        fromWave: wave,
+      },
+    },
+  };
+}
+
+export function retryBattle(state: GameState, now = Date.now()): GameState {
+  const current = tickBattle(state, now);
+  if (current.combat.recovery <= 0) return current;
+  const { stage, wave, clock, serial, seed, lastFailure } = current.combat;
+  return {
+    ...current,
+    battleUpdatedAt: now,
+    combat: {
+      ...initialCombat(battleBuffStats(current).maxHp),
+      stage,
+      wave,
+      clock,
+      serial,
+      seed,
+      lastFailure,
       transition: {
         kind: "wave",
         elapsed: clearDuration("wave") + travelDuration,

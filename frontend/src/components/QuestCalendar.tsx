@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { calendarWeek } from "../domain/calendar";
 import { questCountOn, type GameState } from "../domain/game";
 import { PixelIcon } from "./PixelIcon";
@@ -7,10 +7,12 @@ export function QuestCalendar({
   game,
   selected,
   onSelect,
+  controls,
 }: {
   game: GameState;
   selected: string;
   onSelect?: (date: string) => void;
+  controls?: ReactNode;
 }) {
   const [helpOpen, setHelpOpen] = useState(false);
   const help = useRef<HTMLDivElement>(null);
@@ -37,9 +39,11 @@ export function QuestCalendar({
   return (
     <div className="quest-calendar">
       <div className="calendar-toolbar">
-        <span>
-          {selected.slice(0, 4)}년 {Number(selected.slice(5, 7))}월
-        </span>
+        {controls ?? (
+          <span>
+            {selected.slice(0, 4)}년 {Number(selected.slice(5, 7))}월
+          </span>
+        )}
         <div className="calendar-help" ref={help}>
           <button
             ref={trigger}
