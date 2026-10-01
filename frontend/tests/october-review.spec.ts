@@ -177,7 +177,6 @@ test("dashboard filters sit above the week, range picker commits both dates, and
       ".trend-column strong",
       ".impact-card .risk-change small",
       ".impact-card .chart-axis",
-      ".pixel-date-trigger",
     ]) {
       expect(
         await page
@@ -186,6 +185,11 @@ test("dashboard filters sit above the week, range picker commits both dates, and
           .evaluate((node) => getComputedStyle(node).fontFamily),
       ).toContain("Press Start 2P");
     }
+    expect(
+      await page
+        .locator(".pixel-date-trigger")
+        .evaluate((node) => getComputedStyle(node).fontFamily),
+    ).toContain("Galmuri11");
     await page.getByLabel("건강 변화 조회 기간").selectOption("custom");
     await page.getByRole("button", { name: "조회 날짜 범위" }).click();
     const dialog = page.getByRole("dialog");

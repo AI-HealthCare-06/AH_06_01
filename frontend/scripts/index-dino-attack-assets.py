@@ -38,11 +38,12 @@ def connected_boxes(alpha):
 
 root = Path(__file__).resolve().parents[1]
 names = ['Trex', 'Tricera', 'Raptor', 'Stego', 'Brachio', 'PteraMelee', 'Ptera']
-result = {'frames': {}, 'firstBounds': {}, 'mouthPoints': {}}
+result = {'frames': {}, 'firstBounds': {}, 'releasePoints': {}}
 review = root.parent / 'tmp/dino-attack-review'
 review.mkdir(parents=True, exist_ok=True)
 for name in names:
     filename = 'DinoPteraMeleeAttack.png' if name == 'PteraMelee' else f'Dino{name}RangedAttack.png'
+    if name == 'Raptor': filename = 'DinoRaptorClawRangedAttack.png'
     image = Image.open(root / 'public/assets/battle' / filename).convert('RGBA')
     poses = []
     for x, y, right, bottom, _ in connected_boxes(np.asarray(image.getchannel('A')) > 128):
@@ -57,10 +58,10 @@ for name in names:
     for index, (x, y, w, h) in enumerate(poses):
         if index in [0, 2]: image.crop((x, y, x + w, y + h)).save(review / f'{name}-pose-{index}.png')
     print(name, poses)
-# Mouth points are authored in the IDLE-aligned 160x120 render coordinate space.
+# Release points (Raptor's foreclaws; other dinosaurs' mouths) use IDLE-aligned 160x120 coordinates.
 # Kept separate from source pixels so sprite size and world position share them.
-result['mouthPoints'] = {
-    'Trex': [150, 56], 'Tricera': [151, 82], 'Raptor': [151, 39],
+result['releasePoints'] = {
+    'Trex': [150, 56], 'Tricera': [151, 82], 'Raptor': [159, 91],
     'Stego': [155, 86], 'Ptera': [148, 104], 'Brachio': [127, 31],
 }
 (root / 'src/design/dino-attack-atlases.json').write_text(json.dumps(result, indent=2) + '\n')

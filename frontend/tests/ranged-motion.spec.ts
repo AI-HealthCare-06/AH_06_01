@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const dinosaurMotions = [
   ["Trex", "TrexIdleSpritesheet4X3Png", "290-697", "DinoTrexRangedAttack"],
   ["Tricera", "DinoTriceraIdle", "288-700", "DinoTriceraRangedAttack"],
-  ["Raptor", "RaptorIdleSpritesheet4X31Png", "308-697", "DinoRaptorRangedAttack"],
+  ["Raptor", "RaptorIdleSpritesheet4X31Png", "308-697", "DinoRaptorClawRangedAttack"],
   ["Stego", "DinoStegoIdle", "DinoStegoTailSweepV2", "DinoStegoRangedAttack"],
   ["Ptera", "446-578", "DinoPteraMeleeAttack", "DinoPteraRangedAttack"],
   ["Brachio", "DinoBrachioIdle", "295-697", "DinoBrachioRangedAttack"],
@@ -318,7 +318,7 @@ test("six dinosaurs use authored idle, walk and attack poses; Ptera shares idle/
   const sources = [
     ["TrexIdleSpritesheet4X3Png", "TrexWalkSpritesheet4X4Png", "DinoTrexRangedAttack"],
     ["DinoTriceraIdle", "DinoTriceraWalk", "DinoTriceraRangedAttack"],
-    ["RaptorIdleSpritesheet4X31Png", "RaptorWalkSpritesheet4X4Png", "DinoRaptorRangedAttack"],
+    ["RaptorIdleSpritesheet4X31Png", "RaptorWalkSpritesheet4X4Png", "DinoRaptorClawRangedAttack"],
     ["DinoStegoIdle", "DinoStegoWalk", "DinoStegoRangedAttack"],
     ["446-578", "446-578", "DinoPteraRangedAttack"],
     ["DinoBrachioIdle", "DinoBrachioWalk", "DinoBrachioRangedAttack"],

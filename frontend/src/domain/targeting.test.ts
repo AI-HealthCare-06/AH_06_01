@@ -5,7 +5,7 @@ import { enemyAttackRange, selectPlayerTarget } from "./battle-range";
 import {
   combatPlayerGeometry,
   playerGeometry,
-  playerMouthPosition,
+  playerReleasePosition,
   enemyGeometry,
   center,
   sweptContact,
@@ -59,13 +59,13 @@ describe("ranged attacks and contact melee", () => {
     },
   );
   it.each([0, 1, 2, 3, 4, 5])(
-    "dinosaur %i fires and rotates from its mouth toward the target and hits it",
+    "dinosaur %i fires and rotates from its release point toward the target and hits it",
     (dinosaur) => {
       const stats = { ...buffs, dinosaur };
       const started = advanceCombat(scenario(), stats, 1, 50).combat;
       const launched = advanceCombat(started, stats, 1, 150).combat;
       const shot = launched.playerProjectiles[0];
-      expect(shot).toMatchObject(playerMouthPosition(dinosaur));
+      expect(shot).toMatchObject(playerReleasePosition(dinosaur));
       expect(shot.vx).toBeGreaterThan(0);
       const verticalDirection = Math.sign(started.lastAttack!.aimY! - shot.y);
       expect(Math.sign(shot.vy)).toBe(verticalDirection);
@@ -107,7 +107,7 @@ describe("ranged attacks and contact melee", () => {
       const launched = advanceCombat(started, stats, 1, 150).combat;
       expect(launched.playerProjectiles).toHaveLength(1);
       expect(launched.playerProjectiles[0].dinosaur).toBe(dinosaur);
-      expect(launched.playerProjectiles[0]).toMatchObject(playerMouthPosition(dinosaur));
+      expect(launched.playerProjectiles[0]).toMatchObject(playerReleasePosition(dinosaur));
       expect(launched.enemies[0].hp).toBe(1000);
       expect(combatPlayerGeometry(dinosaur, launched.lastAttack, launched.clock)).toEqual(
         playerGeometry(dinosaur),

@@ -148,7 +148,7 @@ test("game controls open three working, persistent settings and account page has
   await expect(page.getByText("Wave 자동 재시작", { exact: true })).toHaveCount(0);
 });
 
-test("each dinosaur releases its projectile on the visible mouth of its contact pose", async ({
+test("each dinosaur releases its projectile from the visible mouth or foreclaw of its contact pose", async ({
   page,
 }) => {
   await page.clock.install();
@@ -223,7 +223,7 @@ test("each dinosaur releases its projectile on the visible mouth of its contact 
       .toBeGreaterThan(0);
     await page
       .locator(".pixel-battle")
-      .screenshot({ path: `test-results/mouth-release-${dinosaur}.png` });
+      .screenshot({ path: `test-results/projectile-release-${dinosaur}.png` });
   }
 });
 

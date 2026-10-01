@@ -13,6 +13,13 @@
   font-display: swap;
   src: url("galmuri/dist/Galmuri11-Bold.woff2") format("woff2");
 }
+@font-face {
+  font-family: "Galmuri14";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("galmuri/dist/Galmuri14.woff2") format("woff2");
+}
 :root {
   font-family: "Galmuri11", "Noto Sans KR", sans-serif;
   --pixel: "Press Start 2P", "Galmuri11", sans-serif;
@@ -2894,13 +2901,22 @@
   background: #f8eed5;
   color: #153329;
   box-shadow: 2px 2px 0 #171b16;
-  font: 8px var(--pixel);
+  font:
+    12px/18px "Galmuri11",
+    sans-serif;
+}
+.dashboard-date-controls select {
+  font:
+    15px/20px "Galmuri14",
+    sans-serif;
 }
 .pixel-date-trigger {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 4px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .pixel-date-trigger .pixel-icon {
   flex-shrink: 0;

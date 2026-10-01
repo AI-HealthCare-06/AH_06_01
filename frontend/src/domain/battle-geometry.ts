@@ -89,13 +89,13 @@ export function playerGeometry(dinosaur: number, offset = { x: 0, y: 0 }): Actor
   restingPlayers[dinosaur] = geometry(sprite, bounds);
   return translateActor(restingPlayers[dinosaur], offset.x, offset.y);
 }
-// IDLE-sized mouth anchors on ranged release pose 02. Melee poses never
-// release a projectile; Stego's mouth now faces right in its ranged sheet.
-const projectileMouthPoints = ["Trex", "Tricera", "Raptor", "Stego", "Ptera", "Brachio"].map(
-  (name) => attackMotions.mouthPoints[name as keyof typeof attackMotions.mouthPoints],
+// IDLE-sized anchors on ranged release pose 02. Raptor casts from its
+// forward foreclaws; the other dinosaurs release from their mouths.
+const projectileReleasePoints = ["Trex", "Tricera", "Raptor", "Stego", "Ptera", "Brachio"].map(
+  (name) => attackMotions.releasePoints[name as keyof typeof attackMotions.releasePoints],
 );
-export function playerMouthPosition(dinosaur: number, actor = playerGeometry(dinosaur)) {
-  const [x, y] = projectileMouthPoints[dinosaur];
+export function playerReleasePosition(dinosaur: number, actor = playerGeometry(dinosaur)) {
+  const [x, y] = projectileReleasePoints[dinosaur];
   return {
     x: actor.sprite.x + (actor.sprite.width * x) / 160,
     y: actor.sprite.y + (actor.sprite.height * y) / 120,

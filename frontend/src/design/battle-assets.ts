@@ -102,7 +102,7 @@ export const battleDinosaurs = [
   {
     image: art("276-712"),
     attack: art("308-697"),
-    rangedAttack: art("DinoRaptorRangedAttack"),
+    rangedAttack: art("DinoRaptorClawRangedAttack"),
     idle: art("RaptorIdleSpritesheet4X31Png"),
     walk: art("RaptorWalkSpritesheet4X4Png"),
     movement: "sprint",

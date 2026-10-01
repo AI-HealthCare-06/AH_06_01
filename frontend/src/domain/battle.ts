@@ -10,7 +10,7 @@ import {
   center,
   enemyGeometry,
   playerGeometry,
-  playerMouthPosition,
+  playerReleasePosition,
   combatPlayerGeometry,
   projectileGeometry,
   playerProjectileGeometry,
@@ -430,7 +430,7 @@ export function advanceCombat(
     if (state.hp > 0 && pending?.resolved === false && state.clock >= pending.impactAt!) {
       pending.resolved = true;
       if (pending.mode === "ranged") {
-        const source = playerMouthPosition(buffs.dinosaur, player);
+        const source = playerReleasePosition(buffs.dinosaur, player);
         const dx = (pending.aimX ?? source.x + 200) - source.x,
           dy = (pending.aimY ?? source.y) - source.y;
         const length = Math.max(1, Math.hypot(dx, dy));
@@ -442,7 +442,7 @@ export function advanceCombat(
           vy: (dy / length) * playerProjectileSpeed,
           age: 0,
           travelled: 0,
-          // Targeting remains 7u; include the distance from the mouth through
+          // Targeting remains 7u; include the distance from the release point through
           // the player's body so a rear-facing release can still reach 7u.
           maxTravel:
             playerAttackRange * arena.pixelsPerUnit +
