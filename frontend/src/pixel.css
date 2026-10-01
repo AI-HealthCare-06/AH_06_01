@@ -122,7 +122,11 @@
 .debug-player-projectile {
   fill: #7af7de22;
   stroke: #7af7de;
-  stroke-width: 1;
+  stroke-width: 1.5;
+}
+.debug-player-projectile-label {
+  fill: #7af7de;
+  color: #7af7de;
 }
 .battle-clear {
   position: absolute;
@@ -3247,17 +3251,6 @@
   color: #fff4ce;
   font-size: 10px;
   padding: 0 2px;
-}
-.vault-apply {
-  width: 100%;
-  margin-top: 12px;
-  padding: 13px 8px;
-  font-size: 13px;
-}
-.vault-apply:disabled {
-  background: #607658;
-  color: #e9ebd3;
-  opacity: 1;
 }
 .vault-inventory .accessory-catalog {
   padding: 0;

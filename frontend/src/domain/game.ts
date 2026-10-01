@@ -280,12 +280,22 @@ export function claimDailyBonus(state: GameState, date = localDate()): GameState
     : { ...current, gold: current.gold + 10, bonusClaimed: true };
 }
 
-export function applyDinosaurStyle(state: GameState, index: number, skin: SkinId): GameState {
-  if (!Number.isInteger(index) || index < 0 || index >= 6 || !skinIds.includes(skin)) return state;
+export function selectDinosaur(state: GameState, index: number): GameState {
+  if (!Number.isInteger(index) || index < 0 || index >= 6 || index === state.dinosaur) return state;
   return {
     ...state,
     dinosaur: index,
-    dinosaurStyles: state.dinosaurStyles.map((current, i) => (i === index ? skin : current)),
+    // A pending wind-up must not launch an old character's attack after switching.
+    combat: { ...state.combat, playerProjectiles: [], lastAttack: null },
+  };
+}
+
+export function applyDinosaurStyle(state: GameState, index: number, skin: SkinId): GameState {
+  if (!Number.isInteger(index) || index < 0 || index >= 6 || !skinIds.includes(skin)) return state;
+  const selected = selectDinosaur(state, index);
+  return {
+    ...selected,
+    dinosaurStyles: selected.dinosaurStyles.map((current, i) => (i === index ? skin : current)),
   };
 }
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { advanceCombat, battleBuffStats, combatSchema, initialCombat } from "./battle";
+import type { CombatState } from "./battle";
 import { enemyAttackRange, selectPlayerTarget } from "./battle-range";
 import {
   combatPlayerGeometry,
@@ -24,13 +25,56 @@ const ranged = {
   attackIn: 5000,
   hitAt: -1000,
 };
-const scenario = (enemies = [ranged]) => ({
+const scenario = (enemies: CombatState["enemies"] = [ranged]) => ({
   ...initialCombat(),
   spawned: enemies.length,
   spawnIn: 5000,
   enemies,
 });
 describe("ranged attacks and contact melee", () => {
+  it.each(["normal", "elite", "boss"] as const)(
+    "all six %s melee enemies can reach and damage Ptera at its new height",
+    (rank) => {
+      const player = playerGeometry(4);
+      expect(center(player.hitbox).y).toBeCloseTo(188.8, 5);
+      for (let art = 0; art < 6; art++) {
+        const enemy = { ...ranged, ranged: false, rank, art, ad: 20, attackIn: 0 };
+        enemy.distance = enemyAttackRange(enemy, 4);
+        const body = enemyGeometry(enemy.distance, art, rank).hitbox;
+        expect(
+          Math.min(body.y + body.height, player.hitbox.y + player.hitbox.height) -
+            Math.max(body.y, player.hitbox.y),
+        ).toBeGreaterThan(0);
+        const result = advanceCombat(
+          { ...scenario([enemy]), attackIn: 5000 },
+          { ...buffs, dinosaur: 4 },
+          1,
+          50,
+        ).combat;
+        expect(result.hp).toBe(40);
+        expect(result.enemies[0].attackedAt).toBe(50);
+      }
+    },
+  );
+  it("Ptera fires diagonally along the stored target aim and hits that target", () => {
+    const stats = { ...buffs, dinosaur: 4 };
+    const started = advanceCombat(scenario(), stats, 1, 50).combat;
+    const launched = advanceCombat(started, stats, 1, 150).combat;
+    const shot = launched.playerProjectiles[0];
+    expect(shot.y).toBeCloseTo(188.8, 5);
+    expect(shot.vx).toBeGreaterThan(0);
+    expect(shot.vy).toBeGreaterThan(0);
+    expect(Math.hypot(shot.vx, shot.vy)).toBeCloseTo(240, 5);
+    expect(shot.vy / shot.vx).toBeCloseTo(
+      (started.lastAttack!.aimY! - shot.y) / (started.lastAttack!.aimX! - shot.x),
+      5,
+    );
+    const moving = advanceCombat({ ...launched, attackIn: 5000 }, stats, 1, 200).combat;
+    expect(moving.playerProjectiles[0].y).toBeGreaterThan(shot.y);
+    const hit = advanceCombat(moving, stats, 1, 1000).combat;
+    expect(hit.enemies[0].hp).toBe(980);
+    expect(hit.playerProjectiles).toHaveLength(0);
+  });
   it("targets the nearest enemy of either type within 7u, with a stable tie break", () => {
     const melee = { ...ranged, id: 2, ranged: false, distance: 4 };
     expect(selectPlayerTarget([ranged, melee])?.id).toBe(2);

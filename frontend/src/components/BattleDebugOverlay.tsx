@@ -200,7 +200,7 @@ export function BattleDebugOverlay({
             </g>
           );
         })}
-        {playerProjectiles.map((shot) => {
+        {playerProjectiles.map((shot, index) => {
           const box = playerProjectileGeometry(shot).hitbox;
           return (
             <g key={shot.id} data-debug-projectile={shot.id}>
@@ -212,6 +212,13 @@ export function BattleDebugOverlay({
                 width={box.width}
                 height={box.height}
               />
+              <text
+                className="debug-box-label debug-player-projectile-label"
+                x={box.x}
+                y={box.y - 3}
+              >
+                P{index + 1} HIT
+              </text>
             </g>
           );
         })}

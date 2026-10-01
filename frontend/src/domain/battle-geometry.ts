@@ -57,13 +57,16 @@ function geometry(
 }
 export function playerGeometry(dinosaur: number, offset = { x: 0, y: 0 }): ActorGeometry {
   const flying = dinosaur === 4;
+  const bounds = characterBounds[dinosaur];
+  // Anchor the visible flying body at 60% of the battle background's height.
+  const flyingY = arena.top + arena.height * 0.6 - ((bounds[1] + bounds[3] / 2) * 98) / 120;
   const sprite = {
     x: 8 + offset.x,
-    y: (flying ? 84 : arena.ground - 98) + offset.y,
+    y: (flying ? flyingY : arena.ground - 98) + offset.y,
     width: 125,
     height: 98,
   };
-  return geometry(sprite, characterBounds[dinosaur]);
+  return geometry(sprite, bounds);
 }
 export function enemyGeometry(
   distance: number,
@@ -147,7 +150,14 @@ export function combatPlayerGeometry(dinosaur: number, attack: AttackMotion | nu
   });
 }
 
-export type PlayerShotPosition = { x: number; y: number; dinosaur: number; age: number };
+export type PlayerShotPosition = {
+  x: number;
+  y: number;
+  dinosaur: number;
+  age: number;
+  vx?: number;
+  vy?: number;
+};
 const dinoNames = ["Trex", "Tricera", "Raptor", "Stego", "Ptera", "Brachio"];
 export const playerProjectileSize = {
   width: projectileSize.width * 1.2,
@@ -155,6 +165,9 @@ export const playerProjectileSize = {
 };
 export function playerProjectileFrame(age: number) {
   return Math.floor(Math.max(0, age) / 80) % 4;
+}
+export function playerProjectileAngle(shot: PlayerShotPosition) {
+  return shot.dinosaur === 4 ? Math.atan2(shot.vy ?? 0, shot.vx ?? 240) : 0;
 }
 export function playerProjectileGeometry(shot: PlayerShotPosition) {
   const name = `Dino${dinoNames[shot.dinosaur]}Projectile`;
@@ -169,7 +182,7 @@ export function playerProjectileGeometry(shot: PlayerShotPosition) {
     width: playerProjectileSize.width * fit,
     height: playerProjectileSize.height * fit,
   };
-  return geometry(
+  const result = geometry(
     {
       x: shot.x - (size.width * (bounds[0] + bounds[2] / 2)) / 160,
       y: shot.y - (size.height * (bounds[1] + bounds[3] / 2)) / 120,
@@ -177,6 +190,24 @@ export function playerProjectileGeometry(shot: PlayerShotPosition) {
     },
     bounds,
   );
+  const angle = playerProjectileAngle(shot);
+  if (!angle) return result;
+  // Match the AABB of the rotated visible canvas, using its actual center.
+  const cosine = Math.abs(Math.cos(angle)),
+    sine = Math.abs(Math.sin(angle));
+  const width = result.hitbox.width * cosine + result.hitbox.height * sine;
+  const height = result.hitbox.width * sine + result.hitbox.height * cosine;
+  const hitbox = { x: shot.x - width / 2, y: shot.y - height / 2, width, height };
+  return {
+    ...result,
+    hitbox,
+    collider: {
+      x: hitbox.x - width * 0.05,
+      y: hitbox.y - height * 0.05,
+      width: width * 1.1,
+      height: height * 1.1,
+    },
+  };
 }
 
 // Swept AABB: first contact time in [0, 1], including a moving target. This

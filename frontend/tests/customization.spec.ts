@@ -37,7 +37,7 @@ for (const [index, name] of names.entries()) {
   });
 }
 
-test("customization previews without spending Gold and remembers each character's applied style", async ({
+test("character and skin selections apply immediately without spending Gold and persist", async ({
   page,
 }) => {
   await page.clock.install();
@@ -46,13 +46,14 @@ test("customization previews without spending Gold and remembers each character'
   await page.getByRole("link", { name: "Character", exact: true }).click();
   await expect(page).toHaveURL(/\/character$/);
   await expect(page.locator(".vault-roster button")).toHaveCount(6);
-  const before = await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"));
   await page.getByRole("button", { name: "스테고 선택", exact: true }).click();
+  expect(
+    await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!).dinosaur),
+  ).toBe(3);
   const preview = page.getByRole("button", { name: "스테고 바다 탐험가 스킨 선택" });
   await preview.click();
   await expect(page.locator(".vault-hero .dinosaur-art")).toHaveAttribute("data-skin", "ocean");
-  expect(await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"))).toBe(before);
-  await page.getByRole("button", { name: "선택한 외형으로 변경" }).click();
+  await expect(page.locator(".vault-apply")).toHaveCount(0);
   await expect(page.locator(".vault-hero h3")).toContainText("스테고");
   expect(
     await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!).gold),
@@ -99,7 +100,8 @@ test("vault keeps six dinosaurs and separate skin/accessory panels usable at nar
     const region = page.locator(".vault-scroll");
     await region.focus();
     await region.press("End");
-    await expect(page.getByRole("button", { name: "현재 적용된 외형" })).toBeInViewport();
+    await expect(page.locator(".vault-skins > small")).toBeInViewport();
+    await expect(page.locator(".vault-apply")).toHaveCount(0);
     await page.getByRole("button", { name: "악세서리", exact: true }).click();
     await expect(page.locator(".vault-skins")).toHaveCount(0);
     await expect(page.getByRole("region", { name: "보유한 꾸미기 아이템" })).toBeVisible();

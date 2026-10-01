@@ -104,6 +104,7 @@ export function BattleDebugPanel({
         <b className="debug-collider-label">━ COLLIDER</b>
         <b className="debug-hitbox-label">┄ HITBOX</b>
         <b className="debug-projectile-label">┄ SHOT</b>
+        <b className="debug-player-projectile-label">━ PLAYER SHOT</b>
         <b className="debug-player-range-label">━ P RANGE</b>
         <b className="debug-enemy-range-label">━ M RANGE</b>
         <small>공통 0u · 1u = 30px · ◆ 몹 현재 위치 · IN: 사거리 안</small>

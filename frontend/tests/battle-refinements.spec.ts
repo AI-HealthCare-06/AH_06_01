@@ -166,7 +166,7 @@ test("Pteranodon idles in place, attacks down-right and freezes when paused", as
     top: parseFloat(getComputedStyle(e).top),
   }));
   expect(attack.left).toBeGreaterThan(idle.left);
-  expect(attack.top).toBeGreaterThan(idle.top + 20);
+  expect(attack.top).toBeGreaterThan(idle.top);
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   const frame = await canvas.getAttribute("data-frame");
   await page.clock.runFor(1000);

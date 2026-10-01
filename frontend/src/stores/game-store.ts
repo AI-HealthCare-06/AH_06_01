@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   applyDinosaurStyle,
+  selectDinosaur,
   claimDailyBonus,
   completeQuest,
   initialGame,
@@ -194,8 +195,8 @@ export const useGameStore = create<GameStore>((set) => ({
     }),
   chooseDinosaur: (index) =>
     set((state) => {
-      if (!Number.isInteger(index) || index < 0 || index > 5) return state;
-      const game = { ...state.game, dinosaur: index };
+      const game = selectDinosaur(state.game, index);
+      if (game === state.game) return state;
       save(game);
       return { game };
     }),

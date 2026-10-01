@@ -50,7 +50,7 @@ describe("separate battle bodies and hit targets", () => {
         expect(attackEndpoint(character, enemyGeometry(1.5, art).hitbox).x).toBeLessThan(end.x);
       }
     const ptera = playerGeometry(4);
-    expect(center(ptera.hitbox).y).toBeLessThan(arena.top + arena.height / 2);
+    expect(center(ptera.hitbox).y).toBeCloseTo(arena.top + arena.height * 0.6);
     expect(playerGeometry(0).collider).not.toEqual(playerGeometry(0).hitbox);
   });
 });

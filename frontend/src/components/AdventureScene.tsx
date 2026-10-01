@@ -4,6 +4,7 @@ import {
   combatPlayerGeometry,
   playerProjectileGeometry,
   playerProjectileFrame,
+  playerProjectileAngle,
   projectileGeometry,
 } from "../domain/battle-geometry";
 import { useEffect, useRef, useState } from "react";
@@ -507,6 +508,8 @@ export function AdventureScene({
                 top: geometry.sprite.y,
                 width: geometry.sprite.width,
                 height: geometry.sprite.height,
+                transform: `rotate(${playerProjectileAngle(shot)}rad)`,
+                transformOrigin: `${shot.x - geometry.sprite.x}px ${shot.y - geometry.sprite.y}px`,
               }}
             >
               <BattleSprite

@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { dinosaurs } from "../design/dinosaurs";
 import { getSkin, skins } from "../design/skins";
-import { type SkinId } from "../domain/appearance";
 import { useGameStore } from "../stores/game-store";
 import { DinosaurArt } from "./DinosaurArt";
 import { AccessoryCatalog, EquippedAccessories } from "./AccessoryCatalog";
@@ -11,25 +9,23 @@ import { PageHeading } from "./AppShell";
 import { useNotice } from "./NoticeProvider";
 
 export function CharacterVault() {
-  const { game, customizeDinosaur } = useGameStore();
+  const { game, chooseDinosaur, customizeDinosaur } = useGameStore();
   const [params, setParams] = useSearchParams();
   const inventory = params.get("tab") === "accessories";
-  const [selected, setSelected] = useState(game.dinosaur);
-  const [skin, setSkin] = useState<SkinId>(game.dinosaurStyles[selected]);
+  const selected = game.dinosaur;
+  const skin = game.dinosaurStyles[selected];
   const notice = useNotice();
   const choose = (index: number) => {
-    setSelected((index + 6) % 6);
-    setSkin(game.dinosaurStyles[(index + 6) % 6]);
+    chooseDinosaur((index + 6) % 6);
   };
   const dino = dinosaurs[selected];
-  const equipped = selected === game.dinosaur && skin === game.dinosaurStyles[selected];
   return (
     <section className="character-vault" aria-label="공룡 보관소">
       <PageHeading title="DINO VAULT" subtitle="외형만 바뀌며 모든 공룡의 능력치는 같아요." />
       <div className="vault-scroll" tabIndex={0} aria-label="공룡과 외형 선택">
         <header className="roster-heading">
           <strong>보유 공룡</strong>
-          <small>공룡을 눌러 미리보기</small>
+          <small>공룡을 눌러 바로 선택</small>
         </header>
         <div className="vault-roster" aria-label="공룡 선택">
           {dinosaurs.map((item, index) => (
@@ -59,9 +55,7 @@ export function CharacterVault() {
               ›
             </button>
           </div>
-          <small>
-            {selected + 1} / 6 {equipped && "· ✓ 함께하는 공룡"}
-          </small>
+          <small>{selected + 1} / 6 · ✓ 함께하는 공룡</small>
         </section>
         <div className="vault-tabs shop-tabs" aria-label="외형 분류">
           <button className="shop-tab" aria-pressed={!inventory} onClick={() => setParams({})}>
@@ -92,7 +86,10 @@ export function CharacterVault() {
                   data-equipped={skin === item.id}
                   aria-label={`${dino.name} ${item.name} 스킨 선택`}
                   aria-pressed={skin === item.id}
-                  onClick={() => setSkin(item.id)}
+                  onClick={() => {
+                    customizeDinosaur(selected, item.id);
+                    notice(`${dino.name} · ${item.name} 외형을 적용했어요.`);
+                  }}
                 >
                   <span className="style-art" style={{ background: item.surface }}>
                     {selected === 0 && ["desert", "snow", "volcano"].includes(item.id) ? (
@@ -109,16 +106,6 @@ export function CharacterVault() {
             <small>선택한 스킨은 모든 게임 화면에 적용돼요.</small>
           </section>
         )}
-        <button
-          className="primary-button vault-apply"
-          disabled={equipped}
-          onClick={() => {
-            customizeDinosaur(selected, skin);
-            notice(`${dino.name} · ${getSkin(skin).name} 외형을 적용했어요.`);
-          }}
-        >
-          {equipped ? "현재 적용된 외형" : "선택한 외형으로 변경"}
-        </button>
       </div>
     </section>
   );

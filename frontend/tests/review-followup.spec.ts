@@ -245,9 +245,8 @@ test("home hides status copy, shows both progress bars and keeps the pteranodon 
     useGameStore.getState().chooseDinosaur(4);
   });
   await expect(page.locator(".battle-dinosaur")).toHaveAttribute("data-dinosaur", "4");
-  expect(
-    await page.locator(".battle-dinosaur").evaluate((e) => parseInt(getComputedStyle(e).top)),
-  ).toBeLessThan(100);
+  const player = JSON.parse((await page.locator(".battle-dinosaur").getAttribute("data-hitbox"))!);
+  expect(player.y + player.height / 2).toBeCloseTo(188.8, 2);
   const points = await page.locator('[data-series="today"]').getAttribute("points");
   const vertices = points!.split(" ").map((p) => p.split(",").map(Number));
   expect(vertices).toHaveLength(6);
