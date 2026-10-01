@@ -1,15 +1,18 @@
 import atlases from "./animation-atlases.json";
 import motions from "./motion-atlases.json";
+import dinoAttacks from "./dino-attack-atlases.json";
 const art = (node: string) => `/assets/battle/${node}.png`;
 export type SpriteFrame = readonly [x: number, y: number, width: number, height: number];
 // These sheets are hand laid out, not an equal-width grid. Keep the whole pose and
 // a shared scale/baseline so crouches, extended horns and effects do not get clipped.
 export const attackFrames: Record<string, readonly SpriteFrame[]> = {
   ...Object.fromEntries(
-    Object.entries({ ...atlases.frames, ...motions.frames }).map(([src, frames]) => [
-      src,
-      frames.map(([x, y, width, height]): SpriteFrame => [x, y, width, height]),
-    ]),
+    Object.entries({ ...atlases.frames, ...motions.frames, ...dinoAttacks.frames }).map(
+      ([src, frames]) => [
+        src,
+        frames.map(([x, y, width, height]): SpriteFrame => [x, y, width, height]),
+      ],
+    ),
   ),
   // Section 10 walking sheet: four authored wing poses, read row by row.
   [art("446-578")]: [
@@ -83,6 +86,7 @@ export const battleDinosaurs = [
   {
     image: art("276-699"),
     attack: art("290-697"),
+    rangedAttack: art("DinoTrexRangedAttack"),
     idle: art("TrexIdleSpritesheet4X3Png"),
     walk: art("TrexWalkSpritesheet4X4Png"),
     movement: "stomp",
@@ -90,6 +94,7 @@ export const battleDinosaurs = [
   {
     image: art("276-702"),
     attack: art("288-700"),
+    rangedAttack: art("DinoTriceraRangedAttack"),
     idle: art("DinoTriceraIdle"),
     walk: art("DinoTriceraWalk"),
     movement: "trot",
@@ -97,6 +102,7 @@ export const battleDinosaurs = [
   {
     image: art("276-712"),
     attack: art("308-697"),
+    rangedAttack: art("DinoRaptorRangedAttack"),
     idle: art("RaptorIdleSpritesheet4X31Png"),
     walk: art("RaptorWalkSpritesheet4X4Png"),
     movement: "sprint",
@@ -105,6 +111,7 @@ export const battleDinosaurs = [
     image: art("276-705"),
     // Section 10 · 678:594 · 360° Tail Sweep v2 · Head + Tail, 12 poses.
     attack: art("DinoStegoTailSweepV2"),
+    rangedAttack: art("DinoStegoRangedAttack"),
     contactFrame: 5,
     idle: art("DinoStegoIdle"),
     walk: art("DinoStegoWalk"),
@@ -112,7 +119,8 @@ export const battleDinosaurs = [
   },
   {
     image: art("276-709"),
-    attack: art("434-578"),
+    attack: art("DinoPteraMeleeAttack"),
+    rangedAttack: art("DinoPteraRangedAttack"),
     idle: art("446-578"),
     walk: art("446-578"),
     movement: "fly",
@@ -120,6 +128,7 @@ export const battleDinosaurs = [
   {
     image: art("276-715"),
     attack: art("295-697"),
+    rangedAttack: art("DinoBrachioRangedAttack"),
     idle: art("DinoBrachioIdle"),
     walk: art("DinoBrachioWalk"),
     movement: "stride",

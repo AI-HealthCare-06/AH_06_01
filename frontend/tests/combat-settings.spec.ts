@@ -192,7 +192,7 @@ test("each dinosaur releases its projectile on the visible mouth of its contact 
       return combat.playerProjectiles[0];
     }, dinosaur);
     const canvas = page.locator(".battle-dinosaur canvas");
-    await expect(canvas).toHaveAttribute("data-frame", String(dinosaur === 3 ? 5 : 2));
+    await expect(canvas).toHaveAttribute("data-rendered-frame", "2");
     await expect
       .poll(() =>
         canvas.evaluate((node, source) => {

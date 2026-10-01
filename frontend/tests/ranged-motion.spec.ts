@@ -1,88 +1,198 @@
 import { expect, test } from "@playwright/test";
 
-for (const ranged of [true, false])
-  for (const asBonus of [0, 0.8])
-    test(`Tricera plays IDLE between ${ranged ? "ranged" : "melee"} attacks at AS +${asBonus * 100}%`, async ({
-      page,
-    }) => {
-      await page.clock.install();
-      await page.clock.pauseAt(new Date());
-      await page.goto("/home");
+const dinosaurMotions = [
+  ["Trex", "TrexIdleSpritesheet4X3Png", "290-697", "DinoTrexRangedAttack"],
+  ["Tricera", "DinoTriceraIdle", "288-700", "DinoTriceraRangedAttack"],
+  ["Raptor", "RaptorIdleSpritesheet4X31Png", "308-697", "DinoRaptorRangedAttack"],
+  ["Stego", "DinoStegoIdle", "DinoStegoTailSweepV2", "DinoStegoRangedAttack"],
+  ["Ptera", "446-578", "DinoPteraMeleeAttack", "DinoPteraRangedAttack"],
+  ["Brachio", "DinoBrachioIdle", "295-697", "DinoBrachioRangedAttack"],
+];
+for (let dinosaur = 0; dinosaur < dinosaurMotions.length; dinosaur++)
+  for (const ranged of [true, false])
+    for (const asBonus of [0, 0.8])
+      test(`${dinosaurMotions[dinosaur][0]} plays IDLE between ${ranged ? "ranged" : "melee"} attacks at AS +${asBonus * 100}%`, async ({
+        page,
+      }) => {
+        await page.clock.install();
+        await page.clock.pauseAt(new Date());
+        await page.goto("/home");
+        await page.evaluate(
+          async ({ ranged, asBonus, dinosaur }) => {
+            const storePath = "/src/stores/game-store.ts";
+            const battlePath = "/src/domain/battle.ts";
+            const rangePath = "/src/domain/battle-range.ts";
+            const { useGameStore } = await import(storePath);
+            const { initialCombat } = await import(battlePath);
+            const { enemyAttackRange } = await import(rangePath);
+            const { game } = useGameStore.getState();
+            const enemy = {
+              id: 42,
+              art: 0,
+              rank: "normal" as const,
+              ranged,
+              distance: 7,
+              hp: 1000,
+              maxHp: 1000,
+              ad: 0,
+              attackIn: 5000,
+              hitAt: -1000,
+            };
+            if (!ranged) enemy.distance = enemyAttackRange(enemy, dinosaur);
+            useGameStore.setState({
+              paused: false,
+              game: {
+                ...game,
+                dinosaur,
+                battlePaused: false,
+                battleUpdatedAt: Date.now(),
+                debugBuffs: { asBonus, crt: 0, adBonus: 0 },
+                combat: { ...initialCombat(), spawnIn: 5000, spawned: 1, enemies: [enemy] },
+              },
+            });
+          },
+          { ranged, asBonus, dinosaur },
+        );
+        const player = page.locator(".battle-dinosaur"),
+          canvas = player.locator("canvas");
+        await page.clock.runFor(50);
+        await expect(player).toHaveAttribute("data-attack-mode", ranged ? "ranged" : "melee");
+        const first = await page.evaluate(async () => {
+          const path = "/src/stores/game-store.ts";
+          const { useGameStore } = await import(path);
+          return useGameStore.getState().game.combat.lastAttack!;
+        });
+        await page.clock.runFor(first.impactAt! - first.time);
+        const source = `/assets/battle/${dinosaurMotions[dinosaur][ranged ? 3 : 2]}.png`;
+        await expect(canvas).toHaveAttribute("data-rendered-src", source);
+        await expect(canvas).toHaveAttribute(
+          "data-rendered-frame",
+          String(!ranged && dinosaur === 3 ? 5 : 2),
+        );
+        const idleAt = first.time + Math.ceil((first.duration! * 0.75) / 50) * 50;
+        await page.clock.runFor(idleAt - first.impactAt!);
+        await expect(player).toHaveAttribute("data-animation", "idle");
+        await expect(player).toHaveAttribute("data-attacking", "false");
+        await expect(canvas).toHaveAttribute(
+          "data-rendered-src",
+          `/assets/battle/${dinosaurMotions[dinosaur][1]}.png`,
+        );
+        await page.getByRole("button", { name: "모험 일시정지", exact: true }).click();
+        const frame = await canvas.getAttribute("data-frame");
+        await page.clock.runFor(1000);
+        await expect(canvas).toHaveAttribute("data-frame", frame!);
+        await page.locator(".pixel-battle").screenshot({
+          path: `test-results/${dinosaurMotions[dinosaur][0]}-idle-${ranged ? "ranged" : "melee"}-${asBonus}.png`,
+        });
+        await page.getByRole("button", { name: "모험 재개", exact: true }).click();
+        const nextAt = first.time + Math.ceil(500 / (1 + asBonus) / 50) * 50;
+        await page.clock.runFor(nextAt - idleAt);
+        await expect(player).toHaveAttribute("data-animation", "attack");
+        const next = await page.evaluate(async () => {
+          const path = "/src/stores/game-store.ts";
+          const { useGameStore } = await import(path);
+          return useGameStore.getState().game.combat.lastAttack!;
+        });
+        await expect(canvas).toHaveAttribute(
+          "data-rendered-src",
+          `/assets/battle/${dinosaurMotions[dinosaur][next.mode === "ranged" ? 3 : 2]}.png`,
+        );
+        expect(next.time).toBe(nextAt);
+        expect(first.damage).toBe(ranged ? 20 : 23);
+        expect(next.damage).toBe(next.mode === "melee" ? 23 : 20);
+        expect(next.impactAt! - next.time).toBe(first.impactAt! - first.time);
+      });
+
+test("six dinosaurs share IDLE body size and foot or hover anchors in both attack modes", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.clock.pauseAt(new Date());
+  await page.goto("/home");
+  const canvas = page.locator(".battle-dinosaur canvas");
+  for (let dinosaur = 0; dinosaur < 6; dinosaur++) {
+    const sizes = [];
+    for (const mode of ["idle", "melee", "ranged"] as const) {
       await page.evaluate(
-        async ({ ranged, asBonus }) => {
-          const storePath = "/src/stores/game-store.ts";
+        async ({ dinosaur, mode }) => {
+          const path = "/src/stores/game-store.ts";
           const battlePath = "/src/domain/battle.ts";
-          const rangePath = "/src/domain/battle-range.ts";
-          const { useGameStore } = await import(storePath);
+          const { useGameStore } = await import(path);
           const { initialCombat } = await import(battlePath);
-          const { enemyAttackRange } = await import(rangePath);
           const { game } = useGameStore.getState();
-          const enemy = {
-            id: 42,
-            art: 0,
-            rank: "normal" as const,
-            ranged,
-            distance: 7,
-            hp: 1000,
-            maxHp: 1000,
-            ad: 0,
-            attackIn: 5000,
-            hitAt: -1000,
-          };
-          if (!ranged) enemy.distance = enemyAttackRange(enemy, 1);
           useGameStore.setState({
-            paused: false,
+            paused: true,
             game: {
               ...game,
-              dinosaur: 1,
-              battlePaused: false,
-              battleUpdatedAt: Date.now(),
-              debugBuffs: { asBonus, crt: 0, adBonus: 0 },
-              combat: { ...initialCombat(), spawnIn: 5000, spawned: 1, enemies: [enemy] },
+              dinosaur,
+              battlePaused: true,
+              combat: {
+                ...initialCombat(),
+                lastAttack:
+                  mode === "idle"
+                    ? null
+                    : {
+                        time: 0,
+                        mode,
+                        duration: 500,
+                        impactAt: 150,
+                        resolved: true,
+                        distance: 7,
+                        damage: 20,
+                        critical: false,
+                      },
+              },
             },
           });
         },
-        { ranged, asBonus },
+        { dinosaur, mode },
       );
-      const player = page.locator(".battle-dinosaur"),
-        canvas = player.locator("canvas");
-      await page.clock.runFor(50);
-      await expect(player).toHaveAttribute("data-attack-mode", ranged ? "ranged" : "melee");
-      const first = await page.evaluate(async () => {
-        const path = "/src/stores/game-store.ts";
-        const { useGameStore } = await import(path);
-        return useGameStore.getState().game.combat.lastAttack!;
-      });
-      await page.clock.runFor(first.impactAt! - first.time);
-      await expect(canvas).toHaveAttribute("data-src", "/assets/battle/288-700.png");
-      await expect(canvas).toHaveAttribute("data-frame", "2");
-      const idleAt = first.time + Math.ceil((first.duration! * 0.75) / 50) * 50;
-      await page.clock.runFor(idleAt - first.impactAt!);
-      await expect(player).toHaveAttribute("data-animation", "idle");
-      await expect(player).toHaveAttribute("data-attacking", "false");
-      await expect(canvas).toHaveAttribute("data-src", "/assets/battle/DinoTriceraIdle.png");
-      await page.getByRole("button", { name: "모험 일시정지", exact: true }).click();
-      const frame = await canvas.getAttribute("data-frame");
-      await page.clock.runFor(1000);
-      await expect(canvas).toHaveAttribute("data-frame", frame!);
-      await page.locator(".pixel-battle").screenshot({
-        path: `test-results/tricera-idle-${ranged ? "ranged" : "melee"}-${asBonus}.png`,
-      });
-      await page.getByRole("button", { name: "모험 재개", exact: true }).click();
-      const nextAt = first.time + Math.ceil(500 / (1 + asBonus) / 50) * 50;
-      await page.clock.runFor(nextAt - idleAt);
-      await expect(player).toHaveAttribute("data-animation", "attack");
-      await expect(canvas).toHaveAttribute("data-src", "/assets/battle/288-700.png");
-      const next = await page.evaluate(async () => {
-        const path = "/src/stores/game-store.ts";
-        const { useGameStore } = await import(path);
-        return useGameStore.getState().game.combat.lastAttack!;
-      });
-      expect(next.time).toBe(nextAt);
-      expect(first.damage).toBe(ranged ? 20 : 23);
-      expect(next.damage).toBe(next.mode === "melee" ? 23 : 20);
-      expect(next.impactAt! - next.time).toBe(first.impactAt! - first.time);
-    });
+      const source = `/assets/battle/${dinosaurMotions[dinosaur][mode === "idle" ? 1 : mode === "melee" ? 2 : 3]}.png`;
+      await expect(canvas).toHaveAttribute("data-rendered-src", source);
+      await expect(canvas).toHaveAttribute("data-rendered-frame", "0");
+      if (mode !== "idle") await expect(canvas).toHaveAttribute("data-size-reference", "idle");
+      sizes.push(
+        await canvas.evaluate((node) => {
+          const canvas = node as HTMLCanvasElement;
+          const pixels = canvas
+            .getContext("2d")!
+            .getImageData(0, 0, canvas.width, canvas.height).data;
+          let left = canvas.width,
+            top = canvas.height,
+            right = -1,
+            bottom = -1;
+          for (let y = 0; y < canvas.height; y++)
+            for (let x = 0; x < canvas.width; x++)
+              if (pixels[(y * canvas.width + x) * 4 + 3] > 128) {
+                left = Math.min(left, x);
+                top = Math.min(top, y);
+                right = Math.max(right, x);
+                bottom = Math.max(bottom, y);
+              }
+          const wrap = canvas.parentElement!;
+          const scaleX = parseFloat(wrap.style.width) / 160,
+            scaleY = parseFloat(wrap.style.height) / 120;
+          return {
+            width: (right - left + 1) * scaleX,
+            height: (bottom - top + 1) * scaleY,
+            centerX: (parseFloat(canvas.style.left) * 1.6 + (left + right + 1) / 2) * scaleX,
+            bottom: (parseFloat(canvas.style.top) * 1.2 + bottom + 1) * scaleY,
+            hitbox: JSON.parse(wrap.getAttribute("data-hitbox")!),
+          };
+        }),
+      );
+      if (mode !== "idle")
+        await page.locator(".pixel-battle").screenshot({
+          path: `test-results/${dinosaurMotions[dinosaur][0]}-${mode}-idle-size.png`,
+        });
+    }
+    for (const attack of sizes.slice(1)) {
+      for (const key of ["width", "height", "centerX", "bottom"] as const)
+        expect(Math.abs(attack[key] - sizes[0][key])).toBeLessThan(1.3);
+      expect(attack.hitbox).toEqual(sizes[0].hitbox);
+    }
+  }
+});
 
 test("Stego tail sweep renders all twelve poses, contacts on pose six, and moves body boxes together", async ({
   page,
@@ -90,7 +200,7 @@ test("Stego tail sweep renders all twelve poses, contacts on pose six, and moves
   await page.clock.install();
   await page.clock.pauseAt(new Date());
   await page.goto("/home");
-  const times = [14, 41, 68, 95, 123, 150, 204, 258, 312, 365, 419, 473];
+  const times = [14, 41, 68, 95, 123, 150, 185, 219, 254, 288, 323, 358];
   const hashes = new Set<number>();
   let rest: {
     x: number;
@@ -151,6 +261,7 @@ test("Stego tail sweep renders all twelve poses, contacts on pose six, and moves
     }
     await expect(canvas).toHaveAttribute("data-src", "/assets/battle/DinoStegoTailSweepV2.png");
     await expect(canvas).toHaveAttribute("data-frame", String(frame - 1));
+    await expect(canvas).toHaveAttribute("data-rendered-frame", String(frame - 1));
     await expect
       .poll(() =>
         canvas.evaluate((node) => {
@@ -205,12 +316,12 @@ test("six dinosaurs use authored idle, walk and attack poses; Ptera shares idle/
   await page.clock.pauseAt(new Date("2026-09-30T00:01:00Z"));
   await page.goto("/home");
   const sources = [
-    ["TrexIdleSpritesheet4X3Png", "TrexWalkSpritesheet4X4Png", "290-697"],
-    ["DinoTriceraIdle", "DinoTriceraWalk", "288-700"],
-    ["RaptorIdleSpritesheet4X31Png", "RaptorWalkSpritesheet4X4Png", "308-697"],
-    ["DinoStegoIdle", "DinoStegoWalk", "DinoStegoTailSweepV2"],
-    ["446-578", "446-578", "434-578"],
-    ["DinoBrachioIdle", "DinoBrachioWalk", "295-697"],
+    ["TrexIdleSpritesheet4X3Png", "TrexWalkSpritesheet4X4Png", "DinoTrexRangedAttack"],
+    ["DinoTriceraIdle", "DinoTriceraWalk", "DinoTriceraRangedAttack"],
+    ["RaptorIdleSpritesheet4X31Png", "RaptorWalkSpritesheet4X4Png", "DinoRaptorRangedAttack"],
+    ["DinoStegoIdle", "DinoStegoWalk", "DinoStegoRangedAttack"],
+    ["446-578", "446-578", "DinoPteraRangedAttack"],
+    ["DinoBrachioIdle", "DinoBrachioWalk", "DinoBrachioRangedAttack"],
   ];
   for (let dinosaur = 0; dinosaur < 6; dinosaur++)
     for (let mode = 0; mode < 3; mode++) {
@@ -260,7 +371,7 @@ test("six dinosaurs use authored idle, walk and attack poses; Ptera shares idle/
       );
       const canvas = page.locator(".battle-dinosaur canvas");
       await expect(canvas).toHaveAttribute(
-        "data-src",
+        "data-rendered-src",
         `/assets/battle/${sources[dinosaur][mode]}.png`,
       );
       await expect

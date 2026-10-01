@@ -58,7 +58,7 @@ describe("ranged attacks and contact melee", () => {
       }
     },
   );
-  it.each([4, 5])(
+  it.each([0, 1, 2, 3, 4, 5])(
     "dinosaur %i fires and rotates from its mouth toward the target and hits it",
     (dinosaur) => {
       const stats = { ...buffs, dinosaur };
@@ -67,7 +67,8 @@ describe("ranged attacks and contact melee", () => {
       const shot = launched.playerProjectiles[0];
       expect(shot).toMatchObject(playerMouthPosition(dinosaur));
       expect(shot.vx).toBeGreaterThan(0);
-      expect(shot.vy).toBeGreaterThan(0);
+      const verticalDirection = Math.sign(started.lastAttack!.aimY! - shot.y);
+      expect(Math.sign(shot.vy)).toBe(verticalDirection);
       expect(Math.hypot(shot.vx, shot.vy)).toBeCloseTo(240, 5);
       expect(shot.vy / shot.vx).toBeCloseTo(
         (started.lastAttack!.aimY! - shot.y) / (started.lastAttack!.aimX! - shot.x),
@@ -78,7 +79,7 @@ describe("ranged attacks and contact melee", () => {
         5,
       );
       const moving = advanceCombat({ ...launched, attackIn: 5000 }, stats, 1, 200).combat;
-      expect(moving.playerProjectiles[0].y).toBeGreaterThan(shot.y);
+      expect(Math.sign(moving.playerProjectiles[0].y - shot.y)).toBe(verticalDirection);
       const hit = advanceCombat(moving, stats, 1, 1000).combat;
       expect(hit.enemies[0].hp).toBe(980);
       expect(hit.playerProjectiles).toHaveLength(0);

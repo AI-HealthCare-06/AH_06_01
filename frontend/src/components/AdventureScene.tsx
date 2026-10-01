@@ -6,6 +6,7 @@ import {
   playerProjectileFrame,
   playerProjectileAngle,
   projectileGeometry,
+  dinosaurBodyBounds,
 } from "../domain/battle-geometry";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -128,21 +129,23 @@ export function AdventureScene({
   const waveTotal = waveTarget(battle.wave);
   const attackElapsed = battle.lastAttack ? battle.clock - battle.lastAttack.time : 1000;
   const attackDuration = battle.lastAttack?.duration ?? Math.min(500, buffs.attackInterval);
-  // Tricera finishes its visual recovery early, leaving the last quarter of
+  // Finish visual recovery early, leaving the last quarter of
   // each attack cycle for IDLE without changing combat cooldown or impact time.
-  const attackMotionDuration = game.dinosaur === 1 ? attackDuration * 0.75 : attackDuration;
+  const attackMotionDuration = attackDuration * 0.75;
   const attacking =
     attackElapsed >= 0 &&
     attackElapsed < attackMotionDuration &&
     battle.recovery === 0 &&
     !transition;
-  const attack = attacking && art.attack;
+  const rangedAttack = battle.lastAttack?.mode === "ranged";
+  const attackSource = rangedAttack ? art.rangedAttack : art.attack;
+  const attack = attacking && attackSource;
   // The new Stego sheet contacts on pose 06; map its authored wind-up/recovery
   // to the existing combat impact time without changing attack speed or damage.
   const contactProgress =
-    art.contactFrame === undefined
+    rangedAttack || art.contactFrame === undefined
       ? 0.3
-      : (art.contactFrame + 0.5) / attackFrames[art.attack].length;
+      : (art.contactFrame + 0.5) / attackFrames[attackSource].length;
   const impactDelay =
     battle.lastAttack?.impactAt !== undefined
       ? battle.lastAttack.impactAt - battle.lastAttack.time
@@ -451,7 +454,13 @@ export function AdventureScene({
             bottom: "auto",
           }}
         >
-          <BattleSprite src={dinoSource} frame={dinoFrame} label={dino.name} filter={skin.filter} />
+          <BattleSprite
+            src={dinoSource}
+            frame={dinoFrame}
+            label={dino.name}
+            filter={skin.filter}
+            matchBounds={attacking ? dinosaurBodyBounds[game.dinosaur] : undefined}
+          />
           <EquippedAccessories />
         </div>
         {battle.enemies.map((monster) => {

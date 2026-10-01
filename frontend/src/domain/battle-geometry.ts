@@ -2,6 +2,7 @@
 // transparent sprite margins. Colliders describe bodies; hitboxes receive hits.
 import atlases from "../design/animation-atlases.json";
 import motions from "../design/motion-atlases.json";
+import attackMotions from "../design/dino-attack-atlases.json";
 import { meleeSizeMultiplier } from "./game-policy";
 export type BattleBox = { x: number; y: number; width: number; height: number };
 export type ActorGeometry = { sprite: BattleBox; collider: BattleBox; hitbox: BattleBox };
@@ -18,7 +19,7 @@ export function overlaps(a: BattleBox, b: BattleBox) {
 // Nontransparent resting-pose bounds in BattleSprite's 160 × 120 render buffer.
 // Character order follows battleDinosaurs; Pteranodon uses walking frame zero.
 // Keep these stable during attacks/hit reactions so collision size does not pulse.
-const characterBounds = [
+export const dinosaurBodyBounds = [
   atlases.bounds.TrexIdleSpritesheet4X3Png as [number, number, number, number],
   motions.bounds.DinoTriceraIdle as [number, number, number, number],
   atlases.bounds.RaptorIdleSpritesheet4X31Png as [number, number, number, number],
@@ -73,7 +74,7 @@ function translateBox(box: BattleBox, x: number, y: number): BattleBox {
 export function playerGeometry(dinosaur: number, offset = { x: 0, y: 0 }): ActorGeometry {
   if (restingPlayers[dinosaur]) return translateActor(restingPlayers[dinosaur], offset.x, offset.y);
   const flying = dinosaur === 4;
-  const bounds = characterBounds[dinosaur];
+  const bounds = dinosaurBodyBounds[dinosaur];
   const scale = dinosaur === 5 ? 1.2 : 1;
   const width = 125 * scale,
     height = 98 * scale;
@@ -88,16 +89,11 @@ export function playerGeometry(dinosaur: number, offset = { x: 0, y: 0 }): Actor
   restingPlayers[dinosaur] = geometry(sprite, bounds);
   return translateActor(restingPlayers[dinosaur], offset.x, offset.y);
 }
-// Mouth anchors in BattleSprite's 160 × 120 buffer at the authored release
-// pose: frame 02 for the eight-pose attacks, frame 05 for Stego's tail sweep.
-const projectileMouthPoints = [
-  [154, 85],
-  [155, 104],
-  [139, 82],
-  [9, 99],
-  [148, 103],
-  [134, 61],
-] as const;
+// IDLE-sized mouth anchors on ranged release pose 02. Melee poses never
+// release a projectile; Stego's mouth now faces right in its ranged sheet.
+const projectileMouthPoints = ["Trex", "Tricera", "Raptor", "Stego", "Ptera", "Brachio"].map(
+  (name) => attackMotions.mouthPoints[name as keyof typeof attackMotions.mouthPoints],
+);
 export function playerMouthPosition(dinosaur: number, actor = playerGeometry(dinosaur)) {
   const [x, y] = projectileMouthPoints[dinosaur];
   return {
@@ -210,7 +206,7 @@ export function playerProjectileFrame(age: number) {
   return Math.floor(Math.max(0, age) / 80) % 4;
 }
 export function playerProjectileAngle(shot: PlayerShotPosition) {
-  return shot.dinosaur === 4 || shot.dinosaur === 5 ? Math.atan2(shot.vy ?? 0, shot.vx ?? 240) : 0;
+  return Math.atan2(shot.vy ?? 0, shot.vx ?? 240);
 }
 export function playerProjectileGeometry(shot: PlayerShotPosition) {
   const name = `Dino${dinoNames[shot.dinosaur]}Projectile`;

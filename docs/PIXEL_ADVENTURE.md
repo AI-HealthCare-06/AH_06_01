@@ -39,7 +39,7 @@ This feature continues the current REXRUN demo on `feature/pixel-adventure-devic
 
 ## Original Figma art
 
-The source is [REXRUN](https://www.figma.com/design/lCWaAEae4xccaADW0osrLx/REXRUN?node-id=5-2). This change reads Figma and does not edit it. Local original image files are named by node ID under `frontend/public/assets/battle/`; the mapping lives in `frontend/src/design/battle-assets.ts`.
+The source is [REXRUN](https://www.figma.com/design/lCWaAEae4xccaADW0osrLx/REXRUN?node-id=5-2). Original sections remain intact; the 2026-10-01 attack update adds section `21-1 Dino Ranged Attack Motion Asset`. Local original image files are named by node ID under `frontend/public/assets/battle/`; the mapping lives in `frontend/src/design/battle-assets.ts`.
 
 | Section | Nodes | Use |
 | --- | --- | --- |
@@ -166,10 +166,16 @@ Three melee walk layer names in Figma differ from the pictured creature; the map
 
 Stego's 12 authored poses run row by row. Pose 06 is the contact pose; animation wind-up and recovery map to the existing combat impact time and attack interval, keeping damage and attack cadence unchanged. Its melee movement carries the sprite, body hitbox and collider together. The original Figma preview is 1.08s; runtime follows the configured combat duration.
 
-Tricera completes its visual attack within the first 75% of each attack cycle, then plays its authored IDLE sheet during the remaining 25%. The release/contact frame stays at the existing impact time; actual attack cooldowns, damage and melee body recovery remain unchanged.
+All six dinosaurs complete their visual attack within the first 75% of each attack cycle, then play their authored IDLE sheet during the remaining 25%. The release/contact frame stays at the existing impact time; actual attack cooldowns, damage and melee body recovery remain unchanged.
 
 Ptera's visible resting center now sits at 60% of the battle background height (y=188.8 design pixels). Its projectile follows the stored target aim and rotates along its velocity; the shared hitbox is the AABB of the rotated visible canvas and grows with the projectile. Debug shows mint `P# HIT` labels for player shots alongside purple enemy shot labels. All six melee enemies across normal/elite/boss ranks can reach and damage Ptera with their existing sizes.
 
 Brachio's sprite is 20% larger on both axes (150×117.6 design pixels), retaining its ground foot anchor at y=253. Body boxes and the release-pose mouth coordinate share that scale. Its projectile also rotates along the mouth-to-target velocity, with the rotated artwork's AABB shared by collisions and debug display.
 
 The vault applies dinosaur and skin selections immediately, without an apply button. Selecting another dinosaur clears outgoing player projectiles and a pending attack, while preserving HP, wave progress, cooldown, enemy shots and earned rewards. Changing only the skin preserves the ongoing attack. Per-dinosaur styles persist across switching and reloads.
+
+### Separate attack modes (2026-10-01)
+
+The five ground dinosaurs retain section 10 attacks for melee and use new, stationary mouth-release sheets for ranged attacks. Ptera retains its original ranged poses with dust, smoke and trails removed, and uses a new beak-strike sheet for melee. All seven PNGs and source/generation details are recorded in [DINO_ATTACK_MOTIONS.md](DINO_ATTACK_MOTIONS.md) and placed in Figma section `701:591`.
+
+Each attack sheet is calibrated once from its first body pose to the selected dinosaur's IDLE alpha bounds. That scale remains constant through the motion, sharing IDLE's horizontal center and ground/hover anchor. Extended wings, horns and tails can render beyond the actor wrapper without clipping. Collision dimensions remain stable. Ranged release is pose 03; only Stego's melee sweep uses pose 06. All six projectile artworks rotate along the stored mouth-to-target velocity, and collision/debug boxes follow their rotated visible bounds.

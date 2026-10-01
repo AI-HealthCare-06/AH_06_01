@@ -159,7 +159,10 @@ test("Pteranodon idles in place, attacks down-right and freezes when paused", as
   });
   await page.clock.runFor(200);
   await expect(dino).toHaveAttribute("data-attacking", "true");
-  await expect(canvas).toHaveAttribute("data-src", "/assets/battle/434-578.png");
+  await expect(canvas).toHaveAttribute(
+    "data-rendered-src",
+    "/assets/battle/DinoPteraMeleeAttack.png",
+  );
   await expect(canvas).toHaveAttribute("data-frame", "2");
   const attack = await dino.evaluate((e) => ({
     left: parseFloat(getComputedStyle(e).left),
