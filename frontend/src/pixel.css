@@ -48,9 +48,7 @@
   overflow: hidden;
 }
 .dashboard-heading {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  display: block;
   padding: 12px 8px;
   flex-shrink: 0;
 }
@@ -70,8 +68,7 @@
   line-height: 17px;
 }
 .dashboard-heading .dashboard-period-select {
-  flex-shrink: 0;
-  text-align: center;
+  text-align: left;
 }
 .debug-level-controls {
   width: 100%;
@@ -2631,6 +2628,81 @@
 .quest-calendar {
   margin-bottom: 10px;
 }
+.calendar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 16px 6px;
+  color: #59654f;
+  font-size: 10px;
+}
+.calendar-help {
+  position: relative;
+}
+.calendar-help-toggle {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+}
+.calendar-help-toggle .pixel-icon {
+  width: 22px;
+  height: 22px;
+}
+.calendar-help-popover {
+  position: absolute;
+  top: 0;
+  right: 40px;
+  z-index: 30;
+  width: 224px;
+  padding: 12px;
+  border: 2px solid #29392d;
+  background: #fff8e7;
+  color: #29392d;
+  box-shadow: 3px 3px 0 #29392d;
+  font-size: 11px;
+}
+.calendar-help-popover::before,
+.calendar-help-popover::after {
+  content: "";
+  position: absolute;
+  clip-path: polygon(
+    0 0,
+    50% 0,
+    50% 25%,
+    75% 25%,
+    75% 40%,
+    100% 40%,
+    100% 60%,
+    75% 60%,
+    75% 75%,
+    50% 75%,
+    50% 100%,
+    0 100%
+  );
+}
+.calendar-help-popover::before {
+  top: 4px;
+  right: -12px;
+  width: 12px;
+  height: 20px;
+  background: #29392d;
+}
+.calendar-help-popover::after {
+  top: 7px;
+  right: -8px;
+  width: 8px;
+  height: 14px;
+  background: #fff8e7;
+}
+.calendar-help-popover strong {
+  color: #29392d;
+}
+.calendar-help-popover p {
+  margin: 5px 0 10px;
+  color: #65735b;
+  font-size: 10px;
+}
 .quest-calendar .weekly-calendar {
   gap: 6px;
   margin-bottom: 5px;
@@ -2669,10 +2741,10 @@
   cursor: default;
 }
 .calendar-key {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  font-size: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  font-size: 10px;
 }
 .calendar-key span {
   display: flex;
@@ -2680,43 +2752,172 @@
   gap: 4px;
 }
 .calendar-key i {
-  width: 7px;
-  height: 7px;
+  width: 9px;
+  height: 9px;
   background: var(--completion);
 }
 .dashboard-date-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
   align-items: end;
-  margin: 4px 0 10px;
+  margin-top: 12px;
   color: #f8eed5;
 }
-.dashboard-date-controls label {
-  flex: 1;
-  min-width: 110px;
+.dashboard-date-controls label,
+.dashboard-date-field {
+  min-width: 0;
   font-size: 10px;
   display: grid;
-  gap: 3px;
+  gap: 5px;
 }
-.dashboard-date-controls input {
+.dashboard-date-controls[data-custom="true"] .dashboard-period-select {
+  grid-column: 1 / -1;
+}
+.dashboard-date-controls select,
+.pixel-date-trigger {
   width: 100%;
   min-width: 0;
-  padding: 5px 7px;
+  height: 36px;
+  padding: 6px 8px;
   border: 2px solid #232d27;
   background: #f8eed5;
   color: #153329;
+  box-shadow: 2px 2px 0 #171b16;
   font:
     11px "Galmuri11",
     sans-serif;
 }
+.pixel-date-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+.pixel-date-trigger .pixel-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
 .dashboard-date-controls p {
+  grid-column: 1 / -1;
   margin: 0;
-  flex: 1;
-  min-width: 130px;
+  padding-top: 3px;
   font-size: 10px;
   line-height: 1.5;
   color: #dfd7b7;
+  text-align: right;
+}
+.pixel-date-dialog {
+  width: 330px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100svh - 32px);
+  padding: 14px;
+  border: 3px solid #29392d;
+  background: #fff8e7;
+  color: #29392d;
+  box-shadow: 6px 6px 0 #171b16;
+  font:
+    12px "Galmuri11",
+    sans-serif;
+}
+.pixel-date-dialog::backdrop {
+  background: #14251dcc;
+}
+.pixel-date-dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #d6ceb3;
+}
+.pixel-date-dialog h2 {
+  font-size: 14px;
+}
+.pixel-date-dialog header button {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #29392d;
+  font-size: 18px;
+}
+.pixel-date-month {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1.4fr) minmax(0, 1fr) 30px;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.pixel-date-month > * {
+  min-width: 0;
+  height: 32px;
+  padding: 0 3px;
+  border: 2px solid #29392d;
+  background: #f3e7c8;
+  color: #29392d;
+  font: inherit;
+}
+.pixel-date-month button {
+  background: #29392d;
+  color: #ffe486;
+  font-size: 18px;
+}
+.pixel-date-weekdays,
+.pixel-date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.pixel-date-weekdays {
+  margin-bottom: 6px;
+  text-align: center;
+  font-size: 10px;
+}
+.pixel-date-grid button {
+  height: 32px;
+  border: 2px solid transparent;
+  font-size: 13px;
+}
+.pixel-date-grid button[data-outside="true"] {
+  color: #8f9586;
+}
+.pixel-date-weekdays [data-weekday="0"],
+.pixel-date-grid button[data-weekday="0"]:not([data-outside="true"]) {
+  color: #b83930;
+}
+.pixel-date-weekdays [data-weekday="6"],
+.pixel-date-grid button[data-weekday="6"]:not([data-outside="true"]) {
+  color: #286884;
+}
+.pixel-date-grid button[data-today="true"] {
+  border-color: #b88832;
+}
+.pixel-date-grid button[aria-pressed="true"] {
+  background: #df4537;
+  color: #fff3d0 !important;
+  border-color: #952c25;
+  box-shadow: 2px 2px 0 #29392d;
+}
+.pixel-date-dialog button:disabled {
+  opacity: 0.35;
+}
+.pixel-date-grid button:hover:not(:disabled):not([aria-pressed="true"]) {
+  background: #e8e4c7;
+}
+.pixel-date-dialog footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.pixel-date-dialog footer button {
+  flex: 1;
+  height: 36px;
+  border: 2px solid #29392d;
+  box-shadow: 2px 2px 0 #29392d;
+  background: #ffe486;
+}
+.pixel-date-dialog footer button:last-child {
+  background: #29392d;
+  color: #fff3d0;
 }
 
 .shop-wallet {

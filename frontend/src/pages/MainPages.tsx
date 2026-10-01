@@ -24,6 +24,7 @@ import type { HealthPeriod } from "../services/health-history";
 import { useProfileStore } from "../stores/profile-store";
 import { GameWallet, GoldEffects } from "../components/GameWallet";
 import { questExperience } from "../domain/experience";
+import { PixelDatePicker } from "../components/PixelDatePicker";
 
 export function HomePage() {
   const { game, paused, togglePause } = useGameStore();
@@ -229,55 +230,51 @@ export function DashboardPage() {
           title="HEALTH DASHBOARD"
           subtitle={`${periodInfo.label} 건강 기록과 ${dino.name}의 성장을 확인하세요`}
         />
-        <label className="dashboard-period-select">
-          <span>조회 기간</span>
-          <select
-            aria-label="건강 변화 조회 기간"
-            value={period}
-            onChange={(event) => setPeriod(event.target.value as HealthPeriod)}
-          >
-            {(Object.keys(healthPeriods) as HealthPeriod[]).map((value) => (
-              <option key={value} value={value}>
-                {healthPeriods[value].label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="dashboard-date-controls" data-no-swipe>
-        {period === "custom" && (
-          <label>
-            시작일
-            <input
-              aria-label="조회 시작일"
-              type="date"
-              value={rangeStart}
-              max={selectedDate}
-              onChange={(event) => {
-                const value = event.target.value;
-                if (value && value <= selectedDate) setRangeStart(value);
+        <div className="dashboard-date-controls" data-no-swipe data-custom={period === "custom"}>
+          <label className="dashboard-period-select">
+            <span>조회 기간</span>
+            <select
+              aria-label="건강 변화 조회 기간"
+              value={period}
+              onChange={(event) => setPeriod(event.target.value as HealthPeriod)}
+            >
+              {(Object.keys(healthPeriods) as HealthPeriod[]).map((value) => (
+                <option key={value} value={value}>
+                  {healthPeriods[value].label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {period === "custom" && (
+            <div className="dashboard-date-field">
+              <span>시작일</span>
+              <PixelDatePicker
+                label="조회 시작일"
+                value={rangeStart}
+                max={selectedDate}
+                onChange={(value) => {
+                  if (value && value <= selectedDate) setRangeStart(value);
+                }}
+              />
+            </div>
+          )}
+          <div className="dashboard-date-field">
+            <span>{period === "custom" ? "종료일" : "기준 날짜"}</span>
+            <PixelDatePicker
+              label={period === "custom" ? "조회 종료일" : "조회 기준 날짜"}
+              value={selectedDate}
+              max={game.date}
+              onChange={(value) => {
+                if (!value || value > game.date) return;
+                setSelectedDate(value);
+                if (value < rangeStart) setRangeStart(value);
               }}
             />
-          </label>
-        )}
-        <label>
-          {period === "custom" ? "종료일" : "기준 날짜"}
-          <input
-            aria-label={period === "custom" ? "조회 종료일" : "조회 기준 날짜"}
-            type="date"
-            value={selectedDate}
-            max={game.date}
-            onChange={(event) => {
-              const value = event.target.value;
-              if (!value || value > game.date) return;
-              setSelectedDate(value);
-              if (value < rangeStart) setRangeStart(value);
-            }}
-          />
-        </label>
-        <p aria-live="polite">
-          {range.start === range.end ? range.end : `${range.start} ~ ${range.end}`}
-        </p>
+          </div>
+          <p aria-live="polite">
+            {range.start === range.end ? range.end : `${range.start} ~ ${range.end}`}
+          </p>
+        </div>
       </div>
       {!data ? (
         <p role="status">

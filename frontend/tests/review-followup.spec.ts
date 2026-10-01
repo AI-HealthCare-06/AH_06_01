@@ -24,7 +24,9 @@ test("all four player projectile poses share visible bounds with collision and d
                 ...game.combat,
                 lastAttack: null,
                 enemies: [],
-                projectiles: [],
+                projectiles: [
+                  { id: "enemy-pose", art: 0, rank: "normal", origin: 7, distance: 5, damage: 5 },
+                ],
                 playerProjectiles: [
                   {
                     id: "pose",
@@ -47,6 +49,15 @@ test("all four player projectile poses share visible bounds with collision and d
       );
       const shot = page.locator(".player-projectile");
       await expect(shot.locator("canvas")).toHaveAttribute("data-frame", String(frame));
+      const sizes = await page.evaluate(() => {
+        const player = document.querySelector<HTMLElement>(".player-projectile")!.style;
+        const enemy = document.querySelector<HTMLElement>(".enemy-projectile")!.style;
+        return [
+          parseFloat(player.width) / parseFloat(enemy.width),
+          parseFloat(player.height) / parseFloat(enemy.height),
+        ];
+      });
+      for (const ratio of sizes) expect(ratio).toBeCloseTo(1.2, 5);
       const box = JSON.parse((await shot.getAttribute("data-hitbox"))!);
       const rect = page.locator('[data-debug-projectile="pose"] rect');
       for (const [key, value] of Object.entries(box))

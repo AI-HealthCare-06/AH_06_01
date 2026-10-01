@@ -74,14 +74,25 @@ test("dashboard alone shows quest borders and selected dates/ranges drive the re
     await expect(days.nth(i)).toHaveAttribute("data-completion", String(i));
   }
   await days.nth(2).click();
-  await expect(page.getByLabel("조회 기준 날짜")).toHaveValue("2026-09-29");
+  await expect(page.getByRole("button", { name: "조회 기준 날짜" })).toHaveAttribute(
+    "data-date",
+    "2026-09-29",
+  );
   await expect(page.locator(".report-body dl")).toContainText("선택일 퀘스트4 / 5");
   await page.getByLabel("건강 변화 조회 기간").selectOption("custom");
-  await page.getByLabel("조회 시작일").fill("2026-09-20");
+  await page.getByRole("button", { name: "조회 시작일" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "2026년 9월 20일", exact: true })
+    .click();
   await expect(page.locator(".dashboard-date-controls p")).toHaveText("2026-09-20 ~ 2026-09-29");
   await expect(page.locator(".trend-column small").first()).toHaveText("09.20");
   await expect(page.locator(".trend-column small").last()).toHaveText("09.29");
-  await page.getByLabel("조회 종료일").fill("2026-09-26");
+  await page.getByRole("button", { name: "조회 종료일" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "2026년 9월 26일", exact: true })
+    .click();
   await expect(page.locator(".report-body dl")).toContainText("선택 주 달성1일");
   await expect(page.getByRole("button", { name: /9월 26일/ })).toHaveAttribute(
     "data-completion",
@@ -92,6 +103,65 @@ test("dashboard alone shows quest borders and selected dates/ranges drive the re
     await page.goto(`/${route}`);
     await expect(page.locator(".weekly-calendar")).toHaveCount(0);
   }
+});
+
+test("calendar help toggles a right-tail bubble and dismisses with Escape or outside click", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto("/dashboard");
+  const help = page.getByRole("button", { name: "달력 달성률 색상 안내" });
+  const bubble = page.getByRole("tooltip");
+  await expect(bubble).toHaveCount(0);
+  await help.click();
+  await expect(help).toHaveAttribute("aria-expanded", "true");
+  await expect(bubble.locator(".calendar-key span")).toHaveText(["0%", "20–40%", "60–80%", "100%"]);
+  const box = (await bubble.boundingBox())!;
+  const icon = (await help.boundingBox())!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThan(icon.x);
+  expect(await bubble.evaluate((node) => getComputedStyle(node, "::before").right)).toBe("-12px");
+  await page.screenshot({ path: "test-results/dashboard-help-320.png" });
+  await page.keyboard.press("Escape");
+  await expect(bubble).toHaveCount(0);
+  await expect(help).toBeFocused();
+  await help.click();
+  await page.getByRole("heading", { name: "HEALTH DASHBOARD" }).click();
+  await expect(bubble).toHaveCount(0);
+});
+
+test("pixel date picker limits future dates, handles leap years and returns keyboard focus", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto("/dashboard");
+  const trigger = page.getByRole("button", { name: "조회 기준 날짜", exact: true });
+  await trigger.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("button", { name: "2026년 9월 30일", exact: true })).toBeFocused();
+  await expect(dialog.getByRole("button", { name: "2026년 10월 1일", exact: true })).toBeDisabled();
+  await expect(dialog.getByRole("button", { name: "다음 달", exact: true })).toBeDisabled();
+  await page.screenshot({ path: "test-results/dashboard-picker-320.png" });
+  const bounds = (await dialog.boundingBox())!;
+  expect(bounds.x).toBeGreaterThanOrEqual(0);
+  expect(bounds.x + bounds.width).toBeLessThanOrEqual(320);
+  await dialog.getByLabel("연도 선택").selectOption("2024");
+  await dialog.getByLabel("월 선택").selectOption("1");
+  const leapDay = dialog.getByRole("button", { name: "2024년 2월 29일", exact: true });
+  await expect(leapDay).toBeFocused();
+  await page.keyboard.press("ArrowLeft");
+  await expect(dialog.getByRole("button", { name: "2024년 2월 28일", exact: true })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toHaveAttribute("data-date", "2024-02-28");
+  await expect(trigger).toBeFocused();
+  await expect(page.locator(".dashboard-date-controls p")).toHaveText("2024-02-22 ~ 2024-02-28");
+  await trigger.click();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toHaveAttribute("data-date", "2024-02-28");
+  await expect(trigger).toBeFocused();
 });
 
 test("vault assets, wallet actions and date controls stay within mobile bounds", async ({

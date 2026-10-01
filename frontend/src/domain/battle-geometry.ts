@@ -149,7 +149,10 @@ export function combatPlayerGeometry(dinosaur: number, attack: AttackMotion | nu
 
 export type PlayerShotPosition = { x: number; y: number; dinosaur: number; age: number };
 const dinoNames = ["Trex", "Tricera", "Raptor", "Stego", "Ptera", "Brachio"];
-export const playerProjectileSize = { width: 36, height: 27 };
+export const playerProjectileSize = {
+  width: projectileSize.width * 1.2,
+  height: projectileSize.height * 1.2,
+};
 export function playerProjectileGeometry(shot: PlayerShotPosition) {
   const name = `Dino${dinoNames[shot.dinosaur]}Projectile`;
   const frames = (motions.frameBounds as Record<string, number[][]>)[name];

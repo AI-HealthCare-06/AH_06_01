@@ -18,6 +18,9 @@ const paths = {
   network:
     "M9 2h6v2h4v3h3v10h-3v3h-4v2H9v-2H5v-3H2V7h3V4h4zM9 5H7v5h3V5zM14 5v5h3V7h-2V5zM5 13v3h2v3h3v-6zM14 13v6h3v-3h2v-3z",
   sun: "M10 1h4v4h-4zM10 19h4v4h-4zM1 10h4v4H1zM19 10h4v4h-4zM7 7h10v10H7zM3 3h3v3H3zM18 3h3v3h-3zM3 18h3v3H3zM18 18h3v3h-3z",
+  calendar:
+    "M5 1h3v4h8V1h3v4h3v18H2V5h3zM5 9v11h14V9zM7 11h3v3H7zM13 11h3v3h-3zM7 16h3v2H7zM13 16h3v2h-3z",
+  alert: "M10 5h4v10h-4zM10 18h4v3h-4z",
 } as const;
 export type PixelIconName = keyof typeof paths;
 export function PixelIcon({ name, className = "" }: { name: PixelIconName; className?: string }) {
@@ -28,7 +31,20 @@ export function PixelIcon({ name, className = "" }: { name: PixelIconName; class
       aria-hidden="true"
       shapeRendering="crispEdges"
     >
-      <path fill="currentColor" fillRule="evenodd" d={paths[name]} />
+      {name === "alert" && (
+        <>
+          <path
+            fill="#ffcf29"
+            d="M8 0h8v2h4v2h2v4h2v8h-2v4h-2v2h-4v2H8v-2H4v-2H2v-4H0V8h2V4h2V2h4z"
+          />
+          <path fill="#ffb600" d="M12 0h4v2h4v2h2v4h2v8h-2v4h-2v2h-4v2h-4z" />
+        </>
+      )}
+      <path
+        fill={name === "alert" ? "#d22f2f" : "currentColor"}
+        fillRule="evenodd"
+        d={paths[name]}
+      />
     </svg>
   );
 }
