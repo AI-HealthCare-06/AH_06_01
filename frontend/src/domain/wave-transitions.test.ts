@@ -5,7 +5,6 @@ import {
   clearDuration,
   combatSchema,
   initialCombat,
-  spawnBatchLimit,
   projectileSpeed,
   travelDuration,
   startDuration,
@@ -17,11 +16,10 @@ import { experienceForLevel, experienceProgress } from "./experience";
 
 const buffs = battleBuffStats(initialGame());
 describe("mixed waves and travel", () => {
-  it("randomizes group sizes and melee/ranged members, expands only above 50, and caps the quota", () => {
+  it("randomizes singles or two/three mixed members for every wave and caps the quota", () => {
     const harmless = { ...buffs, maxHp: 100000, attack: 0, defBonus: 1 };
     for (const wave of [1, 3, 4, 5, 10]) {
-      const cap = waveTarget(wave) > 50 ? 5 : 3;
-      expect(spawnBatchLimit(wave)).toBe(cap);
+      const cap = 3;
       const sizes = new Set<number>();
       let mixed = false;
       for (let sample = 0; sample < 50; sample++) {
@@ -58,6 +56,72 @@ describe("mixed waves and travel", () => {
         wave === 5 ? ["elite"] : wave === 10 ? ["boss"] : [],
       );
     }
+  });
+  it("uses a 20% simultaneous chance with two or three members, including the threshold boundary", () => {
+    const harmless = { ...buffs, maxHp: 100000, attack: 0, defBonus: 1 };
+    // Saved RNG seeds whose first draws are immediately below/above 0.2.
+    const below = advanceCombat(
+      { ...initialCombat(100000), seed: 2356543012, attackIn: 100000 },
+      harmless,
+      1,
+      50,
+    ).combat;
+    const above = advanceCombat(
+      { ...initialCombat(100000), seed: 2337691369, attackIn: 100000 },
+      harmless,
+      1,
+      50,
+    ).combat;
+    expect(below.spawned).toBe(2);
+    expect(above.spawned).toBe(1);
+    const frequencies = [0, 0, 0, 0];
+    for (let i = 0; i < 1000; i++) {
+      const state = advanceCombat(
+        { ...initialCombat(100000), wave: 4, seed: 999 + i * 100003, attackIn: 100000 },
+        harmless,
+        1,
+        50,
+      ).combat;
+      frequencies[state.spawned]++;
+    }
+    const simultaneous = (frequencies[2] + frequencies[3]) / 1000;
+    expect(simultaneous).toBeGreaterThan(0.19);
+    expect(simultaneous).toBeLessThan(0.21);
+    expect(frequencies[2]).toBeGreaterThan(0);
+    expect(frequencies[3]).toBeGreaterThan(0);
+  });
+  it.each([
+    [42, 1, 3500],
+    [201005, 2, 6300],
+    [601017, 3, 6300],
+  ])("seed %i spawns %i and waits exactly %ims before the next event", (seed, count, cooldown) => {
+    const harmless = { ...buffs, maxHp: 100000, attack: 0, defBonus: 1 };
+    const first = advanceCombat(
+      { ...initialCombat(100000), seed, attackIn: 100000 },
+      harmless,
+      1,
+      50,
+    ).combat;
+    expect(first.spawned).toBe(count);
+    expect(first.spawnIn).toBe(cooldown);
+    const waiting = advanceCombat(first, harmless, 1, cooldown - 50).combat;
+    expect(waiting.spawned).toBe(count);
+    const saved = combatSchema.parse(JSON.parse(JSON.stringify(waiting)));
+    expect(saved.spawnIn).toBe(50);
+    const next = advanceCombat(saved, harmless, 1, 50).combat;
+    expect(next.spawned).toBeGreaterThan(count);
+    expect(next.clock - first.clock).toBe(cooldown);
+  });
+  it("clamps a simultaneous roll to one remaining monster and keeps the normal cooldown", () => {
+    const state = advanceCombat(
+      { ...initialCombat(100000), spawned: 29, seed: 201005, attackIn: 100000 },
+      { ...buffs, maxHp: 100000, attack: 0, defBonus: 1 },
+      1,
+      50,
+    ).combat;
+    expect(state.spawned).toBe(30);
+    expect(state.enemies).toHaveLength(1);
+    expect(state.spawnIn).toBe(3500);
   });
   it("preserves random spawn sequences across saved/offline simulation chunks", () => {
     const input = { ...initialCombat(100000), wave: 4 };

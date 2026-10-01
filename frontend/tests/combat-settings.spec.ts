@@ -1,5 +1,60 @@
 import { expect, test } from "@playwright/test";
 
+for (const [seed, count, cooldown] of [
+  [42, 1, 3500],
+  [201005, 2, 6300],
+  [601017, 3, 6300],
+]) {
+  test(`spawn group ${count} waits ${cooldown}ms and preserves its remaining cooldown across pause/reload`, async ({
+    page,
+  }) => {
+    await page.clock.install();
+    await page.clock.pauseAt(new Date());
+    await page.goto("/home");
+    await page.evaluate(async (seed) => {
+      const path = "/src/stores/game-store.ts";
+      const battlePath = "/src/domain/battle.ts";
+      const { useGameStore } = await import(path);
+      const { initialCombat } = await import(battlePath);
+      const { game } = useGameStore.getState();
+      useGameStore.setState({
+        paused: false,
+        game: {
+          ...game,
+          battlePaused: false,
+          battleUpdatedAt: Date.now(),
+          debugBuffs: { defBonus: 0.9 },
+          combat: { ...initialCombat(), seed, attackIn: 100000 },
+        },
+      });
+    }, seed);
+    await page.clock.runFor(50);
+    const enemies = page.locator(".battle-enemy");
+    await expect(enemies).toHaveCount(count);
+    const remainingCooldown = () =>
+      page.evaluate(async () => {
+        const path = "/src/stores/game-store.ts";
+        const { useGameStore } = await import(path);
+        return useGameStore.getState().game.combat.spawnIn;
+      });
+    expect(await remainingCooldown()).toBe(cooldown);
+    await page.clock.runFor(cooldown - 100);
+    await expect(enemies).toHaveCount(count);
+    await page.getByRole("button", { name: "모험 일시정지", exact: true }).click();
+    await page.clock.runFor(5000);
+    expect(await remainingCooldown()).toBe(100);
+    await page.reload();
+    await expect(enemies).toHaveCount(count);
+    expect(await remainingCooldown()).toBe(100);
+    await page.getByRole("button", { name: "모험 재개", exact: true }).click();
+    await page.clock.runFor(50);
+    await expect(enemies).toHaveCount(count);
+    await page.clock.runFor(50);
+    expect(await enemies.count()).toBeGreaterThan(count);
+    expect(await enemies.count()).toBeLessThanOrEqual(count + 3);
+  });
+}
+
 test("game controls open three working, persistent settings and account page has no reset toggles", async ({
   page,
 }) => {

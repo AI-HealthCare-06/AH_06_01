@@ -70,6 +70,8 @@ test("wave combat pauses, requires multiple hits and awards Gold separately", as
     "1",
   );
   await page.clock.runFor(600);
+  await expect(page.locator(".battle-enemy")).toHaveCount(0);
+  await page.clock.runFor(100);
   expect(await page.locator(".battle-enemy").count()).toBeGreaterThanOrEqual(1);
   expect(await page.locator(".battle-enemy").count()).toBeLessThanOrEqual(3);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!));

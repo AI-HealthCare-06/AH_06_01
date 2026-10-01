@@ -75,7 +75,10 @@ describe("wave rewards and saved history", () => {
     const ready = tickBattle(started, arrival + startDuration);
     expect(ready.combat.spawned).toBe(0);
     expect(ready.combat.transition).toBeNull();
-    expect(tickBattle(ready, arrival + startDuration + 50).combat.spawned).toBe(1);
+    const fighting = tickBattle(ready, arrival + startDuration + 50).combat;
+    expect(fighting.spawned).toBeGreaterThanOrEqual(1);
+    expect(fighting.spawned).toBeLessThanOrEqual(3);
+    expect(fighting.enemies).toHaveLength(fighting.spawned);
     expect(tickBattle(ready, arrival + startDuration)).toBe(ready);
   });
   it("produces the same growing character and rewards online, offline and after reload", () => {

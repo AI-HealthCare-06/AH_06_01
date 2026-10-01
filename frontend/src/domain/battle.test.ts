@@ -80,7 +80,7 @@ describe("document combat rules", () => {
     expect(monsterGold(1, 10, "boss")).toBe(495);
     expect(monsterGold(2, 1, "normal", 1.2)).toBe(40);
   });
-  it("spawns faster with stronger melee HP and still fires ranged attacks immediately", () => {
+  it("spawns at 3.5s intervals with stronger melee HP and fires ranged attacks immediately", () => {
     const buffs = battleBuffStats(initialGame());
     const first = advanceCombat(initialCombat(), buffs, 1, 50);
     expect(first.combat.enemies[0].hp).toBe(96);
@@ -94,7 +94,7 @@ describe("document combat rules", () => {
       { ...first.combat, attackIn: 5000 },
       { ...buffs, attack: 0 },
       1,
-      1900,
+      3450,
     ).combat;
     expect(waiting.spawned).toBe(1);
     const next = advanceCombat(waiting, buffs, 1, 50).combat;

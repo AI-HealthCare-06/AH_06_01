@@ -24,7 +24,9 @@ export const rankPolicies = {
   elite: { hp: 2.5, ad: 1.3, gold: 5, knockback: 0.1 },
   boss: { hp: 6.5, ad: 1.5, gold: 15, knockback: 0.05 },
 };
-export const spawnInterval = 2000;
+export const spawnInterval = 3500;
+export const simultaneousSpawnChance = 0.2;
+export const simultaneousSpawnCooldownMultiplier = 1.8;
 export const meleeSizeMultiplier = 1.2;
 export const meleeHpMultiplier = 1.1 * 1.25;
 export const revivalDelay = 10000;

@@ -31,6 +31,8 @@ import {
   revivalDelay,
   sleepGoldMultiplier,
   spawnInterval,
+  simultaneousSpawnChance,
+  simultaneousSpawnCooldownMultiplier,
   stagePolicies,
   wavePolicies,
 } from "./game-policy";
@@ -257,9 +259,6 @@ export const clearDuration = (kind: "wave" | "stage") => (kind === "stage" ? 160
 export const travelDuration = 3000;
 export const startDuration = 1000;
 export const enemyAttackInterval = (ranged: boolean) => (ranged ? 1000 : 500);
-export function spawnBatchLimit(wave: number) {
-  return waveTarget(wave) > 50 ? 5 : 3;
-}
 // Saved RNG state makes random groups consistent across offline/reloaded ticks.
 function nextRandom(state: CombatState) {
   state.seed = (Math.imul(state.seed, 1664525) + 1013904223) >>> 0;
@@ -347,8 +346,9 @@ export function advanceCombat(
     state.spawnIn -= dt;
     if (state.spawnIn <= 0 && state.spawned < waveTarget(state.wave)) {
       const policy = wavePolicies[state.wave - 1];
+      const simultaneous = nextRandom(state) < simultaneousSpawnChance;
       const count = Math.min(
-        1 + Math.floor(nextRandom(state) * spawnBatchLimit(state.wave)),
+        simultaneous ? 2 + Math.floor(nextRandom(state) * 2) : 1,
         waveTarget(state.wave) - state.spawned,
       );
       for (let i = 0; i < count; i++) {
@@ -372,7 +372,7 @@ export function advanceCombat(
         });
         state.spawned++;
       }
-      state.spawnIn += spawnInterval;
+      state.spawnIn = spawnInterval * (count > 1 ? simultaneousSpawnCooldownMultiplier : 1);
     }
     const player = combatPlayerGeometry(buffs.dinosaur, state.lastAttack, state.clock);
     const previousEnemies = new Map(
