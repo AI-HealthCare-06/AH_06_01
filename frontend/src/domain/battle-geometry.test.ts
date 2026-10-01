@@ -11,6 +11,20 @@ import {
 } from "./battle-geometry";
 
 describe("separate battle bodies and hit targets", () => {
+  it("enlarges Brachio by 20% while keeping its feet on the ground and body boxes in sync", () => {
+    const brachio = playerGeometry(5),
+      translated = playerGeometry(5, { x: 12, y: -10 });
+    expect(brachio.sprite.width).toBe(150);
+    expect(brachio.sprite.height).toBeCloseTo(117.6);
+    expect(brachio.hitbox.y + brachio.hitbox.height).toBeCloseTo(arena.ground);
+    expect(brachio.hitbox.height).toBeGreaterThan(playerGeometry(0).hitbox.height);
+    for (const key of ["sprite", "hitbox", "collider"] as const) {
+      expect(translated[key].x - brachio[key].x).toBeCloseTo(12);
+      expect(translated[key].y - brachio[key].y).toBeCloseTo(-10);
+      expect(translated[key].width).toBe(brachio[key].width);
+      expect(translated[key].height).toBe(brachio[key].height);
+    }
+  });
   it("uses narrower cola bodies and larger boss boxes independently of sprite padding", () => {
     const cola = enemyGeometry(2, 0),
       burger = enemyGeometry(2, 3),

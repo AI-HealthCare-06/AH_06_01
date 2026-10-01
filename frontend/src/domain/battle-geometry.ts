@@ -74,13 +74,16 @@ export function playerGeometry(dinosaur: number, offset = { x: 0, y: 0 }): Actor
   if (restingPlayers[dinosaur]) return translateActor(restingPlayers[dinosaur], offset.x, offset.y);
   const flying = dinosaur === 4;
   const bounds = characterBounds[dinosaur];
+  const scale = dinosaur === 5 ? 1.2 : 1;
+  const width = 125 * scale,
+    height = 98 * scale;
   // Anchor the visible flying body at 60% of the battle background's height.
   const flyingY = arena.top + arena.height * 0.6 - ((bounds[1] + bounds[3] / 2) * 98) / 120;
   const sprite = {
     x: 8,
-    y: flying ? flyingY : arena.ground - 98,
-    width: 125,
-    height: 98,
+    y: flying ? flyingY : arena.ground - height,
+    width,
+    height,
   };
   restingPlayers[dinosaur] = geometry(sprite, bounds);
   return translateActor(restingPlayers[dinosaur], offset.x, offset.y);
@@ -207,7 +210,7 @@ export function playerProjectileFrame(age: number) {
   return Math.floor(Math.max(0, age) / 80) % 4;
 }
 export function playerProjectileAngle(shot: PlayerShotPosition) {
-  return shot.dinosaur === 4 ? Math.atan2(shot.vy ?? 0, shot.vx ?? 240) : 0;
+  return shot.dinosaur === 4 || shot.dinosaur === 5 ? Math.atan2(shot.vy ?? 0, shot.vx ?? 240) : 0;
 }
 export function playerProjectileGeometry(shot: PlayerShotPosition) {
   const name = `Dino${dinoNames[shot.dinosaur]}Projectile`;

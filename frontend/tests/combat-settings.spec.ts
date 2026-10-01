@@ -198,11 +198,13 @@ test("each dinosaur releases its projectile on the visible mouth of its contact 
         canvas.evaluate((node, source) => {
           const canvas = node as HTMLCanvasElement;
           const wrap = canvas.parentElement!;
+          const width = parseFloat(wrap.style.width),
+            height = parseFloat(wrap.style.height);
           const x =
-            ((source.x - parseFloat(wrap.style.left)) / 125) * 160 -
+            ((source.x - parseFloat(wrap.style.left)) / width) * 160 -
             parseFloat(canvas.style.left) * 1.6;
           const y =
-            ((source.y - parseFloat(wrap.style.top)) / 98) * 120 -
+            ((source.y - parseFloat(wrap.style.top)) / height) * 120 -
             parseFloat(canvas.style.top) * 1.2;
           const pixels = canvas
             .getContext("2d")!

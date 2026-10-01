@@ -435,7 +435,13 @@ export function AdventureScene({
           data-collider={JSON.stringify(player.collider)}
           data-hitbox={JSON.stringify(player.hitbox)}
           data-attack-target={targetGeometry ? JSON.stringify(targetGeometry.hitbox) : undefined}
-          style={{ left: position.x, top: position.y, bottom: "auto" }}
+          style={{
+            left: position.x,
+            top: position.y,
+            width: position.width,
+            height: position.height,
+            bottom: "auto",
+          }}
         >
           <BattleSprite src={dinoSource} frame={dinoFrame} label={dino.name} filter={skin.filter} />
           <EquippedAccessories />
