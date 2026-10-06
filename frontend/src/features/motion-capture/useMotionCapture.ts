@@ -16,7 +16,7 @@ const initialProgress: DetectionProgress = {
   stage: "ready",
   holdProgress: 0,
   validObservationRatio: 0,
-  message: "얼굴과 손이 함께 보이도록 휴대폰을 세워 주세요.",
+  message: "얼굴과 동작 대상을 화면에 담아 주세요.",
 };
 type CaptureState = {
   phase: "idle" | "loading" | "observing" | "result" | "error";
@@ -93,7 +93,13 @@ export function useMotionCapture() {
       const token = generation.current;
       const sessionId = uniqueId();
       const detector = new MotionDetector(quest, preparation);
-      let progress = initialProgress;
+      let progress = {
+        ...initialProgress,
+        message:
+          quest === "water"
+            ? "셀카처럼 얼굴과 컵을 담아 주세요. 손과 컵 바닥은 잘려도 괜찮아요."
+            : "얼굴과 약을 준비한 손이 함께 보이도록 담아 주세요.",
+      };
       let observedAt = performance.now();
       let startedAt = new Date().toISOString();
       const active = () => token === generation.current;
@@ -169,7 +175,7 @@ export function useMotionCapture() {
         setState((current) => ({
           ...current,
           phase: "observing",
-          message: initialProgress.message,
+          message: progress.message,
         }));
       };
       setState({

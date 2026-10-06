@@ -199,4 +199,153 @@ describe("camera feature geometry", () => {
     frame(1600, 0.9, [cup(0.8, 0.7, 0.1)]);
     expect(frame(1700, 0.9, [cup(0.8, 0.7, 0.1)]).stage).toBe("detected");
   });
+
+  it("allows a detected selfie cup with cropped hands, but keeps hands required for medicine", () => {
+    const { face, hands } = landmarks();
+    hands.landmarks = [];
+    const feature = extractObservation("water", face, hands, [cup()], 100, 640, 480, null);
+    expect(feature.valid).toBe(true);
+    expect(feature.hand).toBeNull();
+    expect(feature.objectEvidence).toBe("detected");
+    expect(extractObservation("medicine", face, hands, [], 100, 640, 480, null).valid).toBe(false);
+    expect(
+      extractObservation("water", face, hands, [cup(0.45, 0.3)], 100, 640, 480, null).valid,
+    ).toBe(false);
+  });
+
+  it("uses visible palm points to bridge a cup when its gripping wrist is cropped", () => {
+    const { face, hands } = landmarks();
+    hands.landmarks[0][0].y = 1.4;
+    const first = extractObservation("water", face, hands, [cup()], 100, 640, 480, null);
+    expect(first.valid).toBe(true);
+    expect(first.hand?.y).toBeCloseTo(0.6);
+    moveHand(hands, 0.5);
+    hands.landmarks[0][0].y = 1.3;
+    const occluded = extractObservation("water", face, hands, [], 300, 640, 480, first);
+    expect(occluded.valid).toBe(true);
+    expect(occluded.objectEvidence).toBe("tracked");
+    expect(occluded.object?.y).toBeCloseTo(0.35);
+  });
+
+  it("bridges a scheduled inference without hands but stops on a new missing-object result", () => {
+    const { face, hands } = landmarks();
+    hands.landmarks = [];
+    const first = extractObservation("water", face, hands, [cup()], 100, 640, 480, null);
+    const scheduled = extractObservation("water", face, hands, [cup()], 200, 640, 480, first, 100);
+    expect(scheduled.valid).toBe(true);
+    expect(scheduled.objectEvidence).toBe("tracked");
+    expect(scheduled.objectOccluded).toBe(false);
+    expect(scheduled.objectObservedAt).toBe(100);
+    expect(extractObservation("water", face, hands, [], 300, 640, 480, scheduled).valid).toBe(
+      false,
+    );
+    expect(
+      extractObservation("water", face, hands, [cup()], 700, 640, 480, scheduled, 100).valid,
+    ).toBe(false);
+  });
+
+  it("compensates common camera pan and zoom without inventing relative cup movement", () => {
+    const { face, hands } = landmarks();
+    face.faceLandmarks[0][234].x = 0.4;
+    face.faceLandmarks[0][454].x = 0.6;
+    moveHand(hands, 0.6, 0.45);
+    const first = extractObservation(
+      "water",
+      face,
+      hands,
+      [cup(0.55, 0.7, 0.2, 0.4)],
+      100,
+      640,
+      480,
+      null,
+    );
+    const scale = 1.2,
+      dx = 0.22,
+      dy = -0.1;
+    for (const point of face.faceLandmarks[0]) {
+      point.x = 0.5 + (point.x - 0.5) * scale + dx;
+      point.y = 0.4 + (point.y - 0.4) * scale + dy;
+    }
+    for (const point of hands.landmarks[0]) {
+      point.x = 0.5 + (point.x - 0.5) * scale + dx;
+      point.y = 0.4 + (point.y - 0.4) * scale + dy;
+    }
+    const moved = extractObservation("water", face, hands, [], 200, 640, 480, first);
+    expect(moved.valid).toBe(true);
+    expect(moved.trackingChanged).toBe(false);
+    expect(moved.distance).toBeCloseTo(first.distance!);
+    expect(moved.object?.width).toBeCloseTo(first.object!.width * scale);
+    expect(moved.objectObservedAt).toBe(100);
+    hands.landmarks = [];
+    const cached = extractObservation("water", face, hands, [], 200, 640, 480, first, 100);
+    expect(cached.valid).toBe(true);
+    expect(cached.distance).toBeCloseTo(first.distance!);
+  });
+
+  it("rejects cups outside the preview, distant background cups and malformed boxes", () => {
+    const { face, hands } = landmarks();
+    hands.landmarks = [];
+    face.faceLandmarks[0][234].x = 0.45;
+    face.faceLandmarks[0][454].x = 0.55;
+    expect(extractObservation("water", face, hands, [cup(0.9)], 100, 640, 480, null).valid).toBe(
+      false,
+    );
+    expect(extractObservation("water", face, hands, [cup(1.1)], 100, 640, 480, null).valid).toBe(
+      false,
+    );
+    const malformed = cup();
+    malformed.boundingBox!.width = Number.NaN;
+    expect(extractObservation("water", face, hands, [malformed], 100, 640, 480, null).valid).toBe(
+      false,
+    );
+    face.faceLandmarks = [];
+    expect(extractObservation("water", face, hands, [cup()], 100, 640, 480, null).valid).toBe(
+      false,
+    );
+  });
+
+  it("completes a close portrait sequence with cropped cup bottom and no visible hands", () => {
+    const { face, hands } = landmarks();
+    face.faceLandmarks[0][234].x = 0.2;
+    face.faceLandmarks[0][454].x = 0.8;
+    face.faceLandmarks[0][13].y = 0.38;
+    face.faceLandmarks[0][14].y = 0.38;
+    hands.landmarks = [];
+    const detector = new MotionDetector("water", true);
+    let previous: MotionObservation | null = null;
+    const frame = (timestamp: number, y: number) => {
+      const detection = cup();
+      detection.boundingBox = {
+        originX: 0.38 * 360,
+        originY: y * 480,
+        width: 0.32 * 360,
+        height: 0.45 * 480,
+        angle: 0,
+      };
+      const feature = extractObservation(
+        "water",
+        face,
+        hands,
+        [detection],
+        timestamp,
+        360,
+        480,
+        previous,
+        timestamp - (timestamp % 200),
+      );
+      expect(feature.valid).toBe(true);
+      expect(feature.trackingChanged).toBe(false);
+      expect(feature.object!.y + feature.object!.height).toBeLessThanOrEqual(1);
+      previous = feature;
+      return detector.update(feature);
+    };
+    for (let timestamp = 0; timestamp <= 400; timestamp += 100) frame(timestamp, 0.6);
+    expect(frame(600, 0.35).stage).toBe("at_mouth");
+    for (let timestamp = 700; timestamp <= 1400; timestamp += 100) frame(timestamp, 0.35);
+    expect(frame(1500, 0.35).stage).toBe("returning");
+    frame(1600, 0.6);
+    frame(1700, 0.6);
+    frame(1800, 0.6);
+    expect(frame(2000, 0.6).stage).toBe("detected");
+  });
 });

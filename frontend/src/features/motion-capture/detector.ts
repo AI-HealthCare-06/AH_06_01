@@ -71,7 +71,8 @@ export class MotionDetector {
         }
         break;
       case "at_mouth":
-        if (!near) this.resetCandidate();
+        if (this.quest === "water" ? distance > config.waterHoldDistance : !near)
+          this.resetCandidate();
         else {
           this.heldMs += accumulated;
           if (this.heldMs >= holdTarget) {
@@ -93,7 +94,7 @@ export class MotionDetector {
     const messages: Record<MotionStage, string> = {
       ready:
         this.quest === "water"
-          ? "컵·병을 입에서 떨어뜨린 상태로 잠깐 기다려 주세요."
+          ? "얼굴과 컵을 담고, 컵을 입 아래에 잠깐 보여 주세요."
           : "손을 입에서 떨어뜨린 상태로 잠깐 기다려 주세요.",
       approaching:
         this.quest === "water"
@@ -102,7 +103,7 @@ export class MotionDetector {
       at_mouth: "입 근처에서 잠깐 유지해 주세요.",
       returning:
         this.quest === "water"
-          ? "컵·병을 입에서 멀리 내려 주세요."
+          ? "컵을 화면 안에서 입 아래로 살짝 내려 주세요."
           : "손을 입에서 멀리 내려 주세요.",
       detected:
         this.quest === "water"

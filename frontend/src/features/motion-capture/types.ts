@@ -13,6 +13,7 @@ export type MotionObservation = {
   objectAtMouth: boolean;
   trackingChanged: boolean;
   mouth: Point | null;
+  faceWidth: number | null;
   hand: Point | null;
   object: ObjectBox | null;
   objectEvidence: "detected" | "tracked" | null;

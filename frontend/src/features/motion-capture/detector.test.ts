@@ -16,6 +16,7 @@ const observation = (
   objectAtMouth: distance <= 0.6,
   trackingChanged: false,
   mouth: null,
+  faceWidth: null,
   hand: null,
   object: null,
   objectEvidence: "detected",
@@ -53,6 +54,30 @@ describe("motion sequence acceptance", () => {
     const { advance } = sequence("water");
     expect(advance(0.1, 15).stage).toBe("ready");
     expect(advance(2, 5).stage).toBe("approaching");
+  });
+
+  it("accepts a small selfie return but rejects a stationary cup or a partial return", () => {
+    const stationary = sequence("water");
+    expect(stationary.advance(0.5, 25).stage).toBe("approaching");
+    const { advance } = sequence("water");
+    expect(advance(0.5, 5).stage).toBe("approaching");
+    expect(advance(0.3, 10).stage).toBe("approaching");
+    expect(advance(0.1, 10).stage).toBe("returning");
+    expect(advance(0.3, 10).stage).toBe("returning");
+    expect(advance(0.5, 4).stage).toBe("detected");
+  });
+
+  it("tolerates small selfie jitter after entry but rejects movement away during the hold", () => {
+    const { advance } = sequence("water");
+    advance(0.5, 5);
+    advance(0.1, 2);
+    expect(advance(0.27, 5, { objectAtMouth: false }).stage).toBe("at_mouth");
+    expect(advance(0.27, 1, { objectAtMouth: false }).stage).toBe("returning");
+    expect(advance(0.5, 4).stage).toBe("detected");
+    const interrupted = sequence("water");
+    interrupted.advance(0.5, 5);
+    interrupted.advance(0.1, 2);
+    expect(interrupted.advance(0.35, 5).stage).toBe("ready");
   });
 
   it("does not classify face touching as drinking without a cup at the mouth", () => {
