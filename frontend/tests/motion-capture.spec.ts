@@ -35,7 +35,7 @@ for (const quest of ["water", "medicine"] as const) {
       await expect(page.getByRole("button", { name: "샘플 종료" })).toHaveCount(0);
       await page.getByRole("button", { name: "약 준비 확인하고 시작" }).click();
     }
-    await expect(page.locator(".camera-note")).toContainText("샘플");
+    await expect(page.locator(".camera-mode")).toContainText("샘플");
     await page.clock.runFor(6000);
     await expect(page.getByRole("button", { name: "동작 확인", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "동작 확인", exact: true }).click();
@@ -69,9 +69,11 @@ test("sample cancellation and quest changes discard in-progress motion", async (
   await page.clock.install();
   await page.goto("/camera?quest=water");
   await page.getByRole("combobox").selectOption("water:sample");
-  await page.getByRole("button", { name: "샘플 동작 보기" }).click();
+  await page.getByRole("button", { name: "샘플 동작 보기" }).focus();
+  await page.keyboard.press("Enter");
   await page.clock.runFor(2000);
-  await page.getByRole("button", { name: "샘플 종료" }).click();
+  await page.getByRole("button", { name: "샘플 종료" }).focus();
+  await page.keyboard.press("Space");
   await page.clock.runFor(25_000);
   await expect(page.locator(".camera-actions")).toHaveCount(0);
   await page.getByRole("button", { name: "샘플 동작 보기" }).click();
@@ -81,7 +83,7 @@ test("sample cancellation and quest changes discard in-progress motion", async (
   await expect(page.locator(".camera-actions")).toHaveCount(0);
 });
 
-test("permission denial offers the existing sample selector and quest return link", async ({
+test("permission denial offers the existing sample selector without removed controls", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -90,12 +92,11 @@ test("permission denial offers the existing sample selector and quest return lin
     });
   });
   await page.goto("/camera?quest=water");
-  await page.getByRole("button", { name: "카메라 켜기" }).click();
+  await page.getByRole("button", { name: "모션 인식 시작" }).click();
   await expect(page.locator(".camera-status")).toContainText("카메라 권한을 허용");
-  await expect(page.getByRole("link", { name: /퀘스트로 돌아가기/ })).toHaveAttribute(
-    "href",
-    "/quests/water",
-  );
+  await expect(
+    page.locator(".camera-card > .primary-button, .camera-note, .camera-quest-link"),
+  ).toHaveCount(0);
   await page.getByRole("combobox").selectOption("water:sample");
   await expect(page.getByRole("button", { name: "샘플 동작 보기" })).toBeEnabled();
   await expect(page.locator("video")).toHaveJSProperty("srcObject", null);
@@ -109,12 +110,12 @@ test("a late permission response after navigation is stopped immediately", async
     });
   });
   await page.goto("/camera?quest=water");
-  await page.getByRole("button", { name: "카메라 켜기" }).click();
+  await page.getByRole("button", { name: "모션 인식 시작" }).click();
   await expect
     .poll(() => page.evaluate(() => typeof Reflect.get(window, "motionPending")))
     .toBe("function");
-  await page.getByRole("link", { name: /퀘스트로 돌아가기/ }).click();
-  await expect(page).toHaveURL(/\/quests\/water$/);
+  await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
+  await expect(page).toHaveURL(/\/quests$/);
   await page.evaluate(() => {
     const canvas = document.createElement("canvas");
     canvas.width = 320;
@@ -170,7 +171,7 @@ test("real local worker analyses portrait frames and releases camera on capture"
     }
   });
   await page.goto("/camera?quest=water");
-  await page.getByRole("button", { name: "카메라 켜기" }).click();
+  await page.getByRole("button", { name: "모션 인식 시작" }).click();
   await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible({ timeout: 45_000 });
   await expect.poll(() => observations.length, { timeout: 15_000 }).toBeGreaterThan(0);
   expect(observations.every((ratio) => ratio === 0.75)).toBe(true);
@@ -200,7 +201,7 @@ test("medicine preparation is required before requesting camera and disconnect i
   test.setTimeout(60_000);
   await context.grantPermissions(["camera"]);
   await page.goto("/camera?quest=medicine");
-  await page.getByRole("button", { name: "카메라 켜기" }).click();
+  await page.getByRole("button", { name: "모션 인식 시작" }).click();
   await expect(page.locator("video")).toHaveJSProperty("srcObject", null);
   await expect(page.locator(".camera-status")).toContainText("반복해서 먹지 마세요");
   await page.getByRole("button", { name: "약 준비 확인하고 시작" }).click();
@@ -212,7 +213,7 @@ test("medicine preparation is required before requesting camera and disconnect i
   });
   await expect(page.locator(".camera-status")).toContainText("카메라 연결이 끊어졌어요");
   await expect(page.locator("video")).toHaveJSProperty("srcObject", null);
-  await expect(page.getByRole("button", { name: "카메라 켜기" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "모션 인식 시작" })).toBeEnabled();
 });
 
 test("samples keep the portrait pixel layout on narrow screens", async ({ page }) => {

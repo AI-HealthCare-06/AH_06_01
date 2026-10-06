@@ -703,6 +703,7 @@
   color: var(--ink);
 }
 .camera-viewfinder {
+  display: block;
   position: relative;
   margin-top: 16px;
   aspect-ratio: 4/3;

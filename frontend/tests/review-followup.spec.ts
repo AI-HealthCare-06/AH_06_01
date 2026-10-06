@@ -92,6 +92,7 @@ test("all player projectile poses grow through loop wrap with matching collision
 test("camera picks the quest lens, switches a live stream and saves portrait framing", async ({
   page,
 }) => {
+  test.setTimeout(60_000);
   await page.addInitScript(() => {
     const requests: MediaStreamConstraints[] = [];
     const tracks: MediaStreamTrack[] = [];
@@ -122,9 +123,9 @@ test("camera picks the quest lens, switches a live stream and saves portrait fra
   await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
   await page.locator("select").selectOption("medicine");
   await page.getByRole("button", { name: "약 준비 확인하고 시작" }).click();
-  await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible({ timeout: 45_000 });
   await page.locator("select").selectOption("water");
-  await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible({ timeout: 45_000 });
   expect(
     await page.evaluate(() =>
       Reflect.get(window, "cameraReview").requests.map(

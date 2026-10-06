@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { AppShell, PageHeading } from "../components/AppShell";
 import { PixelIcon } from "../components/PixelIcon";
 import { quests } from "../domain/game";
@@ -7,6 +7,12 @@ import { useMotionCapture } from "../features/motion-capture/useMotionCapture";
 import type { InputSource, MotionQuest } from "../features/motion-capture/types";
 const cameraQuests = quests.filter((q) => ["medicine", "meal", "water"].includes(q.id));
 const facingFor = (quest: string) => (quest === "meal" ? "environment" : "user");
+const readyMessage = (selection: string) =>
+  selection.endsWith(":sample")
+    ? "화면을 터치해 샘플 동작을 시작해 주세요."
+    : selection === "meal"
+      ? "화면을 터치해 카메라를 켜 주세요."
+      : "화면을 터치해 모션 인식을 시작해 주세요.";
 
 export function CameraPage() {
   const [params] = useSearchParams();
@@ -24,7 +30,7 @@ export function CameraPage() {
   const [busy, setBusy] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
-  const [message, setMessage] = useState("실천한 순간을 사진으로 남겨 보세요.");
+  const [message, setMessage] = useState(() => readyMessage(selection));
   const [preparingMedicine, setPreparingMedicine] = useState(false);
   const {
     phase,
@@ -50,10 +56,27 @@ export function CameraPage() {
   const connecting = busy || phase === "loading";
   const sampleRunning = phase === "observing" && motionSource === "sample";
   const status = preparingMedicine
-    ? "복용할 약을 준비했는지 확인해 주세요. 인식을 위해 약을 반복해서 먹지 마세요."
+    ? "복용할 약을 준비했는지 확인해 주세요. 준비됐으면 화면을 다시 터치해 주세요. 인식을 위해 약을 반복해서 먹지 마세요."
     : phase !== "idle"
       ? motionMessage
       : message;
+  const viewfinderAction = photo
+    ? "촬영 사진 미리보기"
+    : result
+      ? "모션 인식 결과"
+      : connecting
+        ? "카메라 준비 취소"
+        : cameraLive
+          ? "촬영하기"
+          : sampleRunning
+            ? "샘플 종료"
+            : preparingMedicine
+              ? "약 준비 확인하고 시작"
+              : source === "sample"
+                ? "샘플 동작 보기"
+                : quest === "meal"
+                  ? "카메라 켜기"
+                  : "모션 인식 시작";
 
   function stop() {
     stream.current?.getTracks().forEach((track) => track.stop());
@@ -108,7 +131,7 @@ export function CameraPage() {
       }
       if (request.current !== token) return;
       setLive(true);
-      setMessage("음식을 세로 화면에 담고 촬영해 주세요.");
+      setMessage("음식을 세로 화면에 담고 화면을 터치해 촬영해 주세요.");
     } catch (error) {
       if (request.current !== token) return;
       stop();
@@ -180,6 +203,20 @@ export function CameraPage() {
     setLive(false);
     setMessage("사진을 확인해 주세요.");
   }
+  function activateViewfinder() {
+    if (photo || result) return;
+    if (connecting) {
+      request.current++;
+      stop();
+      cancelMotion();
+      setLive(false);
+      setBusy(false);
+      setPreparingMedicine(false);
+      setMessage("카메라 연결을 취소했어요. 화면을 터치해 다시 시작해 주세요.");
+    } else if (cameraLive) capture();
+    else if (sampleRunning) cancelMotion();
+    else start(selection, preparingMedicine);
+  }
   return (
     <AppShell active="camera">
       <PageHeading title="QUEST CAMERA" subtitle="오늘의 건강한 순간을 한 장에 담아요" />
@@ -196,7 +233,7 @@ export function CameraPage() {
               if (cameraLive || sampleRunning) start(next);
               else {
                 cancelMotion();
-                setMessage("실천한 순간을 사진으로 남겨 보세요.");
+                setMessage(readyMessage(next));
               }
             }}
           >
@@ -218,9 +255,14 @@ export function CameraPage() {
                 ? "전면 카메라 · 실시간 인식 준비"
                 : `전면 카메라 · ${quest === "water" ? "물 마시는" : "약 복용"} 동작 인식`}
         </p>
-        <div
+        <button
+          type="button"
           className={`camera-viewfinder ${cameraLive ? "live" : ""}`}
           data-facing={facingFor(quest)}
+          aria-label={viewfinderAction}
+          aria-busy={connecting}
+          disabled={!!photo || !!result}
+          onClick={activateViewfinder}
         >
           <video
             ref={bindCamera}
@@ -234,44 +276,17 @@ export function CameraPage() {
             <img src={photo} alt="촬영한 퀘스트 사진" />
           ) : (
             !cameraLive && (
-              <div className="camera-placeholder">
+              <span className="camera-placeholder">
                 <PixelIcon name="camera" />
                 <strong>READY TO CAPTURE</strong>
-              </div>
+              </span>
             )
           )}
           <span className="viewfinder-corner" aria-hidden="true" />
-        </div>
+        </button>
         <p className="camera-status" role="status">
           {status}
         </p>
-        {cameraLive ? (
-          <button className="primary-button shutter-button" onClick={capture}>
-            <PixelIcon name="camera" /> 촬영하기
-          </button>
-        ) : (
-          !photo &&
-          !result && (
-            <button
-              className="primary-button"
-              disabled={connecting}
-              onClick={() => {
-                if (sampleRunning) cancelMotion();
-                else start(selection, preparingMedicine);
-              }}
-            >
-              {connecting
-                ? "카메라 연결 중…"
-                : sampleRunning
-                  ? "샘플 종료"
-                  : preparingMedicine
-                    ? "약 준비 확인하고 시작"
-                    : source === "sample"
-                      ? "샘플 동작 보기"
-                      : "카메라 켜기"}
-            </button>
-          )
-        )}
         {(photo || result) && (
           <div className="camera-actions">
             <button onClick={() => start()}>{result ? "다시 인식" : "다시 촬영"}</button>
@@ -295,24 +310,6 @@ export function CameraPage() {
             </button>
           </div>
         )}
-        <p className="camera-note">
-          {phase === "idle" ? (
-            <>
-              사진은 서버로 전송되지 않아요. 자동 인증 기능은 준비 중이며, 촬영으로 퀘스트가 자동
-              완료되지는 않아요.
-            </>
-          ) : (
-            <>
-              {motionSource === "sample"
-                ? "샘플은 인식 순서를 보여 주는 시연이에요. "
-                : "동작은 기기에서만 분석돼요. "}
-              실제 삼킴·복용을 확인하지 않으며 퀘스트가 자동 완료되지는 않아요.
-            </>
-          )}
-        </p>
-        <Link className="camera-quest-link" to={`/quests/${quest}`}>
-          퀘스트로 돌아가기 <PixelIcon name="chevron" />
-        </Link>
       </section>
     </AppShell>
   );
