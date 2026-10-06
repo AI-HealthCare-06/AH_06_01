@@ -1,5 +1,5 @@
 export const motionConfig = {
-  version: "rules-v1.2-selfie",
+  version: "rules-v1.3-selfie",
   frameIntervalMs: 100,
   objectIntervalMs: 200,
   objectMaxAgeMs: 500,
@@ -11,7 +11,7 @@ export const motionConfig = {
   waterHoldDistance: 0.3,
   waterLeaveDistance: 0.45,
   waterObjectMaxDistance: 1.5,
-  timeoutMs: 20_000,
+  timeoutMs: 60_000,
   loadingTimeoutMs: 45_000,
   maxGapMs: 500,
   maxAccumulationGapMs: 250,
