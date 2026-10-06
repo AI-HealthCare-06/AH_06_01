@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "motion:setup": "node scripts/prepare-motion-assets.mjs",
+    "predev": "npm run motion:setup",
+    "prebuild": "npm run motion:setup",
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1",
@@ -25,6 +28,7 @@
     "@fontsource/inter": "5.3.0",
     "@fontsource/noto-sans-kr": "5.3.0",
     "@fontsource/press-start-2p": "5.3.0",
+    "@mediapipe/tasks-vision": "1.0.1",
     "@tanstack/react-query": "5.104.0",
     "galmuri": "2.40.3",
     "react": "19.3.0",

@@ -78,7 +78,7 @@ export default function App() {
       <Route path="/home" element={<HomePage />} />
       <Route path="/quests" element={<QuestsPage />} />
       <Route path="/quests/:id" element={<QuestDetailPage />} />
-      <Route path="/camera" element={<CameraPage />} />
+      <Route path="/camera" element={<CameraPage key={location.search} />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/shop" element={<ShopPage />} />
       <Route path="/character" element={<CharacterPage />} />

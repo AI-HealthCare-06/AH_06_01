@@ -6,7 +6,17 @@ import prettier from "eslint-config-prettier";
 import globals from "globals";
 
 export default tseslint.config(
-  { ignores: ["dist", "test-results", "playwright-report", "android", "ios"] },
+  {
+    ignores: [
+      "dist",
+      "test-results",
+      "playwright-report",
+      "android",
+      "ios",
+      "public/vendor/mediapipe",
+      ".cache",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   prettier,

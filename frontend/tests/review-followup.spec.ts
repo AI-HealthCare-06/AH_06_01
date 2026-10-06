@@ -114,11 +114,14 @@ test("camera picks the quest lens, switches a live stream and saves portrait fra
     "약 복용하기",
     "건강한 식사하기",
     "물 8잔 마시기",
+    "물 마시기 · 샘플 시연",
+    "약 복용 동작 · 샘플 시연",
   ]);
   await expect(page.locator("select")).toHaveValue("meal");
   await page.getByRole("button", { name: "카메라 켜기" }).click();
   await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
   await page.locator("select").selectOption("medicine");
+  await page.getByRole("button", { name: "약 준비 확인하고 시작" }).click();
   await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
   await page.locator("select").selectOption("water");
   await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();

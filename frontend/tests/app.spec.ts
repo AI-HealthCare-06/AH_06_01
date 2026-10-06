@@ -26,7 +26,14 @@ test("all Figma routes render local assets with no browser errors", async ({ pag
     await page.locator(".mobile-screen").waitFor();
     await page.evaluate(() => document.fonts.ready);
     const broken = await page.locator("img").evaluateAll(async (imgs) => {
-      await Promise.all(imgs.map((img) => img.decode().catch(() => {})));
+      await Promise.all(
+        imgs.map((img) => {
+          // Inspect offscreen catalog assets too; lazy images do not start loading
+          // until scrolled into view, so decode() alone can wait indefinitely.
+          img.loading = "eager";
+          return img.decode().catch(() => {});
+        }),
+      );
       return imgs
         .filter((img) => !img.naturalWidth || !new URL(img.src).pathname.startsWith("/assets/"))
         .map((img) => img.src);
