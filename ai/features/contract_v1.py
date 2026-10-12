@@ -346,9 +346,11 @@ NUMERIC_COLUMNS_FULL: tuple[str, ...] = NUMERIC_COLUMNS_LITE + (
 ORIGIN_OF_COLUMN: dict[str, str] = {
     "sex_female": "sex", "smoking_former": "smoking_status", "smoking_current": "smoking_status",
 }
-# 단조 제약 (B1 LightGBM): +1 위험↑, -1 위험↓, 0 제약 없음. 인수인계 5장 B1 요구사항.
+# 단조 제약 (B0 부호 경계 · B1 LightGBM monotone_constraints): +1 위험↑, -1 위험↓, 0 제약 없음.
+# 인수인계 5장: bmi↑ waist↑ age↑ alcohol↑ sodium↑ → 위험↑, activity↑ → 위험↓.
+# smoking_current 는 reason code 가 '지수를 올립니다' 어휘만 있어 ≥0 으로 추가 제약 (AI팀 결정, 2026-10-12).
 MONOTONE_CONSTRAINTS: dict[str, int] = {
-    "age": 1, "sex_female": 0, "bmi": 1, "waist_cm": 1, "smoking_former": 0, "smoking_current": 0,
+    "age": 1, "sex_female": 0, "bmi": 1, "waist_cm": 1, "smoking_former": 0, "smoking_current": 1,
     "alcohol_units_week": 1, "activity_minutes_week": -1, "activity_low_flag": 1, "sleep_avg_h": 0,
     "sodium_risk_score": 1, "stress_score": 0, "family_htn": 0, "diabetes_flag": 0, "missing_count": 0,
 }
