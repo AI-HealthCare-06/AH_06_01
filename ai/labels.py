@@ -51,18 +51,18 @@ def label_prehtn_or_above(sbp, dbp, on_medication) -> np.ndarray:
 
 
 def inclusion_mask(df: pd.DataFrame) -> tuple[pd.Series, dict[str, int]]:
-    """포함 기준: 성인(KNHANES_MIN_AGE 이상), 필수 열 결측 없음, 임신 아님. 제외 사유별 건수도 돌려준다."""
+    """포함 기준: 성인(KNHANES_MIN_AGE 이상) → 필수 열 결측 없음 → 임신 아님. 순서대로 적용한 제외 건수도 돌려준다."""
     reasons: dict[str, int] = {}
     keep = pd.Series(True, index=df.index)
 
-    missing = df[list(INCLUSION_REQUIRE)].isna().any(axis=1)
-    reasons["missing_required"] = int(missing.sum())
-    keep &= ~missing
-
     age = _num(df[COL_AGE])
     minor = (age < T.KNHANES_MIN_AGE) | age.isna()
-    reasons["under_min_age"] = int((minor & keep).sum())
+    reasons["under_min_age"] = int(minor.sum())
     keep &= ~minor
+
+    missing = df[list(INCLUSION_REQUIRE)].isna().any(axis=1)
+    reasons["missing_required"] = int((missing & keep).sum())
+    keep &= ~missing
 
     if COL_PREG in df:
         preg = _num(df[COL_PREG]) == 1
