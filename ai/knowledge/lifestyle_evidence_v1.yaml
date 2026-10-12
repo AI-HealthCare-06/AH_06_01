@@ -169,6 +169,7 @@ factors:
     intervention_band: "sleep_avg_h > 8"
     band_source: feature_contract_v1
     sbp_reduction_mmhg: {point: null}
+    guideline: {text_key: sleep_management, source: ish2023_position, note: "수면 관리 권고. 긴 수면 자체의 혈압 수치 근거는 표에 없음"}
     evidence_level: guideline
     interpretation: "긴 수면은 개입 대상이 아니라 표시만 한다 (U자 관계 가능성, 계약 note)."
 
