@@ -17,6 +17,7 @@ from features.contract_v1 import (
     Imputers, ContractResult, build_features, encode_numeric,
 )
 from inference.bundle import ModelBundle
+from knowledge.evidence import EVIDENCE_VERSION, lifestyle_evidence
 
 log = logging.getLogger(__name__)
 
@@ -77,6 +78,10 @@ class RiskPredictor:
             "data_quality": cr.data_quality,
             "missing_features": list(cr.missing_features),
             "reason_codes": reasons,
+            # 모델 기여도(reason_codes)와 별개로, 문헌 근거표 기준 '개입 대상' 요인. 대치된 피처로는 판단하지 않는다.
+            # 생활습관의 방향·효과 크기는 KNHANES 계수가 아니라 knowledge/lifestyle_evidence_v1.yaml 이 기준.
+            "lifestyle_evidence": lifestyle_evidence(cr.features, cr.missing_features),
+            "evidence_version": EVIDENCE_VERSION,
             "expected_sbp": None,  # T2 회귀 모델 연결 전까지 항상 null
             "disclaimer_key": DISCLAIMER_KEY,
             "warnings": list(cr.warnings),
@@ -96,6 +101,8 @@ class RiskPredictor:
             "missing_features": list(cr.missing_features),
             "out_of_range_features": list(cr.out_of_range),
             "reason_codes": [],
+            "lifestyle_evidence": [],
+            "evidence_version": EVIDENCE_VERSION,
             "expected_sbp": None,
             "disclaimer_key": DISCLAIMER_KEY,
             "warnings": list(cr.warnings),

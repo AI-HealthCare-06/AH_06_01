@@ -348,7 +348,9 @@ ORIGIN_OF_COLUMN: dict[str, str] = {
 }
 # 단조 제약 (B0 부호 경계 · B1 LightGBM monotone_constraints): +1 위험↑, -1 위험↓, 0 제약 없음.
 # 인수인계 5장: bmi↑ waist↑ age↑ alcohol↑ sodium↑ → 위험↑, activity↑ → 위험↓.
-# smoking_current 는 reason code 가 '지수를 올립니다' 어휘만 있어 ≥0 으로 추가 제약 (AI팀 결정, 2026-10-12).
+# 방향의 기준은 문헌 근거표 knowledge/lifestyle_evidence_v1.yaml 이며, 이 표와 일치해야 한다 (tests/test_evidence.py).
+# KNHANES 단면 자료는 역인과(진단 후 소금↓·운동↑)로 sodium/activity 계수 부호가 뒤집히므로 데이터 부호를 따르지 않는다.
+# smoking_current 는 문헌상 혈압 지속 효과는 약하나 심혈관 위험 기준으로 up — ≥0 제약 (AI팀 결정, 2026-10-12).
 MONOTONE_CONSTRAINTS: dict[str, int] = {
     "age": 1, "sex_female": 0, "bmi": 1, "waist_cm": 1, "smoking_former": 0, "smoking_current": 1,
     "alcohol_units_week": 1, "activity_minutes_week": -1, "activity_low_flag": 1, "sleep_avg_h": 0,
