@@ -13,7 +13,6 @@
 from __future__ import annotations
 
 import argparse
-import copy
 import json
 import sys
 from datetime import date
@@ -32,7 +31,7 @@ import evaluation as E  # noqa: E402
 import labels as L  # noqa: E402
 import thresholds_kr_v1 as T  # noqa: E402
 from features import contract_v1 as C  # noqa: E402
-from features.sk_transforms import SignConstrainedLogisticRegression, age_square_preprocessor  # noqa: E402
+from features.sk_transforms import SignConstrainedLogisticRegression, age_square_preprocessor, origin_of  # noqa: E402
 from inference.bundle import ModelBundle  # noqa: E402
 from inference.calibration import make_calibrator  # noqa: E402
 from inference.predictor import RiskPredictor  # noqa: E402
@@ -55,7 +54,7 @@ def build_pipeline(columns: tuple[str, ...], X_train: np.ndarray, age_square: bo
     steps.append(("scale", StandardScaler()))
     if constrained:
         # 변환 열 → 원 계약 열 → 부호. 제곱항(^2)은 자유.
-        signs = [0 if n.endswith("^2") else C.MONOTONE_CONSTRAINTS.get(E._origin(n, list(columns)), 0) for n in names]
+        signs = [0 if n.endswith("^2") else C.MONOTONE_CONSTRAINTS.get(origin_of(n, list(columns)), 0) for n in names]
         steps.append(("lr", SignConstrainedLogisticRegression(signs=signs, C=C_reg)))
     else:
         steps.append(("lr", LogisticRegression(C=C_reg, max_iter=5000, solver="lbfgs")))
@@ -174,6 +173,7 @@ def run(split: str, df: pd.DataFrame, args, version: str) -> dict[str, ModelBund
                 "calibration": cal.describe(), "metrics": {k: {kk: round(vv, 4) for kk, vv in v.items()} for k, v in m.items()},
                 "metrics_test_devadj_label": {kk: round(vv, 4) for kk, vv in devadj.items()},
                 "gates": gates, "sex_ece_gap": round(sex_ece_gap, 4), "sklearn": sklearn.__version__,
+                "optimizer_converged": bool(getattr(pipe.steps[-1][1], "converged_", True)),
                 "trained_on": date.today().isoformat(), "label": "label_htn = HE_sbp>=140 or HE_dbp>=90 or DI1_2 in (1,2,3,4)",
             })
         bundles[model_id] = bundle

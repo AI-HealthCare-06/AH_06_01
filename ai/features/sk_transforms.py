@@ -6,13 +6,28 @@ inference/predictor._origin_column 이 원래 계약 열로 되돌릴 수 있다
 """
 from __future__ import annotations
 
+import warnings
 from typing import Sequence
 
 import numpy as np
 from scipy.optimize import minimize
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.compose import ColumnTransformer
+from sklearn.exceptions import ConvergenceWarning
 from sklearn.preprocessing import FunctionTransformer
+
+
+def origin_of(transformed_name: str, columns: Sequence[str]) -> str:
+    """전처리 후 열 이름('age__age^2', 'remainder__bmi', 'bmi') → 원래 계약 열.
+
+    규칙: '__' 뒤 꼬리를 떼고, 계약 열과 정확히 같거나 거듭제곱 항('<col>^k')이면 그 열. 부분 문자열 매칭은
+    하지 않는다 (오귀속 방지). predictor(설명)·evaluation(계수표)·train_baseline(부호 제약)이 전부 이 함수를 쓴다.
+    """
+    tail = transformed_name.split("__")[-1]
+    for c in sorted(columns, key=len, reverse=True):
+        if tail == c or tail.startswith(c + "^"):
+            return c
+    return tail
 
 
 class SignConstrainedLogisticRegression(BaseEstimator, ClassifierMixin):
@@ -33,7 +48,7 @@ class SignConstrainedLogisticRegression(BaseEstimator, ClassifierMixin):
     def fit(self, X, y):
         X = np.asarray(X, dtype=float)
         y = np.asarray(y, dtype=float).reshape(-1)
-        n, d = X.shape
+        d = X.shape[1]
         signs = np.zeros(d, dtype=int) if self.signs is None else np.asarray(self.signs, dtype=int)
         if len(signs) != d:
             raise ValueError(f"signs length {len(signs)} != n_features {d}")
@@ -59,7 +74,11 @@ class SignConstrainedLogisticRegression(BaseEstimator, ClassifierMixin):
         self.n_features_in_ = d
         self.n_iter_ = np.array([res.nit])
         self.converged_ = bool(res.success)
+        self.optimizer_message_ = str(res.message)
         self.signs_ = signs
+        if not res.success:
+            warnings.warn(f"SignConstrainedLogisticRegression did not converge after {res.nit} iterations: {res.message}",
+                          ConvergenceWarning, stacklevel=2)
         return self
 
     def decision_function(self, X):

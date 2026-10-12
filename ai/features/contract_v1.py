@@ -25,6 +25,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import yaml
 
 import thresholds_kr_v1 as T
@@ -187,9 +188,13 @@ class ContractResult:
 
 
 def _is_missing(v: Any) -> bool:
+    """None / NaN(파이썬·numpy float) / pandas NA·NaT / 빈 문자열을 결측으로 본다.
+    pandas 를 import 하지 않으려고 NA 는 타입 이름으로 판별한다 (추론 프로세스 메모리 예산)."""
     if v is None:
         return True
-    if isinstance(v, float) and math.isnan(v):
+    if isinstance(v, (float, np.floating)) and math.isnan(float(v)):
+        return True
+    if type(v).__name__ in ("NAType", "NaTType"):
         return True
     if isinstance(v, str) and v.strip() == "":
         return True

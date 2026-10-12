@@ -16,6 +16,7 @@ from features.contract_v1 import (
     FEATURE_VERSION, MODEL_FULL, MODEL_LITE, ORIGIN_OF_COLUMN, REASON_CODES, SLEEP_BAND_EDGES,
     Imputers, ContractResult, build_features, encode_numeric,
 )
+from features.sk_transforms import origin_of
 from inference.bundle import ModelBundle
 from knowledge.evidence import EVIDENCE_VERSION, lifestyle_evidence
 
@@ -165,7 +166,7 @@ class RiskPredictor:
             names = list(pre.get_feature_names_out(cols)) if pre is not None and hasattr(pre, "get_feature_names_out") else cols
             out: dict[str, float] = {}
             for name, c in zip(names, per_col):
-                origin = _origin_column(name, cols)
+                origin = origin_of(name, cols)
                 out[origin] = out.get(origin, 0.0) + float(c)
             return out
 
@@ -177,11 +178,3 @@ class RiskPredictor:
             return {c: float(v) for c, v in zip(cols, contrib[: len(cols)])}  # 마지막 값은 bias
 
         raise TypeError(f"cannot explain estimator of type {type(final)}")
-
-
-def _origin_column(transformed_name: str, cols: list[str]) -> str:
-    """'num__age', 'poly__age^2', 'age' 처럼 변환된 열 이름에서 원래 계약 열을 찾는다."""
-    for c in sorted(cols, key=len, reverse=True):
-        if transformed_name == c or transformed_name.endswith("__" + c) or (c in transformed_name.split("__")[-1]):
-            return c
-    return transformed_name

@@ -96,7 +96,9 @@ def test_effect_size_bmi(sex, age):
     p = base_person(sex, age)
     lo_out, hi_out = predict_htn_risk({**p, "bmi": 22.0}), predict_htn_risk({**p, "bmi": 30.0})
     lo_p, hi_p = lo_out["calibrated_p"], hi_out["calibrated_p"]
-    assert hi_p / max(lo_p, 1e-6) >= BMI_EFFECT_MIN_RATIO, f"BMI 22→30 ratio too small: p {lo_p}→{hi_p} ({sex},{age})"
+    # calibrated_p 는 소수 4자리로 반올림된다. 기저가 0.1% 미만이면 비율이 공허해지므로 그 자체를 실패로 본다
+    assert lo_p >= 0.001, f"baseline too low to evaluate ratio: p={lo_p} ({sex},{age})"
+    assert hi_p / lo_p >= BMI_EFFECT_MIN_RATIO, f"BMI 22→30 ratio too small: p {lo_p}→{hi_p} ({sex},{age})"
     assert hi_out["risk_index"] > lo_out["risk_index"], f"risk_index did not increase ({sex},{age})"
     if age >= 60:
         assert hi_out["risk_index"] - lo_out["risk_index"] >= BMI_EFFECT_MIN_ABS_AT_60, \

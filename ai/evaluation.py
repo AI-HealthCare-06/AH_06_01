@@ -12,6 +12,7 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score, brier_score_loss, log_loss, roc_auc_score
 
+from features.sk_transforms import origin_of
 from inference.calibration import logit, sigmoid
 
 AGE_GROUPS = ((19, 39, "19-39"), (40, 59, "40-59"), (60, 200, "60+"))
@@ -127,21 +128,13 @@ def coefficient_table(pipeline, columns: list[str], expected_sign: dict[str, int
     coef = np.asarray(final.coef_).reshape(-1)
     rows = []
     for name, c in zip(names, coef):
-        origin = _origin(name, columns)
+        origin = origin_of(name, columns)
         exp = 0 if name.endswith("^2") else expected_sign.get(origin, 0)   # 제곱항은 부호 기대 없음 (단조성은 probe 로 확인)
         rows.append({"term": name, "origin": origin, "coef_std": float(c), "odds_ratio_per_sd": float(np.exp(c)),
                      "expected_sign": exp, "sign_ok": bool(exp == 0 or np.sign(c) == exp or abs(c) < 1e-6)})
     rows.append({"term": "intercept", "origin": "", "coef_std": float(final.intercept_[0]), "odds_ratio_per_sd": float(np.exp(final.intercept_[0])),
                  "expected_sign": 0, "sign_ok": True})
     return pd.DataFrame(rows)
-
-
-def _origin(name: str, columns: list[str]) -> str:
-    tail = name.split("__")[-1]
-    for c in sorted(columns, key=len, reverse=True):
-        if tail == c or tail.startswith(c + "^"):
-            return c
-    return tail
 
 
 # ── 보정 곡선 PNG ────────────────────────────────────────────────────────────
@@ -167,7 +160,6 @@ def plot_calibration(y, p_raw, p_cal, path: Path, title: str) -> Path:
     ax.legend(frameon=False, loc="upper left", labelcolor=C_TEXT)
     ax.text(0.98, 0.02, f"ECE 보정 전 {ece(y, p_raw):.3f} → 후 {ece(y, p_cal):.3f}", ha="right", va="bottom",
             transform=ax.transAxes, color=C_TEXT2, fontsize=9)
-    plt.rcParams["font.family"] = plt.rcParams["font.family"]
     fig.tight_layout()
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, facecolor=C_SURFACE)

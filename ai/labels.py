@@ -35,19 +35,26 @@ def mean_bp_2_3(second: pd.Series, third: pd.Series) -> pd.Series:
     return out.where(s2.notna() & s3.notna())
 
 
+def _bp_label(sbp, dbp, on_medication, cut: T.BP) -> np.ndarray:
+    """공식 SAS 와 같은 규칙: 혈압 둘 다 있고 복약 여부가 판정 가능할 때만 0/1, 하나라도 결측이면 NaN.
+
+    결측을 0(정상)으로 바꾸지 않는다 — 공단 데이터처럼 혈압 결측이 있는 자료에서 유병률이 조용히 깎이는 사고 방지.
+    """
+    sbp, dbp, med = (np.asarray(x, dtype=float) for x in (sbp, dbp, on_medication))
+    out = ((sbp >= cut.sbp) | (dbp >= cut.dbp) | (med == 1)).astype(float)
+    out[np.isnan(sbp) | np.isnan(dbp) | np.isnan(med)] = np.nan
+    return out
+
+
 def label_htn(sbp, dbp, on_medication) -> np.ndarray:
-    """T1: 진료실 고혈압 (OFFICE_HTN) 또는 혈압약 복용 → 1. thresholds_kr_v1.is_office_htn 과 같은 규칙의 벡터판."""
-    sbp, dbp = np.asarray(sbp, dtype=float), np.asarray(dbp, dtype=float)
-    med = np.asarray(on_medication, dtype=float) == 1
-    return ((sbp >= T.OFFICE_HTN.sbp) | (dbp >= T.OFFICE_HTN.dbp) | med).astype(int)
+    """T1: 진료실 고혈압 (OFFICE_HTN) 또는 혈압약 복용 → 1.0, 아니면 0.0, 판정 불가 → NaN.
+    thresholds_kr_v1.is_office_htn 과 같은 규칙의 벡터판."""
+    return _bp_label(sbp, dbp, on_medication, T.OFFICE_HTN)
 
 
 def label_prehtn_or_above(sbp, dbp, on_medication) -> np.ndarray:
-    """T3(선택): 전단계 이상. 경계는 OFFICE_PREHTN 하한(130/80)."""
-    lo = T.OFFICE_PREHTN[0]
-    sbp, dbp = np.asarray(sbp, dtype=float), np.asarray(dbp, dtype=float)
-    med = np.asarray(on_medication, dtype=float) == 1
-    return ((sbp >= lo.sbp) | (dbp >= lo.dbp) | med).astype(int)
+    """T3(선택): 전단계 이상. 경계는 OFFICE_PREHTN 하한(130/80). 판정 불가 → NaN."""
+    return _bp_label(sbp, dbp, on_medication, T.OFFICE_PREHTN[0])
 
 
 def inclusion_mask(df: pd.DataFrame) -> tuple[pd.Series, dict[str, int]]:
@@ -87,8 +94,9 @@ def make_labels(df: pd.DataFrame) -> pd.DataFrame:
     d = d.loc[med.notna()].copy()
     med = med.loc[d.index].astype(int)
 
-    d[LABEL_HTN] = label_htn(d[COL_SBP], d[COL_DBP], med)
-    d[LABEL_PREHTN] = label_prehtn_or_above(d[COL_SBP], d[COL_DBP], med)
+    y1, y3 = label_htn(d[COL_SBP], d[COL_DBP], med), label_prehtn_or_above(d[COL_SBP], d[COL_DBP], med)
+    assert not np.isnan(y1).any(), "inclusion_mask should have removed undecidable rows"
+    d[LABEL_HTN], d[LABEL_PREHTN] = y1.astype(int), y3.astype(int)
     d[TARGET_SBP] = _num(d[COL_SBP]).where(med == 0)
     return d
 

@@ -100,7 +100,7 @@ def build(raw_dir: Path, out_dir: Path, reports_dir: Path, schema_path: Path) ->
                  "비가중이 더 높은 것은 KNHANES 표본에 고령층 비중이 크기 때문이다.")
 
     # 혈압 측정 장비 변경(2021~22 성인: Microlife 진동형) 민감도 — 전환식 적용 라벨과 비교
-    labeled[L.LABEL_HTN + "_devadj"] = L.label_htn(labeled["HE_sbp_devadj"], labeled["HE_dbp_devadj"], labeled["on_medication"])
+    labeled[L.LABEL_HTN + "_devadj"] = L.label_htn(labeled["HE_sbp_devadj"], labeled["HE_dbp_devadj"], labeled["on_medication"]).astype(int)
     audit += ["\n### 혈압 측정 장비 변경 민감도 (2021~2022 성인은 Microlife 진동형, 전환식 적용 시)\n",
               "| 연도 | 고혈압(원값·공식) | 고혈압(전환식 적용) | SBP 중앙값 원값→전환 | DBP 중앙값 원값→전환 |", "|---|---|---|---|---|"]
     for y in K.DEVICE_CHANGE_YEARS_ADULT:
