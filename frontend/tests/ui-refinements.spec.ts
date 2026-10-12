@@ -1,49 +1,12 @@
 import { expect, test } from "@playwright/test";
 
-test("battle pauses and resumes all effects without awarding demo coins", async ({ page }) => {
-  await page.goto("/home");
-  const animations = () =>
-    page.locator(".battle-animated").evaluateAll((elements) =>
-      elements.flatMap((element) =>
-        element.getAnimations().map((animation) => ({
-          time: Number(animation.currentTime),
-          state: animation.playState,
-        })),
-      ),
-    );
-  await expect.poll(async () => (await animations()).length).toBe(5);
-  await expect.poll(async () => (await animations())[0].time).toBeGreaterThan(100);
-  const storedBefore = await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"));
-  await page.getByRole("button", { name: "모험 일시정지", exact: true }).click();
-  await expect(page.getByRole("button", { name: "모험 재개", exact: true })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await expect
-    .poll(async () => (await animations()).every((animation) => animation.state === "paused"))
-    .toBe(true);
-  // Let the pending pause take effect before comparing two frame timestamps.
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-      ),
-  );
-  const frozen = await animations();
-  await page.waitForTimeout(180);
-  expect(await animations()).toEqual(frozen);
-  await page.getByRole("button", { name: "모험 재개", exact: true }).click();
-  await expect.poll(async () => (await animations())[0].time).toBeGreaterThan(frozen[0].time + 100);
-  expect(await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"))).toBe(storedBefore);
-});
-
-test("reduced motion shows a still battle scene", async ({ page }) => {
+test("reduced motion removes decorative battle animations", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/home");
-  await expect(page.locator(".idle-dino")).toBeVisible();
+  await expect(page.locator(".battle-dinosaur")).toBeVisible();
   expect(
     await page
-      .locator(".battle-animated")
+      .locator(".pixel-battle *")
       .evaluateAll((elements) => elements.flatMap((element) => element.getAnimations()).length),
   ).toBe(0);
 });
@@ -99,7 +62,7 @@ test("quest rewards stay centered at the row end on narrow screens", async ({ pa
   }
 });
 
-test("wallet contains its bonus action and the larger catalog scrolls independently", async ({
+test("wallet contains its bonus action and catalog continues to the bottom navigation", async ({
   page,
 }) => {
   for (const width of [320, 390]) {
@@ -112,22 +75,54 @@ test("wallet contains its bonus action and the larger catalog scrolls independen
     expect(bonus.y).toBeGreaterThan(wallet.y + wallet.height / 2);
     expect(wallet.x + wallet.width - bonus.x - bonus.width).toBeGreaterThanOrEqual(12);
     expect(wallet.y + wallet.height - bonus.y - bonus.height).toBeGreaterThanOrEqual(12);
+    const catalog = (await page.locator(".shop-catalog").boundingBox())!;
+    const navigation = (await page.locator(".bottom-navigation").boundingBox())!;
+    expect(navigation.y - catalog.y - catalog.height).toBeLessThan(24);
+    await expect(page.locator(".product")).toHaveCount(6);
+    await expect(page.locator(".shop-tab")).toHaveText(["추천", "꾸미기"]);
+    expect(
+      await page
+        .locator(".daily-bonus")
+        .evaluate((element) => element.scrollWidth <= element.clientWidth),
+    ).toBe(true);
     const region = page.getByRole("region", { name: "상품 목록" });
-    expect(await region.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(
-      true,
-    );
     await region.focus();
-    const tabsBefore = await page.locator(".shop-tabs").boundingBox();
     await region.press("End");
-    await expect
-      .poll(async () =>
-        region.evaluate(
-          (element) => element.scrollHeight - element.clientHeight - element.scrollTop,
-        ),
-      )
-      .toBeLessThan(2);
-    expect(await page.locator(".shop-tabs").boundingBox()).toEqual(tabsBefore);
-    await expect(page.locator(".product-3 > strong")).toBeInViewport();
+    await page.locator(".product-5").scrollIntoViewIfNeeded();
+    await expect(page.locator(".product-5 > strong")).toBeInViewport();
+    expect((await page.locator(".product-5").boundingBox())!.height).toBeCloseTo(206, 0);
     await expect(page.getByRole("link", { name: "Home", exact: true })).toBeVisible();
   }
+});
+
+test("feedback follows all flipped face assets and the arrow opens buffs", async ({ page }) => {
+  await page.clock.install();
+  await page.clock.pauseAt(new Date());
+  await page.goto("/home");
+  const faces = ["493-579", "493-582", "493-592", "493-585", "493-589", "493-595"];
+  for (let dinosaur = 0; dinosaur < faces.length; dinosaur++) {
+    await page.evaluate(async (index) => {
+      const path = "/src/stores/game-store.ts";
+      const { useGameStore } = await import(path);
+      useGameStore.getState().chooseDinosaur(index);
+    }, dinosaur);
+    await expect(page.locator(".feedback-portrait")).toHaveAttribute(
+      "src",
+      `/assets/battle/${faces[dinosaur]}.png`,
+    );
+    await expect
+      .poll(() =>
+        page
+          .locator(".feedback-portrait")
+          .evaluate((image) => (image as HTMLImageElement).naturalWidth),
+      )
+      .toBeGreaterThan(0);
+  }
+  const toggle = page.getByRole("button", { name: "버프 목록 펼치기" });
+  await expect(toggle).toHaveText("▾");
+  await toggle.click();
+  await expect(page.locator(".battle-buffs")).toBeVisible();
+  await expect(page.getByRole("button", { name: "버프 목록 접기" })).toHaveText("▴");
+  await page.getByRole("button", { name: "퀘스트 찾기" }).click();
+  await expect(page).toHaveURL(/\/quests$/);
 });

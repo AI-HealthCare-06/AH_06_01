@@ -84,7 +84,7 @@ export function DinosaurCustomization() {
           <span className="style-preview-copy">
             선택한 공룡과 스타일로 모험을 이어가요.
             <br />
-            기본 제공 스타일이라 코인은 사용하지 않아요.
+            기본 제공 스타일이라 GOLD는 사용하지 않아요.
           </span>
         </InfoDialog>
       )}

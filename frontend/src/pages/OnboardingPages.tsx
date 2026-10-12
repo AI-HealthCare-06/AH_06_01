@@ -430,14 +430,14 @@ export function FirstResultPage() {
       <h2 className="first-quests-title">오늘의 첫 퀘스트</h2>
       <div className="first-quests">
         {[
-          { id: "medicine", label: "약 복용 체크", reward: 10 },
-          { id: "meal", label: "건강한 한 끼", reward: 20 },
-          { id: "walk", label: "6,000걸음 걷기", reward: 30 },
+          { id: "medicine", label: "약 복용 체크", reward: 20 },
+          { id: "meal", label: "건강한 한 끼", reward: 30 },
+          { id: "walk", label: "6,000걸음 걷기", reward: 50 },
         ].map((q, i) => (
           <Link to={`/quests/${q.id}`} key={q.id} className="cream-card first-quest">
             <span className={`checkbox ${i === 0 ? "checked" : ""}`} />
             <b>{q.label}</b>
-            <strong>+{q.reward} COIN</strong>
+            <strong>+{q.reward} EXP</strong>
           </Link>
         ))}
       </div>

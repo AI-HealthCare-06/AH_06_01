@@ -1,0 +1,141 @@
+// Coordinates are in the 354 × 336 design canvas, independent of CSS scale and
+// transparent sprite margins. Colliders describe bodies; hitboxes receive hits.
+import atlases from "../design/animation-atlases.json";
+export type BattleBox = { x: number; y: number; width: number; height: number };
+export type ActorGeometry = { sprite: BattleBox; collider: BattleBox; hitbox: BattleBox };
+export const arena = { top: 58, height: 218, ground: 253, pixelsPerUnit: 30 };
+export function distanceToX(distance: number) {
+  return 68 + distance * arena.pixelsPerUnit;
+}
+export function center(box: BattleBox) {
+  return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+}
+export function overlaps(a: BattleBox, b: BattleBox) {
+  return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+}
+// Nontransparent resting-pose bounds in BattleSprite's 160 × 120 render buffer.
+// Character order follows battleDinosaurs; Pteranodon uses walking frame zero.
+// Keep these stable during attacks/hit reactions so collision size does not pulse.
+const characterBounds = [
+  atlases.bounds.TrexIdleSpritesheet4X3Png as [number, number, number, number],
+  [0, 8, 160, 112],
+  atlases.bounds.RaptorIdleSpritesheet4X31Png as [number, number, number, number],
+  [0, 19, 160, 101],
+  [0, 28, 160, 92],
+  [21, 0, 119, 120],
+] as const;
+const monsterNames = [
+  "DarkCola",
+  "HardCandy",
+  "SmokyMarshmallow",
+  "RottenBurger",
+  "ArchmagePop",
+  "DrFireball",
+];
+function geometry(
+  sprite: BattleBox,
+  bounds: readonly [number, number, number, number],
+): ActorGeometry {
+  const [x, y, width, height] = bounds;
+  const hitbox = {
+    x: sprite.x + (sprite.width * x) / 160,
+    y: sprite.y + (sprite.height * y) / 120,
+    width: (sprite.width * width) / 160,
+    height: (sprite.height * height) / 120,
+  };
+  return {
+    sprite,
+    hitbox,
+    collider: {
+      x: hitbox.x - hitbox.width * 0.05,
+      y: hitbox.y - hitbox.height * 0.05,
+      width: hitbox.width * 1.1,
+      height: hitbox.height * 1.1,
+    },
+  };
+}
+export function playerGeometry(dinosaur: number): ActorGeometry {
+  const flying = dinosaur === 4;
+  const sprite = { x: 8, y: flying ? 84 : arena.ground - 98, width: 125, height: 98 };
+  return geometry(sprite, characterBounds[dinosaur]);
+}
+export function enemyGeometry(
+  distance: number,
+  art: number,
+  rank = "normal",
+  ranged = false,
+): ActorGeometry {
+  const large = rank !== "normal";
+  const name = `${ranged ? "Ranged" : "Melee"}${monsterNames[art]}Idle`;
+  const bounds = (atlases.bounds as Record<string, number[]>)[name] as [
+    number,
+    number,
+    number,
+    number,
+  ];
+  const sprite = {
+    x: distanceToX(distance),
+    y: arena.ground - ((large ? 74.2 : 65.1) * (bounds[1] + bounds[3])) / 120,
+    width: large ? 65.8 : 57.4,
+    height: large ? 74.2 : 65.1,
+  };
+  return geometry(sprite, bounds);
+}
+type ProjectilePosition = { origin: number; distance: number; art: number; rank?: string };
+// Drawing and collision share the visible alpha bounds, excluding transparent padding.
+export function projectileGeometry(projectile: ProjectilePosition, dinosaur: number) {
+  const source = enemyGeometry(projectile.origin, projectile.art, projectile.rank, true).hitbox;
+  const target = center(playerGeometry(dinosaur).hitbox);
+  const progress = Math.max(0, Math.min(1, 1 - projectile.distance / projectile.origin));
+  const sprite = {
+    x: source.x + (target.x - source.x) * progress - 14,
+    y: center(source).y + (target.y - center(source).y) * progress - 10.5,
+    width: 28,
+    height: 21,
+  };
+  const bounds = (atlases.bounds as Record<string, number[]>)[
+    `Ranged${monsterNames[projectile.art]}Projectile`
+  ] as [number, number, number, number];
+  return geometry(sprite, bounds);
+}
+export function projectileHitsPlayer(projectile: ProjectilePosition, dinosaur: number) {
+  const a = projectileGeometry(projectile, dinosaur).hitbox;
+  const b = playerGeometry(dinosaur).hitbox;
+  return (
+    a.x <= b.x + b.width && a.x + a.width >= b.x && a.y <= b.y + b.height && a.y + a.height >= b.y
+  );
+}
+// The physical body must never cross the player, even after saved/custom input.
+// Nominal melee/ranged reach is 1 / 3 world units.
+export function colliderStopDistance(art: number, rank = "normal", dinosaur = 0, ranged = false) {
+  const player = playerGeometry(dinosaur).collider;
+  const enemy = enemyGeometry(0, art, rank, ranged).collider;
+  return Math.max(0, (player.x + player.width - enemy.x) / arena.pixelsPerUnit);
+}
+const strikePoints = [
+  [0.9, 0.7],
+  [0.9, 0.72],
+  [0.9, 0.72],
+  [0.86, 0.65],
+  [0.9, 0.85],
+  [0.87, 0.7],
+];
+export function attackEndpoint(dinosaur: number, target: BattleBox) {
+  const sprite = playerGeometry(dinosaur).sprite;
+  const [x, y] = strikePoints[dinosaur];
+  const contact = center(target);
+  return { x: contact.x - sprite.width * x, y: contact.y - sprite.height * y, contact };
+}
+export function attackPosition(dinosaur: number, target: BattleBox | null, progress: number) {
+  const start = playerGeometry(dinosaur).sprite;
+  if (!target) return start;
+  const end = attackEndpoint(dinosaur, target);
+  // Contact at 30% of the sheet, then recover to the exact resting anchor.
+  const travel = progress <= 0.3 ? progress / 0.3 : (1 - progress) / 0.7;
+  const amount = Math.max(0, Math.min(1, travel));
+  return {
+    ...start,
+    x: start.x + (end.x - start.x) * amount,
+    y: start.y + (end.y - start.y) * amount,
+  };
+}

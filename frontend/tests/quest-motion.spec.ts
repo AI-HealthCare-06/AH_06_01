@@ -6,9 +6,9 @@ test("every quest shows its actual progress and completion updates the bar", asy
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/quests");
     await page.evaluate(() => document.fonts.ready);
-    const bars = page.getByRole("progressbar");
+    const bars = page.locator(".quest-list").getByRole("progressbar");
     await expect(bars).toHaveCount(5);
-    for (const [index, expected] of [100, 100, 54, 0, 88].entries()) {
+    for (const [index, expected] of [0, 0, 0, 0, 0].entries()) {
       await expect(bars.nth(index)).toHaveAttribute("aria-valuenow", String(expected));
       const ratio = await bars
         .nth(index)
@@ -20,7 +20,7 @@ test("every quest shows its actual progress and completion updates the bar", asy
         );
       expect(ratio).toBeCloseTo(expected, 0);
     }
-    await expect(page.locator(".quest-row .pixel-check")).toHaveCount(2);
+    await expect(page.locator(".quest-row .pixel-check")).toHaveCount(0);
     for (const row of await page.locator(".quest-row").all()) {
       const bounds = (await row.boundingBox())!;
       const checkbox = (await row.locator(".checkbox").boundingBox())!;
@@ -32,15 +32,15 @@ test("every quest shows its actual progress and completion updates the bar", asy
       ).toBe(true);
     }
   }
-  await page.getByRole("link", { name: /6,000걸음 걷기/ }).click();
+  await page.getByRole("link", { name: /물 8잔 마시기/ }).click();
   await page.getByRole("button", { name: "완료 체크하기" }).click();
   await expect(page).toHaveURL(/\/reward$/);
   await page.goto("/quests");
-  await expect(page.getByRole("progressbar", { name: "6,000걸음 걷기 진행도" })).toHaveAttribute(
+  await expect(page.getByRole("progressbar", { name: "물 8잔 마시기 진행도" })).toHaveAttribute(
     "aria-valuenow",
     "100",
   );
-  await expect(page.locator(".quest-row .pixel-check")).toHaveCount(3);
+  await expect(page.locator(".quest-row .pixel-check")).toHaveCount(1);
 });
 
 test("numbers count up on tab entry and animate new rewards without changing their real value", async ({
@@ -64,7 +64,9 @@ test("numbers count up on tab entry and animate new rewards without changing the
   await expect(visual).toHaveAttribute("data-value", "0");
   await page.clock.runFor(800);
   await expect(visual).toHaveAttribute("data-value", "1,280");
-  expect(await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"))).toBe(before);
+  const after = await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!));
+  expect(after.gold).toBe(JSON.parse(before!).gold);
+  expect(after.experience).toBe(JSON.parse(before!).experience);
   await page.locator(".daily-bonus").click();
   await expect(page.locator(".wallet-balance > strong")).toHaveText("1,290");
   await expect(visual).toHaveAttribute("data-value", "1,280");
@@ -82,7 +84,7 @@ test("charts and progress bars replay when returning to their tab", async ({ pag
       Reflect.set(window, "previousRadar", element);
       Reflect.set(window, "previousRadarAnimation", element.getAnimations()[0]);
     });
-  await page.getByRole("link", { name: "Quest", exact: true }).click();
+  await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
   await page
     .locator(".quest-row-progress .metric-fill")
     .first()
@@ -105,7 +107,7 @@ test("charts and progress bars replay when returning to their tab", async ({ pag
         );
       }),
   ).toBe(true);
-  await page.getByRole("link", { name: "Quest", exact: true }).click();
+  await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
   expect(
     await page
       .locator(".quest-row-progress .metric-fill")

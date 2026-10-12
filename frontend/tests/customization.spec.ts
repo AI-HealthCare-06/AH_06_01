@@ -21,7 +21,8 @@ for (const [index, name] of names.entries()) {
       for (const art of await page.locator(".dinosaur-art").all()) {
         await expect(art).toHaveAttribute("data-dinosaur", String(index));
         await expect(art).toHaveAttribute("alt", new RegExp(name));
-        if (index !== 0) await expect(art).toHaveAttribute("src", image!);
+        if (index !== 0 && (await art.getAttribute("data-pose")) !== "portrait")
+          await expect(art).toHaveAttribute("src", image!);
       }
       const text = {
         home: ".feedback-copy",
@@ -36,12 +37,14 @@ for (const [index, name] of names.entries()) {
   });
 }
 
-test("customization previews without spending coins and remembers each character's applied style", async ({
+test("customization previews without spending Gold and remembers each character's applied style", async ({
   page,
 }) => {
+  await page.clock.install();
+  await page.clock.pauseAt(new Date());
   await page.goto("/shop");
-  await page.getByRole("button", { name: "꾸미기", exact: true }).click();
-  await expect(page).toHaveURL(/\/shop\/customize$/);
+  await page.getByRole("link", { name: "Character", exact: true }).click();
+  await expect(page).toHaveURL(/\/character$/);
   await expect(page.locator(".character-collection")).toHaveCount(6);
   const before = await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"));
   const preview = page.getByRole("button", { name: "스테고 바다 탐험가 스타일 미리보기" });
@@ -55,18 +58,18 @@ test("customization previews without spending coins and remembers each character
   await page.getByRole("button", { name: "이 스타일로 함께하기" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator(".page-heading p")).toContainText("스테고");
-  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,280");
+  await expect(page.locator(".page-heading p")).toContainText("GOLD 1,280");
   await page.reload();
-  await expect(page.getByRole("button", { name: "꾸미기", exact: true })).toHaveAttribute(
-    "aria-pressed",
-    "true",
+  await expect(page.getByRole("link", { name: "Character", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
   );
   await expect(
     page.getByRole("button", { name: "스테고 바다 탐험가 스타일 미리보기" }),
   ).toHaveAttribute("data-equipped", "true");
   await page.getByRole("link", { name: "Home", exact: true }).click();
-  await expect(page.locator(".idle-dino")).toHaveAttribute("data-dinosaur", "3");
-  await expect(page.locator(".idle-dino")).toHaveAttribute("data-skin", "ocean");
+  await expect(page.locator(".battle-dinosaur")).toHaveAttribute("data-dinosaur", "3");
+  await expect(page.locator(".battle-dinosaur")).toHaveAttribute("data-skin", "ocean");
   await expect(page.locator(".feedback-portrait")).toHaveAttribute("data-skin", "ocean");
   for (const route of ["reward", "buff", "withered"]) {
     await page.goto(`/${route}`);
@@ -81,7 +84,7 @@ test("customization has three rows per character on narrow and desktop screens",
 }) => {
   for (const width of [320, 390, 526]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto("/shop/customize");
+    await page.goto("/character");
     await page.evaluate(() => document.fonts.ready);
     for (const group of await page.locator(".character-collection").all()) {
       await expect(group.locator(".style-card")).toHaveCount(6);
