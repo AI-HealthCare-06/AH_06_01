@@ -1,0 +1,162 @@
+# feature_contract_v1.yaml — 고혈압 위험도 모델 입력 피처 계약 (v1)
+# 학습(KNHANES)과 추론(앱)이 같은 변환을 거치도록 한 곳에 정의한다.
+# 바꾸면 feature_version 을 올리고 predictions 스냅샷에 함께 저장한다.
+# 혈압값(sbp/dbp)은 어떤 버전에도 피처로 넣지 않는다 (라벨 누수).
+
+feature_version: v1
+thresholds_version: kr_v1
+label:
+  primary:
+    name: label_htn
+    rule: "HE_sbp >= 140 OR HE_dbp >= 90 OR on_medication == 1"   # thresholds_kr_v1.OFFICE_HTN
+    bp_value: "KNHANES 2·3회차 측정 평균"
+  secondary:
+    name: expected_sbp
+    rule: "HE_sbp 회귀, on_medication == 0 인 표본만"
+  optional:
+    name: label_prehtn_or_above
+    rule: "HE_sbp >= 130 OR HE_dbp >= 80 OR on_medication == 1"
+inclusion:
+  min_age: 19
+  require: [age, sex, HE_ht, HE_wt, HE_sbp, HE_dbp]
+  exclude_if: [pregnant == 1]
+models:
+  htn_risk_lite:  { features: [age, sex, bmi, waist_cm, smoking_status] }
+  htn_risk_full:  { features: [age, sex, bmi, waist_cm, smoking_status, alcohol_units_week,
+                               activity_minutes_week, activity_low_flag, sleep_avg_h,
+                               sodium_risk_score, stress_score, family_htn, diabetes_flag,
+                               missing_count] }
+fallback: "full 피처 중 결측 3개 이상이면 htn_risk_lite 로 추론하고 data_quality=partial"
+
+features:
+  - name: age
+    type: int
+    range: [19, 90]
+    app_source: "users.birth_date → 만 나이"
+    knhanes_source: "age"
+    missing: reject            # insufficient
+    monotonic: up
+    required_for: [lite, full]
+
+  - name: sex
+    type: enum
+    values: [male, female]
+    app_source: "users.sex"
+    knhanes_source: "sex (1=male, 2=female)"
+    missing: reject
+    required_for: [lite, full]
+
+  - name: bmi
+    type: float
+    range: [14.0, 50.0]
+    app_source: "body_metrics.weight_kg / (user_health_profile.height_cm/100)^2 (최근 값)"
+    knhanes_source: "HE_BMI (없으면 HE_wt / (HE_ht/100)^2)"
+    missing: reject
+    monotonic: up
+    required_for: [lite, full]
+
+  - name: waist_cm
+    type: float
+    range: [50.0, 150.0]
+    app_source: "body_metrics.waist_cm (최근 90일 내)"
+    knhanes_source: "HE_wc"
+    missing: { impute: "sex×bmi 구간 중앙값(학습 세트에서 계산, 아티팩트에 저장)", flag: waist_missing }
+    monotonic: up
+    required_for: [lite, full]
+
+  - name: smoking_status
+    type: enum
+    values: [never, former, current]
+    app_source: "lifestyle_profile.smoking_status"
+    knhanes_source: "BS3_1: 1,2→current / 3→former / 8→never (연도별 코드 확인)"
+    missing: { impute: never, flag: smoking_missing }
+    required_for: [lite, full]
+
+  - name: alcohol_units_week
+    type: float
+    range: [0.0, 60.0]
+    unit: 표준잔/주
+    app_source: "lifestyle_logs: alcohol_days_per_week × drinks_per_occasion (최근 4주 평균)"
+    knhanes_source: "BD1_11(빈도) × BD2_1(1회 양) 환산표 — 환산표는 transforms.alcohol 에 고정"
+    missing: { impute: 0, flag: alcohol_missing }
+    monotonic: up
+    required_for: [full]
+
+  - name: activity_minutes_week
+    type: int
+    range: [0, 2000]
+    unit: 분/주 (중강도 환산, 고강도는 ×2)
+    app_source: "activity_logs (Health Connect 운동 세션 + 걸음→분 환산, 최근 4주 평균)"
+    knhanes_source: "GPAQ: 일·여가 중강도 분 + 고강도 분×2 + 걷기 분 (BE3_31·BE3_32 등, 연도별 확인)"
+    missing: { impute: "학습 세트 중앙값", flag: activity_missing }
+    monotonic: down
+    note: "설문(KNHANES) vs 실측(웨어러블) 측정 차이 — 모델에는 3단 척도 activity_band(<150, 150~300, >300)도 함께 시험"
+    required_for: [full]
+
+  - name: activity_low_flag
+    type: bool
+    derive: "activity_minutes_week < 150 (결측이면 true)"
+    required_for: [full]
+
+  - name: sleep_avg_h
+    type: float
+    range: [3.0, 12.0]
+    app_source: "lifestyle_logs.sleep_hours (웨어러블 우선, 없으면 문항), 최근 2주 평균"
+    knhanes_source: "(5×BP16_1 + 2×BP16_2)/7 (2016~), 이전 연도 BP8"
+    missing: { impute: 7.0, flag: sleep_missing }
+    note: "U자 관계 가능 → 선형 대신 밴드(<6, 6~8, >8)도 시험"
+    required_for: [full]
+
+  - name: sodium_risk_score
+    type: int
+    range: [0, 2]
+    app_source: "meal_logs.sodium_risk_score(식단 사진 AI) 와 salty_habit_score 결합, 최근 2주 최빈값"
+    knhanes_source: "N_NA(mg/일): <2000→0, 2000~3999→1, ≥4000→2"
+    missing: { impute: 1, flag: sodium_missing }
+    monotonic: up
+    required_for: [full]
+
+  - name: stress_score
+    type: int
+    range: [1, 4]
+    app_source: "lifestyle_logs.stress_score(1~5) → 1~4 재척도: round((s-1)*3/4)+1"
+    knhanes_source: "BP1 (1=대단히 많이 … 4=거의 느끼지 않음) → 역코딩해 4=많음"
+    missing: { impute: 2, flag: stress_missing }
+    required_for: [full]
+
+  - name: family_htn
+    type: bool
+    app_source: "user_health_profile.family_history_codes ∋ hypertension"
+    knhanes_source: "HE_HPfh1 OR HE_HPfh2 OR HE_HPfh3 == 1"
+    missing: { impute: false, flag: family_missing }
+    required_for: [full]
+
+  - name: diabetes_flag
+    type: bool
+    app_source: "comorbidity_codes ∋ diabetes OR lab fasting_glucose>=126 OR hba1c>=6.5"
+    knhanes_source: "HE_glu>=126 OR HE_HbA1c>=6.5 OR DE1_dg==1 OR DE1_31==1"
+    missing: { impute: false, flag: diabetes_missing }
+    required_for: [full]
+
+  - name: missing_count
+    type: int
+    derive: "위 *_missing 플래그 합"
+    required_for: [full]
+
+never_features:            # 어떤 버전에도 금지
+  - sbp
+  - dbp
+  - home_sbp_avg_7d
+  - home_dbp_avg_7d
+  - office_sbp
+  - office_dbp
+  - htn_status             # 라벨과 동치
+
+output:
+  risk_index: "round(calibrated_p × 100), 0~100"
+  risk_level: "thresholds_kr_v1.RISK_LEVELS"
+  reason_codes_vocab: [bmi_high, waist_high, age, smoking_current, alcohol_high,
+                       activity_low, sleep_short, sleep_long, sodium_high,
+                       stress_high, family_htn, diabetes]
+  data_quality: [ok, partial, insufficient, out_of_range, not_applicable]
+  not_applicable_when: "age < 18 OR pregnancy_status == pregnant"
