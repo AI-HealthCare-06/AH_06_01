@@ -7,11 +7,12 @@ export const profileSchema = z.object({
   weight: z.coerce.number().min(1, "몸무게를 확인해 주세요.").max(500),
   bloodPressure: z
     .string()
-    .regex(/^\d{2,3}\s*\/\s*\d{2,3}$/, "혈압은 120 / 80 형식으로 입력해 주세요."),
-  glucose: z.coerce.number().positive("혈당을 확인해 주세요.").max(1000),
-  smoking: z.boolean(),
-  hypertensionFamily: z.boolean(),
-  diabetesFamily: z.boolean(),
+    .regex(/^\d{2,3}\s*\/\s*\d{2,3}$/, "혈압은 120 / 80 형식으로 입력해 주세요.")
+    .nullable(),
+  glucose: z.coerce.number().positive("혈당을 확인해 주세요.").max(1000).nullable(),
+  smoking: z.boolean().nullable(),
+  hypertensionFamily: z.boolean().nullable(),
+  diabetesFamily: z.boolean().nullable(),
 });
 export type HealthProfile = z.infer<typeof profileSchema>;
 export const initialProfile: HealthProfile = {

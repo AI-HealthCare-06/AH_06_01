@@ -32,6 +32,7 @@ export default function App() {
       <Route path="/quests/:id" element={<QuestDetailPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/shop" element={<ShopPage />} />
+      <Route path="/shop/customize" element={<ShopPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/dinosaur" element={<DinosaurPage />} />

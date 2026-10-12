@@ -1,20 +1,23 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell, PageHeading } from "../components/AppShell";
 import { AdventureScene } from "../components/AdventureScene";
 import { DinoRadarCard } from "../components/DinoRadarCard";
+import { DinosaurArt } from "../components/DinosaurArt";
+import { DinosaurCustomization } from "../components/DinosaurCustomization";
 import { RiskChange } from "../components/RiskChange";
 import { AnimatedNumber } from "../components/AnimatedNumber";
 import { QuestProgress, PixelCheckbox } from "../components/QuestProgress";
 import { useNotice } from "../components/NoticeProvider";
 import { assets } from "../design/assets";
+import { dinosaurs } from "../design/dinosaurs";
 import { quests, stageProgress, questProgress, questProgressLabel } from "../domain/game";
 import { useGameStore } from "../stores/game-store";
 import { dashboardService } from "../services/dashboard-service";
 
 export function HomePage() {
   const { game, paused, togglePause } = useGameStore();
+  const dino = dinosaurs[game.dinosaur];
   const a = assets.home;
   const icons = [
     a.imgQuestItem0PixelIcon,
@@ -27,9 +30,9 @@ export function HomePage() {
       <Link to={game.completed.length ? "/buff" : "/withered"} className="dino-feedback">
         <img className="feedback-background" src={a.imgFeedbackDinoMessage} alt="" />
         <span className="feedback-wash" />
-        <img className="feedback-portrait" src={a.imgDinoPortrait} alt="" />
+        <DinosaurArt className="feedback-portrait" pose="portrait" />
         <span className="feedback-copy">
-          <strong>잘하고 있어요!</strong>
+          <strong>{dino.name}, 잘하고 있어요!</strong>
           <small>꾸준히 하면 더 강해질 수 있어요!</small>
         </span>
         <b>›</b>
@@ -82,19 +85,20 @@ export function HomePage() {
 
 export function QuestsPage() {
   const game = useGameStore((s) => s.game);
+  const dino = dinosaurs[game.dinosaur];
   const notice = useNotice();
   return (
     <AppShell active="quests">
-      <PageHeading title="DAILY QUEST" subtitle="오늘의 건강 행동으로 렉스를 강화하세요" />
+      <PageHeading title="DAILY QUEST" subtitle={`${dino.name}의 성장을 위한 오늘의 건강 퀘스트`} />
       <section className="quest-summary">
-        <img className="quest-summary-dino" src={assets.quests.imgDinoPortrait} alt="티라노" />
+        <DinosaurArt className="quest-summary-dino" pose="portrait" />
         <div className="quest-summary-copy">
           <h3>
             TODAY QUEST · <AnimatedNumber value={game.completed.length} /> / 5 완료
           </h3>
           <div className="quest-summary-detail">
             <div className="quest-summary-power">
-              <p>티라노 전투력 +12</p>
+              <p>{dino.name} 전투력 +12</p>
               <div className="summary-track">
                 <i className="metric-fill" style={{ width: `${stageProgress(game) * 10}%` }} />
               </div>
@@ -150,6 +154,8 @@ export function QuestsPage() {
 }
 
 export function DashboardPage() {
+  const selected = useGameStore((s) => s.game.dinosaur);
+  const dino = dinosaurs[selected];
   const { data, isError } = useQuery({
     queryKey: ["dashboard", "demo"],
     queryFn: ({ signal }) => dashboardService.getSnapshot(signal),
@@ -158,7 +164,7 @@ export function DashboardPage() {
     <AppShell active="dashboard">
       <PageHeading
         title="HEALTH DASHBOARD"
-        subtitle="이번 주 건강 기록과 렉스의 성장을 확인하세요"
+        subtitle={`이번 주 건강 기록과 ${dino.name}의 성장을 확인하세요`}
       />
       {!data ? (
         <p role="status">
@@ -237,10 +243,13 @@ export function DashboardPage() {
             </div>
           </section>
           <Link to="/buff" className="growth-insight">
-            <img src={assets.dashboard.imgDinoPortrait} alt="성장한 티라노" />
+            <DinosaurArt pose="portrait" alt={`성장한 ${dino.name}`} />
             <div>
               <h3>
-                REX GROWTH +<AnimatedNumber value={12} />%
+                <span>{dino.name} 성장</span>
+                <span>
+                  +<AnimatedNumber value={12} />%
+                </span>
               </h3>
               <p>건강 점수가 높아져 공격력이 올랐어요!</p>
             </div>
@@ -278,11 +287,19 @@ const products = [
 ];
 export function ShopPage() {
   const { game, claimBonus } = useGameStore();
+  const dino = dinosaurs[game.dinosaur];
   const notice = useNotice();
-  const [category, setCategory] = useState(0);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const category =
+    location.pathname === "/shop/customize"
+      ? 2
+      : new URLSearchParams(location.search).get("category") === "rewards"
+        ? 1
+        : 0;
   return (
     <AppShell active="shop">
-      <PageHeading title="REX SHOP" subtitle="건강 퀘스트 보상으로 렉스를 꾸며보세요" />
+      <PageHeading title="REX SHOP" subtitle={`건강 퀘스트 보상으로 ${dino.name} 꾸미기`} />
       <section className="shop-wallet" aria-label="헬스 코인 지갑">
         <h3>HEALTH COINS</h3>
         <p>퀘스트 완료로 코인을 모아요</p>
@@ -320,13 +337,7 @@ export function ShopPage() {
               key={label}
               className={`shop-tab shop-tab-${i}`}
               aria-pressed={category === i}
-              onClick={() => {
-                setCategory(i);
-                if (i === 2)
-                  notice(
-                    "꾸미기 아이템은 준비 중이에요. 현재는 원본 디자인의 상품을 확인할 수 있어요.",
-                  );
-              }}
+              onClick={() => navigate(["/shop", "/shop?category=rewards", "/shop/customize"][i])}
             >
               <span className="shop-tab-content">
                 <img
@@ -347,31 +358,41 @@ export function ShopPage() {
             </button>
           ))}
         </div>
-        <div className="product-scroll" role="region" aria-label="상품 목록" tabIndex={0}>
-          <div className="product-grid">
-            {products.map((p, i) => (
-              <button
-                key={p.name}
-                className={`product product-${i} ${p.wide ? "wide" : ""}`}
-                onClick={() =>
-                  notice(
-                    `${p.name} · ${p.price} P — 상품 교환은 준비 중이며 코인은 차감되지 않아요.`,
-                  )
-                }
-              >
-                <span className="product-photo">
-                  <img src={p.image} alt={p.name} />
-                </span>
-                <span className="rrr-badge">RRR</span>
-                <span className="product-price">{p.price} P</span>
-                {p.badge && (
-                  <span className={`product-badge ${i === 0 ? "sale" : ""}`}>{p.badge}</span>
-                )}
-                <strong>{p.name}</strong>
-                <small>{p.sub}</small>
-              </button>
-            ))}
-          </div>
+        <div
+          key={category}
+          className="product-scroll"
+          role="region"
+          aria-label={category === 2 ? "꾸미기 목록" : "상품 목록"}
+          tabIndex={0}
+        >
+          {category === 2 ? (
+            <DinosaurCustomization />
+          ) : (
+            <div className="product-grid">
+              {products.map((p, i) => (
+                <button
+                  key={p.name}
+                  className={`product product-${i} ${p.wide ? "wide" : ""}`}
+                  onClick={() =>
+                    notice(
+                      `${p.name} · ${p.price} P — 상품 교환은 준비 중이며 코인은 차감되지 않아요.`,
+                    )
+                  }
+                >
+                  <span className="product-photo">
+                    <img src={p.image} alt={p.name} />
+                  </span>
+                  <span className="rrr-badge">RRR</span>
+                  <span className="product-price">{p.price} P</span>
+                  {p.badge && (
+                    <span className={`product-badge ${i === 0 ? "sale" : ""}`}>{p.badge}</span>
+                  )}
+                  <strong>{p.name}</strong>
+                  <small>{p.sub}</small>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </AppShell>
