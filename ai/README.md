@@ -30,9 +30,16 @@ ai/
 ├─ train_boost.py             B1 단조 제약 LightGBM                     [10/20]
 ├─ calibrate.py               Platt / isotonic 보정                     [10/20]
 ├─ eval_external.py           M-lite 공단 검진정보 외부 검증, 하위군 표     [10/20]
-├─ inference/predict.py       predict_htn_risk(features) -> RiskResult  [10/20]
-├─ tests/test_sanity.py       상식·안전 검증 10종 (CI)                   [10/27]
-├─ tests/golden_cases.json    회귀 테스트 20건                           [10/27]
+├─ inference/
+│  ├─ bundle.py               아티팩트 1파일 형식(모델·보정기·대치값·열·버전)
+│  ├─ predictor.py            계약 피처 → 위험지수·이유 코드 (순수 함수)
+│  └─ predict.py              predict_htn_risk(features) -> dict, 아티팩트 1회 로드  [10/20]
+├─ tests/
+│  ├─ test_contract.py        계약 변환 규칙 (결측·범위·누수·미적용)         ← 모델 없이 실행
+│  ├─ test_labels.py          라벨 규칙·포함 기준                          ← 모델 없이 실행
+│  ├─ test_predictor_stub.py  합성 모델로 추론 경로 끝단 검증                ← 모델 없이 실행
+│  ├─ test_sanity.py          상식·안전 검증 10종 (CI, 아티팩트 필요)        [10/27]
+│  └─ golden_cases.json       회귀 테스트 20건                             [10/27]
 ├─ artifacts/                 학습된 모델·보정기 (B0 ≤5MB, B1 ≤20MB)
 ├─ reports/                   보정 곡선 PNG, 하위군 표 CSV
 ├─ experiments.md             실험 기록 (날짜·데이터 버전·시드·지표 1줄씩)
