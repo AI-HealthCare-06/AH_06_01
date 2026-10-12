@@ -12,4 +12,35 @@ describe("profile inputs", () => {
       false,
     );
   });
+  it("preserves unknown measurements and choices without converting them to zero or false", () => {
+    const unknown = {
+      bloodPressure: null,
+      glucose: null,
+      smoking: null,
+      hypertensionFamily: null,
+      diabetesFamily: null,
+    };
+    expect(profileSchema.parse({ ...initialProfile, ...unknown })).toEqual({
+      ...initialProfile,
+      ...unknown,
+    });
+    for (const key of Object.keys(unknown)) {
+      expect(profileSchema.parse({ ...initialProfile, [key]: null })).toEqual({
+        ...initialProfile,
+        [key]: null,
+      });
+    }
+  });
+  it("still rejects invalid known values when another measurement is unknown", () => {
+    for (const glucose of ["", 0, -1, 1001, NaN]) {
+      expect(
+        profileSchema.safeParse({ ...initialProfile, bloodPressure: null, glucose }).success,
+      ).toBe(false);
+    }
+    for (const bloodPressure of ["", "120", "wrong"]) {
+      expect(
+        profileSchema.safeParse({ ...initialProfile, bloodPressure, glucose: null }).success,
+      ).toBe(false);
+    }
+  });
 });

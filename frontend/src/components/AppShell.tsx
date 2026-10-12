@@ -47,23 +47,27 @@ export function AppShell({ active, children }: { active: TabName; children: Reac
           ☰
         </Link>
       </header>
-      <div className="weekly-calendar" aria-label="주간 달력">
-        {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((label, index) => (
-          <button
-            key={label}
-            onClick={() => {
-              setDay(21 + index);
-              if (21 + index !== 22)
-                notice(`${21 + index}일 기록은 아직 없어요. 현재 화면은 Figma의 예시 기록이에요.`);
-            }}
-            aria-pressed={day === 21 + index}
-            aria-label={`9월 ${21 + index}일`}
-          >
-            <span>{label}</span>
-            <strong>{21 + index}</strong>
-          </button>
-        ))}
-      </div>
+      {active !== "shop" && (
+        <div className="weekly-calendar" aria-label="주간 달력">
+          {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((label, index) => (
+            <button
+              key={label}
+              onClick={() => {
+                setDay(21 + index);
+                if (21 + index !== 22)
+                  notice(
+                    `${21 + index}일 기록은 아직 없어요. 현재 화면은 Figma의 예시 기록이에요.`,
+                  );
+              }}
+              aria-pressed={day === 21 + index}
+              aria-label={`9월 ${21 + index}일`}
+            >
+              <span>{label}</span>
+              <strong>{21 + index}</strong>
+            </button>
+          ))}
+        </div>
+      )}
       <main className="main-content">
         <div className="dark-shell" aria-hidden="true" />
         {children}

@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { defaultDinosaurStyles, skinIds } from "./appearance";
+import type { SkinId } from "./appearance";
 
 export const questIds = ["medicine", "meal", "walk", "water", "sleep"] as const;
 export type QuestId = (typeof questIds)[number];
@@ -76,6 +78,11 @@ export const gameSchema = z.object({
   allDoneBonusClaimed: z.boolean(),
   sampleDay: z.boolean().default(true),
   dinosaur: z.number().int().min(0).max(5),
+  dinosaurStyles: z
+    .array(z.enum(skinIds))
+    .length(6)
+    .default(defaultDinosaurStyles)
+    .catch(defaultDinosaurStyles),
   lastReward: z
     .object({ questId: z.enum(questIds), coins: z.number().int().nonnegative() })
     .nullable(),
@@ -101,6 +108,7 @@ export function initialGame(date = seoulDate()): GameState {
     allDoneBonusClaimed: false,
     sampleDay: true,
     dinosaur: 0,
+    dinosaurStyles: defaultDinosaurStyles(),
     lastReward: null,
   };
 }
@@ -143,6 +151,15 @@ export function claimDailyBonus(state: GameState, date = seoulDate()): GameState
   return current.bonusClaimed
     ? current
     : { ...current, coins: current.coins + 10, bonusClaimed: true };
+}
+
+export function applyDinosaurStyle(state: GameState, index: number, skin: SkinId): GameState {
+  if (!Number.isInteger(index) || index < 0 || index >= 6 || !skinIds.includes(skin)) return state;
+  return {
+    ...state,
+    dinosaur: index,
+    dinosaurStyles: state.dinosaurStyles.map((current, i) => (i === index ? skin : current)),
+  };
 }
 
 export function restoreGame(value: unknown): GameState {
