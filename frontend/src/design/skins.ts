@@ -2,6 +2,19 @@ import type { SkinId } from "../domain/appearance";
 
 export const skins: { id: SkinId; name: string; filter: string; surface: string }[] = [
   { id: "original", name: "오리지널", filter: "none", surface: "#e8e1bf" },
+  { id: "desert", name: "사막", filter: "sepia(.65) saturate(1.1)", surface: "#e8ba6e" },
+  {
+    id: "snow",
+    name: "설원",
+    filter: "saturate(.45) hue-rotate(145deg) brightness(1.15)",
+    surface: "#a3d1ed",
+  },
+  {
+    id: "volcano",
+    name: "화산",
+    filter: "sepia(.65) saturate(1.8) hue-rotate(325deg)",
+    surface: "#d15745",
+  },
   {
     id: "forest",
     name: "숲의 수호자",

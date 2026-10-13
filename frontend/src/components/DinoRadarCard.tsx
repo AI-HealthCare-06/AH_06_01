@@ -10,10 +10,8 @@ function point(value: number, index: number) {
 }
 function polygon(values: readonly number[]) {
   return values
-    .map((value, index) => {
-      const p = point(value, index);
-      return `${p.x},${p.y}`;
-    })
+    .map(point)
+    .map((p) => `${p.x},${p.y}`)
     .join(" ");
 }
 
@@ -47,6 +45,7 @@ export function DinoRadarCard() {
       <svg
         className="radar-comparison"
         viewBox="0 0 170 140"
+        shapeRendering="geometricPrecision"
         role="img"
         aria-labelledby="dino-radar-title"
         aria-describedby="dino-radar-description"
@@ -76,7 +75,17 @@ export function DinoRadarCard() {
           <polygon className="radar-today-series" data-series="today" points={polygon(today)} />
           {today.map((value, i) => {
             const p = point(value, i);
-            return <circle key={i} className="radar-point" cx={p.x} cy={p.y} r={2.5} />;
+            return (
+              <rect
+                key={i}
+                className="radar-point"
+                shapeRendering="crispEdges"
+                x={Math.round(p.x / 2) * 2 - 2}
+                y={Math.round(p.y / 2) * 2 - 2}
+                width={4}
+                height={4}
+              />
+            );
           })}
         </g>
         <g className="radar-series radar-baseline">

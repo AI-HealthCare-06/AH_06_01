@@ -9,14 +9,28 @@ import { useGameStore } from "../stores/game-store";
 import { useProfileStore } from "../stores/profile-store";
 import { dinosaurs } from "../design/dinosaurs";
 import { DinosaurArt } from "../components/DinosaurArt";
+import { StepConnection } from "../components/StepConnection";
+import { useDeviceStore } from "../stores/device-store";
+import { ProfileAvatar } from "../components/ProfileAvatar";
+import { experienceProgress, questExperience } from "../domain/experience";
+import { battleBuffStats, questBuffs } from "../domain/battle";
+import { directRewardPreview } from "../domain/economy";
+import {
+  battleNotificationPermission,
+  requestBattleNotifications,
+} from "../services/battle-notifications";
 
 export function QuestDetailPage() {
   const { id } = useParams();
-  const { game, complete } = useGameStore();
+  const { game, complete, repeat } = useGameStore();
   const navigate = useNavigate();
   const q = quests.find((q) => q.id === id);
   if (!q) return <Navigate to="/quests" replace />;
   const done = game.completed.includes(q.id);
+  const waterCooling =
+    q.id === "water" &&
+    game.lastWaterAt !== null &&
+    game.battleUpdatedAt - game.lastWaterAt < 7_200_000;
   const progress = Math.round(questProgress(game, q) * 100);
   return (
     <ScenarioShell className="quest-detail-screen" camera={assets["quest-detail"].imgEllipse}>
@@ -57,22 +71,65 @@ export function QuestDetailPage() {
       <h2 className="reward-label">완료하면</h2>
       <div className="quest-reward">
         <div>
-          <strong>+{q.reward}</strong>
-          <b>COIN</b>
+          <strong>+{questExperience(q.experience, game.experience)}</strong>
+          <b>EXP</b>
         </div>
-        <p>{q.id === "walk" ? "체력 +2 민첩 +3" : `경험치 +${q.experience}`}</p>
+        <p>{questBuffs.find((buff) => buff.id === q.id)!.effect}</p>
       </div>
       <button
         className="primary-button complete-quest"
-        disabled={done}
+        disabled={done || q.id === "walk" || waterCooling}
         onClick={() => {
           complete(q.id);
           navigate("/reward");
         }}
       >
-        {done ? "오늘 완료한 퀘스트예요" : "완료 체크하기"}
+        {done
+          ? "오늘 완료한 퀘스트예요"
+          : q.id === "walk"
+            ? "6,000걸음 달성 시 자동 완료"
+            : waterCooling
+              ? "물 인정 간격 120분 대기 중"
+              : "완료 체크하기"}
       </button>
-      <p className="complete-help">직접 완료한 뒤 체크해 주세요.</p>
+      {q.id === "walk" ? (
+        <StepConnection />
+      ) : (
+        <>
+          <p className="complete-help">
+            데모 완료 체크로 EXP·버프를 확인해요.{" "}
+            {directRewardPreview(q.id) > 0 &&
+              `직접 보상 ${directRewardPreview(q.id)} Gold는 인증·서버 검증 후 지급됩니다.`}
+          </p>
+          {q.id !== "sleep" && (
+            <Link className="camera-quest-link" to={`/camera?quest=${q.id}`}>
+              카메라로 실천 기록 남기기
+            </Link>
+          )}
+        </>
+      )}
+      {done && (q.id === "meal" || q.id === "water") && (
+        <div className="cream-card repeat-quest">
+          <p>초과 클리어 · 최초 EXP의 10% · 최대 5회</p>
+          <button
+            disabled={
+              (game.activity[q.id] ?? 1) >= 6 ||
+              (q.id === "water" &&
+                game.lastWaterAt !== null &&
+                game.battleUpdatedAt - game.lastWaterAt < 7_200_000)
+            }
+            onClick={() => {
+              repeat(q.id);
+              navigate("/reward");
+            }}
+          >
+            초과 클리어 데모 ({Math.max(0, (game.activity[q.id] ?? 1) - 1)} / 5)
+          </button>
+          {q.id === "water" && (
+            <small>물 인정 간격 120분 · 실제 섭취 안내는 개인별 목표를 따라 주세요.</small>
+          )}
+        </div>
+      )}
     </ScenarioShell>
   );
 }
@@ -88,12 +145,19 @@ export function RewardPage() {
         <img src={assets.reward.imgEllipse1} alt="" />
         <DinosaurArt className="reward-dino" pose="reward" alt={dino.name} />
       </div>
-      <strong className="reward-coins">+{reward?.coins ?? 30} COIN</strong>
+      <strong className="reward-coins">+{reward?.experience ?? 0} EXP</strong>
+      {!!reward?.gold && (
+        <p className="level-up-reward">LEVEL UP · +{reward.gold.toLocaleString()} GOLD</p>
+      )}
       <div className="cream-card reward-stats">
         <h2>{dino.name}가 더 강해졌어요!</h2>
         <div>
-          <strong>체력 12 → 14</strong>
-          <strong>민첩 8 → 11</strong>
+          <strong>Lv.{experienceProgress(game.experience).level}</strong>
+          <strong>
+            {reward
+              ? questBuffs.find((buff) => buff.id === reward.questId)?.effect
+              : "퀘스트를 완료해 성장해요"}
+          </strong>
         </div>
         <p>오늘 완료 {game.completed.length} / 5</p>
       </div>
@@ -107,6 +171,7 @@ export function RewardPage() {
 export function BuffPage() {
   const game = useGameStore((s) => s.game);
   const dino = dinosaurs[game.dinosaur];
+  const stats = battleBuffStats(game);
   return (
     <ScenarioShell className="buff-screen" camera={assets.buff.imgEllipse}>
       <header className="scenario-heading">
@@ -117,16 +182,20 @@ export function BuffPage() {
         <img className="scene-background" src={assets.buff.imgRectangle} alt="초록 숲" />
         <DinosaurArt className="scene-dino" pose="buff" alt={dino.name} />
         <b className="scene-badge">BUFF + HEALTH</b>
-        <strong>{dino.name} · Lv.2 · HP 340 / 340</strong>
+        <strong>
+          {dino.name} · Lv.{experienceProgress(game.experience).level} · HP{" "}
+          {Math.ceil(game.combat.hp)} / {stats.maxHp}
+        </strong>
       </div>
       <div className="cream-card buff-message">
         <h2>좋아요! 몸에 힘이 돌아왔어요.</h2>
         <p>퀘스트를 더 완료하면 버프가 커져요.</p>
       </div>
       <div className="buff-quests">
-        {quests.slice(0, 3).map((q) => (
+        {quests.map((q) => (
           <Link className="cream-card" to={`/quests/${q.id}`} key={q.id}>
             <b>{q.shortTitle}</b>
+            <small>{questBuffs.find((buff) => buff.id === q.id)!.effect}</small>
             <strong className={game.completed.includes(q.id) ? "green" : "red"}>
               {game.completed.includes(q.id)
                 ? "완료"
@@ -137,7 +206,7 @@ export function BuffPage() {
           </Link>
         ))}
       </div>
-      <p className="buff-note">상태는 매일 초기화 · 능력치와 코인은 누적</p>
+      <p className="buff-note">상태는 매일 초기화 · 능력치와 GOLD는 누적</p>
       <Link className="buff-continue" to="/home">
         오늘의 모험 계속하기
       </Link>
@@ -150,24 +219,38 @@ export function MyPage() {
   const clearProfile = useProfileStore((s) => s.clear);
   const navigate = useNavigate();
   const notice = useNotice();
-  const [resetEnabled, setResetEnabled] = useState(true);
   const [dialog, setDialog] = useState<string | null>(null);
   const [dialogTrigger, setDialogTrigger] = useState<HTMLButtonElement | null>(null);
+  const [notificationPermission, setNotificationPermission] = useState(
+    battleNotificationPermission,
+  );
   function logout() {
+    useDeviceStore.getState().disconnect();
     resetDemo();
-    clearProfile();
+    clearProfile(true);
     navigate("/login");
   }
   return (
     <ScenarioShell className="my-page-screen" camera={assets["my-page"].imgEllipse}>
+      <button
+        className="page-back"
+        onClick={() => {
+          if (window.history.state?.idx > 0) navigate(-1);
+          else navigate("/home");
+        }}
+      >
+        ← 뒤로가기
+      </button>
       <h1>MY PAGE</h1>
       <section className="cream-card member-card">
-        <span>MIN</span>
+        <ProfileAvatar />
         <div>
           <h2>민 님</h2>
-          <p>{dinosaurs[game.dinosaur].name} · Lv.12</p>
+          <p>
+            {dinosaurs[game.dinosaur].name} · Lv.{experienceProgress(game.experience).level}
+          </p>
         </div>
-        <strong>{game.coins.toLocaleString("en-US")} COIN</strong>
+        <strong>{game.gold.toLocaleString("en-US")} GOLD</strong>
       </section>
       <h2 className="account-heading">계정 및 건강 정보</h2>
       <div className="account-menu">
@@ -182,7 +265,16 @@ export function MyPage() {
             desc: "퀘스트·복약·저녁 리마인드",
             action: () => setDialog("알림 설정"),
           },
-          { title: "연결 관리", desc: "Health Connect 준비", action: () => setDialog("연결 관리") },
+          {
+            title: "연결 관리",
+            desc: "Android · Health Connect / iPhone · 건강",
+            action: () => setDialog("연결 관리"),
+          },
+          {
+            title: "웨어러블 장비",
+            desc: "Apple Watch · Galaxy Watch · 수면 연동",
+            action: () => setDialog("웨어러블 장비"),
+          },
           {
             title: "개인정보 및 이용약관",
             desc: "데이터 사용 안내",
@@ -205,24 +297,6 @@ export function MyPage() {
           </button>
         ))}
       </div>
-      <div className="cream-card daily-reset-setting">
-        <div>
-          <h3>일일 상태 초기화</h3>
-          <p>매일 00:00에 공룡 상태만 초기화</p>
-        </div>
-        <button
-          role="switch"
-          aria-checked={resetEnabled}
-          aria-label="일일 상태 초기화 안내"
-          onClick={() => {
-            setResetEnabled(!resetEnabled);
-            notice("초기화 설정은 화면 체험용이에요. 데모 퀘스트는 날짜가 바뀌면 초기화돼요.");
-          }}
-          className={resetEnabled ? "enabled" : ""}
-        >
-          <img src={assets["my-page"].imgEllipse1} alt="" />
-        </button>
-      </div>
       <button className="logout-button" onClick={logout}>
         <svg viewBox="0 0 24 24" aria-hidden="true" shapeRendering="crispEdges">
           <path fill="currentColor" d="M3 3h9v3H6v12h6v3H3zM15 6h3v3h3v6h-3v3h-3v-3H9v-3h9V9h-3z" />
@@ -232,11 +306,66 @@ export function MyPage() {
       <p className="app-version">REXRUN v0.1</p>
       {dialog && (
         <InfoDialog title={dialog} onClose={() => setDialog(null)} returnFocusTo={dialogTrigger}>
-          {dialog === "개인정보 및 이용약관"
-            ? "현재는 UI 개발용 데모입니다. 건강 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 브라우저에는 공룡과 꾸미기 선택, 퀘스트 완료와 코인 등이 저장됩니다."
-            : dialog === "알림 설정"
-              ? "시스템 알림과 복약 리마인드는 아직 연결되지 않았어요."
-              : "Health Connect·웨어러블 연결은 준비 중이에요. 현재 기록은 Figma 예시 데이터입니다."}
+          {dialog === "개인정보 및 이용약관" ? (
+            "현재는 UI 개발용 데모입니다. 건강 프로필 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 이 기기에는 프로필 등록 일자, 공룡과 꾸미기 선택, 퀘스트 완료·GOLD, 연결한 오늘의 걸음 수와 동기화 시각이 저장됩니다. 사진은 촬영 화면에만 유지되며 서버에 전송하지 않습니다. 날씨에 위치 사용을 허용하면 반올림한 좌표를 Open-Meteo에 보내며 좌표는 저장하지 않습니다. 로그아웃하면 등록 일자·걸음 수·퀘스트 기록이 초기화됩니다."
+          ) : dialog === "알림 설정" ? (
+            <div className="battle-notification-settings">
+              <h3>Wave 실패 알림</h3>
+              <p>실패하면 화면 알림과 공룡의 응원 대사를 보여드려요.</p>
+              <p>
+                {notificationPermission === "granted"
+                  ? "브라우저 알림 ON · 시스템 알림도 보내요."
+                  : notificationPermission === "denied"
+                    ? "브라우저 설정에서 이 사이트의 알림을 허용해 주세요."
+                    : notificationPermission === "unsupported"
+                      ? "이 환경에서는 화면 알림을 사용해요."
+                      : "시스템 알림을 받으려면 브라우저 알림을 허용해 주세요."}
+              </p>
+              <button
+                className="primary-button"
+                disabled={notificationPermission !== "default"}
+                onClick={async () => {
+                  try {
+                    setNotificationPermission(await requestBattleNotifications());
+                  } catch {
+                    notice(
+                      "알림 허용 상태를 확인하지 못했어요. 화면 알림은 계속 사용할 수 있어요.",
+                    );
+                  }
+                }}
+              >
+                {notificationPermission === "granted"
+                  ? "브라우저 알림 허용됨"
+                  : "브라우저 알림 켜기"}
+              </button>
+              <small>데모가 실행되는 동안 Wave 실패를 알려드려요.</small>
+            </div>
+          ) : dialog === "웨어러블 장비" ? (
+            <div className="wearable-devices">
+              <section>
+                <h3>Apple Watch</h3>
+                <p>
+                  iPhone의 건강 앱에 동기화된 걸음 수를 함께 읽어요. Watch 앱에서 기기를 페어링해
+                  주세요.
+                </p>
+              </section>
+              <section>
+                <h3>Galaxy Watch · Android 워치</h3>
+                <p>
+                  제조사 건강 앱에서 Health Connect로 걸음 수를 공유하면 연결된 기록에 반영돼요.
+                </p>
+              </section>
+              <section>
+                <h3>수면 시간</h3>
+                <p>
+                  웨어러블 수면 기록 연동 준비 중 · 현재 수면 기록을 읽거나 자동 완료하지 않아요.
+                </p>
+              </section>
+              <StepConnection />
+            </div>
+          ) : (
+            <StepConnection />
+          )}
         </InfoDialog>
       )}
     </ScenarioShell>

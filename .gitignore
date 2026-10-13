@@ -19,6 +19,10 @@ Thumbs.db
 *.pfx
 *.p12
 secrets/
+frontend/public/vendor/mediapipe/
+frontend/public/models/motion-capture/*.task
+frontend/public/models/motion-capture/*.tflite
+frontend/public/models/motion-capture/*.partial
 
 # Local source documents supplied by the team; the app and implementation docs are versioned.
 docs/*.docx

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">REXRUN</string>
+    <string name="title_activity_main">REXRUN</string>
+    <string name="package_name">com.rexrun.demo</string>
+    <string name="custom_url_scheme">com.rexrun.demo</string>
+</resources>

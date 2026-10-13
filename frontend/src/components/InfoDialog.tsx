@@ -37,7 +37,7 @@ export function InfoDialog({
     >
       <div>
         <h2 id="dialog-title">{title}</h2>
-        <p>{children}</p>
+        <div className="dialog-body">{children}</div>
         <button autoFocus className="primary-button" onClick={onConfirm ?? onClose}>
           {confirmLabel}
         </button>

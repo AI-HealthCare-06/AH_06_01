@@ -24,24 +24,26 @@ export function RiskChange({
         <strong style={{ color: colors[tone] }}>
           <AnimatedNumber value={current} />%
         </strong>
-        <span
-          className="risk-change-arrow"
-          aria-hidden="true"
-          style={{
-            backgroundImage: `linear-gradient(90deg, ${colors[tone]}, ${colors[projectedTone]})`,
-          }}
-        >
-          →
+        <span className="risk-change-middle">
+          <small>
+            {delta < 0 ? "−" : delta > 0 ? "+" : ""}
+            <AnimatedNumber value={Math.abs(delta)} />
+            %p
+          </small>
+          <span
+            className="risk-change-arrow"
+            aria-hidden="true"
+            style={{
+              backgroundImage: `linear-gradient(90deg, ${colors[tone]}, ${colors[projectedTone]})`,
+            }}
+          >
+            →
+          </span>
         </span>
         <strong style={{ color: colors[projectedTone] }}>
           <AnimatedNumber value={projected} />%
         </strong>
       </div>
-      <small>
-        {delta < 0 ? "−" : delta > 0 ? "+" : ""}
-        <AnimatedNumber value={Math.abs(delta)} />
-        %p
-      </small>
     </div>
   );
 }

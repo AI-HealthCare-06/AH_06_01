@@ -3,6 +3,7 @@ import { dinosaurs } from "../design/dinosaurs";
 import { useGameStore } from "../stores/game-store";
 import { getSkin } from "../design/skins";
 import type { SkinId } from "../domain/appearance";
+import { battleDinosaurs, dinosaurFaces } from "../design/battle-assets";
 
 const tyrannoPoses = {
   default: assets.dinosaur.imgDino,
@@ -34,7 +35,15 @@ export function DinosaurArt({
   return (
     <img
       className={`dinosaur-art ${className}`}
-      src={index === 0 ? tyrannoPoses[pose] : dino.image}
+      src={
+        pose === "portrait"
+          ? dinosaurFaces[index]
+          : pose === "adventure"
+            ? battleDinosaurs[index].image
+            : index === 0
+              ? tyrannoPoses[pose]
+              : dino.image
+      }
       alt={alt ?? dino.name}
       data-dinosaur={index}
       data-pose={pose}

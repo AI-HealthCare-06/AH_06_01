@@ -1,0 +1,39 @@
+{
+  "version": "mediapipe-1.0.1-models-v1",
+  "packageVersion": "1.0.1",
+  "packageLicense": "Apache-2.0",
+  "modelRedistributionReview": "pending",
+  "preprocessing": "MediaPipe Tasks handles model-specific resize, crop and normalization; source frames retain aspect ratio and are not mirrored.",
+  "models": [
+    {
+      "id": "hand",
+      "file": "hand_landmarker.task",
+      "url": "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+      "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1",
+      "size": 7819105,
+      "input": "palm 192x192; hand 224x224; float16",
+      "output": "21 hand landmarks and handedness",
+      "source": "https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker"
+    },
+    {
+      "id": "face",
+      "file": "face_landmarker.task",
+      "url": "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+      "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+      "size": 3758596,
+      "input": "face 192x192; mesh 256x256; float16",
+      "output": "478 face landmarks",
+      "source": "https://developers.google.com/edge/mediapipe/solutions/vision/face_landmarker"
+    },
+    {
+      "id": "object",
+      "file": "efficientdet_lite0.tflite",
+      "url": "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite",
+      "sha256": "4b59100025bea1235a84c1038879a6cccc9f6c49f5e41144e91e74d99e780993",
+      "size": 7254339,
+      "input": "320x320 RGB; float16 weights",
+      "output": "COCO boxes, categories and scores; cup and bottle allowed",
+      "source": "https://developers.google.com/edge/mediapipe/solutions/vision/object_detector"
+    }
+  ]
+}
