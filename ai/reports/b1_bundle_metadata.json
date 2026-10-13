@@ -1,0 +1,470 @@
+{
+  "htn_risk_full": {
+    "model_id": "htn_risk_full",
+    "model_version": "2026.10.13-b1",
+    "imputers": {
+      "source": "knhanes_time_train"
+    },
+    "columns": [
+      "age",
+      "sex_female",
+      "bmi",
+      "waist_cm",
+      "smoking_former",
+      "smoking_current",
+      "alcohol_units_week",
+      "activity_minutes_week",
+      "activity_low_flag",
+      "sleep_avg_h",
+      "sodium_risk_score",
+      "stress_score",
+      "family_htn",
+      "diabetes_flag",
+      "missing_count"
+    ],
+    "reference": null,
+    "feature_version": "v1",
+    "thresholds_version": "kr_v1",
+    "metadata": {
+      "algorithm": "B1 LightGBM monotone (max_depth=4, trees=279/300, early stop on val)",
+      "hyperparameters": {
+        "learning_rate": 0.03,
+        "num_leaves": 15,
+        "min_child_samples": 200
+      },
+      "monotone_constraints": {
+        "age": 1,
+        "sex_female": 0,
+        "bmi": 1,
+        "waist_cm": 1,
+        "smoking_former": 0,
+        "smoking_current": 1,
+        "alcohol_units_week": 1,
+        "activity_minutes_week": -1,
+        "activity_low_flag": 1,
+        "sleep_avg_h": 0,
+        "sodium_risk_score": 1,
+        "stress_score": 0,
+        "family_htn": 0,
+        "diabetes_flag": 0,
+        "missing_count": 0
+      },
+      "split": "time",
+      "train_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019
+      ],
+      "val_years": [
+        2020
+      ],
+      "test_years": [
+        2021,
+        2022
+      ],
+      "n_train": 39914,
+      "n_val": 5704,
+      "n_test": 10576,
+      "seed": 42,
+      "calibration": {
+        "kind": "platt",
+        "a": 1.027,
+        "b": -0.1681
+      },
+      "metrics": {
+        "train_raw": {
+          "n": 39914,
+          "prevalence": 0.321,
+          "pred_mean": 0.3213,
+          "auroc": 0.8486,
+          "auprc": 0.7098,
+          "brier": 0.1458,
+          "logloss": 0.4417,
+          "ece10": 0.0056,
+          "cal_slope": 1.0402,
+          "cal_intercept": 0.0137,
+          "citl": -0.0019,
+          "prevalence_w": 0.2686,
+          "pred_mean_w": 0.27,
+          "auroc_w": 0.8529,
+          "brier_w": 0.1332
+        },
+        "val_raw": {
+          "n": 5704,
+          "prevalence": 0.3324,
+          "pred_mean": 0.3591,
+          "auroc": 0.8398,
+          "auprc": 0.6948,
+          "brier": 0.153,
+          "logloss": 0.4586,
+          "ece10": 0.0267,
+          "cal_slope": 1.027,
+          "cal_intercept": -0.1681,
+          "citl": -0.1728,
+          "prevalence_w": 0.286,
+          "pred_mean_w": 0.3101,
+          "auroc_w": 0.8494,
+          "brier_w": 0.1403
+        },
+        "test_raw": {
+          "n": 10576,
+          "prevalence": 0.3426,
+          "pred_mean": 0.3671,
+          "auroc": 0.8463,
+          "auprc": 0.7228,
+          "brier": 0.151,
+          "logloss": 0.4553,
+          "ece10": 0.0248,
+          "cal_slope": 1.0783,
+          "cal_intercept": -0.1444,
+          "citl": -0.1563,
+          "prevalence_w": 0.2856,
+          "pred_mean_w": 0.3105,
+          "auroc_w": 0.8525,
+          "brier_w": 0.1382
+        },
+        "val_cal": {
+          "n": 5704,
+          "prevalence": 0.3324,
+          "pred_mean": 0.3324,
+          "auroc": 0.8398,
+          "auprc": 0.6948,
+          "brier": 0.1522,
+          "logloss": 0.4562,
+          "ece10": 0.005,
+          "cal_slope": 0.9999,
+          "cal_intercept": -0.0001,
+          "citl": -0.0001,
+          "prevalence_w": 0.286,
+          "pred_mean_w": 0.2845,
+          "auroc_w": 0.8494,
+          "brier_w": 0.1397
+        },
+        "test_cal": {
+          "n": 10576,
+          "prevalence": 0.3426,
+          "pred_mean": 0.3401,
+          "auroc": 0.8463,
+          "auprc": 0.7228,
+          "brier": 0.1503,
+          "logloss": 0.4531,
+          "ece10": 0.0093,
+          "cal_slope": 1.0495,
+          "cal_intercept": 0.0323,
+          "citl": 0.0163,
+          "prevalence_w": 0.2856,
+          "pred_mean_w": 0.2849,
+          "auroc_w": 0.8525,
+          "brier_w": 0.1374
+        }
+      },
+      "metrics_test_devadj_label": {
+        "n": 10576,
+        "prevalence": 0.3719,
+        "pred_mean": 0.3401,
+        "auroc": 0.8396,
+        "auprc": 0.7397,
+        "brier": 0.158,
+        "logloss": 0.4762,
+        "ece10": 0.032,
+        "cal_slope": 0.9871,
+        "cal_intercept": 0.1998,
+        "citl": 0.2053,
+        "prevalence_w": 0.3154,
+        "pred_mean_w": 0.2849,
+        "auroc_w": 0.8427,
+        "brier_w": 0.1479
+      },
+      "gates": {
+        "auroc>=0.80": true,
+        "slope 0.9~1.1": true
+      },
+      "sex_ece_gap": 0.0013,
+      "lightgbm": "4.6.0",
+      "b0_reference": {
+        "version": "2026.10.12-b0",
+        "algorithm": "B0 sign-constrained L2 logistic regression (StandardScaler, age linear+square)",
+        "val": {
+          "n": 5704,
+          "prevalence": 0.3324,
+          "pred_mean": 0.3324,
+          "auroc": 0.837,
+          "auprc": 0.6861,
+          "brier": 0.1537,
+          "logloss": 0.4609,
+          "ece10": 0.0155,
+          "cal_slope": 1.0,
+          "cal_intercept": -0.0,
+          "citl": -0.0,
+          "prevalence_w": 0.286,
+          "pred_mean_w": 0.2824,
+          "auroc_w": 0.8452,
+          "brier_w": 0.1415
+        },
+        "test": {
+          "n": 10576,
+          "prevalence": 0.3426,
+          "pred_mean": 0.3431,
+          "auroc": 0.8439,
+          "auprc": 0.7152,
+          "brier": 0.1516,
+          "logloss": 0.4572,
+          "ece10": 0.0114,
+          "cal_slope": 1.0497,
+          "cal_intercept": 0.0142,
+          "citl": -0.0036,
+          "prevalence_w": 0.2856,
+          "pred_mean_w": 0.2858,
+          "auroc_w": 0.8505,
+          "brier_w": 0.1385
+        }
+      },
+      "delta_auroc_val": 0.0028,
+      "delta_auroc_test": 0.0024,
+      "adopt_rule": false,
+      "trained_on": "2026-10-13",
+      "label": "label_htn = HE_sbp>=140 or HE_dbp>=90 or DI1_2 in (1,2,3,4)",
+      "note": "val 은 조기 종료·그리드 선택·보정에 모두 쓰여 val 지표는 낙관적일 수 있음. 테스트(2021~22)가 공정한 수치",
+      "sanity_probe": {
+        "monotonic_violations": [],
+        "bmi_22_to_30_delta": {
+          "male/25": 1,
+          "male/40": 4,
+          "male/60": 17,
+          "female/25": 0,
+          "female/40": 1,
+          "female/60": 15
+        }
+      }
+    }
+  },
+  "htn_risk_lite": {
+    "model_id": "htn_risk_lite",
+    "model_version": "2026.10.13-b1",
+    "imputers": {
+      "source": "knhanes_time_train"
+    },
+    "columns": [
+      "age",
+      "sex_female",
+      "bmi",
+      "waist_cm",
+      "smoking_former",
+      "smoking_current"
+    ],
+    "reference": null,
+    "feature_version": "v1",
+    "thresholds_version": "kr_v1",
+    "metadata": {
+      "algorithm": "B1 LightGBM monotone (max_depth=4, trees=296/300, early stop on val)",
+      "hyperparameters": {
+        "learning_rate": 0.03,
+        "num_leaves": 7,
+        "min_child_samples": 200
+      },
+      "monotone_constraints": {
+        "age": 1,
+        "sex_female": 0,
+        "bmi": 1,
+        "waist_cm": 1,
+        "smoking_former": 0,
+        "smoking_current": 1
+      },
+      "split": "time",
+      "train_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019
+      ],
+      "val_years": [
+        2020
+      ],
+      "test_years": [
+        2021,
+        2022
+      ],
+      "n_train": 39914,
+      "n_val": 5704,
+      "n_test": 10576,
+      "seed": 42,
+      "calibration": {
+        "kind": "platt",
+        "a": 1.0047,
+        "b": -0.1307
+      },
+      "metrics": {
+        "train_raw": {
+          "n": 39914,
+          "prevalence": 0.321,
+          "pred_mean": 0.3212,
+          "auroc": 0.8282,
+          "auprc": 0.6659,
+          "brier": 0.1551,
+          "logloss": 0.4652,
+          "ece10": 0.0031,
+          "cal_slope": 0.998,
+          "cal_intercept": -0.0021,
+          "citl": -0.0013,
+          "prevalence_w": 0.2686,
+          "pred_mean_w": 0.2696,
+          "auroc_w": 0.8337,
+          "brier_w": 0.1414
+        },
+        "val_raw": {
+          "n": 5704,
+          "prevalence": 0.3324,
+          "pred_mean": 0.3537,
+          "auroc": 0.8212,
+          "auprc": 0.6494,
+          "brier": 0.1607,
+          "logloss": 0.4785,
+          "ece10": 0.0213,
+          "cal_slope": 1.0047,
+          "cal_intercept": -0.1307,
+          "citl": -0.1318,
+          "prevalence_w": 0.286,
+          "pred_mean_w": 0.3039,
+          "auroc_w": 0.8307,
+          "brier_w": 0.1479
+        },
+        "test_raw": {
+          "n": 10576,
+          "prevalence": 0.3426,
+          "pred_mean": 0.3634,
+          "auroc": 0.8275,
+          "auprc": 0.6882,
+          "brier": 0.1596,
+          "logloss": 0.4772,
+          "ece10": 0.0215,
+          "cal_slope": 1.0502,
+          "cal_intercept": -0.1175,
+          "citl": -0.1272,
+          "prevalence_w": 0.2856,
+          "pred_mean_w": 0.3076,
+          "auroc_w": 0.8318,
+          "brier_w": 0.1468
+        },
+        "val_cal": {
+          "n": 5704,
+          "prevalence": 0.3324,
+          "pred_mean": 0.3324,
+          "auroc": 0.8212,
+          "auprc": 0.6494,
+          "brier": 0.1602,
+          "logloss": 0.4771,
+          "ece10": 0.0096,
+          "cal_slope": 1.0001,
+          "cal_intercept": -0.0001,
+          "citl": -0.0001,
+          "prevalence_w": 0.286,
+          "pred_mean_w": 0.284,
+          "auroc_w": 0.8307,
+          "brier_w": 0.1477
+        },
+        "test_cal": {
+          "n": 10576,
+          "prevalence": 0.3426,
+          "pred_mean": 0.3419,
+          "auroc": 0.8275,
+          "auprc": 0.6882,
+          "brier": 0.159,
+          "logloss": 0.4758,
+          "ece10": 0.0093,
+          "cal_slope": 1.0458,
+          "cal_intercept": 0.0188,
+          "citl": 0.0043,
+          "prevalence_w": 0.2856,
+          "pred_mean_w": 0.2876,
+          "auroc_w": 0.8318,
+          "brier_w": 0.1462
+        }
+      },
+      "metrics_test_devadj_label": {
+        "n": 10576,
+        "prevalence": 0.3719,
+        "pred_mean": 0.3419,
+        "auroc": 0.8222,
+        "auprc": 0.7108,
+        "brier": 0.166,
+        "logloss": 0.4975,
+        "ece10": 0.03,
+        "cal_slope": 0.983,
+        "cal_intercept": 0.1765,
+        "citl": 0.1833,
+        "prevalence_w": 0.3154,
+        "pred_mean_w": 0.2876,
+        "auroc_w": 0.8234,
+        "brier_w": 0.1559
+      },
+      "gates": {
+        "auroc>=0.80": true,
+        "slope 0.9~1.1": true
+      },
+      "sex_ece_gap": 0.0035,
+      "lightgbm": "4.6.0",
+      "b0_reference": {
+        "version": "2026.10.12-b0",
+        "algorithm": "B0 sign-constrained L2 logistic regression (StandardScaler, age linear+square)",
+        "val": {
+          "n": 5704,
+          "prevalence": 0.3324,
+          "pred_mean": 0.3324,
+          "auroc": 0.8173,
+          "auprc": 0.6423,
+          "brier": 0.1624,
+          "logloss": 0.4827,
+          "ece10": 0.0221,
+          "cal_slope": 1.0002,
+          "cal_intercept": 0.0,
+          "citl": -0.0,
+          "prevalence_w": 0.286,
+          "pred_mean_w": 0.2815,
+          "auroc_w": 0.8264,
+          "brier_w": 0.1499
+        },
+        "test": {
+          "n": 10576,
+          "prevalence": 0.3426,
+          "pred_mean": 0.343,
+          "auroc": 0.8239,
+          "auprc": 0.6775,
+          "brier": 0.1606,
+          "logloss": 0.4802,
+          "ece10": 0.0134,
+          "cal_slope": 1.05,
+          "cal_intercept": 0.0158,
+          "citl": -0.0027,
+          "prevalence_w": 0.2856,
+          "pred_mean_w": 0.2861,
+          "auroc_w": 0.829,
+          "brier_w": 0.1473
+        }
+      },
+      "delta_auroc_val": 0.0039,
+      "delta_auroc_test": 0.0036,
+      "adopt_rule": false,
+      "trained_on": "2026-10-13",
+      "label": "label_htn = HE_sbp>=140 or HE_dbp>=90 or DI1_2 in (1,2,3,4)",
+      "note": "val 은 조기 종료·그리드 선택·보정에 모두 쓰여 val 지표는 낙관적일 수 있음. 테스트(2021~22)가 공정한 수치",
+      "sanity_probe": {
+        "monotonic_violations": [],
+        "bmi_22_to_30_delta": {
+          "male/25": 1,
+          "male/40": 4,
+          "male/60": 17,
+          "female/25": 0,
+          "female/40": 1,
+          "female/60": 15
+        }
+      }
+    }
+  }
+}

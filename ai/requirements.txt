@@ -1,0 +1,12 @@
+# 고혈압 위험도 모델 — 부트캠프 스택 범위 내. 버전은 첫 B0 실행 후 requirements.lock 으로 고정한다.
+numpy
+pandas
+pyarrow
+scikit-learn
+lightgbm
+pyyaml
+joblib
+pyreadstat        # KNHANES .sas7bdat 읽기
+shap              # 학습 시 설명용. 추론 코드에서는 import 하지 않는다
+matplotlib        # 보정 곡선 PNG
+pytest
