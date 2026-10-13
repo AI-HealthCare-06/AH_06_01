@@ -36,6 +36,11 @@ class ModelBundle:
 
     # ── 추론 ──
     def predict_raw_proba(self, X: np.ndarray) -> np.ndarray:
+        """보정 전 확률. LightGBM 은 booster 로 직접 예측한다 — sklearn 래퍼의 feature-name 검증(경고)을 피하고 더 가볍다."""
+        booster = getattr(self.estimator, "booster_", None)
+        if booster is not None:
+            best = getattr(self.estimator, "best_iteration_", None)
+            return np.asarray(booster.predict(np.asarray(X, dtype=float), num_iteration=best)).reshape(-1)
         return np.asarray(self.estimator.predict_proba(X))[:, 1]
 
     def calibrate(self, p: np.ndarray) -> np.ndarray:
