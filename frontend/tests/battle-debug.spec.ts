@@ -50,18 +50,18 @@ test("development debug boxes share combat coordinates, follow enemies and prese
   await expect(toggle).toHaveAttribute("aria-pressed", "true");
   await expect(overlay.locator("rect")).toHaveCount(8);
   await expect(overlay).toHaveCSS("pointer-events", "none");
-  await expect(overlay.locator('[data-range-actor="P"]')).toHaveAttribute("data-range", "3");
+  await expect(overlay.locator('[data-range-actor="P"]')).toHaveAttribute("data-range", "7");
   await expect(overlay.locator('[data-range-actor="P"] .debug-range-label')).toHaveText(
-    "P RANGE 3.00u",
+    "P RANGE 7.00u",
   );
   await expect(overlay.locator('[data-range-actor="M1"] .debug-range-label')).toHaveText(
-    "M1 RANGE 3.00u IN",
+    "M1 RANGE 7.00u IN",
   );
   await expect(overlay.locator(".debug-player-range .debug-range-boundary")).toHaveAttribute(
     "x1",
-    "158",
+    "278",
   );
-  await expect(overlay.locator('[data-range-actor="M1"]')).toHaveAttribute("data-range", "3");
+  await expect(overlay.locator('[data-range-actor="M1"]')).toHaveAttribute("data-range", "7");
   expect(
     Number(await overlay.locator('[data-range-actor="M2"]').getAttribute("data-range")),
   ).toBeGreaterThan(2);
@@ -150,7 +150,7 @@ test("development debug boxes share combat coordinates, follow enemies and prese
   await page.clock.runFor(1000);
   await expect(overlay.locator('[data-debug-actor="M1"]')).toHaveCount(0);
   await expect(overlay.locator('[data-range-actor="M1"]')).toHaveCount(0);
-  expect(Number(await elite.getAttribute("x"))).toBeLessThan(before);
+  expect(Number(await elite.getAttribute("x"))).toBeGreaterThan(before);
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   const frozen = await elite.getAttribute("x");
   await page.clock.runFor(1000);
@@ -252,6 +252,8 @@ test("monster debug boundary agrees with damage, cooldown and knockback for mele
           const { initialGame } = await import(gamePath);
           const { advanceCombat, battleBuffStats } = await import(battlePath);
           const { enemyAttackRange } = await import(rangePath);
+          const geometryPath = "/src/domain/battle-geometry.ts";
+          const { combatPlayerGeometry } = await import(geometryPath);
           let { game } = useGameStore.getState();
           if (phase === "approach") {
             game = { ...initialGame(), dinosaur, battlePaused: true };
@@ -278,12 +280,18 @@ test("monster debug boundary agrees with damage, cooldown and knockback for mele
           }
           if (phase === "knockback") game.combat.attackIn = 0;
           if (phase === "attack-again") game.combat.attackIn = 5000;
-          const { combat } = advanceCombat(
-            game.combat,
-            battleBuffStats(game),
-            1,
-            phase === "attack-again" ? 500 : 50,
-          );
+          let { combat } = advanceCombat(game.combat, battleBuffStats(game), 1, 50);
+          if (phase === "knockback") {
+            const started = game.combat.clock;
+            combat.attackIn = 5000;
+            for (let ms = 50; ms < 2000 && combat.enemies[0].hitAt <= started; ms += 50)
+              combat = advanceCombat(combat, battleBuffStats(game), 1, 50).combat;
+          }
+          if (phase === "attack-again") {
+            const attackedAt = game.combat.enemies[0].attackedAt;
+            for (let ms = 50; ms < 2500 && combat.enemies[0].attackedAt === attackedAt; ms += 50)
+              combat = advanceCombat(combat, battleBuffStats(game), 1, 50).combat;
+          }
           useGameStore.setState({
             paused: true,
             game: { ...game, combat, battleUpdatedAt: Date.now() },
@@ -291,13 +299,17 @@ test("monster debug boundary agrees with damage, cooldown and knockback for mele
           return {
             hp: combat.hp,
             enemy: combat.enemies[0],
-            range: enemyAttackRange(combat.enemies[0], dinosaur),
+            range: enemyAttackRange(
+              combat.enemies[0],
+              dinosaur,
+              combatPlayerGeometry(dinosaur, combat.lastAttack, combat.clock),
+            ),
           };
         },
         { art, dinosaur, phase },
       );
       expect(result.hp, `${art}/${dinosaur}: ${phase}`).toBe(
-        art === 0 ? (phase === "attack-again" ? 40 : 50) : hp,
+        art === 0 ? (["knockback", "attack-again"].includes(phase) ? 40 : 50) : hp,
       );
       const indicator = page.locator('[data-range-actor="M42"]');
       await expect(indicator).toHaveAttribute("data-in-range", String(inside));

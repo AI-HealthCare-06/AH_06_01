@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   applyDinosaurStyle,
+  selectDinosaur,
   claimDailyBonus,
   completeQuest,
   initialGame,
@@ -13,12 +14,15 @@ import {
   purchaseEffect,
   purchaseAccessory,
   equipAccessory,
+  selectBattleLocation,
+  retryBattle,
 } from "../domain/game";
 import type { GameState, QuestId, StepSnapshot } from "../domain/game";
 import type { SkinId } from "../domain/appearance";
 import type { EffectId } from "../domain/economy";
 import { experienceForLevel, experienceProgress } from "../domain/experience";
 import { characterStats } from "../domain/game-policy";
+import { debugBuffLimits, type DebugBuffs } from "../domain/battle";
 
 const storageKey = "rexrun-demo-game-v1";
 function loadGame() {
@@ -30,7 +34,10 @@ function loadGame() {
 }
 function save(game: GameState) {
   try {
-    localStorage.setItem(storageKey, JSON.stringify(game));
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(game, (key, value) => (key === "debugBuffs" ? undefined : value)),
+    );
   } catch {
     /* The demo also works without persistent browser storage. */
   }
@@ -44,6 +51,13 @@ type GameStore = {
   chooseDinosaur: (index: number) => void;
   customizeDinosaur: (index: number, skin: SkinId) => void;
   togglePause: () => void;
+  selectBattle: (stage: number, wave: number) => void;
+  setWaveAutoRestart: (enabled: boolean) => void;
+  setBattleDisplaySetting: (
+    key: "showBattleDamage" | "showMonsterHealth",
+    enabled: boolean,
+  ) => void;
+  retryWave: () => void;
   refreshDay: () => void;
   resetDemo: () => void;
   syncSteps: (snapshot: StepSnapshot) => void;
@@ -52,6 +66,8 @@ type GameStore = {
   repeat: (id: QuestId) => void;
   buyEffect: (id: EffectId) => void;
   debugChangeLevel: (delta: number) => void;
+  debugSetBuff: (key: keyof DebugBuffs, value: number) => void;
+  debugResetBuffs: () => void;
   buyAccessory: (id: string) => boolean;
   equipAccessory: (id: string) => void;
 };
@@ -62,6 +78,47 @@ let lastSaved = 0;
 export const useGameStore = create<GameStore>((set) => ({
   game: loadedGame,
   paused: loadedGame.battlePaused,
+  setWaveAutoRestart: (enabled) =>
+    set((state) => {
+      const game = { ...tickBattle(state.game), waveAutoRestart: enabled };
+      save(game);
+      return { game };
+    }),
+  setBattleDisplaySetting: (key, enabled) =>
+    set((state) => {
+      const game = { ...tickBattle(state.game), [key]: enabled };
+      save(game);
+      return { game };
+    }),
+  retryWave: () =>
+    set((state) => {
+      const game = retryBattle(state.game);
+      save(game);
+      return { game };
+    }),
+  selectBattle: (stage, wave) =>
+    set((state) => {
+      const game = selectBattleLocation(state.game, stage, wave);
+      if (game === state.game) return state;
+      save(game);
+      return { game };
+    }),
+  debugSetBuff: (key, value) =>
+    set((state) => {
+      if (!import.meta.env.DEV || !Number.isFinite(value) || !Object.hasOwn(debugBuffLimits, key))
+        return state;
+      const [min, max] = debugBuffLimits[key];
+      return {
+        game: {
+          ...tickBattle(state.game),
+          debugBuffs: { ...state.game.debugBuffs, [key]: Math.max(min, Math.min(max, value)) },
+        },
+      };
+    }),
+  debugResetBuffs: () =>
+    set((state) =>
+      import.meta.env.DEV ? { game: { ...tickBattle(state.game), debugBuffs: undefined } } : state,
+    ),
   buyAccessory: (id) => {
     let purchased = false;
     set((state) => {
@@ -104,7 +161,13 @@ export const useGameStore = create<GameStore>((set) => ({
   tick: () =>
     set((state) => {
       const game = tickBattle(state.game);
-      if (Date.now() - lastSaved >= 1000) {
+      if (
+        game.experience !== state.game.experience ||
+        game.gold !== state.game.gold ||
+        game.combat.pendingGold !== state.game.combat.pendingGold ||
+        game.combat.lastFailure?.time !== state.game.combat.lastFailure?.time ||
+        Date.now() - lastSaved >= 1000
+      ) {
         save(game);
         lastSaved = Date.now();
       }
@@ -142,8 +205,8 @@ export const useGameStore = create<GameStore>((set) => ({
     }),
   chooseDinosaur: (index) =>
     set((state) => {
-      if (!Number.isInteger(index) || index < 0 || index > 5) return state;
-      const game = { ...state.game, dinosaur: index };
+      const game = selectDinosaur(state.game, index);
+      if (game === state.game) return state;
       save(game);
       return { game };
     }),

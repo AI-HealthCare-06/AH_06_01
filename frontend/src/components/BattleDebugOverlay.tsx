@@ -1,8 +1,19 @@
 import { Fragment } from "react";
 import type { ActorGeometry } from "../domain/battle-geometry";
-import { arena, distanceToX, enemyGeometry } from "../domain/battle-geometry";
+import {
+  arena,
+  distanceToX,
+  enemyGeometry,
+  projectileGeometry,
+  playerProjectileGeometry,
+} from "../domain/battle-geometry";
 import type { CombatState } from "../domain/battle";
-import { enemyAttackRange, isPlayerInEnemyRange, playerAttackRange } from "../domain/battle-range";
+import {
+  enemyAttackRange,
+  isPlayerInEnemyRange,
+  playerAttackRange,
+  playerMeleeRange,
+} from "../domain/battle-range";
 
 // Both actors use the simulation's fixed origin, not the artwork's body edges.
 function RangeRuler({
@@ -48,47 +59,18 @@ export function BattleDebugOverlay({
   actors,
   dinosaur,
   enemies,
-  level,
-  onChangeLevel,
+  projectiles,
+  playerProjectiles,
 }: {
   actors: { id: string; geometry: ActorGeometry }[];
   dinosaur: number;
   enemies: CombatState["enemies"];
-  level: number;
-  onChangeLevel: (delta: number) => void;
+  projectiles: CombatState["projectiles"];
+  playerProjectiles: CombatState["playerProjectiles"];
 }) {
+  const player = actors.find((actor) => actor.id === "P")!.geometry;
   return (
     <div id="battle-debug-overlay" className="battle-debug-overlay">
-      <div className="battle-debug-legend">
-        <b className="debug-collider-label">━ COLLIDER</b>
-        <b className="debug-hitbox-label">┄ HITBOX</b>
-        <b className="debug-player-range-label">━ P RANGE</b>
-        <b className="debug-enemy-range-label">━ M RANGE</b>
-        <span>P: 캐릭터 · M: 몬스터</span>
-        <small>공통 0u 기준 · 1u = {arena.pixelsPerUnit}px · ◆ 몹 현재 위치</small>
-        <small>◆가 공격 경계 안이면 IN · 쿨타임은 별도</small>
-        <small>플레이어 판정 위치 고정 · 공격 이동은 모션</small>
-        <div className="debug-level-controls" data-no-swipe>
-          <button
-            type="button"
-            aria-label="디버그 레벨 다운"
-            disabled={level <= 1}
-            onClick={() => onChangeLevel(-1)}
-          >
-            −
-          </button>
-          <strong>Lv.{level}</strong>
-          <button
-            type="button"
-            aria-label="디버그 레벨 업"
-            disabled={level >= 100}
-            onClick={() => onChangeLevel(1)}
-          >
-            +
-          </button>
-          <span>HP 회복 · 보상 없음</span>
-        </div>
-      </div>
       <svg
         viewBox="0 0 354 336"
         role="img"
@@ -114,12 +96,21 @@ export function BattleDebugOverlay({
           />
           <RangeRuler label="P" range={playerAttackRange} origin={distanceToX(0)} y={185} />
         </g>
+        <g className="debug-player-melee" data-range={playerMeleeRange}>
+          <RangeRuler
+            label="MELEE"
+            range={playerMeleeRange}
+            origin={player.collider.x + player.collider.width}
+            y={170}
+            status="CONTACT"
+          />
+        </g>
         {enemies.map((enemy, index) => {
-          const range = enemyAttackRange(enemy, dinosaur);
+          const range = enemyAttackRange(enemy, dinosaur, player);
           const x = distanceToX(enemy.distance);
           const boundary = distanceToX(range);
           const y = 209 + (index % 3) * 23;
-          const inside = isPlayerInEnemyRange(enemy, dinosaur);
+          const inside = isPlayerInEnemyRange(enemy, dinosaur, player);
           const remaining = Math.max(0, enemy.distance - range);
           const body = enemyGeometry(enemy.distance, enemy.art, enemy.rank, enemy.ranged).hitbox;
           return (
@@ -191,6 +182,46 @@ export function BattleDebugOverlay({
             })}
           </g>
         ))}
+        {projectiles.map((projectile, index) => {
+          const box = projectileGeometry(projectile, dinosaur).hitbox;
+          return (
+            <g key={projectile.id} data-debug-projectile={projectile.id}>
+              <rect
+                className="debug-projectile"
+                data-box="hitbox"
+                x={box.x}
+                y={box.y}
+                width={box.width}
+                height={box.height}
+              />
+              <text className="debug-box-label debug-projectile-label" x={box.x} y={box.y - 3}>
+                S{index + 1} HIT
+              </text>
+            </g>
+          );
+        })}
+        {playerProjectiles.map((shot, index) => {
+          const box = playerProjectileGeometry(shot).hitbox;
+          return (
+            <g key={shot.id} data-debug-projectile={shot.id}>
+              <rect
+                className="debug-player-projectile"
+                data-box="hitbox"
+                x={box.x}
+                y={box.y}
+                width={box.width}
+                height={box.height}
+              />
+              <text
+                className="debug-box-label debug-player-projectile-label"
+                x={box.x}
+                y={box.y - 3}
+              >
+                P{index + 1} HIT
+              </text>
+            </g>
+          );
+        })}
       </svg>
     </div>
   );

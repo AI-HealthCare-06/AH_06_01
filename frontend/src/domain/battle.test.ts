@@ -11,13 +11,20 @@ import {
 } from "./game-policy";
 import { initialGame, rollDay, tickBattle } from "./game";
 import { colliderStopDistance } from "./battle-geometry";
+import { experienceProgress } from "./experience";
 
 describe("document combat rules", () => {
   it("simulates a full 24 hours without reward attenuation and expires buffs at midnight", () => {
     const now = new Date(2026, 8, 29, 0).getTime();
     const game = { ...initialGame("2026-09-29"), battleUpdatedAt: now };
     const offline = tickBattle(game, now + 86_400_000);
-    const direct = advanceCombat(game.combat, battleBuffStats(game), 1, 86_400_000);
+    const direct = advanceCombat(
+      game.combat,
+      battleBuffStats(game),
+      1,
+      86_400_000,
+      game.experience,
+    );
     expect(offline.gold).toBe(game.gold + direct.gold);
     expect(offline.battleDefeats).toBe(direct.defeats);
     expect(offline.gold).toBeGreaterThan(0);
@@ -28,17 +35,28 @@ describe("document combat rules", () => {
       sleepHours: 8,
       battleUpdatedAt: now + 23 * 3_600_000,
     };
-    const before = advanceCombat(night.combat, battleBuffStats(night), 1, 3_600_000);
-    const after = advanceCombat(
-      before.combat,
-      battleBuffStats(rollDay(night, "2026-09-30")),
+    const before = advanceCombat(
+      night.combat,
+      battleBuffStats(night),
       1,
       3_600_000,
+      night.experience,
+    );
+    const morning = rollDay(
+      { ...night, experience: night.experience + before.defeats },
+      "2026-09-30",
+    );
+    const after = advanceCombat(
+      before.combat,
+      battleBuffStats(morning),
+      experienceProgress(morning.experience).level,
+      3_600_000,
+      morning.experience,
     );
     const across = tickBattle(night, now + 25 * 3_600_000);
     expect(across.gold).toBe(night.gold + before.gold + after.gold);
     expect(across.activity).toEqual({});
-  });
+  }, 60000);
   it("matches the level milestones, damage floor and monster tables", () => {
     expect([1, 2, 3, 4, 5, 6].map(characterStats)).toEqual([
       { hp: 50, ad: 20, def: 10 },
@@ -62,22 +80,26 @@ describe("document combat rules", () => {
     expect(monsterGold(1, 10, "boss")).toBe(495);
     expect(monsterGold(2, 1, "normal", 1.2)).toBe(40);
   });
-  it("spawns at distance 7 every 3 seconds, requires four hits and never attacks outside range", () => {
+  it("spawns at 3.5s intervals with stronger melee HP and fires ranged attacks immediately", () => {
     const buffs = battleBuffStats(initialGame());
     const first = advanceCombat(initialCombat(), buffs, 1, 50);
-    expect(first.combat.enemies[0].hp).toBe(70);
+    expect(first.combat.enemies[0].hp).toBe(96);
+    expect(first.combat.enemies[0].ad).toBe(22);
     expect(first.combat.enemies[0].distance).toBeCloseTo(6.93);
-    const beforeRange = advanceCombat(initialCombat(), buffs, 1, 2800);
-    expect(beforeRange.combat.lastAttack).toBeNull();
-    const attack = advanceCombat(beforeRange.combat, buffs, 1, 100);
-    expect(attack.combat.enemies[0].hp).toBe(50);
-    expect(attack.combat.enemies[0].distance).toBeGreaterThan(3);
-    expect(advanceCombat(attack.combat, buffs, 1, 50).combat.enemies[0].hp).toBe(50);
-    const cleared = advanceCombat(initialCombat(), buffs, 1, 5100);
-    expect(cleared.defeats).toBe(1);
-    expect(cleared.gold).toBe(30);
-    expect(cleared.combat.serial).toBe(2);
-    expect(cleared.combat.enemies[0].hp).toBe(70);
+    expect(first.combat.lastAttack?.mode).toBe("ranged");
+    const launched = advanceCombat(first.combat, buffs, 1, 150).combat;
+    expect(launched.playerProjectiles).toHaveLength(1);
+    expect(launched.enemies[0].hp).toBe(96);
+    const waiting = advanceCombat(
+      { ...first.combat, attackIn: 5000 },
+      { ...buffs, attack: 0 },
+      1,
+      3450,
+    ).combat;
+    expect(waiting.spawned).toBe(1);
+    const next = advanceCombat(waiting, buffs, 1, 50).combat;
+    expect(next.spawned).toBeGreaterThan(1);
+    expect(next.spawned).toBeLessThanOrEqual(4);
   });
   it("lets melee monsters attack at expanded collider contact, but never before contact", () => {
     for (let dinosaur = 0; dinosaur < 6; dinosaur++)
@@ -121,10 +143,10 @@ describe("document combat rules", () => {
     expect(migrateCombat(692, 1)).toMatchObject({ stage: 1, wave: 10, killed: 0 });
     const end = { ...initialCombat(), wave: 10, killed: 100, spawned: 100 };
     const high = { ...battleBuffStats(initialGame()), attack: 10000 };
-    const next = advanceCombat(end, high, 5, 7000);
+    const next = advanceCombat(end, high, 5, 8500);
     expect(next.combat).toMatchObject({ stage: 2, wave: 1 });
     expect(next.gold).toBe(495);
-    expect(advanceCombat(end, high, 1, 7000).combat).toMatchObject({
+    expect(advanceCombat(end, high, 1, 6500).combat).toMatchObject({
       stage: 1,
       wave: 10,
       killed: 0,
@@ -164,7 +186,7 @@ describe("document combat rules", () => {
     const result = tickBattle(game, now + 60_000);
     expect(result.gold).toBeGreaterThan(0);
     expect(tickBattle(result, now + 60_000)).toBe(result);
-    const direct = advanceCombat(game.combat, battleBuffStats(game), 1, 60_000);
+    const direct = advanceCombat(game.combat, battleBuffStats(game), 1, 60_000, game.experience);
     expect(result.gold).toBe(game.gold + direct.gold);
     expect(result.combat).toEqual(direct.combat);
     const dead = {

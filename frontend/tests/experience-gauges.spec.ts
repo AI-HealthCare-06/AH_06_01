@@ -3,6 +3,8 @@ import { expect, test } from "@playwright/test";
 test("quest EXP appears below HP in a thin gray and green gauge and survives reload", async ({
   page,
 }) => {
+  await page.clock.install({ time: new Date("2026-09-30T00:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-09-30T00:01:00Z"));
   await page.goto("/home");
   const exp = page.getByRole("progressbar", { name: "레벨 경험치" });
   await expect(exp).toHaveText("EXP 000/100");

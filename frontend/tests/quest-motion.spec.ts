@@ -50,7 +50,7 @@ test("numbers count up on tab entry and animate new rewards without changing the
   await page.clock.pauseAt(new Date("2026-09-28T03:00:01Z"));
   await page.goto("/shop");
   const visual = page.locator(".wallet-balance .number-visual");
-  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,280");
+  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,280G");
   await expect(visual).toHaveAttribute("data-value", "0");
   await page.clock.runFor(350);
   const intermediate = Number((await visual.getAttribute("data-value"))!.replaceAll(",", ""));
@@ -68,7 +68,7 @@ test("numbers count up on tab entry and animate new rewards without changing the
   expect(after.gold).toBe(JSON.parse(before!).gold);
   expect(after.experience).toBe(JSON.parse(before!).experience);
   await page.locator(".daily-bonus").click();
-  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,290");
+  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,290G");
   await expect(visual).toHaveAttribute("data-value", "1,280");
   await page.clock.runFor(800);
   await expect(visual).toHaveAttribute("data-value", "1,290");

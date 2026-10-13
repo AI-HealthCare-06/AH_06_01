@@ -26,7 +26,14 @@ test("all Figma routes render local assets with no browser errors", async ({ pag
     await page.locator(".mobile-screen").waitFor();
     await page.evaluate(() => document.fonts.ready);
     const broken = await page.locator("img").evaluateAll(async (imgs) => {
-      await Promise.all(imgs.map((img) => img.decode().catch(() => {})));
+      await Promise.all(
+        imgs.map((img) => {
+          // Inspect offscreen catalog assets too; lazy images do not start loading
+          // until scrolled into view, so decode() alone can wait indefinitely.
+          img.loading = "eager";
+          return img.decode().catch(() => {});
+        }),
+      );
       return imgs
         .filter((img) => !img.naturalWidth || !new URL(img.src).pathname.startsWith("/assets/"))
         .map((img) => img.src);
@@ -48,21 +55,21 @@ test("quest completion persists and cannot grant a duplicate reward", async ({ p
   await expect(page).toHaveURL(/\/reward$/);
   await expect(page.locator(".reward-coins")).toHaveText("+30 EXP");
   await page.goto("/shop");
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280G");
   await page.reload();
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280G");
   await page.goto("/quests/water");
   await expect(page.getByRole("button", { name: "오늘 완료한 퀘스트예요" })).toBeDisabled();
 });
 test("daily bonus can be claimed once and demo products never spend Gold", async ({ page }) => {
   await page.goto("/shop");
   await page.locator(".daily-bonus").click();
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,290");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,290G");
   await expect(page.locator(".daily-bonus")).toBeDisabled();
   await page.reload();
   await expect(page.locator(".daily-bonus")).toBeDisabled();
   await page.getByRole("button", { name: /닭가슴살 세트/ }).click();
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,290");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,290G");
 });
 test("onboarding validates input and keeps health and credentials out of storage", async ({
   page,

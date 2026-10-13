@@ -1,9 +1,13 @@
 import {
   arena,
-  attackPosition,
   enemyGeometry,
-  playerGeometry,
+  combatPlayerGeometry,
+  playerProjectileGeometry,
+  playerProjectileFrame,
+  playerProjectileAngle,
   projectileGeometry,
+  dinosaurBodyBounds,
+  center,
 } from "../domain/battle-geometry";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -15,6 +19,7 @@ import {
   stages,
   villains,
   villainAnimation,
+  dinosaurProjectiles,
 } from "../design/battle-assets";
 import { quests } from "../domain/game";
 import type { GameState, QuestId } from "../domain/game";
@@ -22,15 +27,21 @@ import { getSkin } from "../design/skins";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { BattleSprite } from "./BattleSprite";
 import { BattleDebugOverlay } from "./BattleDebugOverlay";
+import { BattleDebugPanel } from "./BattleDebugPanel";
 import { PixelIcon } from "./PixelIcon";
+import { InfoDialog } from "./InfoDialog";
+import { BattleSettingsDialog } from "./BattleSettingsDialog";
 import {
   battleBuffStats,
   questBuffs,
   waveTarget,
   clearDuration,
   travelDuration,
+  healthOrbDuration,
+  healthOrbAbsorptionDuration,
 } from "../domain/battle";
 import { stagePolicies } from "../domain/game-policy";
+import { enemyAttackRange } from "../domain/battle-range";
 import { experienceProgress } from "../domain/experience";
 import { EquippedAccessories } from "./AccessoryCatalog";
 import { useGameStore } from "../stores/game-store";
@@ -50,7 +61,13 @@ export function AdventureScene({
   const [selected, setSelected] = useState<QuestId | null>(null);
   const [buffsExpanded, setBuffsExpanded] = useState(false);
   const [debugVisible, setDebugVisible] = useState(false);
+  const [stagePicker, setStagePicker] = useState<HTMLButtonElement | null>(null);
+  const [settingsTrigger, setSettingsTrigger] = useState<HTMLButtonElement | null>(null);
+  const selectBattle = useGameStore((state) => state.selectBattle);
+  const debugToggle = useRef<HTMLButtonElement>(null);
   const debugChangeLevel = useGameStore((state) => state.debugChangeLevel);
+  const debugSetBuff = useGameStore((state) => state.debugSetBuff);
+  const debugResetBuffs = useGameStore((state) => state.debugResetBuffs);
   const hud = useRef<HTMLDivElement>(null);
   const [reducedMotion, setReducedMotion] = useState(
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -84,30 +101,64 @@ export function AdventureScene({
   const skin = getSkin(game.dinosaurStyles[game.dinosaur]);
   const stage = stages[battle.stage - 1];
   const transition = battle.transition;
+  const sourceStage = stages[(transition?.fromStage ?? battle.stage) - 1];
+  const sourceWave = transition?.fromWave ?? battle.wave;
   const clearing = !!transition && transition.elapsed < clearDuration(transition.kind);
-  const walking = !!transition && !clearing;
+  const starting = !!transition?.arrived;
+  const walking = !!transition && !clearing && !starting;
   const travelProgress =
     transition && !reducedMotion
-      ? Math.min(1, transition.elapsed / (clearDuration(transition.kind) + travelDuration))
+      ? Math.max(
+          0,
+          Math.min(1, (transition.elapsed - clearDuration(transition.kind)) / travelDuration),
+        )
       : 0;
   const changingStage =
     transition?.kind === "stage" &&
-    battle.stage < 5 &&
-    experience.level >= stagePolicies[battle.stage].level;
+    (transition.fromStage ?? battle.stage) < 5 &&
+    experience.level >= stagePolicies[transition.fromStage ?? battle.stage].level;
   const stageTransition = transition?.kind === "stage";
-  const destinationStage = changingStage ? stages[battle.stage] : stage;
+  const destinationStage = changingStage
+    ? stages[transition!.fromStage ?? battle.stage]
+    : sourceStage;
   const nextStageOpacity =
-    stageTransition && walking
+    stageTransition && !clearing
       ? reducedMotion
         ? 1
         : Math.min(1, (transition.elapsed - clearDuration(transition.kind)) / travelDuration)
       : 0;
+  const sceneryStage = starting ? stage : sourceStage;
+  const sceneryWaveOffset = starting ? battle.wave - 1 : sourceWave - 1 + travelProgress;
   const waveTotal = waveTarget(battle.wave);
   const attackElapsed = battle.lastAttack ? battle.clock - battle.lastAttack.time : 1000;
-  const attackDuration = Math.min(500, buffs.attackInterval);
-  const attacking = attackElapsed < attackDuration && battle.recovery === 0 && !transition;
-  const attack = attacking && art.attack;
-  const attackTime = attackElapsed / attackDuration;
+  const attackDuration = battle.lastAttack?.duration ?? Math.min(500, buffs.attackInterval);
+  // Finish visual recovery early, leaving the last quarter of
+  // each attack cycle for IDLE without changing combat cooldown or impact time.
+  const attackMotionDuration = attackDuration * 0.75;
+  const attacking =
+    attackElapsed >= 0 &&
+    attackElapsed < attackMotionDuration &&
+    battle.recovery === 0 &&
+    !transition;
+  const rangedAttack = battle.lastAttack?.mode === "ranged";
+  const attackSource = rangedAttack ? art.rangedAttack : art.attack;
+  const attack = attacking && attackSource;
+  // The new Stego sheet contacts on pose 06; map its authored wind-up/recovery
+  // to the existing combat impact time without changing attack speed or damage.
+  const contactProgress =
+    rangedAttack || art.contactFrame === undefined
+      ? 0.3
+      : (art.contactFrame + 0.5) / attackFrames[attackSource].length;
+  const impactDelay =
+    battle.lastAttack?.impactAt !== undefined
+      ? battle.lastAttack.impactAt - battle.lastAttack.time
+      : attackDuration * 0.3;
+  const attackTime =
+    attackElapsed <= impactDelay
+      ? (attackElapsed / impactDelay) * contactProgress
+      : contactProgress +
+        ((attackElapsed - impactDelay) / (attackMotionDuration - impactDelay)) *
+          (1 - contactProgress);
   const target = battle.enemies.find((enemy) => enemy.id === battle.lastAttack?.targetId);
   const targetGeometry = battle.lastAttack
     ? enemyGeometry(
@@ -117,22 +168,20 @@ export function AdventureScene({
         target?.ranged ?? battle.lastAttack.ranged ?? false,
       )
     : null;
-  const player = playerGeometry(game.dinosaur);
-  const position = attackPosition(
-    game.dinosaur,
-    attacking && !reducedMotion ? (targetGeometry?.hitbox ?? null) : null,
-    attackTime,
-  );
+  const player = combatPlayerGeometry(game.dinosaur, battle.lastAttack, battle.clock);
+  const position = player.sprite;
   const phase =
     battle.recovery > 0
       ? "recover"
       : clearing
         ? "clear"
-        : walking
-          ? "walk"
-          : attacking
-            ? "attack"
-            : "idle";
+        : starting
+          ? "start"
+          : walking
+            ? "walk"
+            : attacking
+              ? "attack"
+              : "idle";
   const dinoSource = attack || (walking ? art.walk : art.idle) || art.image;
   const dinoFrames = attackFrames[dinoSource]?.length;
   const dinoFrame = dinoFrames
@@ -176,8 +225,8 @@ export function AdventureScene({
           role="img"
           aria-label={`${stage.name} 스테이지 배경`}
           style={{
-            backgroundImage: `url(${stage.image})`,
-            backgroundPositionX: `${(((-(battle.wave - 1 + travelProgress) * stage.width) / stage.height) * arena.height) / 10}px`,
+            backgroundImage: `url(${sceneryStage.image})`,
+            backgroundPositionX: `${(((-sceneryWaveOffset * sceneryStage.width) / sceneryStage.height) * arena.height) / 10}px`,
           }}
         />
         {stageTransition && (
@@ -188,16 +237,46 @@ export function AdventureScene({
               backgroundImage: `url(${destinationStage.image})`,
               backgroundPositionX: changingStage
                 ? "0px"
-                : `${(((-9 * stage.width) / stage.height) * arena.height) / 10}px`,
+                : `${(((-9 * sourceStage.width) / sourceStage.height) * arena.height) / 10}px`,
               opacity: nextStageOpacity,
             }}
           />
         )}
         <div className="adventure-title">
           <h2>
-            STAGE {battle.stage} - <span>{stage.name}</span>
+            <button
+              className="battle-stage-select"
+              aria-label={`스테이지 선택 · STAGE ${battle.stage} ${stage.name}`}
+              aria-haspopup="dialog"
+              aria-expanded={!!stagePicker}
+              onClick={(event) => {
+                setDebugVisible(false);
+                setStagePicker(event.currentTarget);
+              }}
+            >
+              <span>
+                STAGE {battle.stage} <i aria-hidden="true">▾</i>
+              </span>
+              <small>{stage.name}</small>
+            </button>
           </h2>
-          <strong className="stage-label">WAVE {battle.wave} / 10</strong>
+          <div className="battle-wave-navigation" aria-label="웨이브 이동" data-no-swipe>
+            <button
+              aria-label="이전 웨이브"
+              disabled={battle.wave <= 1}
+              onClick={() => selectBattle(battle.stage, battle.wave - 1)}
+            >
+              ‹
+            </button>
+            <strong className="stage-label">WAVE {battle.wave} / 10</strong>
+            <button
+              aria-label="다음 웨이브"
+              disabled={battle.wave >= 10}
+              onClick={() => selectBattle(battle.stage, battle.wave + 1)}
+            >
+              ›
+            </button>
+          </div>
         </div>
         <div className="battle-hud" ref={hud}>
           <div className="hp-stats">
@@ -245,6 +324,28 @@ export function AdventureScene({
               </strong>
             </div>
           </div>
+          {buffsExpanded && (
+            <dl className="battle-stat-summary" aria-label="현재 공룡 능력치">
+              <div>
+                <dt>공격력</dt>
+                <dd>{Number(buffs.attack.toFixed(1))}</dd>
+              </div>
+              <div>
+                <dt>방어력</dt>
+                <dd>
+                  {buffs.def} <small>피해 −{Math.round(buffs.defBonus * 100)}%</small>
+                </dd>
+              </div>
+              <div>
+                <dt>추가 GOLD</dt>
+                <dd>{Math.round((buffs.gold - 1) * 100)}%</dd>
+              </div>
+              <div>
+                <dt>크리티컬</dt>
+                <dd>{Math.round(buffs.crt * 100)}%</dd>
+              </div>
+            </dl>
+          )}
           <div
             id="battle-buffs"
             className="battle-buffs"
@@ -299,26 +400,43 @@ export function AdventureScene({
             </section>
           )}
         </div>
-        <button
-          className="pause-adventure"
-          onClick={onTogglePause}
-          aria-label={paused ? "모험 재개" : "모험 일시정지"}
-          aria-pressed={paused}
-        >
-          <span aria-hidden="true" className={paused ? "play-symbol" : "pause-symbol"} />
-        </button>
-        {import.meta.env.DEV && (
+        <div className="battle-controls" aria-label="전투 제어" data-no-swipe>
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              ref={debugToggle}
+              className="battle-debug-toggle"
+              aria-label={debugVisible ? "전투 디버그 숨기기" : "전투 디버그 표시"}
+              aria-pressed={debugVisible}
+              aria-controls="battle-debug-panel battle-debug-overlay"
+              onClick={() => setDebugVisible((visible) => !visible)}
+            >
+              <span>DEBUG</span>
+            </button>
+          )}
           <button
             type="button"
-            className="battle-debug-toggle"
-            aria-label={debugVisible ? "전투 디버그 숨기기" : "전투 디버그 표시"}
-            aria-pressed={debugVisible}
-            aria-controls="battle-debug-overlay"
-            onClick={() => setDebugVisible((visible) => !visible)}
+            className="pause-adventure"
+            onClick={onTogglePause}
+            aria-label={paused ? "모험 재개" : "모험 일시정지"}
+            aria-pressed={paused}
           >
-            DEBUG
+            <span aria-hidden="true" className={paused ? "play-symbol" : "pause-symbol"} />
           </button>
-        )}
+          <button
+            type="button"
+            className="battle-settings-toggle"
+            aria-label="게임 설정"
+            aria-haspopup="dialog"
+            aria-expanded={!!settingsTrigger}
+            onClick={(event) => {
+              setDebugVisible(false);
+              setSettingsTrigger(event.currentTarget);
+            }}
+          >
+            <PixelIcon name="settings" />
+          </button>
+        </div>
         <div
           className="battle-dinosaur"
           data-dinosaur={game.dinosaur}
@@ -326,13 +444,26 @@ export function AdventureScene({
           data-movement={art.movement}
           data-moving={walking && !art.walk && !reducedMotion}
           data-animation={phase}
-          data-attacking={!!attack}
+          data-attacking={attacking}
+          data-attack-mode={attacking ? battle.lastAttack?.mode : undefined}
           data-collider={JSON.stringify(player.collider)}
           data-hitbox={JSON.stringify(player.hitbox)}
           data-attack-target={targetGeometry ? JSON.stringify(targetGeometry.hitbox) : undefined}
-          style={{ left: position.x, top: position.y, bottom: "auto" }}
+          style={{
+            left: position.x,
+            top: position.y,
+            width: position.width,
+            height: position.height,
+            bottom: "auto",
+          }}
         >
-          <BattleSprite src={dinoSource} frame={dinoFrame} label={dino.name} filter={skin.filter} />
+          <BattleSprite
+            src={dinoSource}
+            frame={dinoFrame}
+            label={dino.name}
+            filter={skin.filter}
+            matchBounds={attacking ? dinosaurBodyBounds[game.dinosaur] : undefined}
+          />
           <EquippedAccessories />
         </div>
         {battle.enemies.map((monster) => {
@@ -340,6 +471,8 @@ export function AdventureScene({
           const animation = villainAnimation(monster.art, monster.ranged);
           const attackAge = battle.clock - (monster.attackedAt ?? -1000);
           const enemyAttacking = attackAge >= 0 && attackAge < 450;
+          const enemyWalking =
+            monster.distance > enemyAttackRange(monster, game.dinosaur, player) + 1e-6;
           const geometry = enemyGeometry(
             monster.distance,
             monster.art,
@@ -354,36 +487,88 @@ export function AdventureScene({
               data-rank={monster.rank}
               data-hit={hit}
               data-unit={monster.ranged ? "ranged" : "melee"}
-              data-animation={hit ? "hit" : enemyAttacking ? "attack" : "idle"}
+              data-animation={
+                hit ? "hit" : enemyAttacking ? "attack" : enemyWalking ? "walk" : "idle"
+              }
               data-collider={JSON.stringify(geometry.collider)}
               data-hitbox={JSON.stringify(geometry.hitbox)}
-              style={{ left: geometry.sprite.x, top: geometry.sprite.y, bottom: "auto" }}
+              style={{
+                left: geometry.sprite.x,
+                top: geometry.sprite.y,
+                width: geometry.sprite.width,
+                height: geometry.sprite.height,
+                bottom: "auto",
+              }}
             >
               <BattleSprite
-                src={hit ? animation.hit : enemyAttacking ? animation.attack : animation.image}
+                src={
+                  hit
+                    ? animation.hit
+                    : enemyAttacking
+                      ? animation.attack
+                      : enemyWalking
+                        ? animation.walk
+                        : animation.image
+                }
                 frame={
                   !hit && enemyAttacking
                     ? reducedMotion
                       ? 0
                       : Math.min(7, Math.floor((attackAge / 450) * 8))
-                    : 0
+                    : !hit && enemyWalking && !reducedMotion
+                      ? Math.floor(battle.clock / 110) % 8
+                      : 0
                 }
                 label={enemy.name}
               />
-              <small>
+              <small
+                className="enemy-status"
+                style={{
+                  left: geometry.hitbox.x - geometry.sprite.x + geometry.hitbox.width / 2,
+                  top: geometry.hitbox.y - geometry.sprite.y - 16,
+                  width: Math.max(58, geometry.hitbox.width + 8),
+                }}
+              >
                 {monster.rank !== "normal" && `${monster.rank.toUpperCase()} · `}
                 {enemy.name}
-                <span
-                  className="enemy-hp"
-                  role="meter"
-                  aria-label={`${enemy.name} 체력`}
-                  aria-valuemin={0}
-                  aria-valuemax={monster.maxHp}
-                  aria-valuenow={Math.ceil(monster.hp)}
-                >
-                  <i style={{ width: `${(monster.hp / monster.maxHp) * 100}%` }} />
-                </span>
+                {game.showMonsterHealth && (
+                  <span
+                    className="enemy-hp"
+                    role="meter"
+                    aria-label={`${enemy.name} 체력`}
+                    aria-valuemin={0}
+                    aria-valuemax={monster.maxHp}
+                    aria-valuenow={Math.ceil(monster.hp)}
+                  >
+                    <i style={{ width: `${(monster.hp / monster.maxHp) * 100}%` }} />
+                  </span>
+                )}
               </small>
+            </div>
+          );
+        })}
+        {(battle.playerProjectiles ?? []).map((shot) => {
+          const geometry = playerProjectileGeometry(shot);
+          return (
+            <div
+              key={shot.id}
+              className="player-projectile"
+              data-projectile-id={shot.id}
+              data-hitbox={JSON.stringify(geometry.hitbox)}
+              style={{
+                left: geometry.sprite.x,
+                top: geometry.sprite.y,
+                width: geometry.sprite.width,
+                height: geometry.sprite.height,
+                transform: `rotate(${playerProjectileAngle(shot)}rad)`,
+                transformOrigin: `${shot.x - geometry.sprite.x}px ${shot.y - geometry.sprite.y}px`,
+              }}
+            >
+              <BattleSprite
+                src={dinosaurProjectiles[shot.dinosaur]}
+                frame={playerProjectileFrame(shot.age)}
+                label={`${dinosaurs[shot.dinosaur].name} 원거리 투사체`}
+              />
             </div>
           );
         })}
@@ -393,6 +578,7 @@ export function AdventureScene({
             <img
               key={projectile.id}
               className="enemy-projectile"
+              data-projectile-id={projectile.id}
               data-hitbox={JSON.stringify(geometry.hitbox)}
               alt=""
               aria-hidden="true"
@@ -404,6 +590,57 @@ export function AdventureScene({
                 height: geometry.sprite.height,
               }}
             />
+          );
+        })}
+        {(battle.healthOrbs ?? []).map((orb) => {
+          const age = battle.clock - orb.time;
+          if (age < 0 || age >= healthOrbDuration) return null;
+          const target = center(player.hitbox);
+          const progress = reducedMotion ? 1 : Math.min(1, age / healthOrbAbsorptionDuration);
+          const eased = 1 - (1 - progress) ** 2;
+          const tier = orb.fraction === 1 ? "full" : orb.fraction === 0.4 ? "large" : "normal";
+          const healed = Number(orb.healed.toFixed(1));
+          return (
+            <div
+              key={orb.id}
+              className={`battle-health-orb battle-health-orb-${tier}`}
+              data-orb-id={orb.id}
+              data-healed={orb.healed}
+              data-heal-fraction={orb.fraction}
+              role="status"
+              aria-label={`체력 구슬 · 잃은 체력의 ${orb.fraction * 100}% 회복 · +${healed} HP`}
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 16 16"
+                shapeRendering="crispEdges"
+                style={{
+                  left: Math.round(orb.x + (target.x - orb.x) * eased - 10),
+                  top: Math.round(orb.y + (target.y - orb.y) * eased - 10),
+                  opacity: progress < 1 || reducedMotion ? 1 : 0,
+                }}
+              >
+                <path
+                  d="M5 1h6v1h2v2h2v2h1v4h-1v2h-2v2h-2v1H5v-1H3v-2H1v-2H0V6h1V4h2V2h2Z"
+                  fill="#142e24"
+                />
+                <path d="M5 3h6v1h2v2h1v4h-1v2h-2v1H5v-1H3v-2H2V6h1V4h2Z" fill="currentColor" />
+                <path d="M7 5h2v2h2v2H9v2H7V9H5V7h2Z" fill="#fff8d8" />
+                <path d="M4 4h2v2H4Z" fill="#fff8d8" />
+              </svg>
+              <b
+                aria-hidden="true"
+                style={{
+                  left: Math.round(target.x),
+                  top: Math.round(
+                    player.hitbox.y - 10 - (reducedMotion ? 0 : (age / healthOrbDuration) * 18),
+                  ),
+                  opacity: Math.min(1, (healthOrbDuration - age) / 250),
+                }}
+              >
+                +{healed} HP
+              </b>
+            </div>
           );
         })}
         {clearing && (
@@ -420,41 +657,62 @@ export function AdventureScene({
             {transition.kind === "stage" && <i aria-hidden="true" className="clear-sparks" />}
           </div>
         )}
-        {attacking && (
+        {game.showBattleDamage && battle.lastHit && battle.clock - battle.lastHit.time < 320 && (
           <b
             className="battle-damage"
-            key={`hit-${battle.lastAttack!.time}`}
+            key={`hit-${battle.lastHit.time}`}
             aria-hidden="true"
-            style={
-              targetGeometry
-                ? { left: targetGeometry.hitbox.x, top: targetGeometry.hitbox.y - 18 }
-                : undefined
-            }
+            style={{ left: battle.lastHit.x, top: battle.lastHit.y }}
           >
-            {battle.lastAttack!.critical && "CRT "}−{Math.round(battle.lastAttack!.damage)}
+            {battle.lastHit.critical && "CRT "}−{Math.round(battle.lastHit.damage)}
           </b>
+        )}
+        {starting && (
+          <div className="battle-clear battle-start" role="status">
+            <span>STAGE {battle.stage}</span>
+            <strong>WAVE {battle.wave} START!</strong>
+            <small>준비 완료 · HP 회복</small>
+          </div>
         )}
         {battle.loot && battle.clock - battle.loot.time < 720 && (
           <div
             className="battle-coin"
             key={`loot-${battle.loot.time}`}
-            aria-label={`몬스터 처치 보상 ${battle.loot.gold} Gold`}
+            aria-label={`몬스터 처치 EXP 1 · 미확정 ${battle.loot.gold} Gold`}
           >
             <PixelIcon name="coin" />
-            <b>+{battle.loot.gold} G</b>
+            <b>+1 EXP · +{battle.loot.gold} G</b>
           </div>
         )}
         {battle.recovery > 0 && (
-          <div className="battle-recovery" role="status">
-            {String(Math.ceil(battle.recovery / 1000)).padStart(2, "0")}초 후 재시작
+          <div
+            className="battle-clear battle-recovery"
+            data-manual={!game.waveAutoRestart}
+            data-no-swipe
+            role="status"
+          >
+            <span>
+              STAGE {battle.stage} · WAVE {battle.wave}
+            </span>
+            <strong>DEFEAT</strong>
+            <small>
+              {game.waveAutoRestart
+                ? `${String(Math.ceil(battle.recovery / 1000)).padStart(2, "0")}초 후 재시작`
+                : "자동 재시작 OFF · 쉬어가는 중"}
+            </small>
+            {!game.waveAutoRestart && (
+              <button type="button" onClick={() => useGameStore.getState().retryWave()}>
+                다시 도전하기
+              </button>
+            )}
           </div>
         )}
         {import.meta.env.DEV && debugVisible && (
           <BattleDebugOverlay
-            level={experience.level}
-            onChangeLevel={debugChangeLevel}
             dinosaur={game.dinosaur}
             enemies={battle.enemies}
+            projectiles={battle.projectiles}
+            playerProjectiles={battle.playerProjectiles ?? []}
             actors={[
               { id: "P", geometry: player },
               ...battle.enemies.map((enemy) => ({
@@ -479,6 +737,9 @@ export function AdventureScene({
           >
             <i style={{ width: `${(battle.killed / waveTotal) * 100}%` }} />
           </div>
+          <small className="wave-pending-gold">
+            클리어 보상 · {battle.pendingGold.toLocaleString()} G 대기
+          </small>
           {farming && (
             <small className="wave-caption">
               {farming
@@ -490,6 +751,78 @@ export function AdventureScene({
           )}
         </div>
       </DesignCanvas>
+      {settingsTrigger && (
+        <BattleSettingsDialog
+          game={game}
+          trigger={settingsTrigger}
+          onClose={() => setSettingsTrigger(null)}
+        />
+      )}
+      {stagePicker && (
+        <InfoDialog
+          title="STAGE SELECT"
+          onClose={() => setStagePicker(null)}
+          returnFocusTo={stagePicker}
+          confirmLabel="닫기"
+        >
+          <div className="battle-stage-picker">
+            <p>도전할 스테이지를 선택하세요.</p>
+            <div className="battle-stage-options">
+              {stagePolicies.map((policy, index) => (
+                <button
+                  key={index}
+                  disabled={experience.level < policy.level}
+                  aria-label={`STAGE ${index + 1} · ${stages[index].name}`}
+                  aria-pressed={battle.stage === index + 1}
+                  onClick={() => {
+                    selectBattle(index + 1, 1);
+                    setStagePicker(null);
+                  }}
+                >
+                  <span
+                    className="stage-option-art"
+                    aria-hidden="true"
+                    style={{ backgroundImage: `url(${stages[index].image})` }}
+                  />
+                  <span>
+                    <strong>STAGE {index + 1}</strong>
+                    <small>{stages[index].name}</small>
+                  </span>
+                  <b>
+                    {experience.level < policy.level
+                      ? `Lv.${policy.level} 해제`
+                      : battle.stage === index + 1
+                        ? "현재"
+                        : "선택"}
+                  </b>
+                </button>
+              ))}
+            </div>
+            <small>
+              이동하면 HP가 회복되고 1초 후 전투가 시작돼요.
+              <br />
+              EXP는 유지되며 클리어 전 GOLD는 사라져요.
+            </small>
+          </div>
+        </InfoDialog>
+      )}
+      {import.meta.env.DEV && debugVisible && (
+        <BattleDebugPanel
+          anchor={debugToggle}
+          level={experience.level}
+          dinosaur={game.dinosaur}
+          player={player}
+          enemies={battle.enemies}
+          onChangeLevel={debugChangeLevel}
+          buffs={buffs}
+          onChangeBuff={debugSetBuff}
+          onResetBuffs={debugResetBuffs}
+          onClose={() => {
+            setDebugVisible(false);
+            debugToggle.current?.focus({ preventScroll: true });
+          }}
+        />
+      )}
     </div>
   );
 }

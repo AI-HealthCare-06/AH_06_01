@@ -37,7 +37,7 @@ for (const [index, name] of names.entries()) {
   });
 }
 
-test("customization previews without spending Gold and remembers each character's applied style", async ({
+test("character and skin selections apply immediately without spending Gold and persist", async ({
   page,
 }) => {
   await page.clock.install();
@@ -45,28 +45,28 @@ test("customization previews without spending Gold and remembers each character'
   await page.goto("/shop");
   await page.getByRole("link", { name: "Character", exact: true }).click();
   await expect(page).toHaveURL(/\/character$/);
-  await expect(page.locator(".character-collection")).toHaveCount(6);
-  const before = await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"));
-  const preview = page.getByRole("button", { name: "스테고 바다 탐험가 스타일 미리보기" });
+  await expect(page.locator(".vault-roster button")).toHaveCount(6);
+  await page.getByRole("button", { name: "스테고 선택", exact: true }).click();
+  expect(
+    await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!).dinosaur),
+  ).toBe(3);
+  const preview = page.getByRole("button", { name: "스테고 바다 탐험가 스킨 선택" });
   await preview.click();
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await expect(page.locator(".style-preview-scene img")).toHaveAttribute("data-skin", "ocean");
-  await page.keyboard.press("Escape");
-  await expect(preview).toBeFocused();
-  expect(await page.evaluate(() => localStorage.getItem("rexrun-demo-game-v1"))).toBe(before);
-  await preview.click();
-  await page.getByRole("button", { name: "이 스타일로 함께하기" }).click();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(page.locator(".page-heading p")).toContainText("스테고");
-  await expect(page.locator(".page-heading p")).toContainText("GOLD 1,280");
+  await expect(page.locator(".vault-hero .dinosaur-art")).toHaveAttribute("data-skin", "ocean");
+  await expect(page.locator(".vault-apply")).toHaveCount(0);
+  await expect(page.locator(".vault-hero h3")).toContainText("스테고");
+  expect(
+    await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!).gold),
+  ).toBe(1280);
   await page.reload();
   await expect(page.getByRole("link", { name: "Character", exact: true })).toHaveAttribute(
     "aria-current",
     "page",
   );
-  await expect(
-    page.getByRole("button", { name: "스테고 바다 탐험가 스타일 미리보기" }),
-  ).toHaveAttribute("data-equipped", "true");
+  await expect(page.getByRole("button", { name: "스테고 바다 탐험가 스킨 선택" })).toHaveAttribute(
+    "data-equipped",
+    "true",
+  );
   await page.getByRole("link", { name: "Home", exact: true }).click();
   await expect(page.locator(".battle-dinosaur")).toHaveAttribute("data-dinosaur", "3");
   await expect(page.locator(".battle-dinosaur")).toHaveAttribute("data-skin", "ocean");
@@ -79,31 +79,31 @@ test("customization previews without spending Gold and remembers each character'
   }
 });
 
-test("customization has three rows per character on narrow and desktop screens", async ({
+test("vault keeps six dinosaurs and separate skin/accessory panels usable at narrow widths", async ({
   page,
 }) => {
   for (const width of [320, 390, 526]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/character");
     await page.evaluate(() => document.fonts.ready);
-    for (const group of await page.locator(".character-collection").all()) {
-      await expect(group.locator(".style-card")).toHaveCount(6);
-      const rows = await group
-        .locator(".style-card")
-        .evaluateAll(
-          (cards) =>
-            new Set(cards.map((card) => Math.round(card.getBoundingClientRect().top))).size,
-        );
-      expect(rows).toBe(3);
-    }
+    await expect(page.locator(".vault-roster button")).toHaveCount(6);
+    await expect(page.locator(".vault-skins .style-card")).toHaveCount(9);
+    const rows = await page
+      .locator(".vault-skins .style-card")
+      .evaluateAll(
+        (cards) => new Set(cards.map((card) => Math.round(card.getBoundingClientRect().top))).size,
+      );
+    expect(rows).toBe(3);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
-    const region = page.getByRole("region", { name: "꾸미기 목록" });
+    const region = page.locator(".vault-scroll");
     await region.focus();
     await region.press("End");
-    await expect(
-      page.getByRole("button", { name: "브라키오 황금빛 용사 스타일 미리보기" }),
-    ).toBeInViewport();
+    await expect(page.locator(".vault-skins > small")).toBeInViewport();
+    await expect(page.locator(".vault-apply")).toHaveCount(0);
+    await page.getByRole("button", { name: "악세서리", exact: true }).click();
+    await expect(page.locator(".vault-skins")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "보유한 꾸미기 아이템" })).toBeVisible();
   }
 });

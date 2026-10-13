@@ -18,6 +18,28 @@ function load(src: string) {
 }
 const cutouts = new Map<string, HTMLCanvasElement>();
 const sheets = new Map<string, HTMLCanvasElement[]>();
+const visibleBounds = new WeakMap<HTMLCanvasElement, [number, number, number, number]>();
+function alphaBounds(canvas: HTMLCanvasElement) {
+  const cached = visibleBounds.get(canvas);
+  if (cached) return cached;
+  const { width, height } = canvas;
+  const data = canvas.getContext("2d")!.getImageData(0, 0, width, height).data;
+  let left = width,
+    top = height,
+    right = -1,
+    bottom = -1;
+  for (let row = 0; row < height; row++)
+    for (let col = 0; col < width; col++)
+      if (data[(row * width + col) * 4 + 3] > 128) {
+        left = Math.min(left, col);
+        top = Math.min(top, row);
+        right = Math.max(right, col);
+        bottom = Math.max(bottom, row);
+      }
+  const bounds: [number, number, number, number] = [left, top, right - left + 1, bottom - top + 1];
+  visibleBounds.set(canvas, bounds);
+  return bounds;
+}
 
 // Concept art has an opaque white backdrop. Remove only edge-connected backdrop pixels
 // while rendering; enclosed white eyes/highlights and the original source file stay intact.
@@ -72,6 +94,7 @@ export function BattleSprite({
   backdrop = false,
   className = "",
   filter,
+  matchBounds,
 }: {
   src: string;
   label: string;
@@ -79,6 +102,7 @@ export function BattleSprite({
   backdrop?: boolean;
   className?: string;
   filter?: string;
+  matchBounds?: readonly [number, number, number, number];
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -87,8 +111,10 @@ export function BattleSprite({
       .then((image) => {
         if (!active || !canvas.current) return;
         const buffer = document.createElement("canvas");
-        buffer.width = 160;
-        buffer.height = 120;
+        const padX = matchBounds ? 160 : 0,
+          padY = matchBounds ? 120 : 0;
+        buffer.width = matchBounds ? 480 : 160;
+        buffer.height = matchBounds ? 360 : 120;
         const context = buffer.getContext("2d")!;
         let source: HTMLImageElement | HTMLCanvasElement = backdrop
           ? silhouette(image, src)
@@ -108,7 +134,7 @@ export function BattleSprite({
                   image,
                   attackFrames[src],
                   /434-578|446-578/.test(src),
-                  !/446-578|Spritesheet|Melee|Ranged/.test(src),
+                  !/446-578|Spritesheet|Melee|Ranged|Dino/.test(src),
                 ),
               );
             source =
@@ -148,7 +174,7 @@ export function BattleSprite({
           160 / (poses ? Math.max(...poses.map((p) => p[2])) : width),
           120 / (poses ? Math.max(...poses.map((p) => p[3])) : height),
         );
-        context.clearRect(0, 0, 160, 120);
+        context.clearRect(0, 0, buffer.width, buffer.height);
         context.imageSmoothingEnabled = false;
         const draw = () =>
           context.drawImage(
@@ -162,15 +188,34 @@ export function BattleSprite({
             Math.round(width * scale),
             Math.round(height * scale),
           );
-        draw();
-        const pixels = context.getImageData(0, 0, 160, 120).data;
-        let left = 160,
-          top = 120,
+        if (matchBounds && source instanceof HTMLCanvasElement && sheets.has(src)) {
+          // Calibrate the character body from the first pose, independently of
+          // attack effects or extended horns/tails in later poses. Keep one scale
+          // for the whole motion and share IDLE's center and foot/hover anchor.
+          const [, , baseWidth, baseHeight] = alphaBounds(sheets.get(src)![0]);
+          const [px, py, pw, ph] = alphaBounds(source);
+          const width = Math.round((pw * matchBounds[2]) / baseWidth),
+            height = Math.round((ph * matchBounds[3]) / baseHeight);
+          context.drawImage(
+            source,
+            px,
+            py,
+            pw,
+            ph,
+            padX + Math.round(matchBounds[0] + matchBounds[2] / 2 - width / 2),
+            padY + matchBounds[1] + matchBounds[3] - height,
+            width,
+            height,
+          );
+        } else draw();
+        const pixels = context.getImageData(0, 0, buffer.width, buffer.height).data;
+        let left = buffer.width,
+          top = buffer.height,
           right = -1,
           bottom = -1;
-        for (let row = 0; row < 120; row++)
-          for (let col = 0; col < 160; col++) {
-            if (pixels[(row * 160 + col) * 4 + 3] > 0) {
+        for (let row = 0; row < buffer.height; row++)
+          for (let col = 0; col < buffer.width; col++) {
+            if (pixels[(row * buffer.width + col) * 4 + 3] > 0) {
               left = Math.min(left, col);
               right = Math.max(right, col);
               top = Math.min(top, row);
@@ -181,8 +226,8 @@ export function BattleSprite({
         const output = canvas.current;
         output.width = right - left + 1;
         output.height = bottom - top + 1;
-        output.style.left = `${(left / 160) * 100}%`;
-        output.style.top = `${(top / 120) * 100}%`;
+        output.style.left = `${((left - padX) / 160) * 100}%`;
+        output.style.top = `${((top - padY) / 120) * 100}%`;
         output.style.width = `${(output.width / 160) * 100}%`;
         output.style.height = `${(output.height / 120) * 100}%`;
         const cropped = output.getContext("2d")!;
@@ -198,6 +243,8 @@ export function BattleSprite({
           output.width,
           output.height,
         );
+        output.dataset.renderedSrc = src;
+        output.dataset.renderedFrame = String(frame ?? "");
       })
       .catch(() => {
         /* Keep the accessible label when an asset cannot load. */
@@ -205,7 +252,7 @@ export function BattleSprite({
     return () => {
       active = false;
     };
-  }, [src, frame, backdrop]);
+  }, [src, frame, backdrop, matchBounds]);
   return (
     <canvas
       ref={canvas}
@@ -216,6 +263,7 @@ export function BattleSprite({
       aria-label={label}
       data-src={src}
       data-frame={frame}
+      data-size-reference={matchBounds ? "idle" : undefined}
       style={{ filter }}
     />
   );

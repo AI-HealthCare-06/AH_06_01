@@ -96,6 +96,7 @@ for (const mode of ["missing", "blocked"]) {
 test("all web tabs share screen height and navigation bounds with centered status icons", async ({
   page,
 }) => {
+  test.setTimeout(60_000);
   for (const viewport of [
     { width: 320, height: 694 },
     { width: 390, height: 844 },

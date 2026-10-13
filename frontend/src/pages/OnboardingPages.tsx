@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { ScenarioShell } from "../components/AppShell";
 import { DesignCanvas } from "../components/DesignCanvas";
 import { useNotice } from "../components/NoticeProvider";
@@ -18,7 +18,7 @@ export function LoginPage() {
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     notice("데모 모험을 시작해요. 이메일과 비밀번호는 전송·저장하지 않아요.");
-    navigate("/profile");
+    navigate(useProfileStore.getState().onboardingCompleted ? "/home" : "/profile");
   }
   return (
     <ScenarioShell
@@ -99,7 +99,7 @@ export function LoginPage() {
 }
 
 export function ProfilePage() {
-  const { profile, setProfile } = useProfileStore();
+  const { profile, setProfile, onboardingCompleted } = useProfileStore();
   const [draft, setDraft] = useState(profile);
   const [unknownMeasurements, setUnknownMeasurements] = useState({
     bloodPressure: profile.bloodPressure === null,
@@ -119,8 +119,12 @@ export function ProfilePage() {
       return;
     }
     setProfile(result.data);
-    notice("프로필 입력을 완료했어요. 건강 점수와 위험도는 체험용 예시예요.");
-    navigate("/dinosaur");
+    notice(
+      onboardingCompleted
+        ? "건강 정보를 변경했어요."
+        : "프로필 입력을 완료했어요. 건강 점수와 위험도는 체험용 예시예요.",
+    );
+    navigate(onboardingCompleted ? "/home" : "/dinosaur");
   }
   return (
     <ScenarioShell
@@ -131,17 +135,23 @@ export function ProfilePage() {
       <header className="profile-heading">
         <div className="profile-title-row">
           <h1>건강 프로필</h1>
-          <span>STEP 01</span>
+          {!onboardingCompleted && <span>STEP 01</span>}
         </div>
-        <h2>
-          나를 위한 건강 모험,
-          <br />
-          여기서 시작해요.
-        </h2>
+        {onboardingCompleted ? (
+          <h2>내 건강 정보를 업데이트해요.</h2>
+        ) : (
+          <h2>
+            나를 위한 건강 모험,
+            <br />
+            여기서 시작해요.
+          </h2>
+        )}
         <p>
           기본 정보와 최근 측정값을 입력하고
           <br />
-          함께할 공룡을 만나보세요.
+          {onboardingCompleted
+            ? "변경 내용을 저장하고 홈으로 돌아가세요."
+            : "함께할 공룡을 만나보세요."}
         </p>
       </header>
       <form onSubmit={submit} className="profile-form">
@@ -351,7 +361,7 @@ export function ProfilePage() {
           </span>
         </div>
         <button className="primary-button profile-submit" type="submit">
-          공룡 깨우기
+          {onboardingCompleted ? "변경 저장하고 홈으로" : "공룡 깨우기"}
           <span aria-hidden="true">→</span>
         </button>
         <p className="privacy-note">
@@ -369,7 +379,9 @@ export function ProfilePage() {
 
 export function DinosaurPage() {
   const { game, chooseDinosaur } = useGameStore();
+  const onboardingCompleted = useProfileStore((s) => s.onboardingCompleted);
   const dino = dinosaurs[game.dinosaur];
+  if (onboardingCompleted) return <Navigate to="/home" replace />;
   return (
     <ScenarioShell
       className="dinosaur-screen"
@@ -408,8 +420,10 @@ export function DinosaurPage() {
 
 export function FirstResultPage() {
   const game = useGameStore((s) => s.game);
+  const { onboardingCompleted, completeOnboarding } = useProfileStore();
   const dino = dinosaurs[game.dinosaur];
   const a = assets["first-result"];
+  if (onboardingCompleted) return <Navigate to="/home" replace />;
   return (
     <ScenarioShell className="first-result-screen" camera={a.imgEllipse}>
       <header className="scenario-heading">
@@ -441,7 +455,7 @@ export function FirstResultPage() {
           </Link>
         ))}
       </div>
-      <Link className="primary-button first-start" to="/quests">
+      <Link className="primary-button first-start" to="/home" onClick={completeOnboarding}>
         첫 퀘스트 시작하기
       </Link>
       <p className="first-result-note">표시된 위험도는 입력값과 무관한 체험용 예시예요.</p>

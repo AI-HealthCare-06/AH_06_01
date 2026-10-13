@@ -21,7 +21,7 @@ export function AccessoryCatalog({ inventory = false }: { inventory?: boolean })
     >
       <header>
         <h3>{inventory ? "MY ITEMS" : "DINO ITEMS"}</h3>
-        <Link to={inventory ? "/shop/customize" : "/character"}>
+        <Link to={inventory ? "/shop/customize" : "/character?tab=accessories"}>
           {inventory ? "꾸미기 상점 ›" : "보유 아이템 ›"}
         </Link>
       </header>

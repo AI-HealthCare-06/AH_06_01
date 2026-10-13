@@ -1,11 +1,10 @@
 import { useRef, type ReactNode } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { PaperTexture } from "../design/PaperTexture";
-import { useNotice } from "./NoticeProvider";
 import { useDevicePreview } from "./useDevicePreview";
 import { StatusBar } from "./StatusBar";
 import { PixelIcon } from "./PixelIcon";
-import { calendarWeek } from "../domain/calendar";
+import { QuestCalendar } from "./QuestCalendar";
 import { useGameStore } from "../stores/game-store";
 import { ProfileAvatar } from "./ProfileAvatar";
 import { WeatherGreeting } from "./WeatherGreeting";
@@ -19,9 +18,20 @@ const destinations = [
   { path: "/dashboard", label: "Dashboard", key: "dashboard" },
 ] as const;
 
-export function AppShell({ active, children }: { active: TabName; children: ReactNode }) {
+export function AppShell({
+  active,
+  children,
+  calendarDate,
+  onSelectDate,
+  calendarControls,
+}: {
+  active: TabName;
+  children: ReactNode;
+  calendarDate?: string;
+  onSelectDate?: (date: string) => void;
+  calendarControls?: ReactNode;
+}) {
   const game = useGameStore((state) => state.game);
-  const notice = useNotice();
   const navigate = useNavigate();
   const location = useLocation();
   const swipe = useRef<{ x: number; y: number; id: number } | null>(null);
@@ -86,29 +96,13 @@ export function AppShell({ active, children }: { active: TabName; children: Reac
           <PixelIcon name="menu" />
         </Link>
       </header>
-      {active !== "shop" && active !== "camera" && active !== "character" && (
-        <div className="weekly-calendar" aria-label="주간 달력">
-          {calendarWeek(game.date).map((day) => (
-            <button
-              key={day.date}
-              onClick={() => {
-                notice(
-                  day.date === game.date
-                    ? "오늘의 퀘스트를 확인해 보세요."
-                    : game.completedDates.includes(day.date)
-                      ? `${day.month}월 ${day.day}일 · 모든 퀘스트를 완료했어요!`
-                      : `${day.month}월 ${day.day}일 · 전체 완료 기록이 없어요.`,
-                );
-              }}
-              aria-pressed={day.date === game.date}
-              aria-current={day.date === game.date ? "date" : undefined}
-              aria-label={`${day.month}월 ${day.day}일 ${day.label}요일${day.date === game.date ? " 오늘" : ""}`}
-            >
-              <span>{day.label}</span>
-              <strong>{day.day}</strong>
-            </button>
-          ))}
-        </div>
+      {active === "dashboard" && (
+        <QuestCalendar
+          game={game}
+          selected={calendarDate ?? game.date}
+          onSelect={onSelectDate}
+          controls={calendarControls}
+        />
       )}
       <main className="main-content">
         {active === "home" ? (

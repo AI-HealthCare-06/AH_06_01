@@ -32,13 +32,17 @@ test("radar compares day one and today, and risk changes include units and a del
     "aria-label",
     "현재 41%, 완료 후 35%, 6%포인트 감소",
   );
-  await expect(page.locator(".risk-change-values").last()).toHaveText("41%→35%");
+  await expect(page.locator(".risk-change-values").last().locator("strong")).toHaveText([
+    "41%",
+    "35%",
+  ]);
+  await expect(page.locator(".risk-change-values").last().locator("small")).toHaveText("−6%p");
   const colors = await page
     .locator(".risk-change-values")
     .last()
     .evaluate((element) => ({
       from: getComputedStyle(element.children[0]).color,
-      gradient: getComputedStyle(element.children[1]).backgroundImage,
+      gradient: getComputedStyle(element.querySelector(".risk-change-arrow")!).backgroundImage,
       to: getComputedStyle(element.children[2]).color,
     }));
   expect(colors.from).not.toBe(colors.to);

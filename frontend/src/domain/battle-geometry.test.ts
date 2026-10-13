@@ -8,9 +8,42 @@ import {
   enemyGeometry,
   overlaps,
   playerGeometry,
+  playerReleasePosition,
 } from "./battle-geometry";
+import attackMotions from "../design/dino-attack-atlases.json";
 
 describe("separate battle bodies and hit targets", () => {
+  it("moves mouth releases 4 design px forward without shifting horn or claw anchors", () => {
+    for (const [dinosaur, name, offset] of [
+      [0, "Trex", 4],
+      [1, "Tricera", 0],
+      [2, "Raptor", 0],
+      [3, "Stego", 4],
+      [4, "Ptera", 4],
+      [5, "Brachio", 4],
+    ] as const) {
+      const actor = playerGeometry(dinosaur, { x: 12, y: -10 });
+      const [x, y] = attackMotions.releasePoints[name];
+      const released = playerReleasePosition(dinosaur, actor);
+      expect(released.x - (actor.sprite.x + (actor.sprite.width * x) / 160)).toBeCloseTo(offset);
+      expect(released.y).toBeCloseTo(actor.sprite.y + (actor.sprite.height * y) / 120);
+    }
+    expect(attackMotions.releasePoints.Tricera[1]).toBeLessThan(70); // horn above the mouth
+  });
+  it("enlarges Brachio by 20% while keeping its feet on the ground and body boxes in sync", () => {
+    const brachio = playerGeometry(5),
+      translated = playerGeometry(5, { x: 12, y: -10 });
+    expect(brachio.sprite.width).toBe(150);
+    expect(brachio.sprite.height).toBeCloseTo(117.6);
+    expect(brachio.hitbox.y + brachio.hitbox.height).toBeCloseTo(arena.ground);
+    expect(brachio.hitbox.height).toBeGreaterThan(playerGeometry(0).hitbox.height);
+    for (const key of ["sprite", "hitbox", "collider"] as const) {
+      expect(translated[key].x - brachio[key].x).toBeCloseTo(12);
+      expect(translated[key].y - brachio[key].y).toBeCloseTo(-10);
+      expect(translated[key].width).toBe(brachio[key].width);
+      expect(translated[key].height).toBe(brachio[key].height);
+    }
+  });
   it("uses narrower cola bodies and larger boss boxes independently of sprite padding", () => {
     const cola = enemyGeometry(2, 0),
       burger = enemyGeometry(2, 3),
@@ -50,7 +83,7 @@ describe("separate battle bodies and hit targets", () => {
         expect(attackEndpoint(character, enemyGeometry(1.5, art).hitbox).x).toBeLessThan(end.x);
       }
     const ptera = playerGeometry(4);
-    expect(center(ptera.hitbox).y).toBeLessThan(arena.top + arena.height / 2);
+    expect(center(ptera.hitbox).y).toBeCloseTo(arena.top + arena.height * 0.6);
     expect(playerGeometry(0).collider).not.toEqual(playerGeometry(0).hitbox);
   });
 });

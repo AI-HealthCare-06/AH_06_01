@@ -15,6 +15,10 @@ import { ProfileAvatar } from "../components/ProfileAvatar";
 import { experienceProgress, questExperience } from "../domain/experience";
 import { battleBuffStats, questBuffs } from "../domain/battle";
 import { directRewardPreview } from "../domain/economy";
+import {
+  battleNotificationPermission,
+  requestBattleNotifications,
+} from "../services/battle-notifications";
 
 export function QuestDetailPage() {
   const { id } = useParams();
@@ -215,13 +219,15 @@ export function MyPage() {
   const clearProfile = useProfileStore((s) => s.clear);
   const navigate = useNavigate();
   const notice = useNotice();
-  const [resetEnabled, setResetEnabled] = useState(true);
   const [dialog, setDialog] = useState<string | null>(null);
   const [dialogTrigger, setDialogTrigger] = useState<HTMLButtonElement | null>(null);
+  const [notificationPermission, setNotificationPermission] = useState(
+    battleNotificationPermission,
+  );
   function logout() {
     useDeviceStore.getState().disconnect();
     resetDemo();
-    clearProfile();
+    clearProfile(true);
     navigate("/login");
   }
   return (
@@ -291,24 +297,6 @@ export function MyPage() {
           </button>
         ))}
       </div>
-      <div className="cream-card daily-reset-setting">
-        <div>
-          <h3>일일 상태 초기화</h3>
-          <p>매일 00:00에 공룡 상태만 초기화</p>
-        </div>
-        <button
-          role="switch"
-          aria-checked={resetEnabled}
-          aria-label="일일 상태 초기화 안내"
-          onClick={() => {
-            setResetEnabled(!resetEnabled);
-            notice("초기화 설정은 화면 체험용이에요. 데모 퀘스트는 날짜가 바뀌면 초기화돼요.");
-          }}
-          className={resetEnabled ? "enabled" : ""}
-        >
-          <span className="pixel-toggle-thumb" aria-hidden="true" />
-        </button>
-      </div>
       <button className="logout-button" onClick={logout}>
         <svg viewBox="0 0 24 24" aria-hidden="true" shapeRendering="crispEdges">
           <path fill="currentColor" d="M3 3h9v3H6v12h6v3H3zM15 6h3v3h3v6h-3v3h-3v-3H9v-3h9V9h-3z" />
@@ -321,7 +309,37 @@ export function MyPage() {
           {dialog === "개인정보 및 이용약관" ? (
             "현재는 UI 개발용 데모입니다. 건강 프로필 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 이 기기에는 프로필 등록 일자, 공룡과 꾸미기 선택, 퀘스트 완료·GOLD, 연결한 오늘의 걸음 수와 동기화 시각이 저장됩니다. 사진은 촬영 화면에만 유지되며 서버에 전송하지 않습니다. 날씨에 위치 사용을 허용하면 반올림한 좌표를 Open-Meteo에 보내며 좌표는 저장하지 않습니다. 로그아웃하면 등록 일자·걸음 수·퀘스트 기록이 초기화됩니다."
           ) : dialog === "알림 설정" ? (
-            "시스템 알림과 복약 리마인드는 아직 연결되지 않았어요."
+            <div className="battle-notification-settings">
+              <h3>Wave 실패 알림</h3>
+              <p>실패하면 화면 알림과 공룡의 응원 대사를 보여드려요.</p>
+              <p>
+                {notificationPermission === "granted"
+                  ? "브라우저 알림 ON · 시스템 알림도 보내요."
+                  : notificationPermission === "denied"
+                    ? "브라우저 설정에서 이 사이트의 알림을 허용해 주세요."
+                    : notificationPermission === "unsupported"
+                      ? "이 환경에서는 화면 알림을 사용해요."
+                      : "시스템 알림을 받으려면 브라우저 알림을 허용해 주세요."}
+              </p>
+              <button
+                className="primary-button"
+                disabled={notificationPermission !== "default"}
+                onClick={async () => {
+                  try {
+                    setNotificationPermission(await requestBattleNotifications());
+                  } catch {
+                    notice(
+                      "알림 허용 상태를 확인하지 못했어요. 화면 알림은 계속 사용할 수 있어요.",
+                    );
+                  }
+                }}
+              >
+                {notificationPermission === "granted"
+                  ? "브라우저 알림 허용됨"
+                  : "브라우저 알림 켜기"}
+              </button>
+              <small>데모가 실행되는 동안 Wave 실패를 알려드려요.</small>
+            </div>
           ) : dialog === "웨어러블 장비" ? (
             <div className="wearable-devices">
               <section>

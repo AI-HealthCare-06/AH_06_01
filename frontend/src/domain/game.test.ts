@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   claimDailyBonus,
   applyDinosaurStyle,
+  selectDinosaur,
   completeQuest,
   initialGame,
   quests,
@@ -83,8 +84,16 @@ describe("demo reward rules", () => {
   it("restores older saves without losing currency, quests or selected character", () => {
     const legacy: Record<string, unknown> = { ...initialGame(), gold: 1700, dinosaur: 3 };
     delete legacy.dinosaurStyles;
+    delete legacy.showBattleDamage;
+    delete legacy.showMonsterHealth;
     const restored = restoreGame(legacy);
-    expect(restored).toMatchObject({ gold: 1700, dinosaur: 3, completed: [] });
+    expect(restored).toMatchObject({
+      gold: 1700,
+      dinosaur: 3,
+      completed: [],
+      showBattleDamage: true,
+      showMonsterHealth: true,
+    });
     expect(restored.dinosaurStyles).toEqual(Array(6).fill("original"));
     expect(restoreGame({ ...legacy, dinosaurStyles: ["bad-skin"] })).toEqual(restored);
   });
@@ -110,5 +119,57 @@ describe("demo reward rules", () => {
     expect(applyDinosaurStyle(initial, 1.5, "ocean")).toBe(initial);
     // Untrusted persisted/UI values must not overwrite a valid style.
     expect(applyDinosaurStyle(initial, 2, "unknown" as "ocean")).toBe(initial);
+  });
+  it("switching characters clears outgoing shots and pending attacks while preserving battle progress", () => {
+    const initial = initialGame();
+    const input = {
+      ...initial,
+      combat: {
+        ...initial.combat,
+        wave: 2,
+        killed: 7,
+        hp: 45,
+        attackIn: 300,
+        pendingGold: 210,
+        playerProjectiles: [
+          {
+            id: "old",
+            dinosaur: 0,
+            x: 150,
+            y: 200,
+            vx: 240,
+            vy: 0,
+            age: 80,
+            travelled: 20,
+            damage: 20,
+            critical: false,
+          },
+        ],
+        projectiles: [{ id: "enemy", art: 0, origin: 7, distance: 4, damage: 5 }],
+        lastAttack: {
+          time: 0,
+          mode: "ranged" as const,
+          duration: 500,
+          impactAt: 150,
+          distance: 7,
+          damage: 20,
+          critical: false,
+          resolved: false,
+        },
+      },
+    };
+    const selected = selectDinosaur(input, 4);
+    expect(selected.dinosaur).toBe(4);
+    expect(selected.combat).toEqual({ ...input.combat, playerProjectiles: [], lastAttack: null });
+    expect(input.combat.playerProjectiles).toHaveLength(1);
+    expect(selected.gold).toBe(input.gold);
+    expect(selected.experience).toBe(input.experience);
+    expect(selectDinosaur(input, 0)).toBe(input);
+    expect(selectDinosaur(input, 6)).toBe(input);
+    expect(applyDinosaurStyle(input, 0, "ocean").combat).toBe(input.combat);
+    expect(applyDinosaurStyle(input, 4, "ocean").combat).toEqual(selected.combat);
+    expect(restoreGame(JSON.parse(JSON.stringify(selected))).combat.playerProjectiles).toHaveLength(
+      0,
+    );
   });
 });

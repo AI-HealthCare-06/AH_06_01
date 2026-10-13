@@ -9,7 +9,10 @@ import {
   combatSchema,
   initialCombat,
   migrateCombat,
+  clearDuration,
+  travelDuration,
 } from "./battle";
+import { stagePolicies, wavePolicies } from "./game-policy";
 import { experienceProgress, levelUpGold, questExperience } from "./experience";
 import { effectCatalog, rpAllowance, rpPolicy } from "./economy";
 import type { EffectId } from "./economy";
@@ -103,6 +106,9 @@ export const gameSchema = z
     combat: combatSchema.optional(),
     battleUpdatedAt: z.number().nonnegative().default(0),
     battlePaused: z.boolean().default(false),
+    waveAutoRestart: z.boolean().default(true),
+    showBattleDamage: z.boolean().default(true),
+    showMonsterHealth: z.boolean().default(true),
     ownedEffects: z.array(z.enum(["original", "emerald", "violet"])).default(["original"]),
     battleEffect: z.enum(["original", "emerald", "violet"]).default("original"),
     ownedAccessories: z.array(z.string()).default([]),
@@ -114,6 +120,7 @@ export const gameSchema = z
     sampleDay: z.boolean().default(true),
     steps: stepSnapshotSchema.nullable().default(null),
     completedDates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).default([]),
+    questHistory: z.record(z.string(), z.number().int().min(0).max(5)).default({}),
     battleDefeats: z.number().int().nonnegative().default(0),
     dinosaur: z.number().int().min(0).max(5),
     dinosaurStyles: z
@@ -139,6 +146,7 @@ export const gameSchema = z
     gold: state.gold + (state.version === 1 ? (coins ?? 0) : 0),
   }));
 export type GameState = Omit<z.infer<typeof gameSchema>, "experience" | "combat"> & {
+  debugBuffs?: import("./battle").DebugBuffs;
   experience: number;
   combat: z.infer<typeof combatSchema>;
 };
@@ -169,6 +177,9 @@ export function initialGame(date = localDate()): GameState {
     combat: initialCombat(),
     battleUpdatedAt: Date.now(),
     battlePaused: false,
+    waveAutoRestart: true,
+    showBattleDamage: true,
+    showMonsterHealth: true,
     ownedEffects: ["original"],
     battleEffect: "original",
     ownedAccessories: [],
@@ -178,6 +189,7 @@ export function initialGame(date = localDate()): GameState {
     sampleDay: false,
     steps: null,
     completedDates: [],
+    questHistory: {},
     battleDefeats: 0,
     dinosaur: 0,
     dinosaurStyles: defaultDinosaurStyles(),
@@ -190,6 +202,10 @@ export function rollDay(state: GameState, date = localDate()): GameState {
   return {
     ...state,
     date,
+    questHistory: {
+      ...state.questHistory,
+      [state.date]: state.sampleDay ? 0 : state.completed.length,
+    },
     completed: [],
     bonusClaimed: false,
     allDoneBonusClaimed: false,
@@ -246,6 +262,7 @@ export function completeQuest(
   return {
     ...current,
     completed,
+    questHistory: { ...current.questHistory, [date]: completed.length },
     gold: current.gold + gold,
     experience,
     activity: { ...current.activity, [id]: 1 },
@@ -267,12 +284,22 @@ export function claimDailyBonus(state: GameState, date = localDate()): GameState
     : { ...current, gold: current.gold + 10, bonusClaimed: true };
 }
 
-export function applyDinosaurStyle(state: GameState, index: number, skin: SkinId): GameState {
-  if (!Number.isInteger(index) || index < 0 || index >= 6 || !skinIds.includes(skin)) return state;
+export function selectDinosaur(state: GameState, index: number): GameState {
+  if (!Number.isInteger(index) || index < 0 || index >= 6 || index === state.dinosaur) return state;
   return {
     ...state,
     dinosaur: index,
-    dinosaurStyles: state.dinosaurStyles.map((current, i) => (i === index ? skin : current)),
+    // A pending wind-up must not launch an old character's attack after switching.
+    combat: { ...state.combat, playerProjectiles: [], lastAttack: null },
+  };
+}
+
+export function applyDinosaurStyle(state: GameState, index: number, skin: SkinId): GameState {
+  if (!Number.isInteger(index) || index < 0 || index >= 6 || !skinIds.includes(skin)) return state;
+  const selected = selectDinosaur(state, index);
+  return {
+    ...selected,
+    dinosaurStyles: selected.dinosaurStyles.map((current, i) => (i === index ? skin : current)),
   };
 }
 
@@ -338,12 +365,19 @@ export function syncDeviceSteps(state: GameState, value: unknown, today = localD
   return snapshot.count >= 6000 ? completeQuest(next, "walk", today) : next;
 }
 
-export function weeklyCompletedDays(game: GameState): number {
-  const week = new Set(calendarWeek(game.date).map((day) => day.date));
-  return Math.min(
-    5,
-    new Set(game.completedDates.filter((date) => week.has(date) && date <= game.date)).size,
-  );
+export function weeklyCompletedDays(game: GameState, anchor = game.date): number {
+  const week = new Set(calendarWeek(anchor).map((day) => day.date));
+  const completed = new Set([
+    ...game.completedDates,
+    ...Object.keys(game.questHistory).filter((date) => game.questHistory[date] === 5),
+  ]);
+  return Math.min(5, [...completed].filter((date) => week.has(date) && date <= game.date).length);
+}
+
+export function questCountOn(game: GameState, date: string): number {
+  if (date > game.date) return 0;
+  if (date === game.date) return game.sampleDay ? 0 : game.completed.length;
+  return game.questHistory[date] ?? (game.completedDates.includes(date) ? 5 : 0);
 }
 
 export function tickBattle(state: GameState, now = Date.now()): GameState {
@@ -364,16 +398,86 @@ export function tickBattle(state: GameState, now = Date.now()): GameState {
       battleBuffStats(current),
       experienceProgress(current.experience).level,
       end - cursor,
+      current.experience,
+      current.waveAutoRestart,
     );
     current = {
       ...current,
       combat: result.combat,
       gold: current.gold + result.gold,
+      experience: current.experience + result.defeats,
       battleDefeats: current.battleDefeats + result.defeats,
     };
     cursor = end;
   }
   return { ...rollDay(current, localDate(new Date(now))), battleUpdatedAt: now };
+}
+
+export function selectBattleLocation(
+  state: GameState,
+  stage: number,
+  wave: number,
+  now = Date.now(),
+): GameState {
+  if (
+    !Number.isInteger(stage) ||
+    !Number.isInteger(wave) ||
+    stage < 1 ||
+    stage > stagePolicies.length ||
+    wave < 1 ||
+    wave > wavePolicies.length ||
+    experienceProgress(state.experience).level < stagePolicies[stage - 1].level ||
+    (stage === state.combat.stage && wave === state.combat.wave)
+  )
+    return state;
+  const current = tickBattle(state, now);
+  return {
+    ...current,
+    battleUpdatedAt: now,
+    combat: {
+      ...initialCombat(battleBuffStats(current).maxHp),
+      stage,
+      wave,
+      clock: current.combat.clock,
+      serial: current.combat.serial,
+      lastFailure: current.combat.lastFailure,
+      seed: current.combat.seed,
+      // A manual selection starts at the destination without a false clear reward.
+      transition: {
+        kind: "wave",
+        elapsed: clearDuration("wave") + travelDuration,
+        arrived: true,
+        fromStage: stage,
+        fromWave: wave,
+      },
+    },
+  };
+}
+
+export function retryBattle(state: GameState, now = Date.now()): GameState {
+  const current = tickBattle(state, now);
+  if (current.combat.recovery <= 0) return current;
+  const { stage, wave, clock, serial, seed, lastFailure } = current.combat;
+  return {
+    ...current,
+    battleUpdatedAt: now,
+    combat: {
+      ...initialCombat(battleBuffStats(current).maxHp),
+      stage,
+      wave,
+      clock,
+      serial,
+      seed,
+      lastFailure,
+      transition: {
+        kind: "wave",
+        elapsed: clearDuration("wave") + travelDuration,
+        arrived: true,
+        fromStage: stage,
+        fromWave: wave,
+      },
+    },
+  };
 }
 
 export function convertDemoRp(state: GameState, requested: number, date = localDate()): GameState {

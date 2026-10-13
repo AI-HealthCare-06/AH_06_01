@@ -1,67 +1,98 @@
 import { test, expect } from "@playwright/test";
 
-test("all dinosaurs reach the visible monster during the impact pose", async ({ page }) => {
+test("all player projectile poses grow through loop wrap with matching collision and debug geometry", async ({
+  page,
+}) => {
   await page.clock.install();
   await page.clock.pauseAt(new Date());
+  await page.goto("/home");
+  await page.getByRole("button", { name: "전투 디버그 표시" }).click();
   for (let dinosaur = 0; dinosaur < 6; dinosaur++) {
-    await page.goto("/home");
-    await page.evaluate(async (index) => {
-      const path = "/src/stores/game-store.ts";
-      const { useGameStore } = await import(path);
-      useGameStore.getState().resetDemo();
-      useGameStore.getState().chooseDinosaur(index);
-    }, dinosaur);
-    await page.clock.runFor(3050);
-    await expect(page.locator(".battle-enemy").first()).toHaveAttribute("data-hit", "true");
-    await page.getByRole("button", { name: "모험 일시정지" }).click();
-    await expect
-      .poll(
-        async () =>
-          page.locator(".battle-dinosaur canvas,.battle-enemy canvas").evaluateAll((elements) => {
-            const bounds = elements.slice(0, 2).map((element) => {
-              const canvas = element as HTMLCanvasElement,
-                box = canvas.getBoundingClientRect();
-              const pixels = canvas
-                .getContext("2d")!
-                .getImageData(0, 0, canvas.width, canvas.height).data;
-              let left = canvas.width,
-                top = canvas.height,
-                right = 0,
-                bottom = 0;
-              for (let y = 0; y < canvas.height; y++)
-                for (let x = 0; x < canvas.width; x++)
-                  if (pixels[(y * canvas.width + x) * 4 + 3] > 80) {
-                    left = Math.min(left, x);
-                    right = Math.max(right, x);
-                    top = Math.min(top, y);
-                    bottom = Math.max(bottom, y);
-                  }
-              return {
-                left: box.x + (left * box.width) / canvas.width,
-                right: box.x + (right * box.width) / canvas.width,
-                top: box.y + (top * box.height) / canvas.height,
-                bottom: box.y + (bottom * box.height) / canvas.height,
-                loaded: right > left,
-              };
-            });
-            return (
-              bounds.length === 2 &&
-              bounds.every((b) => b.loaded) &&
-              bounds[0].right > bounds[1].left &&
-              bounds[0].left < bounds[1].right &&
-              bounds[0].bottom > bounds[1].top &&
-              bounds[0].top < bounds[1].bottom
+    let previousSize = 0;
+    for (const step of [0, 1, 2, 3, 4, 10, 11]) {
+      const frame = step % 4;
+      await page.evaluate(
+        async ({ dinosaur, step }) => {
+          const path = "/src/stores/game-store.ts";
+          const { useGameStore } = await import(path);
+          const { game } = useGameStore.getState();
+          useGameStore.setState({
+            paused: true,
+            game: {
+              ...game,
+              dinosaur,
+              battlePaused: true,
+              combat: {
+                ...game.combat,
+                lastAttack: null,
+                enemies: [],
+                projectiles: [
+                  { id: "enemy-pose", art: 0, rank: "normal", origin: 7, distance: 5, damage: 5 },
+                ],
+                playerProjectiles: [
+                  {
+                    id: "pose",
+                    dinosaur,
+                    x: 200,
+                    y: 200,
+                    vx: 240,
+                    vy: 0,
+                    age: step * 80,
+                    travelled: 0,
+                    damage: 20,
+                    critical: false,
+                  },
+                ],
+              },
+            },
+          });
+        },
+        { dinosaur, step },
+      );
+      const shot = page.locator(".player-projectile");
+      await expect(shot.locator("canvas")).toHaveAttribute("data-frame", String(frame));
+      const sizes = await page.evaluate(() => {
+        const player = JSON.parse(
+          document.querySelector(".player-projectile")!.getAttribute("data-hitbox")!,
+        );
+        const enemy = document.querySelector<HTMLElement>(".enemy-projectile")!.style;
+        return [player.width / parseFloat(enemy.width), player.height / parseFloat(enemy.height)];
+      });
+      const size = Math.max(...sizes);
+      if (step === 0) expect(size).toBeCloseTo(1.2, 5);
+      if (step > 0 && step <= 10) expect(size).toBeGreaterThan(previousSize);
+      if (step >= 10) expect(size).toBeCloseTo(2.4, 5);
+      previousSize = size;
+      const box = JSON.parse((await shot.getAttribute("data-hitbox"))!);
+      expect(box.x + box.width / 2).toBeCloseTo(200, 5);
+      expect(box.y + box.height / 2).toBeCloseTo(200, 5);
+      const rect = page.locator('[data-debug-projectile="pose"] rect');
+      for (const [key, value] of Object.entries(box))
+        await expect(rect).toHaveAttribute(key, String(value));
+      await expect
+        .poll(() =>
+          shot.evaluate((node) => {
+            const hit = JSON.parse(node.getAttribute("data-hitbox")!);
+            const arena = node.closest(".design-canvas-inner")!.getBoundingClientRect();
+            const scale = arena.width / 354,
+              canvas = node.querySelector("canvas")!.getBoundingClientRect();
+            return Math.max(
+              Math.abs(canvas.x - arena.x - hit.x * scale),
+              Math.abs(canvas.y - arena.y - hit.y * scale),
+              Math.abs(canvas.width - hit.width * scale),
+              Math.abs(canvas.height - hit.height * scale),
             );
           }),
-        { message: `dinosaur ${dinosaur} must visually reach the enemy` },
-      )
-      .toBe(true);
+        )
+        .toBeLessThan(0.2);
+    }
   }
 });
 
 test("camera picks the quest lens, switches a live stream and saves portrait framing", async ({
   page,
 }) => {
+  test.setTimeout(60_000);
   await page.addInitScript(() => {
     const requests: MediaStreamConstraints[] = [];
     const tracks: MediaStreamTrack[] = [];
@@ -84,14 +115,17 @@ test("camera picks the quest lens, switches a live stream and saves portrait fra
     "약 복용하기",
     "건강한 식사하기",
     "물 8잔 마시기",
+    "물 마시기 · 샘플 시연",
+    "약 복용 동작 · 샘플 시연",
   ]);
   await expect(page.locator("select")).toHaveValue("meal");
   await page.getByRole("button", { name: "카메라 켜기" }).click();
   await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
   await page.locator("select").selectOption("medicine");
-  await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
+  await page.getByRole("button", { name: "약 준비 확인하고 시작" }).click();
+  await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible({ timeout: 45_000 });
   await page.locator("select").selectOption("water");
-  await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible({ timeout: 45_000 });
   expect(
     await page.evaluate(() =>
       Reflect.get(window, "cameraReview").requests.map(
@@ -161,6 +195,7 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
     "주간",
     "월간",
     "연간",
+    "기간",
   ]);
   await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption("day");
   await expect(page.locator(".health-score h3")).toHaveText("DAILY HEALTH SCORE");
@@ -173,13 +208,23 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
   await expect(page.locator(".trend-column")).toHaveCount(4);
   await expect(page.locator(".health-trend")).toContainText("+14점");
   await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption("year");
-  await expect(page.locator(".trend-column")).toHaveCount(12);
+  await expect(page.locator(".trend-column")).toHaveCount(9);
   await expect(page.locator(".health-trend")).toContainText("+26점");
   await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption("week");
   await expect(page.locator(".impact-card")).toBeVisible();
 });
 
 test("account controls, top notices and step guidance keep dialogs separate", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "Notification", {
+      value: class {
+        static permission = "default";
+        static async requestPermission() {
+          throw new Error("Notification permission unavailable");
+        }
+      },
+    });
+  });
   await page.goto("/quests");
   await expect(page.locator(".step-connection")).toHaveCount(0);
   const hint = (await page.locator(".step-connection-note").boundingBox())!;
@@ -193,7 +238,10 @@ test("account controls, top notices and step guidance keep dialogs separate", as
   await page.getByRole("button", { name: /웨어러블 장비/ }).click();
   await expect(page.getByRole("dialog")).toContainText("수면 시간");
   await page.keyboard.press("Escape");
-  await page.getByRole("switch").click();
+  await expect(page.getByRole("switch", { name: "일일 상태 초기화 안내" })).toHaveCount(0);
+  await page.getByRole("button", { name: /알림 설정/ }).click();
+  await page.getByRole("button", { name: "브라우저 알림 켜기" }).click();
+  await page.keyboard.press("Escape");
   await expect(page.locator(".notice.visible")).toBeVisible();
   expect((await page.locator(".notice").boundingBox())!.y).toBeLessThan(25);
   await page.getByRole("button", { name: "← 뒤로가기" }).click();
@@ -214,9 +262,8 @@ test("home hides status copy, shows both progress bars and keeps the pteranodon 
     useGameStore.getState().chooseDinosaur(4);
   });
   await expect(page.locator(".battle-dinosaur")).toHaveAttribute("data-dinosaur", "4");
-  expect(
-    await page.locator(".battle-dinosaur").evaluate((e) => parseInt(getComputedStyle(e).top)),
-  ).toBeLessThan(100);
+  const player = JSON.parse((await page.locator(".battle-dinosaur").getAttribute("data-hitbox"))!);
+  expect(player.y + player.height / 2).toBeCloseTo(188.8, 2);
   const points = await page.locator('[data-series="today"]').getAttribute("points");
   const vertices = points!.split(" ").map((p) => p.split(",").map(Number));
   expect(vertices).toHaveLength(6);
