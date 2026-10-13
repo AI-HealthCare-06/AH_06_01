@@ -1,0 +1,9 @@
+term,origin,coef_std,odds_ratio_per_sd,expected_sign,sign_ok
+age__age,age,1.7916559517930626,5.999378927536514,1,True
+age__age^2,age,-0.45315777817330394,0.6356178390929067,0,True
+remainder__sex_female,sex_female,-0.09734708653799658,0.9072410603209534,0,True
+remainder__bmi,bmi,0.42911021080273176,1.5358902967724222,1,True
+remainder__waist_cm,waist_cm,0.24825913209405054,1.281792042618069,1,True
+remainder__smoking_former,smoking_former,-0.028686549728493098,0.9717210029474794,0,True
+remainder__smoking_current,smoking_current,0.037828882070885805,1.038553502547878,1,True
+intercept,,-1.148462315570106,0.31712403134081546,0,True
