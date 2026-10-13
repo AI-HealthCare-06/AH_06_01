@@ -84,12 +84,25 @@ def test_monotonic(sex, age, field, values, direction):
 
 
 # ── 2. 크기 상식: BMI 22→30 이면 지수가 눈에 띄게 올라야 한다 ────────────────
+# 2026-10-12 개정(AI팀, 멘토 확인 예정): 절대 +8 은 출발점이 낮은 젊은 페르소나(20대 유병률 3.7%)에서
+# 보정된 확률로는 도달 불가 → 모든 페르소나는 상대 기준(보정 확률 1.8배 이상), 60세 페르소나만 절대 +8 유지.
+# 근거: 체중 감량은 고혈압 발생 OR 0.23(TOHP 7년) — 방향·크기 모두 뚜렷해야 한다.
+BMI_EFFECT_MIN_RATIO = 1.8
+BMI_EFFECT_MIN_ABS_AT_60 = 8
+
+
 @pytest.mark.parametrize("sex,age", PERSONAS)
 def test_effect_size_bmi(sex, age):
     p = base_person(sex, age)
-    lo = risk({**p, "bmi": 22.0})
-    hi = risk({**p, "bmi": 30.0})
-    assert hi - lo >= 8, f"BMI 22→30 effect too small: {lo}→{hi} ({sex},{age})"
+    lo_out, hi_out = predict_htn_risk({**p, "bmi": 22.0}), predict_htn_risk({**p, "bmi": 30.0})
+    lo_p, hi_p = lo_out["calibrated_p"], hi_out["calibrated_p"]
+    # calibrated_p 는 소수 4자리로 반올림된다. 기저가 0.1% 미만이면 비율이 공허해지므로 그 자체를 실패로 본다
+    assert lo_p >= 0.001, f"baseline too low to evaluate ratio: p={lo_p} ({sex},{age})"
+    assert hi_p / lo_p >= BMI_EFFECT_MIN_RATIO, f"BMI 22→30 ratio too small: p {lo_p}→{hi_p} ({sex},{age})"
+    assert hi_out["risk_index"] > lo_out["risk_index"], f"risk_index did not increase ({sex},{age})"
+    if age >= 60:
+        assert hi_out["risk_index"] - lo_out["risk_index"] >= BMI_EFFECT_MIN_ABS_AT_60, \
+            f"BMI 22→30 effect too small at 60: {lo_out['risk_index']}→{hi_out['risk_index']} ({sex},{age})"
 
 
 # ── 3. 결정성: 같은 입력은 같은 출력, 병렬에서도 ─────────────────────────────
@@ -175,6 +188,10 @@ def test_output_contract():
     assert out["risk_level"] in {name for name, _ in RISK_LEVELS}
     assert 1 <= len(out["reason_codes"]) <= 3
     assert out["disclaimer_key"] == "risk_not_diagnosis"
+    # 문헌 근거 필드: 코드·숫자·출처 키만, 문장 없음
+    assert isinstance(out["lifestyle_evidence"], list)
+    for e in out["lifestyle_evidence"]:
+        assert set(e) == {"code", "direction", "modifiable", "severity", "expected_sbp_reduction_mmhg", "evidence_level", "sources"}
     banned = ("진단", "발병 확률", "고혈압입니다")
     assert not any(w in json.dumps(out, ensure_ascii=False) for w in banned)
 

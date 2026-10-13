@@ -1,0 +1,410 @@
+{
+  "htn_risk_full": {
+    "model_id": "htn_risk_full",
+    "model_version": "2026.10.12-b0",
+    "imputers": {
+      "source": "knhanes_time_train"
+    },
+    "columns": [
+      "age",
+      "sex_female",
+      "bmi",
+      "waist_cm",
+      "smoking_former",
+      "smoking_current",
+      "alcohol_units_week",
+      "activity_minutes_week",
+      "activity_low_flag",
+      "sleep_avg_h",
+      "sodium_risk_score",
+      "stress_score",
+      "family_htn",
+      "diabetes_flag",
+      "missing_count"
+    ],
+    "reference": {
+      "age": 51.376534549280954,
+      "sex_female": 0.5647141353910908,
+      "bmi": 23.880373594369953,
+      "waist_cm": 82.27089241870219,
+      "smoking_former": 0.20932504885503833,
+      "smoking_current": 0.18231698151024703,
+      "alcohol_units_week": 5.166645454050908,
+      "activity_minutes_week": 366.8511299293481,
+      "activity_low_flag": 0.4085533897880443,
+      "sleep_avg_h": 6.976995779019978,
+      "sodium_risk_score": 1.0489051460640377,
+      "stress_score": 2.1304805331462644,
+      "family_htn": 0.3916420303652854,
+      "diabetes_flag": 0.14182993435887156,
+      "missing_count": 0.30387833842761935
+    },
+    "feature_version": "v1",
+    "thresholds_version": "kr_v1",
+    "metadata": {
+      "algorithm": "B0 sign-constrained L2 logistic regression (StandardScaler, age linear+square)",
+      "sign_constraints": {
+        "age": 1,
+        "sex_female": 0,
+        "bmi": 1,
+        "waist_cm": 1,
+        "smoking_former": 0,
+        "smoking_current": 1,
+        "alcohol_units_week": 1,
+        "activity_minutes_week": -1,
+        "activity_low_flag": 1,
+        "sleep_avg_h": 0,
+        "sodium_risk_score": 1,
+        "stress_score": 0,
+        "family_htn": 0,
+        "diabetes_flag": 0,
+        "missing_count": 0
+      },
+      "split": "time",
+      "train_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019
+      ],
+      "val_years": [
+        2020
+      ],
+      "test_years": [
+        2021,
+        2022
+      ],
+      "n_train": 39914,
+      "n_val": 5704,
+      "n_test": 10576,
+      "seed": 42,
+      "C": 1.0,
+      "calibration": {
+        "kind": "platt",
+        "a": 0.9914,
+        "b": -0.1496
+      },
+      "metrics": {
+        "train_raw": {
+          "n": 39914,
+          "prevalence": 0.321,
+          "pred_mean": 0.321,
+          "auroc": 0.8406,
+          "auprc": 0.6911,
+          "brier": 0.1496,
+          "logloss": 0.4528,
+          "ece10": 0.0113,
+          "cal_slope": 1.0003,
+          "cal_intercept": 0.0001,
+          "citl": -0.0,
+          "prevalence_w": 0.2686,
+          "pred_mean_w": 0.2677,
+          "auroc_w": 0.8446,
+          "brier_w": 0.1365
+        },
+        "val_raw": {
+          "n": 5704,
+          "prevalence": 0.3324,
+          "pred_mean": 0.355,
+          "auroc": 0.837,
+          "auprc": 0.6861,
+          "brier": 0.1541,
+          "logloss": 0.4625,
+          "ece10": 0.0246,
+          "cal_slope": 0.9914,
+          "cal_intercept": -0.1496,
+          "citl": -0.1475,
+          "prevalence_w": 0.286,
+          "pred_mean_w": 0.3031,
+          "auroc_w": 0.8452,
+          "brier_w": 0.1417
+        },
+        "test_raw": {
+          "n": 10576,
+          "prevalence": 0.3426,
+          "pred_mean": 0.366,
+          "auroc": 0.8439,
+          "auprc": 0.7152,
+          "brier": 0.152,
+          "logloss": 0.4589,
+          "ece10": 0.0235,
+          "cal_slope": 1.0408,
+          "cal_intercept": -0.1428,
+          "citl": -0.1513,
+          "prevalence_w": 0.2856,
+          "pred_mean_w": 0.3066,
+          "auroc_w": 0.8505,
+          "brier_w": 0.1388
+        },
+        "val_cal": {
+          "n": 5704,
+          "prevalence": 0.3324,
+          "pred_mean": 0.3324,
+          "auroc": 0.837,
+          "auprc": 0.6861,
+          "brier": 0.1537,
+          "logloss": 0.4609,
+          "ece10": 0.0155,
+          "cal_slope": 1.0,
+          "cal_intercept": -0.0,
+          "citl": -0.0,
+          "prevalence_w": 0.286,
+          "pred_mean_w": 0.2824,
+          "auroc_w": 0.8452,
+          "brier_w": 0.1415
+        },
+        "test_cal": {
+          "n": 10576,
+          "prevalence": 0.3426,
+          "pred_mean": 0.3431,
+          "auroc": 0.8439,
+          "auprc": 0.7152,
+          "brier": 0.1516,
+          "logloss": 0.4572,
+          "ece10": 0.0114,
+          "cal_slope": 1.0497,
+          "cal_intercept": 0.0142,
+          "citl": -0.0036,
+          "prevalence_w": 0.2856,
+          "pred_mean_w": 0.2858,
+          "auroc_w": 0.8505,
+          "brier_w": 0.1385
+        }
+      },
+      "metrics_test_devadj_label": {
+        "n": 10576,
+        "prevalence": 0.3719,
+        "pred_mean": 0.3431,
+        "auroc": 0.8368,
+        "auprc": 0.7346,
+        "brier": 0.1593,
+        "logloss": 0.4794,
+        "ece10": 0.0288,
+        "cal_slope": 0.9982,
+        "cal_intercept": 0.1833,
+        "citl": 0.1841,
+        "prevalence_w": 0.3154,
+        "pred_mean_w": 0.2858,
+        "auroc_w": 0.84,
+        "brier_w": 0.1491
+      },
+      "gates": {
+        "auroc>=0.80": true,
+        "slope 0.9~1.1": true
+      },
+      "sex_ece_gap": 0.0016,
+      "sklearn": "1.9.0",
+      "trained_on": "2026-10-12",
+      "label": "label_htn = HE_sbp>=140 or HE_dbp>=90 or DI1_2 in (1,2,3,4)",
+      "sanity_probe": {
+        "monotonic_violations": [],
+        "bmi_22_to_30_delta": {
+          "male/25": 3,
+          "male/40": 7,
+          "male/60": 22,
+          "female/25": 2,
+          "female/40": 6,
+          "female/60": 19
+        }
+      }
+    }
+  },
+  "htn_risk_lite": {
+    "model_id": "htn_risk_lite",
+    "model_version": "2026.10.12-b0",
+    "imputers": {
+      "source": "knhanes_time_train"
+    },
+    "columns": [
+      "age",
+      "sex_female",
+      "bmi",
+      "waist_cm",
+      "smoking_former",
+      "smoking_current"
+    ],
+    "reference": {
+      "age": 51.376534549280954,
+      "sex_female": 0.5647141353910908,
+      "bmi": 23.880373594369953,
+      "waist_cm": 82.27089241870219,
+      "smoking_former": 0.20932504885503833,
+      "smoking_current": 0.18231698151024703
+    },
+    "feature_version": "v1",
+    "thresholds_version": "kr_v1",
+    "metadata": {
+      "algorithm": "B0 sign-constrained L2 logistic regression (StandardScaler, age linear+square)",
+      "sign_constraints": {
+        "age": 1,
+        "sex_female": 0,
+        "bmi": 1,
+        "waist_cm": 1,
+        "smoking_former": 0,
+        "smoking_current": 1,
+        "alcohol_units_week": 1,
+        "activity_minutes_week": -1,
+        "activity_low_flag": 1,
+        "sleep_avg_h": 0,
+        "sodium_risk_score": 1,
+        "stress_score": 0,
+        "family_htn": 0,
+        "diabetes_flag": 0,
+        "missing_count": 0
+      },
+      "split": "time",
+      "train_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019
+      ],
+      "val_years": [
+        2020
+      ],
+      "test_years": [
+        2021,
+        2022
+      ],
+      "n_train": 39914,
+      "n_val": 5704,
+      "n_test": 10576,
+      "seed": 42,
+      "C": 1.0,
+      "calibration": {
+        "kind": "platt",
+        "a": 0.9852,
+        "b": -0.1114
+      },
+      "metrics": {
+        "train_raw": {
+          "n": 39914,
+          "prevalence": 0.321,
+          "pred_mean": 0.321,
+          "auroc": 0.8225,
+          "auprc": 0.6526,
+          "brier": 0.1577,
+          "logloss": 0.4729,
+          "ece10": 0.0143,
+          "cal_slope": 1.0005,
+          "cal_intercept": 0.0002,
+          "citl": -0.0,
+          "prevalence_w": 0.2686,
+          "pred_mean_w": 0.2671,
+          "auroc_w": 0.8281,
+          "brier_w": 0.1436
+        },
+        "val_raw": {
+          "n": 5704,
+          "prevalence": 0.3324,
+          "pred_mean": 0.3496,
+          "auroc": 0.8173,
+          "auprc": 0.6423,
+          "brier": 0.1626,
+          "logloss": 0.4837,
+          "ece10": 0.0219,
+          "cal_slope": 0.9852,
+          "cal_intercept": -0.1114,
+          "citl": -0.1069,
+          "prevalence_w": 0.286,
+          "pred_mean_w": 0.297,
+          "auroc_w": 0.8264,
+          "brier_w": 0.1498
+        },
+        "test_raw": {
+          "n": 10576,
+          "prevalence": 0.3426,
+          "pred_mean": 0.3605,
+          "auroc": 0.8239,
+          "auprc": 0.6775,
+          "brier": 0.1608,
+          "logloss": 0.4811,
+          "ece10": 0.0187,
+          "cal_slope": 1.0345,
+          "cal_intercept": -0.1009,
+          "citl": -0.1101,
+          "prevalence_w": 0.2856,
+          "pred_mean_w": 0.3017,
+          "auroc_w": 0.829,
+          "brier_w": 0.1475
+        },
+        "val_cal": {
+          "n": 5704,
+          "prevalence": 0.3324,
+          "pred_mean": 0.3324,
+          "auroc": 0.8173,
+          "auprc": 0.6423,
+          "brier": 0.1624,
+          "logloss": 0.4827,
+          "ece10": 0.0221,
+          "cal_slope": 1.0002,
+          "cal_intercept": 0.0,
+          "citl": -0.0,
+          "prevalence_w": 0.286,
+          "pred_mean_w": 0.2815,
+          "auroc_w": 0.8264,
+          "brier_w": 0.1499
+        },
+        "test_cal": {
+          "n": 10576,
+          "prevalence": 0.3426,
+          "pred_mean": 0.343,
+          "auroc": 0.8239,
+          "auprc": 0.6775,
+          "brier": 0.1606,
+          "logloss": 0.4802,
+          "ece10": 0.0134,
+          "cal_slope": 1.05,
+          "cal_intercept": 0.0158,
+          "citl": -0.0027,
+          "prevalence_w": 0.2856,
+          "pred_mean_w": 0.2861,
+          "auroc_w": 0.829,
+          "brier_w": 0.1473
+        }
+      },
+      "metrics_test_devadj_label": {
+        "n": 10576,
+        "prevalence": 0.3719,
+        "pred_mean": 0.343,
+        "auroc": 0.8179,
+        "auprc": 0.7012,
+        "brier": 0.1679,
+        "logloss": 0.5016,
+        "ece10": 0.0289,
+        "cal_slope": 1.0,
+        "cal_intercept": 0.1749,
+        "citl": 0.1749,
+        "prevalence_w": 0.3154,
+        "pred_mean_w": 0.2861,
+        "auroc_w": 0.8193,
+        "brier_w": 0.1577
+      },
+      "gates": {
+        "auroc>=0.80": true,
+        "slope 0.9~1.1": true
+      },
+      "sex_ece_gap": 0.0004,
+      "sklearn": "1.9.0",
+      "trained_on": "2026-10-12",
+      "label": "label_htn = HE_sbp>=140 or HE_dbp>=90 or DI1_2 in (1,2,3,4)",
+      "sanity_probe": {
+        "monotonic_violations": [],
+        "bmi_22_to_30_delta": {
+          "male/25": 3,
+          "male/40": 7,
+          "male/60": 22,
+          "female/25": 2,
+          "female/40": 6,
+          "female/60": 19
+        }
+      }
+    }
+  }
+}

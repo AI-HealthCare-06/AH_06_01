@@ -16,7 +16,6 @@ from inference.bundle import ModelBundle
 from inference.predictor import RiskPredictor
 
 ARTIFACT_DIR = Path(os.environ.get("HTN_RISK_ARTIFACT_DIR", Path(__file__).resolve().parents[1] / "artifacts"))
-ARTIFACT_FILES = {MODEL_FULL: ARTIFACT_DIR / f"{MODEL_FULL}.joblib", MODEL_LITE: ARTIFACT_DIR / f"{MODEL_LITE}.joblib"}
 
 
 def load_predictor(artifact_dir: Path = ARTIFACT_DIR) -> RiskPredictor:

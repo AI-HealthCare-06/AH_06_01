@@ -13,6 +13,9 @@
 - 범위 밖 값은 클리핑하지 않고 `data_quality = out_of_range` 로 거부한다.
 - 출력·로그에 "진단", "발병 확률", "고혈압입니다" 를 쓰지 않는다. reason_codes 는 고정 어휘만.
 - KNHANES·공단 원시자료는 커밋하지 않는다 (`data/raw/`, `data/processed/` 는 gitignore).
+- **생활습관 요인의 방향·효과 크기 기준은 문헌 근거표** `knowledge/lifestyle_evidence_v1.yaml` (팀 문헌표 17편) 이다.
+  KNHANES 단면 계수는 역인과로 방향이 뒤집히므로 근거로 쓰지 않는다. 모델 부호 제약은 근거표와 일치해야 한다(`tests/test_evidence.py`).
+  해석: `reports/lifestyle_evidence_vs_knhanes.md`.
 
 ## 구조
 
@@ -24,7 +27,16 @@ ai/
 │  ├─ schema_map.csv          KNHANES 연도별 변수명 → contract 피처 매핑  [10/13]
 │  ├─ raw/                    원시자료 (gitignore)
 │  └─ processed/              parquet 중간 산출물 (gitignore)
-├─ features/contract_v1.py    14개 피처 변환 함수, 학습·추론 공용        [10/13]
+├─ features/
+│  ├─ contract_v1.py          14개 피처 변환 함수, 학습·추론 공용, 단조 제약 표
+│  ├─ knhanes_v1.py           KNHANES 원시 → 계약 입력 (연도별 변수 차이 흡수)
+│  └─ sk_transforms.py        age 제곱항 전처리, 부호 제약 로지스틱 (B0)
+├─ knowledge/
+│  ├─ lifestyle_evidence_papers.csv   팀 문헌표 17편 (원본)
+│  ├─ lifestyle_evidence_v1.yaml      요인별 방향·SBP 효과·발생 위험·권고·출처 (기준)
+│  └─ evidence.py             로더, EVIDENCE_DIRECTION, 사용자별 lifestyle_evidence()
+├─ build_dataset.py           parquet + schema_map.csv + 데이터 감사 리포트
+├─ evaluation.py              AUROC·AUPRC·Brier·ECE·보정 기울기·하위군 6셀·보정 곡선 PNG
 ├─ labels.py                  T1/T2/T3 라벨 규칙                        [10/13]
 ├─ train_baseline.py          B0 로지스틱, 시간 분할, AUROC·보정          [10/13]
 ├─ train_boost.py             B1 단조 제약 LightGBM                     [10/20]

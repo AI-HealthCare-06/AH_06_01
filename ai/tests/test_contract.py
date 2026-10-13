@@ -167,6 +167,18 @@ def test_bp_keys_ignored_and_reported():
     assert not any(k in C.NUMERIC_COLUMNS_FULL for k in C.NEVER_FEATURES)
 
 
+def test_pandas_na_and_numpy_nan_are_missing():
+    import numpy as np
+    p = person()
+    p["sleep_avg_h"] = pd.NA            # nullable dtype 프레임에서 오는 결측
+    p["stress_score"] = np.float32("nan")
+    p["family_htn"] = pd.NaT
+    r = C.build_features(p, IMP)
+    # 셋 다 결측으로 인식되면(거부 아님) 결측 3개 → lite fallback 이 맞다
+    assert r.accepted and r.data_quality == "partial", r
+    assert sorted(r.missing_features) == ["family_htn", "sleep_avg_h", "stress_score"]
+
+
 def test_input_dict_not_mutated():
     p = person(sbp=170)
     C.build_features(p, IMP)

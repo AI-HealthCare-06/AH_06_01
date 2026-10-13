@@ -83,6 +83,18 @@ def test_reason_codes_follow_inputs(predictor):
     assert cs == sorted(cs, reverse=True)
 
 
+def test_lifestyle_evidence_field(predictor):
+    out = predictor.predict(person(sodium_risk_score=2, activity_minutes_week=30, activity_low_flag=True))
+    codes = [e["code"] for e in out["lifestyle_evidence"]]
+    assert codes[:2] == ["activity_low", "sodium_high"] and out["evidence_version"] == "v1"
+    # 결측(대치)된 피처로는 근거를 내지 않는다
+    p = person(sodium_risk_score=2)
+    p.pop("activity_minutes_week"); p.pop("activity_low_flag")
+    out = predictor.predict(p)
+    assert "activity_low" not in [e["code"] for e in out["lifestyle_evidence"]]
+    assert predictor.predict({**person(), "age": 16})["lifestyle_evidence"] == []
+
+
 def test_sleep_long_code(predictor):
     out = predictor.predict(person(sleep_avg_h=11.0))
     codes = {r["code"] for r in out["reason_codes"]}

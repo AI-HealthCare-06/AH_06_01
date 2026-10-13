@@ -25,6 +25,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import yaml
 
 import thresholds_kr_v1 as T
@@ -187,9 +188,13 @@ class ContractResult:
 
 
 def _is_missing(v: Any) -> bool:
+    """None / NaN(파이썬·numpy float) / pandas NA·NaT / 빈 문자열을 결측으로 본다.
+    pandas 를 import 하지 않으려고 NA 는 타입 이름으로 판별한다 (추론 프로세스 메모리 예산)."""
     if v is None:
         return True
-    if isinstance(v, float) and math.isnan(v):
+    if isinstance(v, (float, np.floating)) and math.isnan(float(v)):
+        return True
+    if type(v).__name__ in ("NAType", "NaTType"):
         return True
     if isinstance(v, str) and v.strip() == "":
         return True
@@ -346,9 +351,13 @@ NUMERIC_COLUMNS_FULL: tuple[str, ...] = NUMERIC_COLUMNS_LITE + (
 ORIGIN_OF_COLUMN: dict[str, str] = {
     "sex_female": "sex", "smoking_former": "smoking_status", "smoking_current": "smoking_status",
 }
-# 단조 제약 (B1 LightGBM): +1 위험↑, -1 위험↓, 0 제약 없음. 인수인계 5장 B1 요구사항.
+# 단조 제약 (B0 부호 경계 · B1 LightGBM monotone_constraints): +1 위험↑, -1 위험↓, 0 제약 없음.
+# 인수인계 5장: bmi↑ waist↑ age↑ alcohol↑ sodium↑ → 위험↑, activity↑ → 위험↓.
+# 방향의 기준은 문헌 근거표 knowledge/lifestyle_evidence_v1.yaml 이며, 이 표와 일치해야 한다 (tests/test_evidence.py).
+# KNHANES 단면 자료는 역인과(진단 후 소금↓·운동↑)로 sodium/activity 계수 부호가 뒤집히므로 데이터 부호를 따르지 않는다.
+# smoking_current 는 문헌상 혈압 지속 효과는 약하나 심혈관 위험 기준으로 up — ≥0 제약 (AI팀 결정, 2026-10-12).
 MONOTONE_CONSTRAINTS: dict[str, int] = {
-    "age": 1, "sex_female": 0, "bmi": 1, "waist_cm": 1, "smoking_former": 0, "smoking_current": 0,
+    "age": 1, "sex_female": 0, "bmi": 1, "waist_cm": 1, "smoking_former": 0, "smoking_current": 1,
     "alcohol_units_week": 1, "activity_minutes_week": -1, "activity_low_flag": 1, "sleep_avg_h": 0,
     "sodium_risk_score": 1, "stress_score": 0, "family_htn": 0, "diabetes_flag": 0, "missing_count": 0,
 }

@@ -1,0 +1,197 @@
+# lifestyle_evidence_v1.yaml — 생활습관 요인의 방향·효과 크기 근거표 (기준 = 문헌, KNHANES 아님)
+#
+# 출처: 팀 문헌표 「고혈압 관리를 위한 생활습관 개선과 심혈관 질환 예방」(17편, knowledge/lifestyle_evidence_papers.csv).
+# 숫자는 전부 그 표에 적힌 값만 옮겼다. 표에 없는 수치는 null 로 두고 지어내지 않는다.
+#
+# 역할 분담 (AI팀 결정 2026-10-12, 멘토링 10/15 확인 항목)
+#   - 위험도(risk_index)      : KNHANES 로 학습한 모델이 낸다.
+#   - 요인의 방향(up/down)     : 이 표가 기준. 모델 부호 제약(contract_v1.MONOTONE_CONSTRAINTS)은 이 표와 일치해야 한다 (tests/test_evidence.py).
+#   - "이렇게 하면 내려가요"   : 이 표의 SBP 감소 효과·권고를 쓴다. KNHANES 단면 계수는 역인과로 방향이 뒤집히므로 근거로 쓰지 않는다.
+#   - 퀘스트 우선순위         : Quest Ranker(다음 문서)가 이 표 + 모델 이유 코드로 정한다.
+# 바꾸면 evidence_version 을 올린다. 출력에는 코드·숫자·출처 키만 나가고 문장은 개발팀 i18n 템플릿이 만든다.
+
+evidence_version: v1
+source_table: knowledge/lifestyle_evidence_papers.csv
+evidence_levels: [meta_analysis, rct, long_term_rct_followup, guideline, narrative_review]
+
+papers:
+  appel2003_premier:     {title: "PREMIER trial — comprehensive lifestyle modification", journal: JAMA, year: 2003, type: rct, n: 810, url: "https://doi.org/10.1001/jama.289.16.2083"}
+  juraschek2017_dash_na: {title: "Sodium reduction and DASH by baseline BP (DASH-Sodium)", journal: JACC, year: 2017, type: rct, n: 412, url: "https://doi.org/10.1016/j.jacc.2017.10.011"}
+  blumenthal2021_triumph: {title: "TRIUMPH — lifestyle in resistant hypertension", journal: Circulation, year: 2021, type: rct, n: 140, url: "https://www.ahajournals.org/doi/10.1161/CIRCULATIONAHA.121.055329"}
+  miller2002_dewit:      {title: "DEW-IT — diet, exercise, weight loss", journal: Hypertension, year: 2002, type: rct, n: 44, url: "https://www.ahajournals.org/doi/10.1161/01.HYP.0000037217.96002.8E"}
+  dickinson2006_meta:    {title: "Lifestyle interventions to reduce raised BP — systematic review", journal: "J Hypertens", year: 2006, type: meta_analysis, n: 6805, trials: 105, url: "https://journals.lww.com/00004872-200602000-00002"}
+  gay2016_diet_meta:     {title: "Dietary interventions on BP — meta-analysis", journal: Hypertension, year: 2016, type: meta_analysis, n: 23858, trials: 24, url: "https://www.ahajournals.org/doi/10.1161/HYPERTENSIONAHA.115.06853"}
+  whelton2024_target:    {title: "Optimal antihypertensive SBP — meta-analysis", journal: Hypertension, year: 2024, type: meta_analysis, n: 72138, trials: 7, url: "https://doi.org/10.1161/HYPERTENSIONAHA.124.23597"}
+  frisoli2011_review:    {title: "Beyond salt: lifestyle modifications and BP", journal: "Eur Heart J", year: 2011, type: narrative_review, url: "https://academic.oup.com/eurheartj/article-lookup/doi/10.1093/eurheartj/ehr379"}
+  he2000_tohp:           {title: "TOHP I 7-year follow-up — weight loss, sodium and HTN incidence", journal: Hypertension, year: 2000, type: long_term_rct_followup, n: 181, url: "https://www.ahajournals.org/doi/10.1161/01.HYP.35.2.544"}
+  ish2023_position:      {title: "ISH lifestyle management of hypertension — position paper", journal: "J Hypertens", year: 2023, type: guideline, url: "https://journals.lww.com/10.1097/HJH.0000000000003563"}
+  turnbull2003_bplttc:   {title: "BP-lowering regimens and major CV events — prospective overviews", journal: Lancet, year: 2003, type: meta_analysis, n: 162341, trials: 29, url: "https://linkinghub.elsevier.com/retrieve/pii/S0140673603147393"}
+  wang2022_chinese_diet: {title: "Cuisine-based Chinese heart-healthy diet", journal: Circulation, year: 2022, type: rct, n: 265, url: "https://doi.org/10.1161/CIRCULATIONAHA.122.059045"}
+  treciokiene2021_meta:  {title: "Healthcare professional-led lifestyle interventions — meta-analysis", journal: "BMC Fam Pract", year: 2021, type: meta_analysis, n: 22419, trials: 34, url: "https://bmcfampract.biomedcentral.com/articles/10.1186/s12875-021-01421-z"}
+  tucker2017_smbp:       {title: "Self-monitoring of BP — IPD meta-analysis", journal: "PLoS Med", year: 2017, type: meta_analysis, n: 8292, trials: 25, url: "https://doi.org/10.1371/journal.pmed.1002389"}
+  whelton1998_tone:      {title: "TONE — sodium reduction and weight loss in older persons", journal: JAMA, year: 1998, type: rct, n: 975, url: "http://jama.jamanetwork.com/article.aspx?doi=10.1001/jama.279.11.839"}
+  blumenthal2000_exercise: {title: "Exercise and weight loss in mild hypertension", journal: "Arch Intern Med", year: 2000, type: rct, n: 133, url: "http://archinte.jamanetwork.com/article.aspx?doi=10.1001/archinte.160.13.1947"}
+  lee2018_korean_rct:    {title: "Diet alone or with exercise in Korean prehypertension/hypertension", journal: "Korean Circ J", year: 2018, type: rct, n: 85, korean: true, url: "https://e-kcj.org/DOIx.php?id=10.4070/kcj.2017.0349"}
+
+# ── 요인별 근거 ───────────────────────────────────────────────────────────────
+# direction: 피처 값이 커질 때 혈압·고혈압 위험이 가는 방향 (up = 위험 ↑). 모델 부호 제약의 기준.
+# intervention_band: 앱에서 '개입 대상'으로 보는 구간 (계약 피처 기준). 출처는 band_source.
+# sbp_reduction_mmhg: 중재 시 수축기혈압 감소 (음수). 표에 적힌 값만.
+factors:
+  - code: sodium_high
+    contract_feature: sodium_risk_score
+    direction: up
+    modifiable: true
+    intervention_band: "sodium_risk_score >= 1"        # ≥2,000 mg/일 — ISH 권고(<2 g/일)를 넘는 구간
+    band_source: ish2023_position
+    sbp_reduction_mmhg:
+      point: -3.6
+      point_source: dickinson2006_meta                 # 나트륨 제한 단독, 105 RCT
+      by_baseline_sbp:                                 # 저나트륨 + DASH 병합 (juraschek2017_dash_na)
+        "<130": -5.3
+        "130-139": -7.5
+        "140-149": -9.7
+        ">=150": -20.8
+      by_baseline_source: juraschek2017_dash_na
+    htn_incidence:
+      - {measure: OR, value: 0.65, note: "7년 추적, p=0.37 (유의하지 않음)", source: he2000_tohp}
+      - {measure: HR, value: 0.69, note: "노인, 혈압 악화/약물 재시작", source: whelton1998_tone}
+    guideline: {text_key: sodium_under_2g_per_day, source: ish2023_position}
+    evidence_level: meta_analysis
+
+  - code: activity_low
+    contract_feature: activity_minutes_week
+    direction: down                                     # 활동이 많을수록 위험 ↓
+    modifiable: true
+    intervention_band: "activity_minutes_week < 150"   # contract activity_low_flag 와 동일
+    band_source: feature_contract_v1
+    sbp_reduction_mmhg:
+      point: -4.6
+      point_source: dickinson2006_meta                 # 유산소 운동 단독
+      combined_with_weight: {sbp: -7, dbp: -5, alone: {sbp: -4, dbp: -4}, source: blumenthal2000_exercise}
+      korean_diet_plus_exercise: {sbp: -5.2, source: lee2018_korean_rct}
+    dose_response: {note: "용량 의존, plateau 존재", source: frisoli2011_review}
+    guideline: {text_key: varied_physical_activity, source: ish2023_position}
+    evidence_level: meta_analysis
+
+  - code: bmi_high
+    contract_feature: bmi
+    direction: up
+    modifiable: true
+    intervention_band: "bmi >= 25"                     # 대한비만학회 성인 비만 기준 (데이터 사전 P04·BMI 밴드)
+    band_source: feature_contract_v1
+    sbp_reduction_mmhg:
+      point: null                                      # 체중 단독 수치는 표에 없음. 병합 중재 값만
+      combined: [{sbp: -7, dbp: -5, note: "체중관리군", source: blumenthal2000_exercise},
+                 {sbp_24h: -9.5, sbp_day: -12.1, weight_kg: -4.9, note: "DASH+저칼로리+운동 9주", source: miller2002_dewit}]
+    htn_incidence:
+      - {measure: OR, value: 0.23, note: "체중 감량군, 7년 추적, p=0.02", source: he2000_tohp}
+      - {measure: HR, value: 0.70, note: "노인, 혈압 악화/약물 재시작", source: whelton1998_tone}
+      - {measure: HR, value: 0.47, note: "나트륨 감소 + 체중 감량 병합", source: whelton1998_tone}
+    relationship: {note: "체중-혈압 선형 관계", source: frisoli2011_review}
+    guideline: {text_key: healthy_weight, source: ish2023_position}
+    evidence_level: long_term_rct_followup
+
+  - code: waist_high
+    contract_feature: waist_cm
+    direction: up
+    modifiable: true
+    intervention_band: "waist_cm >= 90 (male) / >= 85 (female)"   # 데이터 사전 P05 복부비만
+    band_source: data_dictionary_v0.1
+    sbp_reduction_mmhg: {point: null, note: "허리둘레 단독 수치는 표에 없음 → bmi_high 와 같은 체중 근거를 공유"}
+    shares_evidence_with: bmi_high
+    evidence_level: long_term_rct_followup
+
+  - code: alcohol_high
+    contract_feature: alcohol_units_week
+    direction: up
+    modifiable: true
+    intervention_band: "alcohol_units_week > 14 (male) / > 8 (female)"   # 데이터 사전 L02 상한
+    band_source: data_dictionary_v0.1
+    sbp_reduction_mmhg: {point: -3.8, point_source: dickinson2006_meta}
+    caution: {note: "하루 1-2잔은 CHD 보호 효과가 있으나 폭음 시 상실", source: frisoli2011_review}
+    guideline: {text_key: limit_alcohol, source: ish2023_position}
+    evidence_level: meta_analysis
+
+  - code: smoking_current
+    contract_feature: smoking_status
+    direction: up                                      # 심혈관 위험 기준. 혈압 단독 효과는 아래 참고
+    modifiable: true
+    intervention_band: "smoking_status == current"
+    band_source: ish2023_position
+    sbp_reduction_mmhg: {point: null, note: "표에 금연의 혈압 감소 수치 없음"}
+    bp_mechanism: {note: "니코틴은 지속적 혈압 상승을 일으키지 않음(급성 상승만)", source: frisoli2011_review}
+    guideline: {text_key: smoking_cessation, source: ish2023_position}
+    evidence_level: guideline
+    interpretation: >
+      문헌 기준으로도 흡연→혈압의 지속 효과는 약하다. KNHANES 단면 계수가 0 에 가까운 것은 문헌과 모순이 아니다.
+      금연 퀘스트의 근거는 혈압이 아니라 심혈관질환 예방(ISH 1차 권고)이며, 위험지수 설명 카드보다 퀘스트 쪽에서 다룬다.
+
+  - code: sodium_diet_pattern            # 계약 피처는 없지만 퀘스트(DASH·한식 저염)의 근거로 필요
+    contract_feature: null
+    direction: down
+    modifiable: true
+    intervention_band: null
+    sbp_reduction_mmhg:
+      dash: {sbp: -7.62, dbp: -4.22, source: gay2016_diet_meta}
+      diet_generic: {sbp: -5.0, source: dickinson2006_meta}
+      premier_combined: {sbp: -4.3, htn_prevalence: "38% → 12%", optimal_bp_prevalence: "19% → 35%", source: appel2003_premier}
+      cuisine_adapted: {sbp: -10.0, dbp: -3.8, note: "중국 4대 요리권역 모두 유효, 기호도 9.5/10", source: wang2022_chinese_diet}
+      korean_home_based: {sbp: -5.2, note: "DASH+운동, 식이 단독보다 효과적", source: lee2018_korean_rct}
+    evidence_level: meta_analysis
+
+  - code: stress_high
+    contract_feature: stress_score
+    direction: up
+    modifiable: true
+    intervention_band: "stress_score >= 3"
+    band_source: feature_contract_v1
+    sbp_reduction_mmhg: {point: null, note: "이완요법은 비중재 대조군 비교에서만 유의 (dickinson2006_meta)"}
+    guideline: {text_key: stress_management, source: ish2023_position}
+    evidence_level: guideline
+    interpretation: >
+      근거 수준이 낮다(지침 권고 + 제한적 RCT). 모델 계수 0 은 문헌과 모순이 아니며, 퀘스트에서는 보조 요인으로만 다룬다.
+
+  - code: sleep_short
+    contract_feature: sleep_avg_h
+    direction: down                                    # 수면이 길수록(6h 이상) 위험 ↓ — 단, U자 관계라 sleep_long 과 짝
+    modifiable: true
+    intervention_band: "sleep_avg_h < 6"
+    band_source: feature_contract_v1
+    sbp_reduction_mmhg: {point: null, note: "표에 수면 중재의 혈압 수치 없음"}
+    guideline: {text_key: sleep_management, source: ish2023_position, note: "수면 무호흡 개선 언급"}
+    evidence_level: guideline
+
+  - code: sleep_long
+    contract_feature: sleep_avg_h
+    direction: up
+    modifiable: false
+    intervention_band: "sleep_avg_h > 8"
+    band_source: feature_contract_v1
+    sbp_reduction_mmhg: {point: null}
+    guideline: {text_key: sleep_management, source: ish2023_position, note: "수면 관리 권고. 긴 수면 자체의 혈압 수치 근거는 표에 없음"}
+    evidence_level: guideline
+    interpretation: "긴 수면은 개입 대상이 아니라 표시만 한다 (U자 관계 가능성, 계약 note)."
+
+# ── 앱 설계 근거 (요인은 아니지만 퀘스트·코칭 구조의 근거) ──────────────────────
+program_evidence:
+  self_monitoring:
+    monitoring_alone_sbp: -1.0
+    with_support_sbp: -6.1
+    overall_12m_sbp: -3.2
+    source: tucker2017_smbp
+    implication: "혈압 측정만 시키는 앱은 효과가 거의 없고, 퀘스트·교육·상담 동반이 필수"
+  professional_led:
+    sbp: -4.41
+    sbp_ci95: [-5.52, -3.30]
+    dbp: -1.66
+    control_rate_or: 1.87
+    source: treciokiene2021_meta
+  combined_programs:
+    - {sbp: -4.3, note: "PREMIER 기존권고+DASH 6개월", source: appel2003_premier}
+    - {sbp_office: -12.5, sbp_24h: -7.0, note: "TRIUMPH 난치성 고혈압 4개월 식이+운동", source: blumenthal2021_triumph}
+    - {note: "다중 병용 시 최대 효과", source: frisoli2011_review}
+  why_lower_bp_matters:
+    - {target: "SBP <130", cvd_hr: 0.78, mortality_hr: 0.89, source: whelton2024_target}
+    - {target: "SBP <120", cvd_hr: 0.82, source: whelton2024_target}
+    - {cvd_reduction: "18~22%", lower_target_extra: "15%", source: turnbull2003_bplttc}

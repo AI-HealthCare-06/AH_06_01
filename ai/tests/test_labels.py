@@ -29,6 +29,14 @@ def test_label_htn_matches_scalar_rule():
     assert list(y) == expected == [0, 1, 1, 1, 0, 0, 1, 0]
 
 
+def test_label_htn_propagates_missing():
+    # 혈압 또는 복약 여부가 결측이면 0(정상)이 아니라 NaN — 공단 데이터 외부 검증에서 유병률이 깎이지 않게
+    y = L.label_htn([150, np.nan, 120, 120], [95, 80, np.nan, 80], [0, 0, 0, np.nan])
+    assert y[0] == 1.0 and np.isnan(y[1]) and np.isnan(y[2]) and np.isnan(y[3])
+    # 약 복용 중이어도 혈압이 없으면 판정 불가 (공식 SAS: HE_SBP·HE_DBP 모두 있어야 함)
+    assert np.isnan(L.label_htn([np.nan], [np.nan], [1])[0])
+
+
 def test_label_prehtn_boundary():
     # 130/80 경계: SBP 139/DBP 80 → 전단계 이상, 128/79 → 아님
     assert list(L.label_prehtn_or_above([139, 128, 129], [80, 79, 85], [0, 0, 0])) == [1, 0, 1]
