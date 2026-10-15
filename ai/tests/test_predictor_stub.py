@@ -16,7 +16,7 @@ from sklearn.preprocessing import StandardScaler
 
 import thresholds_kr_v1 as T
 from features import contract_v1 as C
-from inference.bundle import ModelBundle
+from inference.bundle import ModelBundle, RegressionBundle
 from inference.predictor import RiskPredictor, DISCLAIMER_KEY
 
 IMP = C.Imputers.provisional()
@@ -140,6 +140,46 @@ def test_deterministic(predictor):
     with ThreadPoolExecutor(max_workers=4) as ex:
         par = set(ex.map(lambda _: json.dumps(predictor.predict(p), sort_keys=True), range(40)))
     assert len(seq) == 1 and seq == par
+
+
+def _synthetic_bp_bundle(seed: int = 1) -> RegressionBundle:
+    """예상 혈압 합성 회귀 (SBP ≈ 100 + 0.4·age + 1.5·bmi + 1.0·sodium − 0.01·activity …)."""
+    from inference.bundle import MODEL_EXPECTED_BP, RegressionBundle
+    from sklearn.linear_model import Ridge
+    rng = np.random.default_rng(seed)
+    cols = list(C.columns_for(C.MODEL_FULL))
+    n = 3000
+    X = np.column_stack([rng.uniform(19, 90, n), rng.integers(0, 2, n), rng.uniform(16, 40, n), rng.uniform(60, 120, n),
+                         rng.integers(0, 2, n), rng.integers(0, 2, n), rng.uniform(0, 40, n), rng.uniform(0, 600, n), rng.integers(0, 2, n),
+                         rng.uniform(4, 10, n), rng.integers(0, 3, n), rng.integers(1, 5, n), rng.integers(0, 2, n), rng.integers(0, 2, n), rng.integers(0, 4, n)])
+    w = {"age": 0.4, "sex_female": -3, "bmi": 1.5, "waist_cm": 0.1, "smoking_former": 0, "smoking_current": 0.5, "alcohol_units_week": 0.2,
+         "activity_minutes_week": -0.01, "activity_low_flag": 1.0, "sleep_avg_h": 0, "sodium_risk_score": 1.5, "stress_score": 0.3,
+         "family_htn": 2, "diabetes_flag": 3, "missing_count": 0}
+    base = 85 + sum(w[c] * X[:, i] for i, c in enumerate(cols))
+    est = {"sbp": Ridge(alpha=1.0).fit(X, base + rng.normal(0, 5, n)), "dbp": Ridge(alpha=1.0).fit(X, 0.6 * base + rng.normal(0, 4, n))}
+    return RegressionBundle(model_id=MODEL_EXPECTED_BP, model_version="0.0.0-stub", estimators=est, imputers=IMP, columns=tuple(cols))
+
+
+def test_expected_bp_whatif_and_comparison():
+    from inference.bundle import RegressionBundle  # noqa: F401
+    pred = RiskPredictor(_synthetic_bundle(C.MODEL_FULL), _synthetic_bundle(C.MODEL_LITE), bp=_synthetic_bp_bundle())
+    out = pred.predict(person(bmi=31.0, sodium_risk_score=2, activity_minutes_week=30, activity_low_flag=True, measured_sbp=150, measured_dbp=95))
+    assert isinstance(out["expected_sbp"], float) and isinstance(out["expected_dbp"], float)
+    assert out["bp_model_version"] == "0.0.0-stub"
+    assert out["bp_vs_expected"]["sbp_diff"] == round(150 - out["expected_sbp"], 1)
+    codes = {w["code"]: w for w in out["whatif"]}
+    assert {"bmi_high", "sodium_high", "activity_low"} <= set(codes)
+    assert codes["bmi_high"]["delta_sbp_model"] < 0 and codes["bmi_high"]["target"] == {"bmi": 25.0}
+    assert codes["sodium_high"]["delta_sbp_literature"] == -3.6 and codes["activity_low"]["delta_sbp_literature"] == -4.6
+    # measured 키는 M1 위험지수에 영향을 주지 않는다
+    assert out["risk_index"] == pred.predict(person(bmi=31.0, sodium_risk_score=2, activity_minutes_week=30, activity_low_flag=True))["risk_index"]
+    # M2 모델이 없으면 전부 null, partial(lite) 이어도 null
+    none_out = RiskPredictor(_synthetic_bundle(C.MODEL_FULL), _synthetic_bundle(C.MODEL_LITE)).predict(person())
+    assert none_out["expected_sbp"] is None and none_out["whatif"] == [] and none_out["bp_vs_expected"] is None
+    p = person()
+    for k in ("alcohol_units_week", "sodium_risk_score", "family_htn"):
+        p.pop(k)
+    assert pred.predict(p)["expected_sbp"] is None
 
 
 def test_bundle_roundtrip(tmp_path):

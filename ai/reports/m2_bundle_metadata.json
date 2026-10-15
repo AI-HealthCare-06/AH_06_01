@@ -1,0 +1,208 @@
+{
+  "model_id": "expected_bp",
+  "model_version": "2026.10.15-m2",
+  "columns": [
+    "age",
+    "sex_female",
+    "bmi",
+    "waist_cm",
+    "smoking_former",
+    "smoking_current",
+    "alcohol_units_week",
+    "activity_minutes_week",
+    "activity_low_flag",
+    "sleep_avg_h",
+    "sodium_risk_score",
+    "stress_score",
+    "family_htn",
+    "diabetes_flag",
+    "missing_count"
+  ],
+  "targets": [
+    "sbp",
+    "dbp"
+  ],
+  "feature_version": "v1",
+  "thresholds_version": "kr_v1",
+  "imputers": {
+    "source": "knhanes_time_train"
+  },
+  "metadata": {
+    "algorithm": {
+      "sbp": "linear",
+      "dbp": "linear"
+    },
+    "split": "time",
+    "alpha": 1.0,
+    "n_train": 30969,
+    "n_val": 4356,
+    "n_test": 7802,
+    "population": "on_medication == 0",
+    "metrics": {
+      "sbp": {
+        "test": {
+          "n": 7802,
+          "rmse": 13.5307,
+          "mae": 10.0643,
+          "r2": 0.2413,
+          "mean_residual": 0.2462,
+          "cal_slope": 0.9704,
+          "cal_intercept": 3.7057,
+          "y_mean": 117.0802,
+          "pred_mean": 116.8339,
+          "rmse_w": 12.8275
+        },
+        "val": {
+          "n": 4356,
+          "rmse": 13.2667,
+          "mae": 10.1807,
+          "r2": 0.2798,
+          "mean_residual": -0.2871,
+          "cal_slope": 1.0502,
+          "cal_intercept": -6.1536,
+          "y_mean": 116.5331,
+          "pred_mean": 116.8202
+        },
+        "test_devadj": {
+          "n": 7802,
+          "rmse": 13.3297,
+          "mae": 9.635,
+          "r2": 0.2464,
+          "mean_residual": 2.3921,
+          "cal_slope": 1.015,
+          "cal_intercept": 0.6413,
+          "y_mean": 119.2261,
+          "pred_mean": 116.8339
+        },
+        "resid_by_year": {
+          "2021": 0.18,
+          "2022": 0.31
+        }
+      },
+      "dbp": {
+        "test": {
+          "n": 7802,
+          "rmse": 9.2326,
+          "mae": 7.3454,
+          "r2": 0.1599,
+          "mean_residual": -1.7191,
+          "cal_slope": 0.9927,
+          "cal_intercept": -1.1723,
+          "y_mean": 73.5333,
+          "pred_mean": 75.2524,
+          "rmse_w": 9.166
+        },
+        "val": {
+          "n": 4356,
+          "rmse": 8.5571,
+          "mae": 6.7039,
+          "r2": 0.2483,
+          "mean_residual": 0.1331,
+          "cal_slope": 1.1152,
+          "cal_intercept": -8.5525,
+          "y_mean": 75.511,
+          "pred_mean": 75.3779
+        },
+        "test_devadj": {
+          "n": 7802,
+          "rmse": 8.6068,
+          "mae": 6.6056,
+          "r2": 0.1637,
+          "mean_residual": 1.4818,
+          "cal_slope": 0.929,
+          "cal_intercept": 6.822,
+          "y_mean": 76.7342,
+          "pred_mean": 75.2524
+        },
+        "resid_by_year": {
+          "2021": -1.95,
+          "2022": -1.47
+        }
+      }
+    },
+    "coefficients_mmhg": {
+      "sbp": {
+        "age__age": 0.0,
+        "age__age^2": 0.004,
+        "remainder__sex_female": -3.487,
+        "remainder__bmi": 0.89,
+        "remainder__waist_cm": 0.038,
+        "remainder__smoking_former": -1.469,
+        "remainder__smoking_current": 0.0,
+        "remainder__alcohol_units_week": 0.204,
+        "remainder__activity_minutes_week": 0.0,
+        "remainder__activity_low_flag": 0.199,
+        "remainder__sleep_avg_h": -0.001,
+        "remainder__sodium_risk_score": 0.0,
+        "remainder__stress_score": -0.356,
+        "remainder__family_htn": 2.353,
+        "remainder__diabetes_flag": 0.331,
+        "remainder__missing_count": 0.665
+      },
+      "dbp": {
+        "age__age": 0.718,
+        "age__age^2": -0.007,
+        "remainder__sex_female": -3.086,
+        "remainder__bmi": 0.55,
+        "remainder__waist_cm": 0.054,
+        "remainder__smoking_former": -0.23,
+        "remainder__smoking_current": 0.0,
+        "remainder__alcohol_units_week": 0.133,
+        "remainder__activity_minutes_week": -0.0,
+        "remainder__activity_low_flag": 0.049,
+        "remainder__sleep_avg_h": -0.053,
+        "remainder__sodium_risk_score": 0.0,
+        "remainder__stress_score": -0.033,
+        "remainder__family_htn": 1.758,
+        "remainder__diabetes_flag": -1.253,
+        "remainder__missing_count": 0.429
+      }
+    },
+    "trained_on": "2026-10-15",
+    "note": "KNHANES 단면: '이 조건이면 보통 혈압이 얼마'. 개인의 변화 예측이 아님. what-if 변화량은 반사실 예측 차이",
+    "sanity_probe": {
+      "male/25": {
+        "sbp_base": 108.9,
+        "bmi_22_to_30": 7.1,
+        "sodium_0_to_2": 0.0,
+        "activity_300_to_0": 0.2,
+        "alcohol_0_to_21": 4.3
+      },
+      "male/40": {
+        "sbp_base": 112.7,
+        "bmi_22_to_30": 7.1,
+        "sodium_0_to_2": 0.0,
+        "activity_300_to_0": 0.2,
+        "alcohol_0_to_21": 4.3
+      },
+      "male/60": {
+        "sbp_base": 120.5,
+        "bmi_22_to_30": 7.1,
+        "sodium_0_to_2": 0.0,
+        "activity_300_to_0": 0.2,
+        "alcohol_0_to_21": 4.3
+      },
+      "female/25": {
+        "sbp_base": 105.2,
+        "bmi_22_to_30": 7.1,
+        "sodium_0_to_2": 0.0,
+        "activity_300_to_0": 0.2,
+        "alcohol_0_to_21": 4.3
+      },
+      "female/40": {
+        "sbp_base": 109.0,
+        "bmi_22_to_30": 7.1,
+        "sodium_0_to_2": 0.0,
+        "activity_300_to_0": 0.2,
+        "alcohol_0_to_21": 4.3
+      },
+      "female/60": {
+        "sbp_base": 116.8,
+        "bmi_22_to_30": 7.1,
+        "sodium_0_to_2": 0.0,
+        "activity_300_to_0": 0.2,
+        "alcohol_0_to_21": 4.3
+      }
+    }
+  }
+}

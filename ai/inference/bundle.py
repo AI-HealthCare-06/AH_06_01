@@ -73,3 +73,52 @@ class ModelBundle:
         d.pop("calibrator")
         d["imputers"] = {"source": self.imputers.source}
         return d
+
+
+MODEL_EXPECTED_BP = "expected_bp"
+
+
+@dataclass
+class RegressionBundle:
+    """M2 예상 혈압: 같은 계약 피처(full 14 열)로 SBP·DBP 를 각각 회귀한 두 추정기를 한 파일에 담는다.
+
+    estimators = {"sbp": pipeline, "dbp": pipeline}; predict(X) → {"sbp": ndarray, "dbp": ndarray} (mmHg).
+    """
+
+    model_id: str
+    model_version: str
+    estimators: dict[str, Any]
+    imputers: Imputers
+    columns: tuple[str, ...] = ()
+    feature_version: str = FEATURE_VERSION
+    thresholds_version: str = T.THRESHOLDS_VERSION
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not self.columns:
+            self.columns = columns_for("htn_risk_full")
+        self.columns = tuple(self.columns)
+
+    def predict(self, X: np.ndarray) -> dict[str, np.ndarray]:
+        X = np.asarray(X, dtype=float)
+        return {k: np.asarray(est.predict(X)).reshape(-1) for k, est in self.estimators.items()}
+
+    def save(self, path: str | Path) -> Path:
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(self, path, compress=3)
+        return path
+
+    @staticmethod
+    def load(path: str | Path) -> "RegressionBundle":
+        b = joblib.load(path)
+        if not isinstance(b, RegressionBundle):
+            raise TypeError(f"{path} is not a RegressionBundle")
+        if b.feature_version != FEATURE_VERSION:
+            raise ValueError(f"{path}: feature_version {b.feature_version} != {FEATURE_VERSION}")
+        return b
+
+    def describe(self) -> dict[str, Any]:
+        return {"model_id": self.model_id, "model_version": self.model_version, "columns": list(self.columns),
+                "targets": list(self.estimators), "feature_version": self.feature_version,
+                "thresholds_version": self.thresholds_version, "imputers": {"source": self.imputers.source}, "metadata": self.metadata}

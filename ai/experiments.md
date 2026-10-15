@@ -16,3 +16,10 @@
 | 2026-10-12 | 2026.10.12-b0/random721 | B0 LR (htn_risk_lite) | lite 5 | knhanes_contract_v1.parquet | 42 | 0.818 (0.822) | 0.654 | 0.160 | 0.98 / +0.02 | 0.013 | platt 보정, 테스트=무작위 10%, 가중 AUROC 0.826, 성별 ECE 차 0.020, gates 통과, 단조 위반 0, 전환식 라벨 AUROC 0.818 |
 | 2026-10-13 | 2026.10.13-b1/time | B1 LGBM mono (htn_risk_full) | full 14 | knhanes_contract_v1.parquet | 42 | 0.846 (0.840) | 0.723 | 0.150 | 1.05 / +0.03 | 0.009 | platt 보정, hp {'learning_rate': 0.03, 'num_leaves': 15, 'min_child_samples': 200}, trees 279, ΔAUROC vs B0 val +0.003 / test +0.002, 성별 ECE 차 0.001, 단조 위반 0, B0 유지 |
 | 2026-10-13 | 2026.10.13-b1/time | B1 LGBM mono (htn_risk_lite) | lite 5 | knhanes_contract_v1.parquet | 42 | 0.827 (0.821) | 0.688 | 0.159 | 1.05 / +0.02 | 0.009 | platt 보정, hp {'learning_rate': 0.03, 'num_leaves': 7, 'min_child_samples': 200}, trees 296, ΔAUROC vs B0 val +0.004 / test +0.004, 성별 ECE 차 0.003, 단조 위반 0, B0 유지 |
+
+## M2 예상 혈압 회귀 (expected_bp)
+
+| 날짜 | 실험 ID | 모델 | 타깃 | 학습 n | RMSE 테스트 (검증) | MAE | R² | 보정 기울기 | 잔차 평균 2021~22 | 비고 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-10-15 | 2026.10.15-m2/time | M2 linear (부호 제약) | SBP | 30,969 | 13.53 (13.27) | 10.06 | 0.241 | 0.97 | +0.25 | 미복용자, alpha 1.0, 전환식 라벨 RMSE 13.33, 연도별 잔차 {2021: 0.18, 2022: 0.31} |
+| 2026-10-15 | 2026.10.15-m2/time | M2 linear (부호 제약) | DBP | 30,969 | 9.23 (8.56) | 7.35 | 0.160 | 0.99 | -1.72 | 미복용자, alpha 1.0, 전환식 라벨 RMSE 8.61, 연도별 잔차 {2021: -1.95, 2022: -1.47} |

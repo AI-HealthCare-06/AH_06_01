@@ -17,8 +17,11 @@ from features.contract_v1 import (
     Imputers, ContractResult, build_features, encode_numeric,
 )
 from features.sk_transforms import origin_of
-from inference.bundle import ModelBundle
-from knowledge.evidence import EVIDENCE_VERSION, lifestyle_evidence
+from inference.bundle import ModelBundle, RegressionBundle
+from knowledge.evidence import (
+    ACTIVITY_LOW_MINUTES, ALCOHOL_UPPER_UNITS_WEEK, BMI_OBESE, EVIDENCE_VERSION, WAIST_ABDOMINAL_CM,
+    factors, lifestyle_evidence,
+)
 
 log = logging.getLogger(__name__)
 
@@ -44,13 +47,28 @@ def _logit(p: float) -> float:
     return math.log(p / (1 - p))
 
 
+# M2 what-if: 근거표 '개입 대상' 요인을 구간 경계까지 바꿨을 때의 반사실 입력. 경계값은 knowledge.evidence 와 공유.
+def _whatif_target(code: str, f: dict[str, Any]) -> dict[str, Any] | None:
+    male = f.get("sex") == "male"
+    return {
+        "bmi_high": {"bmi": BMI_OBESE},
+        "waist_high": {"waist_cm": WAIST_ABDOMINAL_CM["male" if male else "female"]},
+        "alcohol_high": {"alcohol_units_week": ALCOHOL_UPPER_UNITS_WEEK["male" if male else "female"]},
+        "sodium_high": {"sodium_risk_score": 0},
+        "activity_low": {"activity_minutes_week": ACTIVITY_LOW_MINUTES, "activity_low_flag": False},
+        "smoking_current": {"smoking_status": "never"},
+        "stress_high": {"stress_score": 2},
+        "sleep_short": {"sleep_avg_h": 7.0},
+    }.get(code)
+
+
 class RiskPredictor:
-    def __init__(self, full: ModelBundle, lite: ModelBundle) -> None:
+    def __init__(self, full: ModelBundle, lite: ModelBundle, bp: RegressionBundle | None = None) -> None:
         if full.model_id != MODEL_FULL or lite.model_id != MODEL_LITE:
             raise ValueError(f"bundle ids: full={full.model_id} lite={lite.model_id}")
         if full.imputers != lite.imputers:
             log.warning("full/lite imputers differ; using full's for contract transform")
-        self.full, self.lite = full, lite
+        self.full, self.lite, self.bp = full, lite, bp
         self.imputers: Imputers = full.imputers
 
     # ── 공개 API ──
@@ -67,6 +85,8 @@ class RiskPredictor:
         p = min(max(p, 0.0), 1.0)
         risk_index = int(round(p * 100))
         reasons = self._reason_codes(bundle, x, cr.features)
+        evidence = lifestyle_evidence(cr.features, cr.missing_features)
+        bp_block = self._expected_bp(cr, evidence, features)
 
         return {
             "risk_index": risk_index,
@@ -81,12 +101,57 @@ class RiskPredictor:
             "reason_codes": reasons,
             # 모델 기여도(reason_codes)와 별개로, 문헌 근거표 기준 '개입 대상' 요인. 대치된 피처로는 판단하지 않는다.
             # 생활습관의 방향·효과 크기는 KNHANES 계수가 아니라 knowledge/lifestyle_evidence_v1.yaml 이 기준.
-            "lifestyle_evidence": lifestyle_evidence(cr.features, cr.missing_features),
+            "lifestyle_evidence": evidence,
             "evidence_version": EVIDENCE_VERSION,
-            "expected_sbp": None,  # T2 회귀 모델 연결 전까지 항상 null
+            # M2: 생활·신체 정보로 본 '예상' 혈압(미복용자 기준)과 요인별 what-if. 모델 없거나 partial 이면 null
+            "expected_sbp": bp_block["expected_sbp"],
+            "expected_dbp": bp_block["expected_dbp"],
+            "expected_bp_rmse": bp_block["expected_bp_rmse"],
+            "bp_model_version": bp_block["bp_model_version"],
+            "whatif": bp_block["whatif"],
+            "bp_vs_expected": bp_block["bp_vs_expected"],
             "disclaimer_key": DISCLAIMER_KEY,
             "warnings": list(cr.warnings),
         }
+
+    # ── M2: 예상 혈압·what-if·실측 비교 ──
+    def _expected_bp(self, cr: ContractResult, evidence: list[dict[str, Any]], raw: dict[str, Any]) -> dict[str, Any]:
+        empty = {"expected_sbp": None, "expected_dbp": None, "expected_bp_rmse": None, "bp_model_version": None, "whatif": [], "bp_vs_expected": None}
+        if self.bp is None or cr.data_quality != "ok":
+            return empty
+        base_row = encode_numeric(cr.features, MODEL_FULL)
+        xb = np.array([[base_row[c] for c in self.bp.columns]], dtype=float)
+        base = {k: float(v[0]) for k, v in self.bp.predict(xb).items()}
+        lit = {code: (f.get("sbp_reduction_mmhg") or {}).get("point") for code, f in factors().items()}
+
+        whatif = []
+        for e in evidence:
+            if not e["modifiable"]:
+                continue
+            target = _whatif_target(e["code"], cr.features)
+            if not target:
+                continue
+            cf = {**cr.features, **target}
+            row = encode_numeric(cf, MODEL_FULL)
+            xc = np.array([[row[c] for c in self.bp.columns]], dtype=float)
+            pred = {k: float(v[0]) for k, v in self.bp.predict(xc).items()}
+            whatif.append({
+                "code": e["code"], "target": target,
+                "delta_sbp_model": round(pred["sbp"] - base["sbp"], 1),
+                "delta_dbp_model": round(pred["dbp"] - base["dbp"], 1),
+                "delta_sbp_literature": lit.get(e["code"]),   # RCT·메타분석 효과 크기 (근거표). None 이면 문헌 수치 없음
+            })
+
+        vs = None
+        m_sbp, m_dbp = raw.get("measured_sbp"), raw.get("measured_dbp")
+        if isinstance(m_sbp, (int, float)) and not isinstance(m_sbp, bool):
+            vs = {"measured_sbp": float(m_sbp), "expected_sbp": round(base["sbp"], 1), "sbp_diff": round(float(m_sbp) - base["sbp"], 1)}
+            if isinstance(m_dbp, (int, float)) and not isinstance(m_dbp, bool):
+                vs.update({"measured_dbp": float(m_dbp), "expected_dbp": round(base["dbp"], 1), "dbp_diff": round(float(m_dbp) - base["dbp"], 1)})
+        return {"expected_sbp": round(base["sbp"], 1), "expected_dbp": round(base["dbp"], 1),
+                # 테스트 세트 RMSE — '예상'은 모집단 평균 참고치라 ±이 폭의 띠로 보여줘야 한다 (SBP 약 ±13, DBP 약 ±9 mmHg)
+                "expected_bp_rmse": self.bp.metadata.get("rmse_test"),
+                "bp_model_version": self.bp.model_version, "whatif": whatif, "bp_vs_expected": vs}
 
     # ── 거부 응답 ──
     def _rejected(self, cr: ContractResult) -> dict[str, Any]:
@@ -104,7 +169,7 @@ class RiskPredictor:
             "reason_codes": [],
             "lifestyle_evidence": [],
             "evidence_version": EVIDENCE_VERSION,
-            "expected_sbp": None,
+            "expected_sbp": None, "expected_dbp": None, "expected_bp_rmse": None, "bp_model_version": None, "whatif": [], "bp_vs_expected": None,
             "disclaimer_key": DISCLAIMER_KEY,
             "warnings": list(cr.warnings),
         }

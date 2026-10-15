@@ -1,9 +1,16 @@
-# ai/ — 고혈압 위험도 모델 (AI 팀)
+# ai/ — 혈압 관련 질환·혈압 증감 예측 모델 (AI 팀)
 
-인수인계 문서 「AI팀 인수인계 — 고혈압 위험도 모델 v0.1」(2026-10-12)을 구현하는 폴더.
-생활·신체 변수 14개로 **고혈압 참고 위험지수(0~100)** 를 내는 설명 가능한 모델을 만든다.
-판정(밴드·표현형·저혈압·응급)은 규칙 트리(개발팀) 담당이며, 이 모델은 대시보드
-위험지수와 Quest Ranker 가중치에만 쓰인다.
+앱은 혈압 + 생활습관 데이터로 혈압 관련 질환을 추정하고 관리(퀘스트)를 돕는다. 이 폴더는 그중
+**입력 건강 데이터로 질환과 혈압의 증감을 예측**하는 모델을 만든다 (범위·변경 이력: `HANDOFF_v0.2.md`, 원 인수인계 v0.1).
+
+| 모델 | 입력 | 출력 | 상태 |
+|---|---|---|---|
+| M1 고혈압 선별 (B0) | 생활·신체 14개, 혈압 없음 | risk_index 0~100, reason_codes | 완료 |
+| M2 예상 혈압·what-if | 생활·신체 14개 | expected_sbp/dbp ± RMSE, whatif, 실측 비교 | 완료 |
+| M3 동반 질환 위험 | 혈압 포함 + 14개 (+검진값) | 당뇨·CKD·대사증후군·이상지질 위험지수 | 진행 중 |
+| M4 혈압 추이 | 앱 가정혈압 로그 | 7일 추세 | 규칙 스펙 |
+
+판정(밴드·표현형·저혈압·응급)은 규칙 트리(개발팀) 담당. 모델 결과는 대시보드 참고 카드와 Quest Ranker 에 쓰인다.
 
 ## 원칙 (바꾸지 않는 것)
 
@@ -38,9 +45,10 @@ ai/
 ├─ build_dataset.py           parquet + schema_map.csv + 데이터 감사 리포트
 ├─ evaluation.py              AUROC·AUPRC·Brier·ECE·보정 기울기·하위군 6셀·보정 곡선 PNG
 ├─ labels.py                  T1/T2/T3 라벨 규칙                        [10/13]
-├─ train_baseline.py          B0 로지스틱, 시간 분할, AUROC·보정          [10/13]
-├─ train_boost.py             B1 단조 제약 LightGBM                     [10/20]
-├─ calibrate.py               Platt / isotonic 보정                     [10/20]
+├─ train_baseline.py          M1 B0 부호 제약 로지스틱, 시간 분할, AUROC·보정
+├─ train_boost.py             M1 B1 단조 제약 LightGBM (후보, 미채택)
+├─ train_sbp.py               M2 예상 혈압 회귀 (SBP·DBP, 미복용자), what-if 근거
+├─ HANDOFF_v0.2.md            v0.1 대비 범위·계약·인터페이스 변경 기록
 ├─ eval_external.py           M-lite 공단 검진정보 외부 검증, 하위군 표     [10/20]
 ├─ inference/
 │  ├─ bundle.py               아티팩트 1파일 형식(모델·보정기·대치값·열·버전)
