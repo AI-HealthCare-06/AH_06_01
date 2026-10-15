@@ -15,6 +15,8 @@ import numpy as np
 from features.contract_v1 import FEATURE_VERSION, Imputers, columns_for
 import thresholds_kr_v1 as T
 
+SUPPORTED_FEATURE_VERSIONS = ("v1", "v2")   # v2 = M3 (혈압·복약 포함, features/contract_v2.py)
+
 
 @dataclass
 class ModelBundle:
@@ -63,8 +65,8 @@ class ModelBundle:
         b = joblib.load(path)
         if not isinstance(b, ModelBundle):
             raise TypeError(f"{path} is not a ModelBundle")
-        if b.feature_version != FEATURE_VERSION:
-            raise ValueError(f"{path}: feature_version {b.feature_version} != {FEATURE_VERSION}")
+        if b.feature_version not in SUPPORTED_FEATURE_VERSIONS:
+            raise ValueError(f"{path}: feature_version {b.feature_version} not in {SUPPORTED_FEATURE_VERSIONS}")
         return b
 
     def describe(self) -> dict[str, Any]:

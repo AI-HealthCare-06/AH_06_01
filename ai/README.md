@@ -7,7 +7,7 @@
 |---|---|---|---|
 | M1 고혈압 선별 (B0) | 생활·신체 14개, 혈압 없음 | risk_index 0~100, reason_codes | 완료 |
 | M2 예상 혈압·what-if | 생활·신체 14개 | expected_sbp/dbp ± RMSE, whatif, 실측 비교 | 완료 |
-| M3 동반 질환 위험 | 혈압 포함 + 14개 (+검진값) | 당뇨·CKD·대사증후군·이상지질 위험지수 | 진행 중 |
+| M3 동반 질환 위험 | 혈압 포함 + 14개 + 복약 (계약 v2) | 당뇨·CKD·대사증후군·이상지질 위험지수 | 완료 |
 | M4 혈압 추이 | 앱 가정혈압 로그 | 7일 추세 | 규칙 스펙 |
 
 판정(밴드·표현형·저혈압·응급)은 규칙 트리(개발팀) 담당. 모델 결과는 대시보드 참고 카드와 Quest Ranker 에 쓰인다.
@@ -48,6 +48,7 @@ ai/
 ├─ train_baseline.py          M1 B0 부호 제약 로지스틱, 시간 분할, AUROC·보정
 ├─ train_boost.py             M1 B1 단조 제약 LightGBM (후보, 미채택)
 ├─ train_sbp.py               M2 예상 혈압 회귀 (SBP·DBP, 미복용자), what-if 근거
+├─ train_comorbidity.py       M3 동반 질환 4개 (계약 v2: features/contract_v2.py, 라벨 labels_m3.py)
 ├─ HANDOFF_v0.2.md            v0.1 대비 범위·계약·인터페이스 변경 기록
 ├─ eval_external.py           M-lite 공단 검진정보 외부 검증, 하위군 표     [10/20]
 ├─ inference/

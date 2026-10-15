@@ -35,6 +35,8 @@ _CODE_OF_FEATURE: dict[str, str | None] = {
     "alcohol_units_week": "alcohol_high", "activity_minutes_week": "activity_low", "activity_low_flag": "activity_low",
     "sleep_avg_h": None, "sodium_risk_score": "sodium_high", "stress_score": "stress_high",
     "family_htn": "family_htn", "diabetes_flag": "diabetes", "sex": None, "missing_count": None,
+    # M3 (계약 v2) 전용
+    "sbp": "bp_high", "dbp": "bp_high", "htn_medication": "htn_treated",
 }
 
 
@@ -63,17 +65,24 @@ def _whatif_target(code: str, f: dict[str, Any]) -> dict[str, Any] | None:
 
 
 class RiskPredictor:
-    def __init__(self, full: ModelBundle, lite: ModelBundle, bp: RegressionBundle | None = None) -> None:
+    def __init__(self, full: ModelBundle, lite: ModelBundle, bp: RegressionBundle | None = None,
+                 comorbidity: dict[str, ModelBundle] | None = None) -> None:
         if full.model_id != MODEL_FULL or lite.model_id != MODEL_LITE:
             raise ValueError(f"bundle ids: full={full.model_id} lite={lite.model_id}")
         if full.imputers != lite.imputers:
             log.warning("full/lite imputers differ; using full's for contract transform")
         self.full, self.lite, self.bp = full, lite, bp
+        self.comorbidity: dict[str, ModelBundle] = comorbidity or {}   # M3: disease → bundle (feature_version v2)
         self.imputers: Imputers = full.imputers
 
     # ── 공개 API ──
+    # M2·M3 전용 입력 키. M1 계약(v1)에는 넘기지 않아 '금지 피처' 경고를 내지 않는다 (M1 위험지수에는 어차피 영향 없음)
+    AUX_KEYS = ("measured_sbp", "measured_dbp", "htn_medication", "htn_status")
+
     def predict(self, features: dict[str, Any]) -> dict[str, Any]:
-        cr = build_features(features, self.imputers)
+        raw = dict(features)
+        aux = {k: raw.pop(k) for k in self.AUX_KEYS if k in raw}
+        cr = build_features(raw, self.imputers)
         if not cr.accepted:
             return self._rejected(cr)
 
@@ -86,7 +95,8 @@ class RiskPredictor:
         risk_index = int(round(p * 100))
         reasons = self._reason_codes(bundle, x, cr.features)
         evidence = lifestyle_evidence(cr.features, cr.missing_features)
-        bp_block = self._expected_bp(cr, evidence, features)
+        bp_block = self._expected_bp(cr, evidence, aux)
+        como = self._comorbidity(cr, aux)
 
         return {
             "risk_index": risk_index,
@@ -110,9 +120,34 @@ class RiskPredictor:
             "bp_model_version": bp_block["bp_model_version"],
             "whatif": bp_block["whatif"],
             "bp_vs_expected": bp_block["bp_vs_expected"],
+            # M3: 혈압(measured_sbp/dbp)·복약 포함 동반 질환 참고 위험. 혈압이 없으면 status=needs_bp
+            "comorbidity_risk": como["risk"],
+            "comorbidity_status": como["status"],
+            "comorbidity_model_version": como["version"],
             "disclaimer_key": DISCLAIMER_KEY,
             "warnings": list(cr.warnings),
         }
+
+    # ── M3: 동반 질환 위험 (계약 v2) ──
+    def _comorbidity(self, cr: ContractResult, raw: dict[str, Any]) -> dict[str, Any]:
+        if not self.comorbidity:
+            return {"risk": None, "status": "no_model", "version": None}
+        if cr.data_quality != "ok":
+            return {"risk": None, "status": cr.data_quality, "version": None}
+        from features import contract_v2 as C2
+        extra, problems = C2.extra_features(raw)
+        if extra is None:
+            return {"risk": None, "status": problems[0] if problems else "needs_bp", "version": None}
+        out, version = {}, None
+        for disease, bundle in self.comorbidity.items():
+            row = C2.encode_numeric_v2(cr.features, extra, bundle.columns)
+            x = np.array([[row[c] for c in bundle.columns]], dtype=float)
+            p = min(max(float(bundle.predict_proba(x)[0]), 0.0), 1.0)
+            feats = {**cr.features, **extra}
+            out[disease] = {"risk_index": int(round(p * 100)), "risk_level": T.risk_level(p), "calibrated_p": round(p, 4),
+                            "reason_codes": self._reason_codes(bundle, x, feats, vocab=C2.REASON_CODES_V2)}
+            version = bundle.model_version
+        return {"risk": out, "status": "ok", "version": version}
 
     # ── M2: 예상 혈압·what-if·실측 비교 ──
     def _expected_bp(self, cr: ContractResult, evidence: list[dict[str, Any]], raw: dict[str, Any]) -> dict[str, Any]:
@@ -170,12 +205,14 @@ class RiskPredictor:
             "lifestyle_evidence": [],
             "evidence_version": EVIDENCE_VERSION,
             "expected_sbp": None, "expected_dbp": None, "expected_bp_rmse": None, "bp_model_version": None, "whatif": [], "bp_vs_expected": None,
+            "comorbidity_risk": None, "comorbidity_status": cr.data_quality, "comorbidity_model_version": None,
             "disclaimer_key": DISCLAIMER_KEY,
             "warnings": list(cr.warnings),
         }
 
     # ── 설명: 피처별 로짓 기여 → 확률 단위 → 고정 어휘 상위 3개 ──
-    def _reason_codes(self, bundle: ModelBundle, x: np.ndarray, feats: dict[str, Any]) -> list[dict[str, Any]]:
+    def _reason_codes(self, bundle: ModelBundle, x: np.ndarray, feats: dict[str, Any],
+                      vocab: tuple[str, ...] = REASON_CODES) -> list[dict[str, Any]]:
         contrib_by_col = self._logit_contributions(bundle, x)
         # 열 → 계약 피처 → 코드 로 합산
         by_code: dict[str, float] = {}
@@ -197,7 +234,7 @@ class RiskPredictor:
         if not picked:  # 올리는 요인이 하나도 없으면 가장 크게 내리는 요인 1개를 direction=down 으로
             picked = downs[:1]
         out = [{"code": k, "direction": "up" if v > 0 else "down", "contribution": round(abs(v), 4)} for k, v in picked]
-        assert all(o["code"] in REASON_CODES for o in out)
+        assert all(o["code"] in vocab for o in out), out
         return out
 
     @staticmethod
@@ -208,6 +245,8 @@ class RiskPredictor:
             return "sleep_short" if h < lo else ("sleep_long" if h > hi else None)
         if feat == "smoking_status":
             return "smoking_current" if feats["smoking_status"] == "current" else None
+        if feat == "htn_medication":
+            return "htn_treated" if feats.get("htn_medication") else None
         return _CODE_OF_FEATURE.get(feat)
 
     @staticmethod

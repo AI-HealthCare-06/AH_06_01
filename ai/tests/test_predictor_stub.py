@@ -182,6 +182,50 @@ def test_expected_bp_whatif_and_comparison():
     assert pred.predict(p)["expected_sbp"] is None
 
 
+def _synthetic_comorbidity(disease: str, seed: int = 2) -> ModelBundle:
+    from features import contract_v2 as C2
+    rng = np.random.default_rng(seed)
+    cols = C2.columns_for_disease(disease)
+    n = 3000
+    gen = {"age": lambda: rng.uniform(19, 90, n), "sex_female": lambda: rng.integers(0, 2, n), "bmi": lambda: rng.uniform(16, 40, n),
+           "waist_cm": lambda: rng.uniform(60, 120, n), "smoking_former": lambda: rng.integers(0, 2, n), "smoking_current": lambda: rng.integers(0, 2, n),
+           "alcohol_units_week": lambda: rng.uniform(0, 40, n), "activity_minutes_week": lambda: rng.uniform(0, 600, n), "activity_low_flag": lambda: rng.integers(0, 2, n),
+           "sleep_avg_h": lambda: rng.uniform(4, 10, n), "sodium_risk_score": lambda: rng.integers(0, 3, n), "stress_score": lambda: rng.integers(1, 5, n),
+           "family_htn": lambda: rng.integers(0, 2, n), "diabetes_flag": lambda: rng.integers(0, 2, n), "missing_count": lambda: rng.integers(0, 4, n),
+           "sbp": lambda: rng.uniform(90, 180, n), "dbp": lambda: rng.uniform(55, 110, n), "htn_medication": lambda: rng.integers(0, 2, n)}
+    X = np.column_stack([gen[c]() for c in cols])
+    w = {"age": 0.05, "waist_cm": 0.04, "sbp": 0.03, "dbp": 0.02, "htn_medication": 0.6, "diabetes_flag": 0.5, "bmi": 0.05}
+    z = sum(w.get(c, 0.0) * X[:, i] for i, c in enumerate(cols)) - 9.0
+    y = (rng.uniform(size=n) < 1 / (1 + np.exp(-z))).astype(int)
+    pipe = Pipeline([("scale", StandardScaler()), ("lr", LogisticRegression(max_iter=500))]).fit(X, y)
+    return ModelBundle(model_id=f"{C2.MODEL_PREFIX}{disease}", model_version="0.0.0-stub", estimator=pipe, imputers=IMP, columns=cols,
+                       reference={c: float(v) for c, v in zip(cols, X.mean(axis=0))}, feature_version=C2.FEATURE_VERSION)
+
+
+def test_comorbidity_block():
+    from features import contract_v2 as C2
+    como = {d: _synthetic_comorbidity(d) for d in C2.DISEASES}
+    pred = RiskPredictor(_synthetic_bundle(C.MODEL_FULL), _synthetic_bundle(C.MODEL_LITE), comorbidity=como)
+    # 혈압 없음 → needs_bp
+    out = pred.predict(person())
+    assert out["comorbidity_risk"] is None and out["comorbidity_status"] == "needs_bp"
+    # 혈압 + 복약 → 4개 질환 위험
+    out = pred.predict(person(measured_sbp=150, measured_dbp=95, htn_medication=True))
+    assert out["comorbidity_status"] == "ok" and set(out["comorbidity_risk"]) == set(C2.DISEASES)
+    for d, r in out["comorbidity_risk"].items():
+        assert 0 <= r["risk_index"] <= 100 and r["risk_level"] == T.risk_level(r["calibrated_p"])
+        assert 1 <= len(r["reason_codes"]) <= 3 and all(c["code"] in C2.REASON_CODES_V2 for c in r["reason_codes"])
+    # 혈압이 높고 복약 중이면 bp_high / htn_treated 가 이유에 나올 수 있어야 한다 (합성 모델 가중치 양수)
+    codes = {c["code"] for r in out["comorbidity_risk"].values() for c in r["reason_codes"]}
+    assert codes & {"bp_high", "htn_treated"}
+    # htn_status 문자열로도 복약 판정, 범위 밖 혈압은 상태로 알림, M1 위험지수는 불변
+    assert pred.predict(person(measured_sbp=120, measured_dbp=80, htn_status="on_medication"))["comorbidity_status"] == "ok"
+    assert pred.predict(person(measured_sbp=300, measured_dbp=80))["comorbidity_status"] == "measured_sbp_out_of_range"
+    assert out["risk_index"] == pred.predict(person())["risk_index"]
+    # 당뇨 모델은 diabetes_flag 를 피처로 쓰지 않는다
+    assert "diabetes_flag" not in como["diabetes"].columns and "diabetes_flag" in como["ckd"].columns
+
+
 def test_bundle_roundtrip(tmp_path):
     b = _synthetic_bundle(C.MODEL_LITE)
     path = b.save(tmp_path / "htn_risk_lite.joblib")

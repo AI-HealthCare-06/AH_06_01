@@ -42,37 +42,37 @@
       "sbp": {
         "test": {
           "n": 7802,
-          "rmse": 13.5307,
-          "mae": 10.0643,
+          "rmse": 13.5304,
+          "mae": 10.0641,
           "r2": 0.2413,
-          "mean_residual": 0.2462,
-          "cal_slope": 0.9704,
-          "cal_intercept": 3.7057,
+          "mean_residual": 0.246,
+          "cal_slope": 0.9705,
+          "cal_intercept": 3.6942,
           "y_mean": 117.0802,
-          "pred_mean": 116.8339,
-          "rmse_w": 12.8275
+          "pred_mean": 116.8341,
+          "rmse_w": 12.8272
         },
         "val": {
           "n": 4356,
-          "rmse": 13.2667,
-          "mae": 10.1807,
-          "r2": 0.2798,
-          "mean_residual": -0.2871,
-          "cal_slope": 1.0502,
-          "cal_intercept": -6.1536,
+          "rmse": 13.2655,
+          "mae": 10.1801,
+          "r2": 0.2799,
+          "mean_residual": -0.287,
+          "cal_slope": 1.0506,
+          "cal_intercept": -6.1949,
           "y_mean": 116.5331,
-          "pred_mean": 116.8202
+          "pred_mean": 116.8201
         },
         "test_devadj": {
           "n": 7802,
-          "rmse": 13.3297,
-          "mae": 9.635,
+          "rmse": 13.3296,
+          "mae": 9.6351,
           "r2": 0.2464,
-          "mean_residual": 2.3921,
+          "mean_residual": 2.3919,
           "cal_slope": 1.015,
-          "cal_intercept": 0.6413,
+          "cal_intercept": 0.6367,
           "y_mean": 119.2261,
-          "pred_mean": 116.8339
+          "pred_mean": 116.8341
         },
         "resid_by_year": {
           "2021": 0.18,
@@ -82,37 +82,37 @@
       "dbp": {
         "test": {
           "n": 7802,
-          "rmse": 9.2326,
-          "mae": 7.3454,
-          "r2": 0.1599,
-          "mean_residual": -1.7191,
-          "cal_slope": 0.9927,
-          "cal_intercept": -1.1723,
+          "rmse": 9.2333,
+          "mae": 7.3455,
+          "r2": 0.1598,
+          "mean_residual": -1.7179,
+          "cal_slope": 0.9925,
+          "cal_intercept": -1.155,
           "y_mean": 73.5333,
-          "pred_mean": 75.2524,
-          "rmse_w": 9.166
+          "pred_mean": 75.2513,
+          "rmse_w": 9.1664
         },
         "val": {
           "n": 4356,
-          "rmse": 8.5571,
-          "mae": 6.7039,
-          "r2": 0.2483,
-          "mean_residual": 0.1331,
-          "cal_slope": 1.1152,
-          "cal_intercept": -8.5525,
+          "rmse": 8.5576,
+          "mae": 6.7042,
+          "r2": 0.2482,
+          "mean_residual": 0.1355,
+          "cal_slope": 1.1157,
+          "cal_intercept": -8.5826,
           "y_mean": 75.511,
-          "pred_mean": 75.3779
+          "pred_mean": 75.3755
         },
         "test_devadj": {
           "n": 7802,
-          "rmse": 8.6068,
-          "mae": 6.6056,
-          "r2": 0.1637,
-          "mean_residual": 1.4818,
-          "cal_slope": 0.929,
-          "cal_intercept": 6.822,
+          "rmse": 8.6076,
+          "mae": 6.606,
+          "r2": 0.1636,
+          "mean_residual": 1.483,
+          "cal_slope": 0.9289,
+          "cal_intercept": 6.832,
           "y_mean": 76.7342,
-          "pred_mean": 75.2524
+          "pred_mean": 75.2513
         },
         "resid_by_year": {
           "2021": -1.95,
@@ -127,38 +127,42 @@
         "remainder__sex_female": -3.487,
         "remainder__bmi": 0.89,
         "remainder__waist_cm": 0.038,
-        "remainder__smoking_former": -1.469,
+        "remainder__smoking_former": -1.47,
         "remainder__smoking_current": 0.0,
         "remainder__alcohol_units_week": 0.204,
         "remainder__activity_minutes_week": 0.0,
         "remainder__activity_low_flag": 0.199,
         "remainder__sleep_avg_h": -0.001,
         "remainder__sodium_risk_score": 0.0,
-        "remainder__stress_score": -0.356,
-        "remainder__family_htn": 2.353,
-        "remainder__diabetes_flag": 0.331,
-        "remainder__missing_count": 0.665
+        "remainder__stress_score": -0.355,
+        "remainder__family_htn": 2.351,
+        "remainder__diabetes_flag": 0.246,
+        "remainder__missing_count": 0.666
       },
       "dbp": {
         "age__age": 0.718,
         "age__age^2": -0.007,
-        "remainder__sex_female": -3.086,
+        "remainder__sex_female": -3.085,
         "remainder__bmi": 0.55,
-        "remainder__waist_cm": 0.054,
-        "remainder__smoking_former": -0.23,
+        "remainder__waist_cm": 0.053,
+        "remainder__smoking_former": -0.229,
         "remainder__smoking_current": 0.0,
         "remainder__alcohol_units_week": 0.133,
         "remainder__activity_minutes_week": -0.0,
-        "remainder__activity_low_flag": 0.049,
+        "remainder__activity_low_flag": 0.047,
         "remainder__sleep_avg_h": -0.053,
         "remainder__sodium_risk_score": 0.0,
         "remainder__stress_score": -0.033,
-        "remainder__family_htn": 1.758,
-        "remainder__diabetes_flag": -1.253,
+        "remainder__family_htn": 1.76,
+        "remainder__diabetes_flag": -1.236,
         "remainder__missing_count": 0.429
       }
     },
     "trained_on": "2026-10-15",
+    "rmse_test": {
+      "sbp": 13.5,
+      "dbp": 9.2
+    },
     "note": "KNHANES 단면: '이 조건이면 보통 혈압이 얼마'. 개인의 변화 예측이 아님. what-if 변화량은 반사실 예측 차이",
     "sanity_probe": {
       "male/25": {
