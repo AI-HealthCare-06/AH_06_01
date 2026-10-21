@@ -1,0 +1,241 @@
+# feature_contract.yaml — M2 A군 입력 변수 계약 (원본). 이름·타입·단위·범위·결측 처리의 단일 기준.
+# 바꾸면 version 을 올린다.
+version: "0.2.0"
+module: M2
+scope: >
+  A군 10개 상태. 입력 = M1 step(m1_bp_step) + 생활 데이터(§3 의 7·8·9·10·11·12·13·14·15·16·17·19·20).
+  혈압 원시값(1·2 가정혈압, 3 진료실, 4 ABPM, 5 기립)은 M1 이 분류하므로 M2 계약에서 제외했다.
+changelog:
+  - "0.2.0: 경계 변경. 1·2·3·4·5(혈압 원시값) 제거, m1_bp_step 추가. 7일 평균·밴드·가드는 M1 역할."
+  - "0.1.0: 최초. 가정혈압 원시값 기반 (archive/v0.1_raw_bp)."
+
+conventions:
+  missing: "null / 빈 문자열 / NaN 은 결측. 대체·보간하지 않는다."
+  out_of_range: "range 밖 값은 클리핑하지 않고 data_quality=out_of_range 로 입력 전체를 거부한다."
+  invalid: "타입·형식 오류는 data_quality=invalid (명세 없음, D-08)."
+  range_status: >
+    §3 에는 변수 범위가 없다. 아래 모든 range 는 임시값(provisional)이며 확정 전까지 D-10 항목이다.
+  date_format: "YYYY-MM-DD"
+  time_format: "HH:MM (24h)"
+  presence: >
+    present_if 를 만족하면 그 변수가 '있음'. all = 모두 비결측, any = 하나 이상 비결측.
+    필수(required_for) 변수가 없으면 해당 상태는 not_evaluable.
+  pending_m1: >
+    status: pending_m1 인 필드는 M1 이 아직 주지 않는 값이다. 들어오면 검증은 하지만 규칙은 아직 쓰지 않는다.
+    어느 상태가 어느 필드를 기다리는지는 unlocks 에 적었다 (docs/m1_interface.md).
+  table_layout: >
+    평탄 표는 한 행 = subject 하나를 가정한다. 컬럼명은 "<변수명>__<필드명>".
+    같은 subject 행이 여러 개면 첫 비결측값을 쓴다. 실제 컬럼이 다르면 column_aliases 로 매핑한다(4단계에서 대조).
+
+table_keys: [subject_id]
+
+meta_fields:
+  - {name: subject_id, type: str, required: true}
+  - {name: as_of, type: date, required: false, note: "판정 기준일. 출력에 그대로 싣는다"}
+
+variables:
+  - id: M1
+    name: m1_bp_step
+    kind: dict
+    description: "M1 이 분류한 혈압 단계. normal / elevated / prehtn / htn (htn 은 M1 정의상 항고혈압제 복약을 포함)"
+    collection: "M1 출력"
+    required_for: [ELEVATED, PREHTN, HTN_SUSPECT, HTN_STAGE2_SCREEN, ISH, WHITE_COAT, MASKED, MORNING, NOCTURNAL_SCREEN, RESISTANT_SUSPECT]
+    auxiliary_for: []
+    present_if: {all: [step]}
+    fields:
+      - {name: step, type: enum, values: [normal, elevated, prehtn, htn], required: true}
+      - {name: step_date, type: date, required: false, note: "M1 분류 기준일(선택)"}
+      # ── M1 안정화 후 받을 필드 (현재 규칙 미사용) ──
+      - {name: morning_step, type: enum, values: [normal, elevated, prehtn, htn], status: pending_m1, unlocks: [MORNING]}
+      - {name: evening_step, type: enum, values: [normal, elevated, prehtn, htn], status: pending_m1, unlocks: [MORNING, NOCTURNAL_SCREEN]}
+      - {name: office_step, type: enum, values: [normal, elevated, prehtn, htn], status: pending_m1, unlocks: [WHITE_COAT, MASKED]}
+      - {name: bp_level_step, type: enum, values: [normal, elevated, prehtn, htn], status: pending_m1, unlocks: [HTN_SUSPECT, RESISTANT_SUSPECT], note: "복약 조항을 뺀 순수 혈압 단계"}
+      - {name: stage2_flag, type: bool, status: pending_m1, unlocks: [HTN_STAGE2_SCREEN], note: "1회라도 2기 범위"}
+      - {name: ish_flag, type: bool, status: pending_m1, unlocks: [ISH], note: "수축기만 높음"}
+      - {name: guard_flag, type: bool, status: pending_m1, unlocks: [GUARD], note: "§2 가드 범위 입력 발생"}
+
+  - id: 7
+    name: pulse_hr
+    kind: dict
+    description: "맥박·심박(안정시), 불규칙맥 표시"
+    collection: "혈압계·웨어러블"
+    required_for: []
+    auxiliary_for: [ELEVATED, PREHTN, HTN_SUSPECT, HTN_STAGE2_SCREEN, ISH, MORNING, NOCTURNAL_SCREEN]
+    present_if: {any: [resting_hr, irregular_pulse]}
+    fields:
+      - {name: resting_hr, type: int, unit: bpm, range: [20, 250]}
+      - {name: irregular_pulse, type: bool}
+
+  - id: 8
+    name: symptom_flags
+    kind: dict
+    description: "두통·시야장애·흉통·호흡곤란·마비·언어장애·어지럼·실신·야뇨"
+    collection: "앱 탭 입력"
+    required_for: [HTN_STAGE2_SCREEN, NOCTURNAL_SCREEN]
+    auxiliary_for: [HTN_SUSPECT, ISH, MORNING, RESISTANT_SUSPECT]
+    present_if: {any: [headache, visual_disturbance, chest_pain, dyspnea, paralysis, speech_disturbance, dizziness, syncope, nocturia]}
+    fields:
+      - {name: headache, type: bool}
+      - {name: visual_disturbance, type: bool}
+      - {name: chest_pain, type: bool}
+      - {name: dyspnea, type: bool}
+      - {name: paralysis, type: bool}
+      - {name: speech_disturbance, type: bool}
+      - {name: dizziness, type: bool}
+      - {name: syncope, type: bool}
+      - {name: nocturia, type: bool}
+
+  - id: 9
+    name: age_sex
+    kind: dict
+    description: "생년월일(만 나이), 성별"
+    collection: "가입"
+    required_for: [ELEVATED, PREHTN, HTN_SUSPECT, HTN_STAGE2_SCREEN, ISH, WHITE_COAT, MASKED, MORNING, NOCTURNAL_SCREEN, RESISTANT_SUSPECT]
+    auxiliary_for: []
+    present_if: {all: [sex], any: [birth_date, age]}
+    fields:
+      - {name: birth_date, type: date, note: "만 나이 계산은 연령 기준(D-05)이 정해질 때 구현"}
+      - {name: age, type: int, unit: years, range: [0, 120], note: "birth_date 없을 때 대체"}
+      - {name: sex, type: enum, values: [M, F]}
+
+  - id: 10
+    name: height_weight_waist
+    kind: dict
+    description: "키, 체중, 허리둘레"
+    collection: "수기 / 체중계"
+    required_for: [PREHTN, HTN_SUSPECT]
+    auxiliary_for: [ELEVATED, HTN_STAGE2_SCREEN, ISH, MASKED, NOCTURNAL_SCREEN, RESISTANT_SUSPECT]
+    present_if: {all: [height_cm, weight_kg, waist_cm]}
+    fields:
+      - {name: height_cm, type: float, unit: cm, range: [100, 250]}
+      - {name: weight_kg, type: float, unit: kg, range: [20, 300]}
+      - {name: waist_cm, type: float, unit: cm, range: [40, 200]}
+
+  - id: 11
+    name: medication
+    kind: dict
+    description: "치료 상태 코드(1 진단 없음, 2 진단·미치료, 3 약 복용 중), 약 이름·복용 시각, 이뇨제 포함 3제 이상 여부"
+    collection: "온보딩 + 복약 등록"
+    required_for: [HTN_SUSPECT, HTN_STAGE2_SCREEN, ISH, WHITE_COAT, MASKED, MORNING, NOCTURNAL_SCREEN, RESISTANT_SUSPECT]
+    auxiliary_for: [ELEVATED, PREHTN]
+    present_if: {all: [status]}
+    fields:
+      - {name: status, type: enum, values: [1, 2, 3]}
+      - {name: drugs, type: list, item: {name: str, dose_time: time}, note: "복약 등록 목록"}
+      - {name: triple_with_diuretic, type: bool, note: "이뇨제 포함 3제 이상. RESISTANT_SUSPECT 에서 필수 하위 필드"}
+
+  - id: 12
+    name: smoking_alcohol
+    kind: dict
+    description: "흡연(현재/과거/비흡연), 음주(주당 횟수·1회 잔 수·폭음)"
+    collection: "문항"
+    required_for: [PREHTN, HTN_SUSPECT, MASKED, MORNING, RESISTANT_SUSPECT]
+    auxiliary_for: [ELEVATED, HTN_STAGE2_SCREEN, NOCTURNAL_SCREEN]
+    present_if: {all: [smoking, alcohol_per_week]}
+    fields:
+      - {name: smoking, type: enum, values: [current, former, never]}
+      - {name: alcohol_per_week, type: int, unit: times/week, range: [0, 30]}
+      - {name: drinks_per_occasion, type: float, unit: drinks, range: [0, 50]}
+      - {name: binge, type: bool}
+
+  - id: 13
+    name: sleep_snoring
+    kind: dict
+    description: "취침·기상 시각, 수면시간, 코골이·주간졸림·야뇨"
+    collection: "웨어러블 + 문항"
+    required_for: [MORNING, NOCTURNAL_SCREEN, RESISTANT_SUSPECT]
+    auxiliary_for: [PREHTN, HTN_SUSPECT, MASKED]
+    present_if: {all: [snoring, daytime_sleepiness, nocturia]}
+    fields:
+      - {name: bedtime, type: time}
+      - {name: wake_time, type: time}
+      - {name: sleep_hours, type: float, unit: h, range: [0, 24]}
+      - {name: snoring, type: bool}
+      - {name: daytime_sleepiness, type: bool}
+      - {name: nocturia, type: bool}
+
+  - id: 14
+    name: diet_sodium
+    kind: dict
+    description: "식단 사진(국·찌개·가공식품), 짜게 먹는 습관, 외식 빈도"
+    collection: "식단 사진 + 문항"
+    required_for: [PREHTN, HTN_SUSPECT, RESISTANT_SUSPECT]
+    auxiliary_for: [ELEVATED, HTN_STAGE2_SCREEN, ISH, MORNING, NOCTURNAL_SCREEN]
+    present_if: {all: [salty_habit]}
+    fields:
+      - {name: salty_habit, type: bool}
+      - {name: eating_out_per_week, type: int, unit: times/week, range: [0, 30]}
+      - {name: photo_soup_stew, type: bool, note: "식단 사진 분류 결과(선택)"}
+      - {name: photo_processed, type: bool}
+
+  - id: 15
+    name: activity
+    kind: dict
+    description: "주당 중강도 분, 걸음 수, 좌식 시간"
+    collection: "자동 수집"
+    required_for: [PREHTN, HTN_SUSPECT]
+    auxiliary_for: [ELEVATED, ISH, RESISTANT_SUSPECT]
+    present_if: {any: [moderate_min_per_week, steps_per_day, sedentary_hours]}
+    fields:
+      - {name: moderate_min_per_week, type: int, unit: min/week, range: [0, 10080]}
+      - {name: steps_per_day, type: int, unit: steps/day, range: [0, 100000]}
+      - {name: sedentary_hours, type: float, unit: h/day, range: [0, 24]}
+
+  - id: 16
+    name: lab_glucose_lipid
+    kind: dict
+    description: "공복혈당, HbA1c, 총콜레스테롤, TG, HDL, LDL"
+    collection: "검진 결과 입력"
+    required_for: []
+    auxiliary_for: [PREHTN, HTN_SUSPECT, HTN_STAGE2_SCREEN, RESISTANT_SUSPECT]
+    role_note: "당뇨 동반 확인 시 목표 혈압 필드만 130/80 으로 전환 (확인 기준은 D-06)"
+    present_if: {any: [fpg, hba1c, tc, tg, hdl, ldl]}
+    fields:
+      - {name: fpg, type: float, unit: mg/dL, range: [20, 1000]}
+      - {name: hba1c, type: float, unit: "%", range: [2, 20]}
+      - {name: tc, type: float, unit: mg/dL, range: [50, 1000]}
+      - {name: tg, type: float, unit: mg/dL, range: [10, 5000]}
+      - {name: hdl, type: float, unit: mg/dL, range: [5, 300]}
+      - {name: ldl, type: float, unit: mg/dL, range: [5, 800]}
+      - {name: date, type: date}
+
+  - id: 17
+    name: lab_kidney
+    kind: dict
+    description: "크레아티닌, 요단백"
+    collection: "검진 결과 입력"
+    required_for: [RESISTANT_SUSPECT]
+    auxiliary_for: [HTN_SUSPECT, HTN_STAGE2_SCREEN, NOCTURNAL_SCREEN]
+    role_note: "CKD 동반 확인 시 목표 혈압 필드만 130/80 으로 전환 (확인 기준은 D-06)"
+    present_if: {any: [creatinine, urine_protein]}
+    fields:
+      - {name: creatinine, type: float, unit: mg/dL, range: [0.1, 30]}
+      - {name: urine_protein, type: enum, values: [negative, trace, "1+", "2+", "3+", "4+"]}
+      - {name: date, type: date}
+
+  - id: 19
+    name: family_history
+    kind: dict
+    description: "부모·형제 고혈압·뇌졸중·심근경색, 본인 발병 연령"
+    collection: "온보딩"
+    required_for: [PREHTN, HTN_SUSPECT]
+    auxiliary_for: [ELEVATED, HTN_STAGE2_SCREEN]
+    present_if: {all: [htn]}
+    fields:
+      - {name: htn, type: bool, note: "부모·형제 고혈압"}
+      - {name: stroke, type: bool}
+      - {name: mi, type: bool}
+      - {name: own_onset_age, type: int, unit: years, range: [0, 120]}
+
+  - id: 20
+    name: clinical_exam
+    kind: dict
+    description: "심전도·심초음파·안저 (앱 불가, 보조)"
+    collection: "의료기관"
+    required_for: []
+    auxiliary_for: [HTN_SUSPECT, HTN_STAGE2_SCREEN, ISH, RESISTANT_SUSPECT]
+    present_if: {any: [ecg, echo, fundus]}
+    fields:
+      - {name: ecg, type: str}
+      - {name: echo, type: str}
+      - {name: fundus, type: str}
