@@ -1,0 +1,233 @@
+{
+  "model_version": "M1aux-20261020_150607-bp_regression__linear",
+  "feature_version": "1.2.0",
+  "kind": "bp_regression",
+  "candidate": "linear",
+  "purpose": "점검용 — 명세 2-1 에 따라 제품 출력 아님",
+  "run_id": "20261020_150607",
+  "columns": [
+    "age",
+    "male",
+    "bmi",
+    "waist_cm",
+    "alcohol_week",
+    "alcohol_per_day",
+    "binge",
+    "activity_minutes_week",
+    "activity_low_flag",
+    "family_htn",
+    "sleep_short_flag",
+    "diabetes_flag",
+    "fasting_glucose",
+    "resting_hr",
+    "education_years",
+    "missing_count",
+    "age_x_male",
+    "waist_missing",
+    "alcohol_missing",
+    "activity_missing",
+    "family_htn_missing",
+    "sleep_missing",
+    "diabetes_missing",
+    "fasting_glucose_missing",
+    "resting_hr_missing",
+    "education_missing"
+  ],
+  "monotone": [
+    1,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    -1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    -1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fit_seconds": 0.0636081249685958,
+  "fit_info": {
+    "sbp": {
+      "lam": 0.0001,
+      "l2_trials": [
+        {
+          "lam": 0.0001,
+          "val_rmse": 13.649232525483853,
+          "converged": true
+        },
+        {
+          "lam": 0.001,
+          "val_rmse": 13.649299922271947,
+          "converged": true
+        },
+        {
+          "lam": 0.01,
+          "val_rmse": 13.649747119051833,
+          "converged": true
+        },
+        {
+          "lam": 0.1,
+          "val_rmse": 13.703277018314473,
+          "converged": true
+        },
+        {
+          "lam": 1.0,
+          "val_rmse": 14.154450381577965,
+          "converged": true
+        }
+      ],
+      "coef": {
+        "age": 7.591895279191716,
+        "male": 3.1023112609352617,
+        "bmi": 2.6385162399711457,
+        "waist_cm": 0.0,
+        "alcohol_week": 0.9358472541737483,
+        "alcohol_per_day": 0.6677882979442317,
+        "binge": 1.362400460504144,
+        "activity_minutes_week": 0.0,
+        "activity_low_flag": 0.0,
+        "family_htn": 2.5059811994769268,
+        "sleep_short_flag": 0.09642084289078587,
+        "diabetes_flag": 0.0,
+        "fasting_glucose": 0.7424153931037946,
+        "resting_hr": 0.2603366283732018,
+        "education_years": -1.5446494314351389,
+        "missing_count": 0.0,
+        "age_x_male": -3.700046555511063,
+        "waist_missing": 0.0,
+        "alcohol_missing": 0.0,
+        "activity_missing": 0.0,
+        "family_htn_missing": 0.0,
+        "sleep_missing": 0.0,
+        "diabetes_missing": 0.0,
+        "fasting_glucose_missing": 0.0,
+        "resting_hr_missing": 0.0,
+        "education_missing": 0.0
+      },
+      "intercept": 114.97323924500971
+    },
+    "dbp": {
+      "lam": 0.001,
+      "l2_trials": [
+        {
+          "lam": 0.0001,
+          "val_rmse": 8.92632552225696,
+          "converged": true
+        },
+        {
+          "lam": 0.001,
+          "val_rmse": 8.926311352509986,
+          "converged": true
+        },
+        {
+          "lam": 0.01,
+          "val_rmse": 8.926629399021001,
+          "converged": true
+        },
+        {
+          "lam": 0.1,
+          "val_rmse": 8.955215790920615,
+          "converged": true
+        },
+        {
+          "lam": 1.0,
+          "val_rmse": 9.163946111395875,
+          "converged": true
+        }
+      ],
+      "coef": {
+        "age": 1.1451018307850263,
+        "male": 2.8409096359749904,
+        "bmi": 2.126783058665922,
+        "waist_cm": 0.0,
+        "alcohol_week": 0.7540951309815657,
+        "alcohol_per_day": 0.5656044765807177,
+        "binge": 1.187668106554217,
+        "activity_minutes_week": 0.0,
+        "activity_low_flag": 0.0,
+        "family_htn": 2.26182429239905,
+        "sleep_short_flag": 0.22155767290987505,
+        "diabetes_flag": 0.0,
+        "fasting_glucose": 0.0,
+        "resting_hr": 0.8703768717900352,
+        "education_years": 0.0,
+        "missing_count": 0.0,
+        "age_x_male": -1.825152618995538,
+        "waist_missing": 0.0,
+        "alcohol_missing": 0.0,
+        "activity_missing": 0.0,
+        "family_htn_missing": 0.0,
+        "sleep_missing": 0.0,
+        "diabetes_missing": 0.0,
+        "fasting_glucose_missing": 0.0,
+        "resting_hr_missing": 0.0,
+        "education_missing": 0.0
+      },
+      "intercept": 72.65997398838809
+    }
+  },
+  "metrics": {
+    "val": {
+      "rmse_sbp": 13.649232525483853,
+      "mae_sbp": 10.402576379007376,
+      "bias_sbp": -0.2635435299093976,
+      "r2_sbp": 0.28823334936493716,
+      "rmse_dbp": 8.926311352509986,
+      "mae_dbp": 7.028425536607271,
+      "bias_dbp": 0.23205005933654232,
+      "r2_dbp": 0.17695695886171792,
+      "stage_accuracy_from_bp": 0.464123206160308,
+      "stage_adjacent_accuracy_from_bp": 0.7625131256562828,
+      "stage_counts_from_bp": {
+        "normal": 2810,
+        "elevated": 1808,
+        "prehtn": 1082,
+        "htn": 14
+      },
+      "accuracy_htn_from_bp": 0.8521176058802941,
+      "sensitivity_htn_from_bp": 0.004767580452920143,
+      "specificity_htn_from_bp": 0.997948717948718,
+      "ppv_htn_from_bp": 0.2857142857142857,
+      "n_pred_pos_htn_from_bp": 14
+    },
+    "test": {
+      "rmse_sbp": 13.751873739394949,
+      "mae_sbp": 10.339210281374042,
+      "bias_sbp": -0.2987178248960718,
+      "r2_sbp": 0.26273859305200375,
+      "rmse_dbp": 9.167898052740158,
+      "mae_dbp": 7.277626981059984,
+      "bias_dbp": 1.6459495569412228,
+      "r2_dbp": 0.10940497906548075,
+      "stage_accuracy_from_bp": 0.4527067221891731,
+      "stage_adjacent_accuracy_from_bp": 0.7938726948245092,
+      "stage_counts_from_bp": {
+        "normal": 3035,
+        "elevated": 2409,
+        "prehtn": 1270,
+        "htn": 10
+      },
+      "accuracy_htn_from_bp": 0.8677870315288518,
+      "sensitivity_htn_from_bp": 0.0011350737797956867,
+      "specificity_htn_from_bp": 0.9984596953619715,
+      "ppv_htn_from_bp": 0.1,
+      "n_pred_pos_htn_from_bp": 10
+    }
+  }
+}
