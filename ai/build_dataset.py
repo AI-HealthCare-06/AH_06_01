@@ -25,6 +25,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import labels as L  # noqa: E402
+import labels_m3 as L3  # noqa: E402
 import thresholds_kr_v1 as T  # noqa: E402
 from features import contract_v1 as C  # noqa: E402
 from features import knhanes_v1 as K  # noqa: E402
@@ -76,7 +77,7 @@ def build(raw_dir: Path, out_dir: Path, reports_dir: Path, schema_path: Path) ->
     # 2. 포함 기준·라벨 (labels.py)
     adults = full[full["age"] >= T.KNHANES_MIN_AGE]
     keep, reasons = L.inclusion_mask(full)
-    labeled = L.make_labels(full)
+    labeled = L3.make_labels_m3(L.make_labels(full))
     med_missing = int(keep.sum() - len(labeled))
 
     audit += ["\n## 1. 표본 흐름\n", "| 단계 | 행 수 |", "|---|---|",
@@ -111,6 +112,14 @@ def build(raw_dir: Path, out_dir: Path, reports_dir: Path, schema_path: Path) ->
                  "공식 통계와 본 모델의 **주 라벨은 원값**. 전환식 라벨은 `label_htn_devadj` 로 저장해 테스트 세트 민감도 분석에만 쓴다. "
                  "2020년 커프 선정 오류 159건은 원시자료에서 식별할 수 없어 포함돼 있다.")
 
+    # 2b. M3 동반 질환 라벨 — 판정 가능 비율과 유병률
+    audit += ["\n### M3 동반 질환 라벨 (라벨 완료 행 기준)\n", "| 라벨 | 판정 가능 | 양성 | 유병률(판정 가능 중) | 가중 유병률 |", "|---|---|---|---|---|"]
+    for lab in L3.LABELS_M3:
+        d = labeled[labeled[lab].notna()]
+        audit.append(f"| {lab} | {len(d):,} ({pct(len(d) / len(labeled))}) | {int(d[lab].sum()):,} | {pct(d[lab].mean())} | {pct(L.weighted_prevalence(d, lab))} |")
+    audit.append("\n당뇨 = 공복(≥8h) 혈당 ≥126 or HbA1c ≥6.5 or 진단·약 (공식 HE_DM_HbA1c). CKD = eGFR(CKD-EPI 2021) <60 or 요단백 ≥1+ or ACR ≥30(2013~14·2019~). "
+                 "이상지질 = 공복 총콜 ≥240 or 약 or LDL ≥160 or 공복 12h TG ≥200 or HDL <40 or 진단. 대사증후군 = 5개 중 3개 이상. 판정 불가(검사 결측)는 NaN.")
+
     # 3. 결측률 (대치 전) — 피처 × 연도
     miss = labeled.groupby("year")[list(LIFESTYLE)].apply(lambda g: g.isna().mean()).T
     miss["all_years"] = labeled[list(LIFESTYLE)].isna().mean()
@@ -123,7 +132,7 @@ def build(raw_dir: Path, out_dir: Path, reports_dir: Path, schema_path: Path) ->
 
     # 4. 계약 변환 결과(범위 밖·fallback)
     imp = C.fit_imputers(labeled[labeled["year"].isin(TIME_SPLIT["train"])], source="knhanes_2013_2019")
-    _, results = C.transform_frame(labeled.drop(columns=["_activity_raw_minutes"]), imp)
+    _, results = C.transform_frame(labeled.drop(columns=[c for c in labeled.columns if c.startswith(("_", "lab_"))]), imp)
     dq = pd.Series([r.data_quality for r in results]).value_counts()
     oor = pd.Series([f for r in results for f in r.out_of_range]).value_counts()
     mc = pd.Series([int(r.features["missing_count"]) for r in results if r.accepted]).value_counts().sort_index()

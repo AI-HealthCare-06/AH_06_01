@@ -117,6 +117,67 @@ def fairness_gap(sub: pd.DataFrame, col: str = "ece10") -> float:
     return float(by_sex.max() - by_sex.min()) if len(by_sex) > 1 else 0.0
 
 
+# ── 회귀 지표 (M2 예상 혈압) ──────────────────────────────────────────────────
+
+
+def evaluate_regression(y, yhat, w=None) -> dict[str, float]:
+    """RMSE·MAE·R²·보정 기울기(관측 ~ 예측)·평균 잔차. mmHg 단위."""
+    y, yhat = np.asarray(y, dtype=float), np.asarray(yhat, dtype=float)
+    r = y - yhat
+    ss_res, ss_tot = float((r ** 2).sum()), float(((y - y.mean()) ** 2).sum())
+    slope, intercept = np.polyfit(yhat, y, 1) if len(y) > 2 else (float("nan"), float("nan"))
+    out = {"n": int(len(y)), "rmse": float(np.sqrt((r ** 2).mean())), "mae": float(np.abs(r).mean()),
+           "r2": float(1 - ss_res / ss_tot) if ss_tot > 0 else float("nan"), "mean_residual": float(r.mean()),
+           "cal_slope": float(slope), "cal_intercept": float(intercept), "y_mean": float(y.mean()), "pred_mean": float(yhat.mean())}
+    if w is not None:
+        w = np.asarray(w, dtype=float)
+        ok = np.isfinite(w) & (w > 0)
+        out["rmse_w"] = float(np.sqrt(np.average(r[ok] ** 2, weights=w[ok])))
+    return out
+
+
+def regression_subgroups(y, yhat, sex: pd.Series, age: pd.Series) -> pd.DataFrame:
+    df = pd.DataFrame({"y": np.asarray(y), "yhat": np.asarray(yhat), "sex": np.asarray(sex), "age_group": age_group(pd.Series(np.asarray(age)))})
+    rows = []
+    for (s, g), d in df.groupby(["sex", "age_group"], observed=True):
+        m = evaluate_regression(d["y"], d["yhat"])
+        rows.append({"sex": s, "age_group": str(g), "n": m["n"], "y_mean": m["y_mean"], "pred_mean": m["pred_mean"],
+                     "rmse": m["rmse"], "mae": m["mae"], "mean_residual": m["mean_residual"]})
+    return pd.DataFrame(rows)
+
+
+def plot_regression_calibration(y, yhat, path: Path, title: str, unit: str = "mmHg") -> Path:
+    """예측 10분위별 관측 평균 vs 예측 평균 (회귀판 보정 곡선)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    y, yhat = np.asarray(y, dtype=float), np.asarray(yhat, dtype=float)
+    edges = np.unique(np.quantile(yhat, np.linspace(0, 1, N_BINS + 1)))
+    idx = np.clip(np.searchsorted(edges, yhat, side="right") - 1, 0, len(edges) - 2)
+    px = np.array([yhat[idx == b].mean() for b in range(len(edges) - 1)])
+    py = np.array([y[idx == b].mean() for b in range(len(edges) - 1)])
+    lo, hi = min(px.min(), py.min()) - 3, max(px.max(), py.max()) + 3
+    fig, ax = plt.subplots(figsize=(5.2, 5.2), dpi=150, facecolor=C_SURFACE)
+    ax.set_facecolor(C_SURFACE)
+    ax.plot([lo, hi], [lo, hi], color=C_GRID, lw=1, ls="--", zorder=1)
+    ax.plot(px, py, color=C_SERIES1, lw=2, marker="o", ms=5, zorder=3)
+    ax.set_xlim(lo, hi); ax.set_ylim(lo, hi); ax.set_aspect("equal")
+    ax.set_xlabel(f"예측 ({unit}, 10분위 평균)", color=C_TEXT2); ax.set_ylabel(f"관측 평균 ({unit})", color=C_TEXT2)
+    ax.set_title(title, color=C_TEXT, fontsize=11, loc="left")
+    ax.tick_params(colors=C_TEXT2); ax.grid(color=C_GRID, lw=0.6)
+    for s in ax.spines.values():
+        s.set_color(C_GRID)
+    m = evaluate_regression(y, yhat)
+    ax.text(0.98, 0.02, f"RMSE {m['rmse']:.1f} · 기울기 {m['cal_slope']:.2f}", ha="right", va="bottom",
+            transform=ax.transAxes, color=C_TEXT2, fontsize=9)
+    fig.tight_layout()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, facecolor=C_SURFACE)
+    plt.close(fig)
+    return path
+
+
 # ── 계수 표 (B0) ─────────────────────────────────────────────────────────────
 
 

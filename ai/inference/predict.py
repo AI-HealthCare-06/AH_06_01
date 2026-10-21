@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from features.contract_v1 import MODEL_FULL, MODEL_LITE
-from inference.bundle import ModelBundle
+from inference.bundle import MODEL_EXPECTED_BP, ModelBundle, RegressionBundle
 from inference.predictor import RiskPredictor
 
 ARTIFACT_DIR = Path(os.environ.get("HTN_RISK_ARTIFACT_DIR", Path(__file__).resolve().parents[1] / "artifacts"))
@@ -23,7 +23,11 @@ def load_predictor(artifact_dir: Path = ARTIFACT_DIR) -> RiskPredictor:
     missing = [str(p) for p in files.values() if not p.exists()]
     if missing:
         raise FileNotFoundError(f"model artifacts not found: {missing}")
-    return RiskPredictor(full=ModelBundle.load(files[MODEL_FULL]), lite=ModelBundle.load(files[MODEL_LITE]))
+    bp_path = artifact_dir / f"{MODEL_EXPECTED_BP}.joblib"   # M2 는 선택 — 없으면 expected_sbp 가 null
+    bp = RegressionBundle.load(bp_path) if bp_path.exists() else None
+    from features.contract_v2 import DISEASES, MODEL_PREFIX  # M3 (선택) — 있는 질환 번들만 로드
+    como = {d: ModelBundle.load(artifact_dir / f"{MODEL_PREFIX}{d}.joblib") for d in DISEASES if (artifact_dir / f"{MODEL_PREFIX}{d}.joblib").exists()}
+    return RiskPredictor(full=ModelBundle.load(files[MODEL_FULL]), lite=ModelBundle.load(files[MODEL_LITE]), bp=bp, comorbidity=como or None)
 
 
 _PREDICTOR = load_predictor()
@@ -36,4 +40,7 @@ def predict_htn_risk(features: dict[str, Any]) -> dict[str, Any]:
 
 def model_info() -> dict[str, Any]:
     """운영 로그·헬스체크용: 로드된 모델 버전."""
-    return {k: b.describe() for k, b in ((MODEL_FULL, _PREDICTOR.full), (MODEL_LITE, _PREDICTOR.lite))}
+    info = {k: b.describe() for k, b in ((MODEL_FULL, _PREDICTOR.full), (MODEL_LITE, _PREDICTOR.lite))}
+    info[MODEL_EXPECTED_BP] = _PREDICTOR.bp.describe() if _PREDICTOR.bp else None
+    info.update({b.model_id: b.describe() for b in _PREDICTOR.comorbidity.values()})
+    return info

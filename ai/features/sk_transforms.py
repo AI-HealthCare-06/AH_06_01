@@ -10,8 +10,8 @@ import warnings
 from typing import Sequence
 
 import numpy as np
-from scipy.optimize import minimize
-from sklearn.base import BaseEstimator, ClassifierMixin
+from scipy.optimize import lsq_linear, minimize
+from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.preprocessing import FunctionTransformer
@@ -90,6 +90,42 @@ class SignConstrainedLogisticRegression(BaseEstimator, ClassifierMixin):
 
     def predict(self, X):
         return (self.decision_function(X) >= 0).astype(int)
+
+
+class SignConstrainedRidge(BaseEstimator, RegressorMixin):
+    """릿지 회귀 + 계수 부호 경계 (M2 예상 혈압).
+
+    최소화: ‖Xw + b − y‖² + alpha·‖w‖², w_j 의 부호는 signs[j] 로 제한(+1 ≥0, −1 ≤0, 0 자유), 절편은 자유·비정규화.
+    scipy.optimize.lsq_linear 로 정확히 푼다(볼록 문제, 전역 최적). coef_/intercept_/predict 는 sklearn 과 같다.
+    """
+
+    def __init__(self, signs: Sequence[int] | None = None, alpha: float = 1.0) -> None:
+        self.signs = signs
+        self.alpha = alpha
+
+    def fit(self, X, y):
+        X = np.asarray(X, dtype=float)
+        y = np.asarray(y, dtype=float).reshape(-1)
+        n, d = X.shape
+        signs = np.zeros(d, dtype=int) if self.signs is None else np.asarray(self.signs, dtype=int)
+        if len(signs) != d:
+            raise ValueError(f"signs length {len(signs)} != n_features {d}")
+        # 절편 열 + 릿지 패널티를 가상 행으로 쌓는다 (절편은 패널티 없음)
+        A = np.hstack([X, np.ones((n, 1))])
+        R = np.hstack([np.sqrt(self.alpha) * np.eye(d), np.zeros((d, 1))])
+        A_aug, y_aug = np.vstack([A, R]), np.concatenate([y, np.zeros(d)])
+        lo = np.array([0.0 if s > 0 else -np.inf for s in signs] + [-np.inf])
+        hi = np.array([0.0 if s < 0 else np.inf for s in signs] + [np.inf])
+        res = lsq_linear(A_aug, y_aug, bounds=(lo, hi), method="bvls" if d < 200 else "trf")
+        self.coef_ = res.x[:-1]
+        self.intercept_ = float(res.x[-1])
+        self.n_features_in_ = d
+        self.signs_ = signs
+        self.converged_ = bool(res.success)
+        return self
+
+    def predict(self, X):
+        return np.asarray(X, dtype=float) @ self.coef_ + self.intercept_
 
 
 def with_square(X):

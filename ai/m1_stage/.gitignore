@@ -1,0 +1,28 @@
+# 데이터 파일은 커밋하지 않는다 (train/, test/ 에는 안내 파일만)
+train/*
+test/*
+!train/README.txt
+!test/README.txt
+*.csv
+*.xlsx
+*.xls
+*.parquet
+!reports/explore_*/*.csv
+!reports/threshold_scan_*/*.csv
+!reports/reason_rules_*/*.csv
+!reports/reason_audit_*/*.csv
+!reports/feature_importance_*/*.csv
+# 행 단위 결과·보관 폴더
+reports/_archive/
+reports/predict_*/
+reports/step_compare_*/
+reports/profile_*
+reports/*/test_results.xlsx
+reports/*/data_summary.json
+reports/*/run_config.json
+artifacts/_archive/
+# 로컬 캐시
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store

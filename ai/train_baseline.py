@@ -66,7 +66,9 @@ def prepare(df: pd.DataFrame, split: str) -> tuple[pd.DataFrame, pd.DataFrame, C
     col = SPLIT_COL[split]
     imp = C.fit_imputers(df[df[col] == "train"], source=f"knhanes_{split}_train")
     X_full, results = C.transform_frame(df.drop(columns=[c for c in df.columns if c.startswith("_")]), imp, C.MODEL_FULL)
-    meta = df.loc[X_full.index, ["year", "sex", "age", "wt", L.LABEL_HTN, L.LABEL_HTN + "_devadj", col]].rename(columns={col: "split"})
+    meta_cols = ["year", "sex", "age", "wt", L.LABEL_HTN, L.LABEL_HTN + "_devadj", "HE_sbp", "HE_dbp",
+                 "HE_sbp_devadj", "HE_dbp_devadj", "on_medication", col]
+    meta = df.loc[X_full.index, meta_cols].rename(columns={col: "split"})
     n_rej = sum(1 for r in results if not r.accepted)
     print(f"[prepare:{split}] rows={len(df):,} accepted={len(X_full):,} rejected(out_of_range)={n_rej:,}  imputers={imp.source}")
     return X_full, meta, imp
