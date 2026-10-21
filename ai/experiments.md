@@ -16,6 +16,8 @@
 | 2026-10-12 | 2026.10.12-b0/random721 | B0 LR (htn_risk_lite) | lite 5 | knhanes_contract_v1.parquet | 42 | 0.818 (0.822) | 0.654 | 0.160 | 0.98 / +0.02 | 0.013 | platt 보정, 테스트=무작위 10%, 가중 AUROC 0.826, 성별 ECE 차 0.020, gates 통과, 단조 위반 0, 전환식 라벨 AUROC 0.818 |
 | 2026-10-13 | 2026.10.13-b1/time | B1 LGBM mono (htn_risk_full) | full 14 | knhanes_contract_v1.parquet | 42 | 0.846 (0.840) | 0.723 | 0.150 | 1.05 / +0.03 | 0.009 | platt 보정, hp {'learning_rate': 0.03, 'num_leaves': 15, 'min_child_samples': 200}, trees 279, ΔAUROC vs B0 val +0.003 / test +0.002, 성별 ECE 차 0.001, 단조 위반 0, B0 유지 |
 | 2026-10-13 | 2026.10.13-b1/time | B1 LGBM mono (htn_risk_lite) | lite 5 | knhanes_contract_v1.parquet | 42 | 0.827 (0.821) | 0.688 | 0.159 | 1.05 / +0.02 | 0.009 | platt 보정, hp {'learning_rate': 0.03, 'num_leaves': 7, 'min_child_samples': 200}, trees 296, ΔAUROC vs B0 val +0.004 / test +0.004, 성별 ECE 차 0.003, 단조 위반 0, B0 유지 |
+| 2026-10-15 | 2026.10.15-b0/time | B0 LR (htn_risk_full) | full 14 | knhanes_contract_v1.parquet | 42 | 0.844 (0.837) | 0.715 | 0.152 | 1.05 / +0.02 | 0.012 | platt 보정, 테스트=2021~22, 가중 AUROC 0.851, 성별 ECE 차 0.000, gates 통과, 데이터 재빌드(당뇨 공복 8h) 후 재학습, 단조 위반 0, 전환식 라벨 AUROC 0.837 |
+| 2026-10-15 | 2026.10.15-b0/time | B0 LR (htn_risk_lite) | lite 5 | knhanes_contract_v1.parquet | 42 | 0.824 (0.817) | 0.678 | 0.161 | 1.05 / +0.02 | 0.013 | platt 보정, 테스트=2021~22, 가중 AUROC 0.829, 성별 ECE 차 0.000, gates 통과, 데이터 재빌드(당뇨 공복 8h) 후 재학습, 단조 위반 0, 전환식 라벨 AUROC 0.818 |
 
 ## M2 예상 혈압 회귀 (expected_bp)
 
@@ -32,7 +34,3 @@
 | 2026-10-15 | 2026.10.15-m3/time | ckd | M3 LR(부호 제약) | 39,139 (5.4%) | 0.755 (0.758) | 0.273 | 0.079 | 0.96 | 0.008 | val AUROC lin 0.758 / gbm 0.769, 성별 ECE 차 0.005 |
 | 2026-10-15 | 2026.10.15-m3/time | dyslipidemia | M3 LR(부호 제약) | 38,348 (41.7%) | 0.746 (0.758) | 0.680 | 0.204 | 0.94 | 0.037 | val AUROC lin 0.758 / gbm 0.766, 성별 ECE 차 0.005 |
 | 2026-10-15 | 2026.10.15-m3/time | metsyn | M3 LR(부호 제약) | 37,808 (34.1%) | 0.908 (0.911) | 0.856 | 0.121 | 0.96 | 0.027 | val AUROC lin 0.911 / gbm 0.927, 성별 ECE 차 0.002 |
-| 2026-10-15 | 2026.10.15-b0/time | B0 LR (htn_risk_full) | full 14 | knhanes_contract_v1.parquet | 42 | 0.844 (0.837) | 0.715 | 0.152 | 1.05 / +0.02 | 0.012 | platt 보정, 테스트=2021~22, 가중 AUROC 0.851, 성별 ECE 차 0.000, gates 통과, 단조 위반 0, 전환식 라벨 AUROC 0.837 |
-| 2026-10-15 | 2026.10.15-b0/time | B0 LR (htn_risk_lite) | lite 5 | knhanes_contract_v1.parquet | 42 | 0.824 (0.817) | 0.678 | 0.161 | 1.05 / +0.02 | 0.013 | platt 보정, 테스트=2021~22, 가중 AUROC 0.829, 성별 ECE 차 0.000, gates 통과, 단조 위반 0, 전환식 라벨 AUROC 0.818 |
-| 2026-10-15 | 2026.10.15-m2/time | M2 linear (부호 제약) | SBP | 30,969 | 13.53 (13.27) | 10.06 | 0.241 | 0.97 | +0.25 | 미복용자, alpha 1.0, 전환식 라벨 RMSE 13.33, 연도별 잔차 {2021: 0.18, 2022: 0.31} |
-| 2026-10-15 | 2026.10.15-m2/time | M2 linear (부호 제약) | DBP | 30,969 | 9.23 (8.56) | 7.35 | 0.160 | 0.99 | -1.72 | 미복용자, alpha 1.0, 전환식 라벨 RMSE 8.61, 연도별 잔차 {2021: -1.95, 2022: -1.47} |
