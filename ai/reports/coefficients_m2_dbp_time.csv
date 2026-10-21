@@ -1,0 +1,17 @@
+term,origin,coef_std,mmhg_per_unit,sign_constraint
+age__age,age,11.331942727390576,0.718441392194424,1
+age__age^2,age,-10.898416882169458,-0.007019001223302494,0
+remainder__sex_female,sex_female,-1.5291597869355673,-3.0852513264817327,0
+remainder__bmi,bmi,1.9102780964107557,0.5499235111605123,1
+remainder__waist_cm,waist_cm,0.5334862245886781,0.05347153614514156,1
+remainder__smoking_former,smoking_former,-0.0906310521521389,-0.22879278236324285,0
+remainder__smoking_current,smoking_current,0.0,0.0,1
+remainder__alcohol_units_week,alcohol_units_week,1.3001275743093623,0.13316024495373754,1
+remainder__activity_minutes_week,activity_minutes_week,-0.024880967016159817,-5.597960967959237e-05,-1
+remainder__activity_low_flag,activity_low_flag,0.02301387087505719,0.04724515361282652,1
+remainder__sleep_avg_h,sleep_avg_h,-0.06717296812211869,-0.052853966765818,0
+remainder__sodium_risk_score,sodium_risk_score,0.0,0.0,1
+remainder__stress_score,stress_score,-0.02402728879573196,-0.03330637690988619,0
+remainder__family_htn,family_htn,0.8491819915546509,1.7597609489927546,0
+remainder__diabetes_flag,diabetes_flag,-0.3431644918284666,-1.236135952118927,0
+remainder__missing_count,missing_count,0.3034882460583147,0.428855740963328,0

@@ -1,0 +1,143 @@
+{
+  "model_version": "M1-20261020_150607-lgbm__base",
+  "feature_version": "1.2.0",
+  "candidate": "lgbm",
+  "variant": "base",
+  "optional_features": [],
+  "run_id": "20261020_150607",
+  "columns": [
+    "age",
+    "male",
+    "bmi",
+    "waist_cm",
+    "alcohol_week",
+    "alcohol_per_day",
+    "binge",
+    "activity_minutes_week",
+    "activity_low_flag",
+    "family_htn",
+    "sleep_short_flag",
+    "diabetes_flag",
+    "fasting_glucose",
+    "resting_hr",
+    "education_years",
+    "missing_count",
+    "age_x_male",
+    "waist_missing",
+    "alcohol_missing",
+    "activity_missing",
+    "family_htn_missing",
+    "sleep_missing",
+    "diabetes_missing",
+    "fasting_glucose_missing",
+    "resting_hr_missing",
+    "education_missing"
+  ],
+  "monotone": [
+    1,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    -1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    -1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "train_size": 26105,
+  "fit_seconds": 2.1882004169747233,
+  "fit_info": {
+    "binaries": [
+      {
+        "threshold": "ge_1",
+        "best_iteration": 269,
+        "platt": {
+          "a": 0.9885766419926966,
+          "b": -0.011106655788603249,
+          "fitted_on": 5714
+        }
+      },
+      {
+        "threshold": "ge_2",
+        "best_iteration": 274,
+        "platt": {
+          "a": 0.9825982131374273,
+          "b": -0.06077479026768904,
+          "fitted_on": 5714
+        }
+      },
+      {
+        "threshold": "ge_3",
+        "best_iteration": 315,
+        "platt": {
+          "a": 0.9431200814795884,
+          "b": -0.2064123756132023,
+          "fitted_on": 5714
+        }
+      }
+    ],
+    "params": {
+      "objective": "binary",
+      "learning_rate": 0.05,
+      "num_leaves": 7,
+      "max_depth": 3,
+      "min_child_samples": 20,
+      "subsample": 0.8,
+      "subsample_freq": 1,
+      "colsample_bytree": 0.8,
+      "reg_lambda": 1.0,
+      "n_estimators": 2000,
+      "monotone_constraints_method": "advanced",
+      "deterministic": true,
+      "force_row_wise": true,
+      "verbose": -1
+    }
+  },
+  "fast_path_check": {
+    "rows": 6724,
+    "max_abs_dx": 0.0,
+    "status_mismatch": 0,
+    "problems_mismatch": 0,
+    "flags_mismatch": 0,
+    "observed_mismatch": 0,
+    "raw_mismatch": 0,
+    "max_abs_dp": 0.0,
+    "max_abs_dcontrib": 0.0,
+    "atol": 1e-09,
+    "ok": true
+  },
+  "htn_threshold_youden": 0.1396310511985353,
+  "stage_rule": "cumulative",
+  "stage_objective": "accuracy",
+  "stage_thresholds": {
+    "accuracy": [
+      0.77,
+      0.53,
+      0.36
+    ],
+    "val_accuracy_score": 0.5178508925446272,
+    "balanced": [
+      0.5,
+      0.49,
+      0.22
+    ],
+    "val_balanced_score": 0.4019533733502058
+  }
+}

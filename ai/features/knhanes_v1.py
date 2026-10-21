@@ -48,6 +48,8 @@ COMMON_VARS = [
     "BS3_1", "BD1_11", "BD2_1", "BE3_31", "BE3_32", "BE3_33", "BP1", "N_NA",
     "HE_HPfh1", "HE_HPfh2", "HE_HPfh3", "HE_glu", "HE_HbA1c", "DE1_dg", "DE1_31", "DE1_32",
     "wt_itvex", "psu", "kstrata",
+    # M3 동반 질환 라벨 재료 (검진값·이상지질 진단/복약·공복시간). 피처가 아니라 라벨에만 쓴다 (lab_ 접두)
+    "HE_fst", "HE_chol", "HE_TG", "HE_HDL_st2", "HE_LDL_drct", "HE_crea", "HE_Upro", "HE_Ualb", "HE_Ucrea", "DI2_dg", "DI2_2",
 ]
 ACTIVITY_IPAQ_2013 = ["BE3_11", "BE3_12", "BE3_13", "BE3_21", "BE3_22", "BE3_23"]
 ACTIVITY_GPAQ = ["BE3_71", "BE3_72", "BE3_73", "BE3_74", "BE3_75", "BE3_76", "BE3_77", "BE3_78",
@@ -233,11 +235,26 @@ def to_contract(df: pd.DataFrame, year: int) -> pd.DataFrame:
     all_known_no = fh.isin([0, 8]).all(axis=1)
     out["family_htn"] = pd.Series(np.where(any_yes, True, np.where(all_known_no, False, None)), index=df.index, dtype=object)
 
-    glu, a1c = _num(df["HE_glu"]), _num(df["HE_HbA1c"])
+    glu, a1c, fst = _num(df["HE_glu"]), _num(df["HE_HbA1c"]), _num(df["HE_fst"])
     dg, ins, oral = _num(df["DE1_dg"]), _num(df["DE1_31"]), _num(df["DE1_32"])
-    dm_yes = (glu >= 126) | (a1c >= 6.5) | (dg == 1) | (ins == 1) | (oral == 1)
+    # 공식 HE_DM: 공복 8시간 이상일 때만 공복혈당 기준을 쓴다 (2026-10-15 SAS 대조 후 추가). HbA1c·진단·약은 공복 무관
+    glu_fasting = glu.where(fst >= 8)
+    dm_yes = (glu_fasting >= 126) | (a1c >= 6.5) | (dg == 1) | (ins == 1) | (oral == 1)
     dg_known_no = dg.isin([0, 8])
     out["diabetes_flag"] = pd.Series(np.where(dm_yes, True, np.where(dg_known_no, False, None)), index=df.index, dtype=object)
+
+    # ── M3 라벨 재료 (피처 아님) ──
+    out["lab_fst_h"] = fst
+    out["lab_glu"], out["lab_hba1c"] = glu, a1c
+    out["lab_chol"], out["lab_tg"], out["lab_hdl"], out["lab_ldl"] = (_num(df[c]) for c in ("HE_chol", "HE_TG", "HE_HDL_st2", "HE_LDL_drct"))
+    out["lab_crea"] = _num(df["HE_crea"])                       # mg/dL
+    out["lab_upro"] = _num(df["HE_Upro"])                       # 요단백 스틱 코드 0 − / 1 ± / 2 1+ / 3 2+ / 4 3+ / 5 4+
+    ualb, ucrea = _num(df["HE_Ualb"]), _num(df["HE_Ucrea"])     # ㎍/mL, mg/dL → ACR mg/g = Ualb/Ucrea×100 (2013~14, 2019~)
+    out["lab_acr"] = (ualb / ucrea * 100).where(ucrea > 0)
+    di2 = _num(df["DI2_2"])                                     # 이상지질혈증 약 복용 (DI1_2 와 같은 코드)
+    out["lipid_medication"] = pd.Series(np.where(di2.isin([1, 2, 3, 4]), 1.0, np.where(di2.isin([5, 8]), 0.0, np.nan)), index=df.index)
+    out["lipid_dx"] = (_num(df["DI2_dg"]) == 1).astype(int)
+    out["dm_medication"] = ((ins == 1) | (oral == 1)).astype(int)
 
     out["wt"] = _num(df["wt_itvex"])
     out["psu"], out["kstrata"] = _num(df["psu"]), _num(df["kstrata"])

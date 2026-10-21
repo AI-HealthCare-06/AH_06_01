@@ -1,0 +1,200 @@
+# M1 피처 계약 — 피처 이름·타입·단위·범위·결측 처리·단조 방향의 유일한 원본.
+# 학습과 추론은 m1/features.py 의 같은 변환 함수를 쓴다. 이 파일을 바꾸면 version 을 올린다.
+# 임계값 숫자는 쓰지 않고 thresholds.py 상수 이름으로 참조한다.
+version: "1.2.0"   # 1.1.0: label_inputs 컬럼 별칭(sbp/dbp). 1.2.0: sodium_risk_score 피처 제거(사용자 결정 2026-10-20, 명세 2-3 에서 벗어남)
+model: "M1"
+
+# 혈압 관련 컬럼은 어떤 형태로도 피처 행렬에 들어갈 수 없다 (컬럼 이름 소문자 부분 일치 검사).
+forbidden_feature_patterns:   # 정규식, 소문자 컬럼명에 re.search
+  - "sbp"
+  - "dbp"
+  - "systolic"
+  - "diastolic"
+  - "blood_pressure"
+  - "(^|_)bp($|_)"
+  - "htn_med"
+  - "혈압"
+
+# 라벨 생성 전용 컬럼 (피처 금지). 라벨 규칙은 thresholds.py + m1/labels.py
+label_inputs:
+  sbp_mean: [sbp_mean, sbp]          # 앞에서부터 먼저 있는 컬럼 사용. 2회 이상 측정 평균으로 간주(측정 횟수 검증 불가 → 보고서에 기록)
+  dbp_mean: [dbp_mean, dbp]
+  sbp_repeat_pattern: "^sbp_\\d+$"   # 평균 컬럼이 없으면 회차 컬럼 평균. thresholds.LABEL_MIN_MEASUREMENTS 회 이상 필요
+  dbp_repeat_pattern: "^dbp_\\d+$"
+  htn_med: [htn_med]                 # bool: 항고혈압제 현재 복용 여부. 없으면 라벨 생성 불가. train.py --assume-no-med 로 '비복약 가정' 실행 가능(명세 2-2 복약 규칙 미적용)
+
+# 선택적 원시 컬럼 — 명세 변수 컬럼이 없거나 NaN 인 행에서만 산출(derive)에 쓴다.
+raw_inputs:
+  height_cm: {type: float, unit: cm, used_for: bmi}
+  weight_kg: {type: float, unit: kg, used_for: bmi}
+  alcohol_freq_per_week: {type: float, unit: "회/주", used_for: alcohol_week}
+  alcohol_drinks_per_occasion: {type: float, unit: "잔/회", used_for: alcohol_week}
+  binge_freq_per_month: {type: float, unit: "회/월", used_for: binge}
+  moderate_min_week: {type: float, unit: "분/주", used_for: activity_minutes_week}
+  vigorous_min_week: {type: float, unit: "분/주", used_for: activity_minutes_week}
+  walk_min_week: {type: float, unit: "분/주", used_for: activity_minutes_week}
+  family_htn_father: {type: bool, used_for: family_htn}
+  family_htn_mother: {type: bool, used_for: family_htn}
+  family_htn_sibling: {type: bool, used_for: family_htn}
+  sleep_hours: {type: float, unit: "시간/일", used_for: sleep_short_flag}
+  dm_dx: {type: bool, used_for: diabetes_flag}
+  dm_med: {type: bool, used_for: diabetes_flag}
+  hba1c: {type: float, unit: "%", used_for: diabetes_flag}
+
+# 결측 처리 method: reject | median | median_by_sex_bmi_bin | constant
+# monotone: 1 상승, -1 하강, 0 제약 없음
+features:
+  - name: age
+    type: int
+    unit: years
+    range: [19, 90]
+    source: {column: age}
+    missing: {method: reject}
+    monotone: 1
+    evidence: A
+  - name: sex
+    type: category
+    values: [male, female]
+    source: {column: sex}
+    aliases:
+      male: [male, m, man, "남", "남성", "남자", "1"]
+      female: [female, f, woman, "여", "여성", "여자", "2"]
+    encoding: {column: male}          # male = 1, female = 0
+    missing: {method: reject}
+    monotone: 0
+    evidence: A
+    note: "age × sex 상호작용 항(age_x_male) 포함. 부호 제약 없음."
+  - name: bmi
+    type: float
+    unit: kg/m2
+    range: [14, 50]
+    source: {column: bmi, derive: "weight_kg / (height_cm / 100) ** 2"}
+    missing: {method: reject}
+    monotone: 1
+    evidence: A
+  - name: waist_cm
+    type: float
+    unit: cm
+    range: [50, 150]
+    source: {column: waist_cm}
+    missing: {method: median_by_sex_bmi_bin, flag: waist_missing, bins: thresholds.BMI_BINS}
+    monotone: 1
+    evidence: A
+  - name: alcohol_week
+    type: float
+    unit: "표준잔/주"
+    range: [0, 60]
+    source: {column: alcohol_week, derive: "alcohol_freq_per_week * alcohol_drinks_per_occasion"}
+    missing: {method: constant, value: 0, flag: alcohol_missing}
+    monotone: 1
+    evidence: A
+  - name: alcohol_per_day
+    type: bool
+    source: {column: alcohol_per_day, derive: "alcohol_week / 7 > thresholds.ALCOHOL_DRINKS_PER_DAY_HIGH"}
+    missing: {method: constant, value: false, flag: alcohol_missing}
+    monotone: 1
+    evidence: "A (RCT는 ≤2잔/일에서 효과 없음)"
+  - name: binge
+    type: bool
+    source: {column: binge, derive: "binge_freq_per_month >= thresholds.BINGE_MIN_PER_MONTH"}
+    missing: {method: constant, value: false, flag: alcohol_missing}
+    monotone: 1
+    evidence: A
+  - name: activity_minutes_week
+    type: int
+    unit: "분/주"
+    range: [0, 2000]
+    source: {column: activity_minutes_week, derive: "moderate_min_week + thresholds.ACTIVITY_VIGOROUS_WEIGHT * vigorous_min_week + walk_min_week"}
+    missing: {method: median, flag: activity_missing}
+    monotone: -1
+    evidence: A
+  - name: activity_low_flag
+    type: bool
+    source: {column: activity_low_flag, derive: "activity_minutes_week < thresholds.ACTIVITY_LOW_MIN_PER_WEEK (결측이면 true)"}
+    missing: {method: derived}
+    monotone: 1
+    evidence: A
+  - name: family_htn
+    type: bool
+    source: {column: family_htn, derive: "any(family_htn_father, family_htn_mother, family_htn_sibling)"}
+    missing: {method: constant, value: false, flag: family_htn_missing}
+    monotone: 1
+    evidence: A
+  - name: sleep_short_flag
+    type: bool
+    source: {column: sleep_short_flag, derive: "sleep_hours < thresholds.SLEEP_SHORT_HOURS"}
+    missing: {method: constant, value: false, flag: sleep_missing}
+    monotone: 1
+    evidence: B
+    note: "긴 수면은 넣지 않는다"
+  - name: diabetes_flag
+    type: bool
+    source: {column: diabetes_flag, derive: "dm_dx or dm_med or fasting_glucose >= thresholds.FASTING_GLUCOSE_DM or hba1c >= thresholds.HBA1C_DM"}
+    missing: {method: constant, value: false, flag: diabetes_missing}
+    monotone: 1
+    evidence: B
+  - name: fasting_glucose
+    type: float
+    unit: mg/dL
+    range: null                       # 명세 미정의 → 범위 검사 생략 (사용자 지정 필요)
+    source: {column: fasting_glucose}
+    missing: {method: median, flag: fasting_glucose_missing}
+    monotone: 1
+    evidence: B
+  - name: resting_hr
+    type: int
+    unit: bpm
+    range: null                       # 명세 미정의
+    source: {column: resting_hr}
+    missing: {method: median, flag: resting_hr_missing}
+    monotone: 1
+    evidence: B
+  - name: education_years
+    type: int
+    unit: years
+    range: null                       # 명세 미정의
+    source: {column: education_years}
+    missing: {method: median, flag: education_missing}
+    monotone: -1
+    evidence: "B (여성에서만 근거)"
+  - name: missing_count
+    type: int
+    source: {derive: "위 결측 플래그(중복 제거) 합"}
+    missing: {method: derived}
+    monotone: 0
+    evidence: "-"
+
+# 근거 상충 변수 — 포함/제외 버전을 모두 학습해 수치로 비교. 부호 제약 없음.
+optional_features:
+  - name: smoking
+    type: category
+    values: [never, former, current]
+    source: {column: smoking}
+    aliases:
+      never: [never, non, "비흡연", "0"]
+      former: [former, ex, past, "과거흡연", "1"]
+      current: [current, "현재흡연", "2"]
+    encoding: {dummies: [smoking_former, smoking_current]}
+    missing: {method: constant, value: never, flag: smoking_missing}   # 명세 미정의 → 임시
+    monotone: 0
+    evidence: "상충"
+  - name: stress_score
+    type: int
+    range: [1, 4]
+    source: {column: stress_score}
+    missing: {method: median, flag: stress_missing}                    # 명세 미정의 → 임시
+    monotone: 0
+    evidence: "상충"
+
+interactions:
+  - name: age_x_male
+    expr: "표준화 age × male"
+    monotone: 0
+
+# 결측 플래그를 피처로도 넣는다 (부호 제약 없음)
+missing_flags_as_features: true
+
+# 학습 데이터 평균·표준편차로 표준화하는 연속형 컬럼 (bool·플래그·더미는 0/1 그대로)
+standardize: [age, bmi, waist_cm, alcohol_week, activity_minutes_week, fasting_glucose, resting_hr, education_years, missing_count, stress_score]
+
+# 제거된 변수 (명세 2-3 대비): sodium_risk_score — 결과 코호트 근거 불일치, 이 데이터에서 단계와 상관 0.00, 모델 계수 0 (사용자 결정 2026-10-20)

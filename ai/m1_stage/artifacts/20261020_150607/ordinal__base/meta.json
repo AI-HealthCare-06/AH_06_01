@@ -1,0 +1,164 @@
+{
+  "model_version": "M1-20261020_150607-ordinal__base",
+  "feature_version": "1.2.0",
+  "candidate": "ordinal",
+  "variant": "base",
+  "optional_features": [],
+  "run_id": "20261020_150607",
+  "columns": [
+    "age",
+    "male",
+    "bmi",
+    "waist_cm",
+    "alcohol_week",
+    "alcohol_per_day",
+    "binge",
+    "activity_minutes_week",
+    "activity_low_flag",
+    "family_htn",
+    "sleep_short_flag",
+    "diabetes_flag",
+    "fasting_glucose",
+    "resting_hr",
+    "education_years",
+    "missing_count",
+    "age_x_male",
+    "waist_missing",
+    "alcohol_missing",
+    "activity_missing",
+    "family_htn_missing",
+    "sleep_missing",
+    "diabetes_missing",
+    "fasting_glucose_missing",
+    "resting_hr_missing",
+    "education_missing"
+  ],
+  "monotone": [
+    1,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    -1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    -1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "train_size": 26105,
+  "fit_seconds": 0.34471433400176466,
+  "fit_info": {
+    "l2_trials": [
+      {
+        "lam": 0.0001,
+        "val_logloss": 1.1085016687780935,
+        "converged": true,
+        "iters": 29
+      },
+      {
+        "lam": 0.001,
+        "val_logloss": 1.108490527183853,
+        "converged": true,
+        "iters": 28
+      },
+      {
+        "lam": 0.01,
+        "val_logloss": 1.1115271814511636,
+        "converged": true,
+        "iters": 20
+      },
+      {
+        "lam": 0.1,
+        "val_logloss": 1.1328930693341106,
+        "converged": true,
+        "iters": 12
+      },
+      {
+        "lam": 1.0,
+        "val_logloss": 1.1875606967543644,
+        "converged": true,
+        "iters": 15
+      }
+    ],
+    "lam": 0.001,
+    "theta": [
+      0.5781660050898664,
+      1.0291734452501584,
+      2.511700617169601
+    ],
+    "coef": {
+      "age": 0.9157852631539671,
+      "male": 0.5065816689378244,
+      "bmi": 0.35807576560583904,
+      "waist_cm": 0.03431400771316187,
+      "alcohol_week": 0.14326472277027744,
+      "alcohol_per_day": 0.0978098476136273,
+      "binge": 0.2092134047060675,
+      "activity_minutes_week": 0.0,
+      "activity_low_flag": 0.0,
+      "family_htn": 0.3708726584261003,
+      "sleep_short_flag": 0.005681269063688637,
+      "diabetes_flag": 0.0,
+      "fasting_glucose": 0.059714179936725495,
+      "resting_hr": 0.09297678559221617,
+      "education_years": -0.03861002055777589,
+      "missing_count": 0.0,
+      "age_x_male": -0.5583583200659409,
+      "waist_missing": 0.0,
+      "alcohol_missing": 0.0,
+      "activity_missing": 0.0,
+      "family_htn_missing": 0.0,
+      "sleep_missing": 0.0,
+      "diabetes_missing": 0.0,
+      "fasting_glucose_missing": 0.0,
+      "resting_hr_missing": 0.0,
+      "education_missing": 0.0
+    }
+  },
+  "fast_path_check": {
+    "rows": 6724,
+    "max_abs_dx": 0.0,
+    "status_mismatch": 0,
+    "problems_mismatch": 0,
+    "flags_mismatch": 0,
+    "observed_mismatch": 0,
+    "raw_mismatch": 0,
+    "max_abs_dp": 3.3306690738754696e-16,
+    "max_abs_dcontrib": 0.0,
+    "atol": 1e-09,
+    "ok": true
+  },
+  "htn_threshold_youden": 0.15415088929904752,
+  "stage_rule": "cumulative",
+  "stage_objective": "accuracy",
+  "stage_thresholds": {
+    "accuracy": [
+      0.64,
+      0.53,
+      0.48
+    ],
+    "val_accuracy_score": 0.5211760588029402,
+    "balanced": [
+      0.5,
+      0.51,
+      0.18
+    ],
+    "val_balanced_score": 0.3918200275450253
+  }
+}
