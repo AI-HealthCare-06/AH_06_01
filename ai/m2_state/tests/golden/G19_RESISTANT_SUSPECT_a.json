@@ -1,0 +1,153 @@
+{
+ "id": "G19_RESISTANT_SUSPECT_a",
+ "state": "RESISTANT_SUSPECT",
+ "draft": true,
+ "description": "약 4제(이뇨제 포함), step=htn → 혈압 조건 bp_level_step 대기",
+ "intended": {
+  "RESISTANT_SUSPECT": "not_evaluable",
+  "HTN_SUSPECT": "not_evaluable"
+ },
+ "input": {
+  "subject_id": "G19",
+  "as_of": "2026-10-21",
+  "m1_bp_step": {
+   "step": "htn",
+   "step_date": null
+  },
+  "pulse_hr": {
+   "resting_hr": 70,
+   "irregular_pulse": false
+  },
+  "symptom_flags": {
+   "headache": false,
+   "visual_disturbance": false,
+   "chest_pain": false,
+   "dyspnea": false,
+   "paralysis": false,
+   "speech_disturbance": false,
+   "dizziness": false,
+   "syncope": false,
+   "nocturia": false
+  },
+  "age_sex": {
+   "age": 64,
+   "sex": "M"
+  },
+  "height_weight_waist": {
+   "height_cm": 170,
+   "weight_kg": 65,
+   "waist_cm": 80
+  },
+  "medication": {
+   "status": 3,
+   "drugs": [
+    {
+     "name": "drug_0",
+     "dose_time": "08:00"
+    },
+    {
+     "name": "drug_1",
+     "dose_time": "08:00"
+    },
+    {
+     "name": "drug_2",
+     "dose_time": "08:00"
+    },
+    {
+     "name": "drug_3",
+     "dose_time": "08:00"
+    }
+   ],
+   "triple_with_diuretic": true
+  },
+  "smoking_alcohol": {
+   "smoking": "never",
+   "alcohol_per_week": 0,
+   "drinks_per_occasion": 0,
+   "binge": false
+  },
+  "sleep_snoring": {
+   "bedtime": "23:00",
+   "wake_time": "06:30",
+   "sleep_hours": 7.0,
+   "snoring": false,
+   "daytime_sleepiness": false,
+   "nocturia": false
+  },
+  "diet_sodium": {
+   "salty_habit": false,
+   "eating_out_per_week": 2
+  },
+  "activity": {
+   "moderate_min_per_week": 150,
+   "steps_per_day": 7000,
+   "sedentary_hours": 8
+  },
+  "lab_glucose_lipid": {
+   "fpg": 95,
+   "hba1c": 5.4,
+   "tc": 180,
+   "tg": 100,
+   "hdl": 55,
+   "ldl": 100
+  },
+  "lab_kidney": {
+   "creatinine": 0.9,
+   "urine_protein": "negative"
+  },
+  "family_history": {
+   "htn": false,
+   "stroke": false,
+   "mi": false
+  },
+  "clinical_exam": null
+ },
+ "expected": {
+  "data_quality": "ok",
+  "step": "htn",
+  "states": {
+   "ELEVATED": "negative",
+   "PREHTN": "negative",
+   "HTN_SUSPECT": "not_evaluable",
+   "HTN_STAGE2_SCREEN": "not_evaluable",
+   "ISH": "not_evaluable",
+   "WHITE_COAT": "not_applicable",
+   "MASKED": "not_applicable",
+   "MORNING": "not_evaluable",
+   "NOCTURNAL_SCREEN": "not_evaluable",
+   "RESISTANT_SUSPECT": "not_evaluable"
+  },
+  "missing_required": {
+   "ELEVATED": [],
+   "PREHTN": [],
+   "HTN_SUSPECT": [
+    "m1_bp_step.bp_level_step"
+   ],
+   "HTN_STAGE2_SCREEN": [
+    "m1_bp_step.stage2_flag"
+   ],
+   "ISH": [
+    "m1_bp_step.ish_flag"
+   ],
+   "WHITE_COAT": [],
+   "MASKED": [],
+   "MORNING": [
+    "m1_bp_step.morning_step",
+    "m1_bp_step.evening_step"
+   ],
+   "NOCTURNAL_SCREEN": [
+    "m1_bp_step.evening_step"
+   ],
+   "RESISTANT_SUSPECT": [
+    "m1_bp_step.bp_level_step"
+   ]
+  },
+  "target_bp": {
+   "sbp": null,
+   "dbp": null,
+   "diabetes": null,
+   "ckd": null,
+   "basis": null
+  }
+ }
+}
