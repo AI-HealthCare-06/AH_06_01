@@ -1,6 +1,14 @@
-# M1-S — 생활습habits·신체 변수 → 혈압 단계(4단계) 확률 모델
+# M1 — 생활습관·신체 변수 → 혈압 단계 확률 모델
 
-> 위치: . 상위  의 M1(B0, risk_index 0~100)과 별개의 독립 패키지이며 서로 import 하지 않는다. 이 폴더 안에서 실행한다 (). 데이터는 · 에 넣고 커밋하지 않는다.
+
+## 최종 모델 M1-F (2026-10-26 확정: 현재 입력으로 가능한 최선)
+
+- 구성: `m1/chain.py` ChainPreprocessor(입력 15열, 필수 age·sex·bmi·waist_cm, 대치 5개 이상 제외, 범위 밖 제외, 사용자 결측 규칙) → ChainFeatures(문헌 기준값 중심 표준화 + 나이×·성별× 추가 데이터, 42열) → LightGBM 다중분류 → 단계 = argmax. 코드 `m1/final_model.py`.
+- 성능: 5겹 교차검증 정확도 0.518 ± 0.006, AUROC ≥140/90 0.731 ± 0.007 (전부 normal 기준선 0.51). 시간 분할 테스트 정확도 0.513, AUROC 0.716. 71개 학습기·설정 탐색에서 더 오르는 조합 없음(`reports/maxsearch_*`). 0.6 은 현재 혈압과 상관 ≥0.6 인 과거 혈압 입력이 있어야 도달(가상 실험).
+- 지연: 단건 p95 3.1 ms(기여 요인 포함) / 0.2 ms(제외). 단건 경로 = 배치 경로 검증을 학습 때 수행(불일치면 중단).
+- 학습: `python3 train_final.py --data train/ --test-data test/` → `artifacts/final_<run>/`, `reports/final_<run>/`(summary.md, test_predictions.xlsx).
+- 추론: `python3 predict_final.py --json '{"age":52,"sex":"male","bmi":27.5,"waist_cm":95,...}'` 또는 `--data <파일/폴더>` → 단계, 4단계 확률, 기여 요인(top_factors), 제외 사유(note).
+- 임계값·기준값·행 검증 상수는 `thresholds.py`(CHAIN_*, REFERENCE_*)에 있음. 명세 계약 기반 후보(ordinal/nested/lgbm)와 체인·M1-C 실험 코드는 비교용으로 남겨 둠.
 
 혈압을 입력하지 않은 사용자에게 생활습관·신체 변수만으로 **혈압 4단계(normal / elevated / prehtn / htn)에 속할 확률**을 낸다.
 mmHg 점 추정은 제품 출력이 아니다(명세 2-1). 혈압값은 라벨 생성에만 쓰고 피처로는 어떤 형태로도 넣지 않는다(코드가 이름 패턴으로 차단).

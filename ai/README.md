@@ -10,6 +10,7 @@
 | M3 동반 질환 위험 | 혈압 포함 + 14개 + 복약 (계약 v2) | 당뇨·CKD·대사증후군·이상지질 위험지수 | 완료 |
 | M4 혈압 추이 | 앱 가정혈압 로그 | 7일 추세 | 규칙 스펙 |
 | M1-S 혈압 단계 (4단계 확률) | 생활·신체 16개(나트륨 제외), 혈압 없음 | stage_probs, stage_top, reason_codes | 검토 중 — `m1_stage/` 독립 패키지, 10/21 |
+| M1-F 혈압 단계 최종 (다중분류 LightGBM) | 생활·신체 15개(sodium·sleep·education·missing_count 제외), 혈압 없음 | stage, P_normal~P_htn, top_factors, note | 확정 10/26 — `m1_stage/train_final.py`·`predict_final.py`, 테스트 파일 정확도 0.520·AUROC 0.730 |
 | M2 혈압 관련 상태 판정 (규칙, A군 10개) | M1-S step + 생활 데이터(7~20) | 상태 코드 10개 (positive / negative / not_evaluable / not_applicable) | 구현 4 (ELEVATED·PREHTN·HTN_SUSPECT·NOCTURNAL_SCREEN) / M1 필드 대기 6 — `m2_state/` 독립 패키지, 10/21 |
 
 판정(밴드·표현형·저혈압·응급)은 규칙 트리(개발팀) 담당. 모델 결과는 대시보드 참고 카드와 Quest Ranker 에 쓰인다.
@@ -51,7 +52,7 @@ ai/
 ├─ train_boost.py             M1 B1 단조 제약 LightGBM (후보, 미채택)
 ├─ train_sbp.py               M2 예상 혈압 회귀 (SBP·DBP, 미복용자), what-if 근거
 ├─ train_comorbidity.py       M3 동반 질환 4개 (계약 v2: features/contract_v2.py, 라벨 labels_m3.py)
-├─ m1_stage/                  M1-S 혈압 4단계 확률 모델 (독립 패키지: 계약·임계값·후보 3종·단건 고속 경로·테스트, README 참조)
+├─ m1_stage/                  M1 혈압 4단계 모델 (독립 패키지: 명세 후보 3종 M1-S + 최종 다중분류 M1-F, 전처리 v2, 정답률 탐색 기록, 테스트 41개, README 참조)
 ├─ m2_state/                  M2 혈압 관련 상태 판정 규칙 (독립 패키지: M1-S step + 생활 데이터 → A군 10개 상태, 계약·임계값·테스트·골든 20건, README 참조)
 ├─ HANDOFF_v0.2.md            v0.1 대비 범위·계약·인터페이스 변경 기록
 ├─ eval_external.py           M-lite 공단 검진정보 외부 검증, 하위군 표     [10/20]

@@ -1,0 +1,5 @@
+stage,age,bmi,waist_cm,alcohol_week,activity_minutes_week,fasting_glucose,resting_hr,education_years,sbp (label only),dbp (label only)
+normal,45.0,22.77,79.1,0.55,210.0,93.0,68.0,14.0,107.0,70.0
+elevated,65.0,24.23,85.4,0.15,210.0,99.0,68.0,12.0,124.0,73.0
+prehtn,55.0,24.48,85.6,0.88,210.0,98.0,68.0,12.0,127.0,82.0
+htn,61.5,24.75,86.6,0.38,180.0,100.0,68.0,12.0,144.0,90.0

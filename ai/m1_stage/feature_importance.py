@@ -1,7 +1,7 @@
 """
 [파일] feature_importance.py
 [용도] 변수별 전체 기여도. 내부 테스트 분할에서 행별 로짓 기여도(선형: 계수×표준화값, LightGBM: SHAP, 누적 이진 3개 합)를 모아
-      변수마다 평균 절대 기여도(영향 크기)·평균 기여도(방향)·전체 대비 비중을 모델별로 계산하고, 이유 코드 단위로도 묶는다. 그림 1장 + md + csv.
+      변수마다 평균 절대 기여도(영향 크기)·평균 기여도(방향)·전체 대비 비중을 모델별로 계산하고, 이유 코드 단위로도 묶는다. 그림 1장 + md + csv(features_*.csv, groups_*.csv).
 [왜 필요한가] 사용자 요청(2026-10-20): 어떤 변수가 단계 확률 계산에 가장 크게 기여하는지 전체 수준에서 보기 위해서.
 [쓰는 곳] 사용자가 직접 실행. 결과 reports/feature_importance_<시각>/
 """
@@ -95,6 +95,7 @@ def main(argv=None) -> Path:
          "- mean_abs = 평균 절대 기여도(영향 크기), mean = 평균 기여도(양수면 평균적으로 확률을 올림), share = 전체 절대 기여도 중 비중\n"]
     for combo, t in tables.items():
         t.to_csv(out / f"features_{combo}.csv")
+        groups[combo].to_csv(out / f"groups_{combo}.csv")
         L.append(f"## {combo} — 변수\n\n" + md_table(t.reset_index().rename(columns={"index": "feature"}), nd=3) + "\n")
         L.append(f"## {combo} — 이유 코드 묶음\n\n" + md_table(groups[combo].reset_index().rename(columns={"index": "code"}), nd=3) + "\n")
     (out / "summary.md").write_text("\n".join(L) + "\n", encoding="utf-8")

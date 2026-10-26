@@ -26,3 +26,5 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .DS_Store
+catboost_info/
+.vscode/
