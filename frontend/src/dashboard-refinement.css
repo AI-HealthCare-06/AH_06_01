@@ -288,3 +288,11 @@
   max-width: 100%;
   overflow-wrap: anywhere;
 }
+
+.dashboard-report-web .weekly-calendar {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  min-width: 0;
+}
+.dashboard-report-web .weekly-calendar > button {
+  min-width: 0;
+}

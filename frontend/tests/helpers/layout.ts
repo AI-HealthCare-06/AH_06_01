@@ -12,6 +12,8 @@ export async function expectNoHorizontalOverflow(page: Page, selector = "html") 
           const rect = child.getBoundingClientRect();
           return {
             tag: child.tagName,
+            text: child.textContent?.slice(0, 40),
+            parent: child.parentElement?.className,
             className: String(child.className),
             left: rect.left,
             right: rect.right,

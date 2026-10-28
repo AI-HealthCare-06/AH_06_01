@@ -3423,3 +3423,8 @@
     font-size: var(--wallet-number-size);
   }
 }
+
+/* Transient combat art must not own a touch that outlives its DOM node. */
+.pixel-battle :is(.battle-enemy, .battle-damage, .battle-coin) {
+  pointer-events: none;
+}

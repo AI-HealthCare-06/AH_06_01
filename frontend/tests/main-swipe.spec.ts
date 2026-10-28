@@ -7,10 +7,19 @@ async function fingerSwipe(page: Page, selector: string, dx: number, dy = 0) {
   const route = new URL(page.url()).pathname.split("/")[1];
   const target = page.locator(`.${route}-screen ${selector}`);
   await expect(target).toBeVisible();
-  await target.scrollIntoViewIfNeeded();
+  await target.evaluate((element) =>
+    element.scrollIntoView({ block: "center", inline: "nearest", behavior: "instant" }),
+  );
   const box = (await target.boundingBox())!;
-  const x = box.x + box.width * (dx < 0 ? 0.8 : 0.2);
-  const y = Math.min(page.viewportSize()!.height - 160, box.y + box.height / 2);
+  const viewport = page.viewportSize()!;
+  const left = Math.max(20, box.x),
+    right = Math.min(viewport.width - 20, box.x + box.width);
+  const top = Math.max(0, box.y),
+    bottom = Math.min(viewport.height - 90, box.y + box.height);
+  expect(right).toBeGreaterThan(left);
+  expect(bottom).toBeGreaterThan(top);
+  const x = left + (right - left) * (dx < 0 ? 0.8 : 0.2);
+  const y = (top + bottom) / 2;
   const touch = await page.context().newCDPSession(page);
   try {
     await touch.send("Input.dispatchTouchEvent", {
