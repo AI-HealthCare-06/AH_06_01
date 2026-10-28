@@ -231,16 +231,16 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
   await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "day");
   await expect(page.locator(".health-score h3")).toHaveText("DAILY HEALTH SCORE");
   await expect(page.getByRole("region", { name: "REPORT", exact: true })).toContainText(
-    "어제 대비 건강 점수 +1점",
+    "아직 점수를 계산할 기록이 없어요",
   );
-  await expect(page.locator(".trend-column")).toHaveCount(4);
+  await expect(page.locator(".trend-column")).toHaveCount(1);
   await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "month");
   await expect(page.locator(".health-score h3")).toHaveText("MONTHLY HEALTH SCORE");
-  await expect(page.locator(".trend-column")).toHaveCount(4);
-  await expect(page.locator(".health-trend")).toContainText("+14점");
+  await expect(page.locator(".trend-column")).toHaveCount(7);
+  await expect(page.locator(".health-trend")).toContainText("기록 없음");
   await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "year");
   await expect(page.locator(".trend-column")).toHaveCount(9);
-  await expect(page.locator(".health-trend")).toContainText("+26점");
+  await expect(page.locator(".health-trend")).toContainText("기록 없음");
   await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "week");
   await expect(page.locator(".impact-card")).toBeVisible();
 });
