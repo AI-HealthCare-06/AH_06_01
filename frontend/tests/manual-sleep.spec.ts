@@ -33,6 +33,7 @@ test("sleep is recorded by bedtime and wake time inside the survey on small phon
     const modal = page.getByRole("dialog", { name: "오늘의 건강 서베이", exact: true });
     await modal.getByRole("button", { name: "다음", exact: true }).click();
     await modal.getByRole("button", { name: "다음", exact: true }).click();
+    await modal.getByRole("radio", { name: "시간을 확인했어요", exact: true }).check();
     for (const name of ["취침 시각", "기상 시각"]) {
       await expect(modal.getByRole("button", { name, exact: true })).toBeVisible();
       const box = (await modal.getByRole("button", { name, exact: true }).boundingBox())!;

@@ -30,6 +30,7 @@ test("signup uses short pages and preserves custom histories and medication time
     .getByRole("textbox", { name: "약 / 영양제 이름", exact: true })
     .fill("처방된 테스트 약");
   await page.getByRole("button", { name: "다음: 복용 항목" }).click();
+  await page.getByRole("button", { name: "다음: 복용 시간", exact: true }).click();
   await setMedicationTime(page, 1, "09:30");
   await page.getByRole("button", { name: "항목 저장", exact: true }).click();
   await page.getByRole("button", { name: "다음: 확인하고 완료", exact: true }).click();

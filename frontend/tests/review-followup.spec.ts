@@ -126,9 +126,11 @@ test("photo quests restart the rear camera and save portrait framing", async ({ 
     )
       throw Error("Medication fixture failed");
   });
-  await expect(
-    page.locator('[role="listbox"][aria-label="기록할 퀘스트 선택 항목"] [role="option"]'),
-  ).toHaveText([
+  expect(
+    await page
+      .locator(".camera-quest-select [role=option]")
+      .evaluateAll((options) => options.map((o) => o.textContent!.replace("◆", ""))),
+  ).toEqual([
     "약 / 영양제 복용",
     "건강한 식사하기",
     "물 마시기 실천",
@@ -277,7 +279,7 @@ test("account controls, top notices and step guidance keep dialogs separate", as
   await expect(page).toHaveURL(/\/home$/);
 });
 
-test("home hides status copy, shows both progress bars and keeps the pteranodon airborne", async ({
+test("home hides status copy, shows the walk progress and keeps the pteranodon airborne", async ({
   page,
 }) => {
   await page.goto("/home");
@@ -296,5 +298,5 @@ test("home hides status copy, shows both progress bars and keeps the pteranodon 
   const points = await page.locator('[data-series="today"]').getAttribute("points");
   const vertices = points!.split(" ").map((p) => p.split(",").map(Number));
   expect(vertices).toHaveLength(6);
-  await expect(page.locator(".radar-point")).toHaveCount(6);
+  await expect(page.locator(".radar-point")).toHaveCount(4);
 });
