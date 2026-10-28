@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { recordDailySurvey, mainQuests } from "./game";
+import { surveyFixture } from "./daily-survey.test-fixture";
 import { calendarWeek, localDate } from "./calendar";
 import {
   completeQuest,
@@ -33,8 +35,8 @@ describe("device dates and quest progression", () => {
     expect(questProgress(half, quests[2])).toBe(0.5);
     const done = syncDeviceSteps(half, { ...snapshot, count: 6000, syncedAt: 200 }, day);
     expect(done.completed).toEqual(["walk"]);
-    expect(done.gold).toBe(1280);
-    expect(syncDeviceSteps(done, { ...snapshot, count: 6800, syncedAt: 300 }, day).gold).toBe(1280);
+    expect(done.gold).toBe(2580);
+    expect(syncDeviceSteps(done, { ...snapshot, count: 6800, syncedAt: 300 }, day).gold).toBe(2580);
     expect(syncDeviceSteps(done, snapshot, day)).toBe(done);
     expect(syncDeviceSteps(done, { ...snapshot, date: "2026-09-28" }, day)).toBe(done);
     expect(syncDeviceSteps(done, { ...snapshot, count: -1 }, day)).toBe(done);
@@ -49,7 +51,8 @@ describe("device dates and quest progression", () => {
         day,
       );
       expect(weeklyCompletedDays(game)).toBe(game.completedDates.length);
-      for (const q of quests)
+      game = recordDailySurvey(game, surveyFixture(day), day);
+      for (const q of mainQuests)
         game = completeQuest(game, q.id, day, new Date(`${day}T12:00:00`).getTime());
       game = completeQuest(game, "sleep", day);
     }

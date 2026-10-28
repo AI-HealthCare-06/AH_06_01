@@ -1,0 +1,4 @@
+-r requirements-lambda.txt
+boto3[crt]==1.43.119
+pytest==9.1.1
+ruff==0.17.3

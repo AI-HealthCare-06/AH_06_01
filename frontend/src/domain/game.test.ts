@@ -1,3 +1,5 @@
+import { surveyFixture } from "./daily-survey.test-fixture";
+import { recordDailySurvey, mainQuests } from "./game";
 import { describe, expect, it } from "vitest";
 import {
   claimDailyBonus,
@@ -5,7 +7,6 @@ import {
   selectDinosaur,
   completeQuest,
   initialGame,
-  quests,
   restoreGame,
   rollDay,
   seoulDate,
@@ -21,7 +22,7 @@ describe("demo reward rules", () => {
       source: "healthkit",
       syncedAt: 100,
     });
-    expect(first.gold).toBe(1280);
+    expect(first.gold).toBe(2580);
     expect(first.completed).toContain("walk");
     expect(completeQuest(first, "walk")).toBe(first);
   });
@@ -33,11 +34,12 @@ describe("demo reward rules", () => {
       source: "healthkit",
       syncedAt: 100,
     });
-    for (const q of quests) game = completeQuest(game, q.id);
-    expect(game.gold).toBe(2280);
-    expect(game.lastReward?.experience).toBe(40);
+    game = recordDailySurvey(game, surveyFixture(game.date), game.date);
+    for (const q of mainQuests) game = completeQuest(game, q.id);
+    expect(game.gold).toBe(6780);
+    expect(game.lastReward?.experience).toBe(120);
     expect(game.allDoneBonusClaimed).toBe(true);
-    expect(completeQuest(game, "sleep").gold).toBe(2280);
+    expect(completeQuest(game, "sleep").gold).toBe(6780);
     expect(stageProgress(game)).toBe(10);
   });
   it("daily coin is idempotent and available again next Seoul day", () => {

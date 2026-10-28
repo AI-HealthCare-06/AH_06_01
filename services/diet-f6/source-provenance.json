@@ -1,0 +1,54 @@
+{
+  "archive": "팀원공유_F6_식단사진분석_최종.zip",
+  "archiveSha256": "8f7140631590b85c324df5f7f26c8e36489a48633588e4ca86c7711f9664fc5a",
+  "importedAt": "2026-10-27",
+  "files": [
+    {
+      "source": "backend/workers/vision/base.py",
+      "imported": "f6_diet/vision/base.py",
+      "sourceSha256": "fafa87e708866c385a7db0fd8e0e5e538c5956df7c8a1ad8a5500d4e73bcd655",
+      "adapted": false,
+      "integratedSha256": "fafa87e708866c385a7db0fd8e0e5e538c5956df7c8a1ad8a5500d4e73bcd655"
+    },
+    {
+      "source": "backend/workers/vision/openai_provider.py",
+      "imported": "f6_diet/vision/openai_provider.py",
+      "sourceSha256": "cac9f2fa74a292b22724f84918b5fc240973c5033fc286254894ec44bf9f0742",
+      "adapted": true,
+      "integratedSha256": "4b3297a205dfe9ef048563a0de68b25aaca36398c9245b7189e0d1f3b2c492d5"
+    },
+    {
+      "source": "backend/app/schemas/vision.py",
+      "imported": "f6_diet/schemas.py",
+      "sourceSha256": "516a5c4a6ac5076cd468da697fbfda1b9cbd66ddc9dff2b34405b57966ae830f",
+      "adapted": true,
+      "integratedSha256": "df704ac52a089c56b506eca6ec4dc0fc2fcd44ef8d03eef94c51b9ca4e222ba0"
+    },
+    {
+      "source": "ai/prompts/diet_vision_v2.md",
+      "imported": "prompts/diet_vision_v2.md",
+      "sourceSha256": "fa32c57ffcd9e1e56804abb9506f089d7dae1e30bc2a222822238b0910a81506",
+      "adapted": false,
+      "integratedSha256": "fa32c57ffcd9e1e56804abb9506f089d7dae1e30bc2a222822238b0910a81506"
+    },
+    {
+      "source": "ai/data/food_nutrition_dev_sample.csv",
+      "imported": "data/food_nutrition_dev_sample.csv",
+      "sourceSha256": "d5d4b134e5b08dca0f8db3902e8e0bda42fb8bf015f80fd03319ff4ca74e2ee8",
+      "adapted": false,
+      "integratedSha256": "d5d4b134e5b08dca0f8db3902e8e0bda42fb8bf015f80fd03319ff4ca74e2ee8"
+    },
+    {
+      "source": "ai/data/food_aliases.csv",
+      "imported": "data/food_aliases.csv",
+      "sourceSha256": "7bff899955eeacbbee52be19db0f764c8d6c9b29ca9fff1f18c0ff36322ded68",
+      "adapted": false,
+      "integratedSha256": "7bff899955eeacbbee52be19db0f764c8d6c9b29ca9fff1f18c0ff36322ded68"
+    }
+  ],
+  "notes": [
+    "F6 prompt v2 and development nutrition data retained",
+    "Original queue/database/user migrations are not applied",
+    "Image set and model keys are not imported into Git"
+  ]
+}

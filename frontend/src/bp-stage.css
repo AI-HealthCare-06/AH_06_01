@@ -1,0 +1,77 @@
+.bp-stage-card {
+  margin: 16px 0;
+  padding: 16px;
+  border: 2px solid #8c906a;
+  background: #fff9e7;
+  color: #1d3931;
+  text-align: left;
+}
+.bp-stage-card h4 {
+  margin: 0 0 12px;
+  font-size: calc(16px * var(--ui-text-scale, 1));
+}
+.bp-stage-card > strong {
+  display: block;
+  font-size: calc(18px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.bp-stage-card p {
+  margin: 10px 0;
+  font-size: calc(14px * var(--ui-text-scale, 1));
+  line-height: 1.65;
+}
+.bp-stage-card small {
+  display: block;
+  margin-top: 10px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.bp-stage-card a,
+.bp-stage-card button {
+  display: inline-block;
+  margin-top: 12px;
+  color: #1d3931;
+}
+.bp-stage-distribution {
+  margin: 16px 0;
+}
+.bp-stage-distribution > div {
+  margin-top: 12px;
+}
+.bp-stage-distribution dt {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.bp-stage-distribution dd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 0;
+}
+.bp-stage-distribution b {
+  flex: 0 0 56px;
+  text-align: right;
+  font-size: calc(14px * var(--ui-text-scale, 1));
+  font-variant-numeric: tabular-nums;
+}
+.bp-stage-track {
+  display: block;
+  flex: 1;
+  height: 12px;
+  border: 1px solid #8c906a;
+  background: #e5dfbd;
+}
+.bp-stage-track > span {
+  display: block;
+  height: 100%;
+  background: #3e8258;
+}
+.bp-stage-card.compact {
+  margin: 12px 0;
+}
+@media print {
+  .bp-stage-card button,
+  .bp-stage-card a {
+    display: none;
+  }
+}

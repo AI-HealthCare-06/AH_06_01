@@ -2,6 +2,16 @@ import { describe, expect, it } from "vitest";
 import { inferenceFrame } from "./frame";
 
 describe("portrait inference framing", () => {
+  it("preserves the full field of view for the process profile", () => {
+    expect(inferenceFrame(1920, 1080, 1920 / 1080)).toEqual({
+      x: 0,
+      y: 0,
+      width: 1920,
+      height: 1080,
+      resizeWidth: 640,
+      resizeHeight: 360,
+    });
+  });
   it("excludes landscape edges that are outside the visible viewfinder", () => {
     expect(inferenceFrame(640, 480, 3 / 4)).toEqual({
       x: 140,

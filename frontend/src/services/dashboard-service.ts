@@ -1,6 +1,9 @@
 export type RiskTone = "amber" | "green" | "red";
 
 export type DashboardSnapshot = {
+  bpResult?: unknown;
+  modelResult?: unknown;
+  rankerResult?: unknown;
   score: number;
   delta: number;
   risks: {

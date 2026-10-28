@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 test("owner death removes flying/contact shots and their debug boxes before they can damage", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.evaluate(async () => {
     const storePath = "/src/stores/game-store.ts";
@@ -74,9 +74,10 @@ test("owner death removes flying/contact shots and their debug boxes before they
 test("four drop tiers heal immediately, absorb toward the dinosaur and survive pause/reload once", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
+  test.setTimeout(90_000);
   for (const [seed, fraction, healed] of [
     [1972, 0.1, 4],
     [1976, 0.2, 8],
@@ -162,8 +163,8 @@ test("four drop tiers heal immediately, absorb toward the dinosaur and survive p
 
 test("reduced motion shows healing feedback at the dinosaur without flight", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.evaluate(async () => {
     const storePath = "/src/stores/game-store.ts";

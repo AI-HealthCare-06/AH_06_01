@@ -1,0 +1,12 @@
+{
+  "account": "862330372849",
+  "region": "ap-southeast-2",
+  "bucket": "rexrun-test-web-webassets27872646-fo2kto1cdq5i",
+  "distribution": "E2X0UT8JSNCKQ3",
+  "origin": "https://d4vy5vn0lhbgi.cloudfront.net",
+  "releaseLine": "1.6",
+  "nativeVersion": "1.5.2",
+  "compatibleNativeVersions": ["1.5.0", "1.5.1", "1.5.2"],
+  "nativeFingerprint": "4961b12e81d2a247caa6ae9cfc4bdea98ff7ef4cb768549202ddac514740c772",
+  "legacyCertificate": "356e716af83d623755456d2a7764d18a0ef072decb5a7d8e8c558832735dff45"
+}

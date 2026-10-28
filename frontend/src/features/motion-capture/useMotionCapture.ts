@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  InjectionDetector,
+  injectionConfig,
+  sampleInjection,
+  type InjectionRegion,
+  type InjectionObservation,
+} from "./injection";
 import { manifestVersion, motionConfig } from "./config";
+import { ProcessDetector, processConfig } from "./process";
+import { sampleProcess } from "./process-sample";
 import { MotionDetector } from "./detector";
 import { inferenceFrame } from "./frame";
 import { sampleObservation } from "./sample";
@@ -7,6 +16,7 @@ import type {
   DetectionProgress,
   InputSource,
   MotionObservation,
+  ProcessObservation,
   MotionQuest,
   MotionResult,
   WorkerResponse,
@@ -40,12 +50,18 @@ const initialState: CaptureState = {
 const uniqueId = () =>
   globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-export function useMotionCapture() {
+export function useMotionCapture(profile: "motion" | "process" | "injection" = "motion") {
   const video = useRef<HTMLVideoElement>(null);
   const bindVideo = useCallback((element: HTMLVideoElement | null) => {
     video.current = element;
   }, []);
   const [state, setState] = useState<CaptureState>(initialState);
+  const [selectedRegion, setSelectedRegion] = useState<InjectionRegion | null>(null);
+  const regionRef = useRef<InjectionRegion | null>(null);
+  const selectRegion = useCallback((region: InjectionRegion) => {
+    regionRef.current = region;
+    setSelectedRegion(region);
+  }, []);
   const generation = useRef(0);
   const stream = useRef<MediaStream | null>(null);
   const worker = useRef<Worker | null>(null);
@@ -90,15 +106,27 @@ export function useMotionCapture() {
   const start = useCallback(
     async (quest: MotionQuest, source: InputSource, preparation: boolean) => {
       cleanup();
+      regionRef.current = null;
+      setSelectedRegion(null);
+      if (profile === "injection" && source === "sample") {
+        regionRef.current = { x: 0.5, y: 0.6, radius: 0.12 };
+        setSelectedRegion(regionRef.current);
+      }
+      let injectionDetector: InjectionDetector | null = null;
+      let detectorRegion: InjectionRegion | null = null;
       const token = generation.current;
       const sessionId = uniqueId();
       const detector = new MotionDetector(quest, preparation);
+      const processDetector =
+        profile === "process" ? new ProcessDetector(quest, preparation) : null;
       let progress = {
         ...initialProgress,
         message:
-          quest === "water"
-            ? "셀카처럼 얼굴과 컵을 담아 주세요. 손과 컵 바닥은 잘려도 괜찮아요."
-            : "얼굴과 약을 준비한 손이 함께 보이도록 담아 주세요.",
+          profile === "process"
+            ? "얼굴과 손을 담고, 컵을 입 아래에 잠깐 보여 주세요."
+            : quest === "water"
+              ? "셀카처럼 얼굴과 컵을 담아 주세요. 손과 컵 바닥은 잘려도 괜찮아요."
+              : "얼굴과 약을 준비한 손이 함께 보이도록 담아 주세요.",
       };
       let observedAt = performance.now();
       let startedAt = new Date().toISOString();
@@ -118,21 +146,36 @@ export function useMotionCapture() {
           inputSource: source,
           kind:
             decision === "detected"
-              ? quest === "water"
-                ? "drinking_motion"
-                : "hand_to_mouth_motion"
+              ? profile === "injection"
+                ? "injection_site_hand_process"
+                : quest === "water"
+                  ? "drinking_motion"
+                  : processDetector
+                    ? "oral_medication_process"
+                    : "hand_to_mouth_motion"
               : null,
           decision,
-          detector: "rules_v1",
+          detector:
+            profile === "injection"
+              ? "injection_rules_v1"
+              : processDetector
+                ? "process_rules_v2"
+                : "rules_v1",
+          ...(progress.process ? { process: progress.process } : {}),
           modelManifestVersion: manifestVersion,
-          configVersion: motionConfig.version,
+          configVersion:
+            profile === "injection"
+              ? injectionConfig.version
+              : processDetector
+                ? processConfig.version
+                : motionConfig.version,
           startedAt,
           endedAt: new Date().toISOString(),
           durationMs: Math.round(performance.now() - observedAt),
           validObservationRatio: progress.validObservationRatio,
           classificationScore: null,
           preparationSource: quest === "medicine" ? "user_ack" : "not_required",
-          verificationLevel: "local_demo",
+          verificationLevel: profile !== "motion" ? "experimental_process" : "local_demo",
           userConfirmed: false,
           reasonCodes: decision === "detected" ? [] : ["observation_timeout"],
         };
@@ -147,15 +190,47 @@ export function useMotionCapture() {
           latencyMs: null,
         });
       };
-      const consume = (observation: MotionObservation, latencyMs: number | null) => {
+      const consume = (
+        observation: MotionObservation,
+        latencyMs: number | null,
+        process?: ProcessObservation,
+        injection?: InjectionObservation,
+      ) => {
         if (!active()) return;
-        progress = detector.update(observation);
+        if (profile === "injection" && regionRef.current !== detectorRegion) {
+          detectorRegion = regionRef.current;
+          injectionDetector = detectorRegion ? new InjectionDetector(detectorRegion) : null;
+        }
+        progress =
+          profile === "injection"
+            ? injectionDetector
+              ? injectionDetector.update(
+                  injection ?? {
+                    timestamp: observation.timestamp,
+                    frameWidth: observation.frameWidth,
+                    frameHeight: observation.frameHeight,
+                    hands: [],
+                  },
+                )
+              : { ...initialProgress, message: "영상에서 관찰할 투약 부위를 터치해 지정해 주세요." }
+            : processDetector
+              ? processDetector.update(
+                  process ?? {
+                    hand: { ...observation, valid: false, mouth: null },
+                    drink: { ...observation, valid: false, mouth: null },
+                  },
+                )
+              : detector.update(observation);
         if (progress.stage === "detected") finish("detected", progress.message);
         else
           setState((current) => ({
             ...current,
             progress,
-            observation,
+            observation: injection
+              ? { ...observation, mouth: null, object: null, hand: injection.hands[0] ?? null }
+              : process && progress.process?.phase !== "hand"
+                ? process.drink
+                : observation,
             latencyMs,
             message: progress.message,
           }));
@@ -196,7 +271,21 @@ export function useMotionCapture() {
         let sampleTime = 0;
         interval.current = setInterval(() => {
           sampleTime += motionConfig.frameIntervalMs;
-          consume(sampleObservation(quest, sampleTime, observedAt + sampleTime), null);
+          const process = processDetector
+            ? sampleProcess(quest, sampleTime, observedAt + sampleTime)
+            : undefined;
+          consume(
+            process
+              ? quest === "medicine"
+                ? process.hand
+                : process.drink
+              : sampleObservation(quest, sampleTime, observedAt + sampleTime),
+            null,
+            process,
+            profile === "injection"
+              ? sampleInjection(sampleTime, observedAt + sampleTime)
+              : undefined,
+          );
         }, motionConfig.frameIntervalMs);
         return;
       }
@@ -230,14 +319,26 @@ export function useMotionCapture() {
             else if (data.type === "error") fail(data.message);
             else {
               inFlight = false;
-              consume(data.observation, Math.round(performance.now() - data.observation.timestamp));
+              consume(
+                data.observation,
+                Math.round(performance.now() - data.observation.timestamp),
+                data.process,
+                data.injection,
+              );
             }
           };
           inference.onerror = () =>
             fail("인식 기능을 실행하지 못했어요. 다시 시도하거나 샘플 동작을 이용해 주세요.");
         });
         void ready.catch(() => {});
-        inference.postMessage({ type: "init", sessionId, quest, baseUrl: window.location.origin });
+        inference.postMessage({
+          type: "init",
+          sessionId,
+          quest,
+          process: profile === "process",
+          injection: profile === "injection",
+          baseUrl: window.location.origin,
+        });
         timeout.current = setTimeout(
           () => fail("카메라와 모델 준비 시간이 길어졌어요. 권한을 확인한 뒤 다시 시작해 주세요."),
           motionConfig.loadingTimeoutMs,
@@ -289,7 +390,11 @@ export function useMotionCapture() {
           inFlight = true;
           lastFrameAt = now;
           lastVideoTime = element.currentTime;
-          const crop = inferenceFrame(element.videoWidth, element.videoHeight, 3 / 4);
+          const crop = inferenceFrame(
+            element.videoWidth,
+            element.videoHeight,
+            profile !== "motion" ? element.videoWidth / element.videoHeight : 3 / 4,
+          );
           void createImageBitmap(element, crop.x, crop.y, crop.width, crop.height, {
             resizeWidth: crop.resizeWidth,
             resizeHeight: crop.resizeHeight,
@@ -314,7 +419,7 @@ export function useMotionCapture() {
         );
       }
     },
-    [cleanup, video],
+    [cleanup, video, profile],
   );
 
   const confirm = () =>
@@ -325,10 +430,10 @@ export function useMotionCapture() {
             message:
               current.source === "sample"
                 ? "샘플 시연 결과를 확인했어요."
-                : "동작 기록을 확인했어요. 이 화면에서만 유지돼요.",
+                : "동작 인증을 확인했어요. 퀘스트 화면에서 완료해 주세요.",
             result: { ...current.result, userConfirmed: true },
           }
         : current,
     );
-  return { ...state, bindVideo, start, cancel, confirm };
+  return { ...state, selectedRegion, selectRegion, bindVideo, start, cancel, confirm };
 }

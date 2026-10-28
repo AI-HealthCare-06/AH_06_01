@@ -15,7 +15,7 @@ for (const device of ["iPhone 13", "Pixel 7"]) {
     const page = await context.newPage();
     try {
       for (const route of ["home", "profile", "shop"]) {
-        await page.goto(`http://127.0.0.1:5173/${route}`);
+        await page.goto(`http://127.0.0.1:${process.env.REXRUN_TEST_PORT || "5173"}/${route}`);
         await expect(page.locator(".mobile-screen")).toHaveAttribute(
           "data-device-preview",
           "false",
@@ -47,7 +47,7 @@ test("tablet desktop mode and native shells do not show simulated device chrome"
     }, runtime);
     const page = await context.newPage();
     try {
-      await page.goto("http://127.0.0.1:5173/home");
+      await page.goto(`http://127.0.0.1:${process.env.REXRUN_TEST_PORT || "5173"}/home`);
       await expect(page.locator(".mobile-screen")).toHaveAttribute("data-device-preview", "false");
       await expect(page.locator(".status-bar")).toHaveCount(0);
     } finally {

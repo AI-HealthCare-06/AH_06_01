@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "886373745633",
+    "project_id": "rexrun-mobile-test",
+    "storage_bucket": "rexrun-mobile-test.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:886373745633:android:f132c3dfe3a635195188a0",
+        "android_client_info": {
+          "package_name": "com.rexrun.demo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "886373745633-0aj86a67p9s2rdpo9ufdf0ma8m1riu0b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rexrun.demo",
+            "certificate_hash": "01309ec42fff083cd4ac5d947c34d51061c2f43f"
+          }
+        },
+        {
+          "client_id": "886373745633-8c764hn4ukc5jc6qvrqt0l6mde84kqdk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4P6iwChLvcaiP_xkPuDpP2rSnjkC5w0M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "886373745633-8c764hn4ukc5jc6qvrqt0l6mde84kqdk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

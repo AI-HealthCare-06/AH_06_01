@@ -38,7 +38,7 @@ GitHub에서 **base: develop / compare: feature/quest-progress** PR을 만듭니
 2. 릴리스 브랜치에서는 새 기능 대신 검증, 버그 수정, 버전·변경 내역 정리를 진행합니다.
 3. 검증 후 `release/* → main` PR을 merge commit으로 병합합니다.
 4. 같은 릴리스 브랜치를 `develop`에도 병합합니다. 양쪽 병합이 완료될 때까지 브랜치를 유지합니다.
-5. 릴리스가 승인되면 `main`의 해당 커밋에 `v0.2.0` 같은 주석 태그를 생성하고 푸시합니다. 태그·GitHub Release·운영 배포는 구분하며 자동으로 배포하지 않습니다.
+5. 릴리스가 승인되면 `main`의 해당 커밋에 `v0.2.0` 같은 주석 태그를 생성하고 푸시합니다. 태그와 GitHub Release는 별도이며, main에 병합하면 검증된 커밋에서 GitHub Actions 운영 배포가 자동 실행됩니다. APK·자동 업데이트 절차는 [deployment/README.md](../deployment/README.md)를 따릅니다.
 
 ## 긴급 수정
 

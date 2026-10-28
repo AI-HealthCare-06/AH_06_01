@@ -18,6 +18,8 @@ M1-S(`ai/m1_stage/`)가 분류한 혈압 단계(step: normal / elevated / prehtn
 | `scripts/report_tests.py` | pytest 실행 + 규칙별 결과표 → `docs/test_results.md` |
 | `scripts/make_golden.py` | 골든 케이스 재생성 → `docs/golden_cases_draft.md` |
 | `scripts/apply_data.py` | 데이터 적용 보고(컬럼 대조 → 결측·범위 → 판정 분포 → 동시 발생표) |
+| `docs/how_it_works.md` | 작동 원리 설명(흐름·검증·규칙·대기 메커니즘) |
+| `docs/api_spec.md` | API 명세서(함수 시그니처, 요청·응답 스키마, 예시) |
 | `docs/rules_spec.md` | 규칙 명세서(구현 기준) |
 | `docs/m1_interface.md` | M1 에서 받는 것 / 받아야 하는 것 |
 | `docs/decisions_needed.md` | 결정 필요 항목 목록 |

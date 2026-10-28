@@ -5,7 +5,7 @@
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>현재 위치의 날씨에 맞는 안내를 보여주기 위해 앱 사용 중 위치를 확인합니다.</string>
     <key>NSHealthShareUsageDescription</key>
-    <string>오늘의 걸음 수를 읽어 걷기 퀘스트의 진행도를 표시하고 6,000걸음에 자동 완료합니다.</string>
+    <string>동의한 걸음 수와 수면 기록을 읽어 걷기·수면 퀘스트 진행도를 확인합니다. 건강 데이터 쓰기 권한은 요청하지 않습니다.</string>
     <key>NSCameraUsageDescription</key>
     <string>건강 퀘스트를 실천한 순간을 사진으로 촬영합니다. 사진은 서버로 전송되지 않습니다.</string>
   <key>CAPACITOR_DEBUG</key>

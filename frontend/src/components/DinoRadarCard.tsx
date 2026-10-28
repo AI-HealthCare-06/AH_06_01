@@ -1,22 +1,27 @@
 import { Link } from "react-router-dom";
 import { assets } from "../design/assets";
-import { dinoRadarDemo } from "../services/dino-radar-data";
+import { radarData } from "../domain/dino-radar";
+import { useGameStore } from "../stores/game-store";
+import { useId } from "react";
 
 const center = { x: 85, y: 70 };
-function point(value: number, index: number) {
+function point(value: number | null, index: number) {
   const angle = ((index * 60 - 90) * Math.PI) / 180;
-  const radius = (52 * Math.max(0, Math.min(100, value))) / 100;
+  const radius = (52 * Math.max(0, Math.min(100, value ?? 0))) / 100;
   return { x: center.x + Math.cos(angle) * radius, y: center.y + Math.sin(angle) * radius };
 }
-function polygon(values: readonly number[]) {
+function polygon(values: readonly (number | null)[]) {
   return values
     .map(point)
     .map((p) => `${p.x},${p.y}`)
     .join(" ");
 }
 
-export function DinoRadarCard() {
-  const { axes, dayOne, today } = dinoRadarDemo;
+export function DinoRadarCard({ linked = true }: { linked?: boolean } = {}) {
+  const game = useGameStore((s) => s.game);
+  const { axes, dayOne, today, first, elapsed } = radarData(game);
+  const titleId = useId(),
+    descriptionId = useId();
   const labels = [
     { x: 85, y: 9 },
     { x: 150, y: 47 },
@@ -25,8 +30,8 @@ export function DinoRadarCard() {
     { x: 20, y: 98 },
     { x: 20, y: 47 },
   ];
-  return (
-    <Link to="/dashboard" className="radar-card">
+  const content = (
+    <>
       <div className="radar-heading">
         <img src={assets.home.imgPixelIconRadar} alt="" />
         <h3>DINO RADAR</h3>
@@ -34,12 +39,11 @@ export function DinoRadarCard() {
       </div>
       <div className="radar-legend">
         <span>
-          <i className="baseline-key" />
-          1일차
+          <i className="baseline-key" />첫 기록 {first.slice(5)}
         </span>
         <span>
           <i className="today-key" />
-          72일차(오늘)
+          {elapsed}일차 · 오늘
         </span>
       </div>
       <svg
@@ -47,13 +51,18 @@ export function DinoRadarCard() {
         viewBox="0 0 170 140"
         shapeRendering="geometricPrecision"
         role="img"
-        aria-labelledby="dino-radar-title"
-        aria-describedby="dino-radar-description"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
       >
-        <title id="dino-radar-title">1일차와 오늘의 공룡 능력치 비교</title>
-        <desc id="dino-radar-description">
-          데모 데이터.{" "}
-          {axes.map((axis, i) => `${axis}: 1일차 ${dayOne[i]}, 오늘 ${today[i]}`).join(". ")}
+        <title id={titleId}>첫 기록과 오늘의 실천 기록 비교</title>
+        <desc id={descriptionId}>
+          저장된 실천 기록 비율. 빈 축은 기록 없음.{" "}
+          {axes
+            .map(
+              (axis, i) =>
+                `${axis}: 1일차 ${dayOne[i] ?? "기록 없음"}, 오늘 ${today[i] ?? "기록 없음"}`,
+            )
+            .join(". ")}
         </desc>
         {[25, 50, 75, 100].map((value) => (
           <polygon key={value} className="radar-grid" points={polygon(axes.map(() => value))} />
@@ -74,6 +83,7 @@ export function DinoRadarCard() {
         <g className="radar-series radar-current">
           <polygon className="radar-today-series" data-series="today" points={polygon(today)} />
           {today.map((value, i) => {
+            if (value === null) return null;
             const p = point(value, i);
             return (
               <rect
@@ -107,6 +117,13 @@ export function DinoRadarCard() {
           </text>
         ))}
       </svg>
+    </>
+  );
+  return linked ? (
+    <Link to="/dashboard" className="radar-card" aria-label="DINO RADAR · 건강 대시보드 보기">
+      {content}
     </Link>
+  ) : (
+    <div className="radar-card">{content}</div>
   );
 }

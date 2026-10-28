@@ -1,0 +1,24 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {App,BootstraplessSynthesizer} from 'aws-cdk-lib';
+import {Template,Match} from 'aws-cdk-lib/assertions';
+import {WebStack,ArtifactsStack,CollectorStack} from '../stacks.js';
+test('private web, no database duplication, scoped Lambda role and rate limits',()=>{
+ const app=new App();
+ const env={account:'123456789012',region:'ap-southeast-2'};
+ const web=new WebStack(app,'TestWeb',{env,synthesizer:new BootstraplessSynthesizer()});
+ const artifacts=new ArtifactsStack(app,'TestArtifacts',{env,synthesizer:new BootstraplessSynthesizer()});
+ const collector=new CollectorStack(app,'TestCollector',{env,synthesizer:new BootstraplessSynthesizer(),bucket:artifacts.bucket,webUrl:web.webUrl});
+ const w=Template.fromStack(web);w.resourceCountIs('AWS::CloudFront::OriginAccessControl',1);
+ w.hasResourceProperties('AWS::S3::Bucket',{PublicAccessBlockConfiguration:{BlockPublicAcls:true,BlockPublicPolicy:true,IgnorePublicAcls:true,RestrictPublicBuckets:true}});
+ const api=Template.fromStack(collector);api.resourceCountIs('AWS::DynamoDB::Table',0);api.resourceCountIs('AWS::IAM::Role',2);
+ api.hasResourceProperties('AWS::Lambda::Function',{Runtime:'nodejs24.x',Timeout:20,MemorySize:512});
+ api.hasResourceProperties('AWS::ApiGatewayV2::Stage',{DefaultRouteSettings:Match.objectLike({ThrottlingRateLimit:2,ThrottlingBurstLimit:4})});
+ const policies=Object.values(api.findResources('AWS::IAM::Policy'));
+ assert.ok(policies.length===2);assert.ok(!JSON.stringify(policies).includes('dynamodb:'));
+ api.hasResourceProperties('AWS::Lambda::Function',{Runtime:'python3.12',Handler:'handler.handler',Timeout:30,MemorySize:1024});
+ api.hasResourceProperties('AWS::ApiGatewayV2::Route',{RouteKey:'POST /v1/predictions/bp-stage'});
+ assert.ok(!JSON.stringify(policies).includes('secretsmanager:'));
+ assert.ok(!JSON.stringify(policies).includes('AdministratorAccess'));
+ app.synth();
+});

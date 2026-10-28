@@ -1,0 +1,344 @@
+/* Pixel quest sheet: objectives, evidence and rewards share one compact paper panel. */
+.quest-detail-screen .scenario-content {
+  margin: 0 16px;
+  padding-top: 4px;
+  min-height: 0;
+}
+.quest-detail-screen .scenario-content > .dark-shell {
+  display: none;
+}
+.quest-sheet {
+  padding: 14px;
+  border: 3px solid #203b32;
+  background: #f8edce;
+  box-shadow: 4px 4px 0 #203b32;
+  color: #203b32;
+}
+.quest-log-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: -14px -14px 14px;
+  padding: 6px 12px;
+  border-bottom: 3px solid #ae9151;
+  background: #203b32;
+  color: #fff4d4;
+}
+.quest-log-toolbar .quest-back {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: calc(16px * var(--ui-text-scale, 1));
+  line-height: 1.3;
+}
+.quest-log-toolbar > span {
+  color: #e7cd7b;
+  font:
+    8px/1.6 "Press Start 2P",
+    monospace;
+  text-align: right;
+}
+.quest-sheet .quest-detail-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.quest-sheet .quest-detail-heading > .quest-goal-badge {
+  width: 58px;
+  height: 62px;
+  border: 2px solid #203b32;
+  border-radius: 0;
+  background: #e9ce7d;
+  color: #173c30;
+  box-shadow: inset -3px -3px 0 #c3a351;
+  font:
+    700 23px/1 "Galmuri11",
+    sans-serif;
+}
+.quest-detail-copy {
+  flex: 1;
+  min-width: 0;
+}
+.quest-detail-copy > small {
+  color: #536548;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.quest-sheet .quest-detail-heading h1 {
+  margin: 3px 0;
+  color: #203b32;
+  font-size: calc(20px * var(--ui-text-scale, 1));
+  line-height: 1.35;
+  word-break: keep-all;
+}
+.quest-sheet .quest-detail-heading p {
+  margin: 0;
+  color: #3b5247;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+  line-height: 1.4;
+}
+.quest-help-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  min-height: 44px;
+  padding: 6px;
+  border: 0;
+  border-radius: 0;
+  color: #203b32;
+  background: transparent;
+}
+.quest-help-button > span {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border: 2px solid #203b32;
+  background: #f4dc94;
+  box-shadow: 2px 2px 0 #8a8057;
+  font:
+    700 20px/1 "Galmuri11",
+    sans-serif;
+}
+.quest-help-button:focus-visible {
+  outline: 3px solid #b33225;
+  outline-offset: -2px;
+}
+.quest-sheet .quest-progress {
+  margin: 14px 0;
+}
+.quest-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #334e3c;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.quest-progress-value {
+  min-width: 60px;
+  padding: 3px 7px;
+  border: 2px solid #203b32;
+  background: #f3d77a;
+  color: #173c30;
+  font:
+    700 18px/1.1 "Galmuri11",
+    sans-serif;
+  text-align: center;
+}
+.quest-sheet .detail-track {
+  height: 14px;
+  margin: 7px 0 0;
+  overflow: hidden;
+  border: 2px solid #203b32;
+  border-radius: 0;
+  background: #d8d4b8;
+}
+.quest-sheet .detail-track > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  border-radius: 0;
+  background: #4c865a;
+}
+.quest-sheet .detail-track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 13px, #fff3 13px 14px);
+  pointer-events: none;
+}
+.quest-objective {
+  display: grid;
+  gap: 10px;
+}
+.quest-sheet .quest-verification {
+  min-width: 0;
+  margin: 0;
+  padding: 10px 12px 12px;
+  border: 2px solid #8e8b63;
+  border-radius: 0;
+  background: #fff9e8;
+  color: #203b32;
+  box-shadow: 2px 2px 0 #d0c298;
+}
+.quest-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.quest-sheet .quest-card-heading h2 {
+  margin: 0;
+  color: #203b32;
+  font-size: calc(17px * var(--ui-text-scale, 1));
+  line-height: 1.4;
+}
+.quest-sheet .manual-sleep legend {
+  margin: 0 0 8px;
+  color: #526447;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  font-weight: 400;
+}
+.quest-sheet .sleep-duration-inputs {
+  gap: 10px;
+  margin: 0;
+}
+.quest-sheet .sleep-duration-inputs label {
+  gap: 4px;
+  color: #203b32;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.quest-sheet .sleep-duration-inputs input {
+  min-height: 48px;
+  padding: 6px 9px;
+  border-color: #3d5549;
+  background: #f8efd5;
+  color: #173c30;
+  font-size: calc(22px * var(--ui-text-scale, 1));
+}
+.quest-sheet .sleep-duration-inputs input::placeholder {
+  color: #64705c;
+  opacity: 1;
+  font-size: calc(16px * var(--ui-text-scale, 1));
+  font-weight: 400;
+}
+.quest-sheet .sleep-duration-inputs input:focus-visible,
+.quest-sheet .sleep-report-confirmation input:focus-visible {
+  outline: 3px solid #b33225;
+  outline-offset: 2px;
+}
+.quest-sheet .sleep-report-confirmation {
+  min-height: 44px;
+  margin: 6px 0;
+  gap: 8px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+}
+.quest-sheet .secondary-button {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 2px solid #334d3e;
+  border-radius: 0;
+  background: #f4e2ab;
+  color: #203b32;
+  font-size: calc(14px * var(--ui-text-scale, 1));
+}
+.quest-sheet .secondary-button:disabled {
+  background: #e6e3d1;
+  color: #626753;
+  opacity: 1;
+}
+.quest-sheet .sleep-report-status {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  color: #24553a;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.sleep-health-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.sleep-health-action > span {
+  color: #526447;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.quest-sheet .sleep-health-connection p {
+  margin-top: 8px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.quest-claim {
+  margin-top: 14px;
+  border-top: 2px dashed #b8aa77;
+  padding-top: 12px;
+}
+.quest-sheet .quest-reward {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  height: auto;
+  margin: 0 0 10px;
+  padding: 10px;
+  border: 2px solid #203b32;
+  border-radius: 0;
+  background: #203b32;
+  color: #fff4d4;
+}
+.quest-sheet .quest-reward > div {
+  flex: 0 0 auto;
+  gap: 5px;
+}
+.quest-sheet .quest-reward strong {
+  font-size: calc(26px * var(--ui-text-scale, 1));
+  line-height: 1.1;
+}
+.quest-sheet .quest-reward b {
+  color: #f2dc9c;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.quest-sheet .quest-reward p {
+  min-width: 0;
+  margin: 0;
+  color: #fff4d4;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.quest-sheet .complete-quest {
+  min-height: 50px;
+  height: auto;
+  margin: 0;
+  padding: 10px;
+  border: 2px solid #203b32;
+  border-radius: 0;
+  box-shadow: 3px 3px 0 #203b32;
+  font-size: calc(16px * var(--ui-text-scale, 1));
+}
+.quest-sheet .complete-quest:disabled {
+  background: #d9d7bd;
+  color: #4c5d4a;
+  opacity: 1;
+}
+.quest-sheet .complete-help {
+  margin-top: 0;
+  color: #334e3c;
+}
+.quest-sheet .camera-quest-link {
+  margin-top: 0;
+}
+@media (max-width: 374px) {
+  .quest-detail-screen .scenario-content {
+    margin-inline: 10px;
+  }
+  .quest-sheet {
+    padding: 10px;
+  }
+  .quest-log-toolbar {
+    margin: -10px -10px 12px;
+    padding-inline: 8px;
+  }
+  .quest-sheet .quest-detail-heading {
+    gap: 8px;
+  }
+  .quest-sheet .quest-detail-heading > .quest-goal-badge {
+    width: 48px;
+    height: 54px;
+    font-size: calc(21px * var(--ui-text-scale, 1));
+  }
+  .quest-sheet .quest-detail-heading h1 {
+    font-size: calc(18px * var(--ui-text-scale, 1));
+  }
+  .quest-sheet .quest-verification {
+    padding-inline: 10px;
+  }
+  .quest-sheet .quest-reward {
+    gap: 8px;
+    padding: 8px;
+  }
+}

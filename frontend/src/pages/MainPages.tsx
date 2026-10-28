@@ -1,4 +1,9 @@
-import { Link, useNavigate } from "react-router-dom";
+import { ProfileQuests } from "../components/ProfileQuests";
+import { InfoDialog } from "../components/InfoDialog";
+import { retailReferences, discountedRetailRp, retailPricePolicy } from "../domain/retail-pricing";
+import { PixelSelect } from "../components/PixelSelect";
+import { SubQuestPanel } from "../components/SubQuestPanel";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell, PageHeading } from "../components/AppShell";
@@ -13,7 +18,13 @@ import { QuestProgress, PixelCheckbox } from "../components/QuestProgress";
 import { useNotice } from "../components/NoticeProvider";
 import { assets } from "../design/assets";
 import { dinosaurs } from "../design/dinosaurs";
-import { quests, stageProgress, questProgress, questProgressLabel } from "../domain/game";
+import {
+  quests,
+  mainQuests,
+  mainQuestCount,
+  questProgress,
+  questProgressLabel,
+} from "../domain/game";
 import { useGameStore } from "../stores/game-store";
 import { dashboardService } from "../services/dashboard-service";
 import { weeklyCompletedDays, questCountOn } from "../domain/game";
@@ -23,28 +34,40 @@ import { healthPeriods, reportDateRange } from "../services/health-history";
 import type { HealthPeriod } from "../services/health-history";
 import { useProfileStore } from "../stores/profile-store";
 import { GameWallet, GoldEffects } from "../components/GameWallet";
-import { questExperience } from "../domain/experience";
+import { dailyCombatExperienceLimit, questExperience } from "../domain/experience";
 import { PixelDatePicker } from "../components/PixelDatePicker";
+import { BloodPressureReport } from "../components/BloodPressureReport";
+import { useMedicationStore } from "../stores/medication-store";
+import { dailyDoses } from "../domain/medications";
+import { QuestCameraDialog } from "../components/QuestCameraDialog";
+import { QuestInfoDialog } from "../components/QuestInfoDialog";
+import { QuestCalendar } from "../components/QuestCalendar";
+import { DashboardSummary } from "../components/DashboardSummary";
+import { DashboardReportShell } from "../components/DashboardReportShell";
+import { reportSelection } from "../services/health-history";
 
 export function HomePage() {
+  const location = useLocation();
   const { game, paused, togglePause } = useGameStore();
   const dino = dinosaurs[game.dinosaur];
   const a = assets.home;
+  const { medications, taken } = useMedicationStore();
+  const doses = dailyDoses(medications, game.date, taken);
   const icons = {
     medicine: a.imgQuestItem0PixelIcon,
     meal: a.imgQuestItem1PixelIcon,
     walk: a.imgQuestItem2PixelIcon,
     water: a.imgQuestItem3PixelIcon,
   };
-  const homeQuests = [...quests]
+  const homeQuests = [...mainQuests]
     .sort((a, b) => Number(game.completed.includes(a.id)) - Number(game.completed.includes(b.id)))
     .slice(0, 4);
-  const doneCount = game.completed.length;
-  const nextQuest = quests.find((q) => !game.completed.includes(q.id));
+  const doneCount = mainQuestCount(game.completed);
+  const nextQuest = mainQuests.find((q) => !game.completed.includes(q.id));
   const feedbackTitle =
     game.combat.recovery > 0
       ? `${dino.name}: 잠깐 쉬어가도 괜찮아요!`
-      : doneCount === 5
+      : doneCount === mainQuests.length
         ? `${dino.name}, 오늘 모두 해냈어요!`
         : doneCount >= 3
           ? `${dino.name}, 오늘 잘하고 있어요!`
@@ -55,8 +78,8 @@ export function HomePage() {
     game.combat.recovery > 0
       ? `WAVE ${game.combat.wave} 실패 · 퀘스트로 힘을 모아 다시 도전해요.`
       : nextQuest
-        ? `오늘 ${doneCount}/5 완료 · 다음 실천: ${nextQuest.title}`
-        : "오늘 5/5 완료 · 모든 퀘스트 버프가 활성화됐어요!";
+        ? `오늘 ${doneCount}/${mainQuests.length} 완료 · 다음 실천: ${nextQuest.title}`
+        : "오늘의 메인 퀘스트를 모두 완료했어요!";
   return (
     <AppShell active="home">
       <Link to={game.completed.length ? "/buff" : "/withered"} className="dino-feedback">
@@ -74,6 +97,7 @@ export function HomePage() {
       </Link>
       <AdventureScene game={game} paused={paused} onTogglePause={togglePause} />
       <div className="home-panels">
+        <ProfileQuests compact />
         <DinoRadarCard />
         <section className="compact-quests">
           <Link className="compact-quest-title" to="/quests">
@@ -88,14 +112,34 @@ export function HomePage() {
                 className="compact-quest"
                 data-completed={done}
                 key={q.id}
-                to={`/quests/${q.id}`}
+                to={
+                  q.id === "survey"
+                    ? "/daily-survey"
+                    : q.id === "medicine" && doses.length
+                      ? "/medications"
+                      : `/quests/${q.id}`
+                }
+                state={q.id === "survey" ? { surveyBackground: location } : undefined}
               >
                 <PixelCheckbox checked={done} />
-                {q.id === "sleep" ? <PixelIcon name="moon" /> : <img src={icons[q.id]} alt="" />}
+                {q.id === "survey" ? (
+                  <PixelIcon name="document" />
+                ) : q.id === "sleep" ? (
+                  <PixelIcon name="moon" />
+                ) : (
+                  <img src={icons[q.id]} alt="" />
+                )}
                 <div>
                   <div className="compact-quest-heading">
                     <strong>{q.title}</strong>
-                    {q.id === "water" && <small>{done ? 8 : 0} / 8잔</small>}
+                    {q.id === "medicine" && doses.length > 0 && (
+                      <small>
+                        {doses.filter((dose) => dose.taken).length} / {doses.length}회
+                      </small>
+                    )}
+                    {q.id === "water" && (
+                      <small>{done ? "동작 인증 완료" : "동작 인증 대기"}</small>
+                    )}
                     {q.id === "walk" && <small>{Math.round(questProgress(game, q) * 100)}%</small>}
                   </div>
                   {(q.id === "walk" || q.id === "water") && (
@@ -125,108 +169,174 @@ export function HomePage() {
 }
 
 export function QuestsPage() {
+  const location = useLocation();
+  const [questTab, setQuestTab] = useState<"today" | "sub">("today");
+  const navigate = useNavigate();
+  const [detail, setDetail] = useState<{
+    quest: (typeof quests)[number];
+    trigger: HTMLButtonElement;
+  } | null>(null);
+  const [camera, setCamera] = useState<{
+    quest: "meal" | "medicine" | "water";
+    trigger: HTMLButtonElement;
+  } | null>(null);
   const game = useGameStore((s) => s.game);
-  const dino = dinosaurs[game.dinosaur];
-  const notice = useNotice();
   return (
     <AppShell active="quests">
-      <PageHeading title="DAILY QUEST" subtitle={`${dino.name}의 성장을 위한 오늘의 건강 퀘스트`} />
-      <section className="quest-summary">
-        <DinosaurArt className="quest-summary-dino" pose="portrait" />
-        <div className="quest-summary-copy">
-          <h3>
-            TODAY QUEST · <AnimatedNumber value={game.completed.length} /> / 5 완료
-          </h3>
-          <div className="quest-summary-detail">
-            <div className="quest-summary-power">
-              <p>{dino.name} EXP·버프 획득</p>
-              <div className="summary-track">
-                <i className="metric-fill" style={{ width: `${stageProgress(game) * 10}%` }} />
-              </div>
-            </div>
-            <button
-              className="quest-summary-reward"
-              onClick={() =>
-                notice(
-                  "레벨업 시 도달 레벨 × 500 GOLD를 받아요. 퀘스트 EXP는 레벨 구간에 따라 증가해요.",
-                )
-              }
-            >
-              <img src={assets.quests.imgDecorationRewardSpark} alt="" />
-              LEVEL UP
-            </button>
-          </div>
-        </div>
-      </section>
-      <Link className="step-connection-note" to="/me">
-        걸음 수 자동 완료는 Android·iPhone 앱의 건강 연결이 필요해요. 연결 관리 ›
+      <PageHeading title="DAILY QUEST" subtitle="나의 건강 습관을 쌓는 오늘의 퀘스트" />
+      <Link className="cv-test-entry" to="/cv" aria-label="전면 카메라 CV 테스트">
+        <PixelIcon name="camera" />
+        <span>
+          전면 카메라 CV 테스트<small>물 마시기 · 경구 복약 · 주사 동작</small>
+        </span>
+        <b aria-hidden="true">›</b>
       </Link>
-      <section className="quest-list" aria-label="오늘의 퀘스트">
-        {quests.map((q, index) => {
-          const done = game.completed.includes(q.id);
-          return (
-            <Link className="quest-row" to={`/quests/${q.id}`} key={q.id}>
-              <PixelCheckbox checked={done} />
-              <div className="quest-row-copy">
-                <h3>{q.title}</h3>
-                <small className={done ? "green" : ""}>{questProgressLabel(game, q)}</small>
-                <QuestProgress
-                  label={q.title}
-                  progress={questProgress(game, q)}
-                  done={done}
-                  delay={index * 45}
+      <Link className="meal-records-entry" to="/meals">
+        식단 분석·기록 보기 ›
+      </Link>
+      <div className="quest-hub-tabs" role="tablist" aria-label="퀘스트 종류" data-no-swipe>
+        <button
+          role="tab"
+          id="today-quest-tab"
+          aria-selected={questTab === "today"}
+          aria-controls="today-quest-panel"
+          onClick={() => setQuestTab("today")}
+        >
+          Main Quest
+        </button>
+        <button
+          role="tab"
+          id="sub-quest-tab"
+          aria-selected={questTab === "sub"}
+          aria-controls="sub-quest-panel"
+          onClick={() => setQuestTab("sub")}
+        >
+          Sub Quest
+        </button>
+      </div>
+      <div
+        role="tabpanel"
+        id="today-quest-panel"
+        aria-labelledby="today-quest-tab"
+        hidden={questTab !== "today"}
+      >
+        <ProfileQuests />
+        <section className="quest-summary">
+          <DinosaurArt className="quest-summary-dino" pose="portrait" />
+          <div className="quest-summary-copy">
+            <h3>
+              MAIN QUEST · <AnimatedNumber value={mainQuestCount(game.completed)} /> /{" "}
+              {mainQuests.length} 완료
+            </h3>
+            <div className="quest-summary-detail">
+              <div
+                className="summary-track"
+                role="progressbar"
+                aria-label="오늘의 퀘스트 달성률"
+                aria-valuemin={0}
+                aria-valuemax={mainQuests.length}
+                aria-valuenow={mainQuestCount(game.completed)}
+              >
+                <i
+                  className="metric-fill"
+                  style={{
+                    width: `${(mainQuestCount(game.completed) / mainQuests.length) * 100}%`,
+                  }}
                 />
               </div>
-              <span className="quest-exp">
-                +{questExperience(q.experience, game.experience)} EXP
-              </span>
-            </Link>
-          );
-        })}
-      </section>
-      <button
-        className="weekly-reward"
-        onClick={() =>
-          notice(
-            weeklyCompletedDays(game) === 5
-              ? "이번 주 5일 달성! 보스전 입장 조건을 충족했어요. 보스전은 준비 중이에요."
-              : `하루 5개 퀘스트를 모두 완료하면 1일 달성으로 기록돼요. 이번 주 ${weeklyCompletedDays(game)}일 달성했어요.`,
-          )
-        }
-      >
-        <h3>WEEKLY BOSS REWARD</h3>
-        <p>
-          {weeklyCompletedDays(game) === 5
-            ? "5일 달성! 보스전 입장 조건 완료"
-            : "하루 퀘스트 모두 완료 · 주 5일 달성"}
-        </p>
-        <div>
-          <strong>
-            <AnimatedNumber value={weeklyCompletedDays(game)} /> / 5 DAYS
-          </strong>
-          <span
-            role="progressbar"
-            aria-label="이번 주 퀘스트 달성일"
-            aria-valuemin={0}
-            aria-valuemax={5}
-            aria-valuenow={weeklyCompletedDays(game)}
-          >
-            <i className="metric-fill" style={{ width: `${weeklyCompletedDays(game) * 20}%` }} />
-          </span>
+              <p className="quest-weekly-inline">
+                이번 주 달성 <strong>{weeklyCompletedDays(game)} / 5일</strong>
+              </p>
+              <small className="quest-growth-note">
+                전투 EXP {game.combatExperienceToday} /{" "}
+                {dailyCombatExperienceLimit(game.experience)} · 모두 완료 +200 G
+              </small>
+              {game.sleepExperience[game.date] && (
+                <small className="quest-growth-note" aria-label="오늘 수면 추가 EXP">
+                  수면 {game.sleepHours}시간 기록 · 추가 +
+                  {game.sleepExperience[game.date].experience} EXP 지급 완료
+                </small>
+              )}
+            </div>
+          </div>
+        </section>
+        <Link className="step-connection-note" to="/me">
+          걸음 수 자동 완료는 Android·iPhone 앱의 건강 연결이 필요해요. 연결 관리 ›
+        </Link>
+        <section className="quest-list" aria-label="오늘의 퀘스트">
+          {mainQuests.map((q, index) => {
+            const done = game.completed.includes(q.id);
+            return (
+              <button
+                type="button"
+                className="quest-row"
+                key={q.id}
+                aria-haspopup="dialog"
+                onClick={(event) => setDetail({ quest: q, trigger: event.currentTarget })}
+              >
+                <PixelCheckbox checked={done} />
+                <div className="quest-row-copy">
+                  <h3>{q.title}</h3>
+                  <small className={done ? "green" : ""}>{questProgressLabel(game, q)}</small>
+                  <QuestProgress
+                    label={q.title}
+                    progress={questProgress(game, q)}
+                    done={done}
+                    delay={index * 45}
+                  />
+                </div>
+                <span className="quest-exp">
+                  +{questExperience(q.experience, game.experience)} EXP
+                </span>
+              </button>
+            );
+          })}
+        </section>
+      </div>
+      {questTab === "sub" && (
+        <div role="tabpanel" id="sub-quest-panel" aria-labelledby="sub-quest-tab">
+          <SubQuestPanel onChoose={(quest, trigger) => setDetail({ quest, trigger })} />
         </div>
-      </button>
+      )}
+      {detail && (
+        <QuestInfoDialog
+          quest={detail.quest}
+          trigger={detail.trigger}
+          onClose={() => setDetail(null)}
+          onAuthenticate={() => {
+            const id = detail.quest.id;
+            if (id === "meal" || id === "water" || id === "medicine") {
+              setCamera({ quest: id, trigger: detail.trigger });
+              setDetail(null);
+            } else if (id === "survey") {
+              setDetail(null);
+              navigate("/daily-survey", { state: { surveyBackground: location } });
+            } else navigate(`/quests/${id}`);
+          }}
+        />
+      )}
+      {camera && (
+        <QuestCameraDialog
+          quest={camera.quest}
+          trigger={camera.trigger}
+          onClose={() => setCamera(null)}
+        />
+      )}
     </AppShell>
   );
 }
 
-export function DashboardPage() {
+export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
   const game = useGameStore((s) => s.game);
-  const dino = dinosaurs[game.dinosaur];
+  const [params, setParams] = useSearchParams();
+  const initial = reportSelection(params, game.date);
   const registeredOn = useProfileStore((s) => s.registeredOn);
-  const [period, setPeriod] = useState<HealthPeriod>("week");
-  const [dateChoice, setSelectedDate] = useState<string | null>(null);
+  const [period, setPeriod] = useState<HealthPeriod>(initial.period);
+  const [dateChoice, setSelectedDate] = useState<string | null>(
+    params.has("date") ? initial.date : null,
+  );
   const selectedDate = dateChoice ?? game.date;
-  const [rangeStart, setRangeStart] = useState(game.date);
+  const [rangeStart, setRangeStart] = useState(initial.from);
   const range = reportDateRange(period, selectedDate, rangeStart);
   const selectedQuests = questCountOn(game, selectedDate);
   const periodInfo = healthPeriods[period];
@@ -234,81 +344,102 @@ export function DashboardPage() {
     queryKey: ["dashboard", "demo"],
     queryFn: ({ signal }) => dashboardService.getSnapshot(signal),
   });
+  const Shell = detailed ? DashboardReportShell : AppShell;
+  const reportUrl = `/dashboard/report?${new URLSearchParams({ period, date: selectedDate, from: rangeStart })}`;
+  const setReportPeriod = (value: HealthPeriod) => {
+    setPeriod(value);
+    setParams({ period: value, date: selectedDate, from: rangeStart }, { replace: true });
+  };
+  const selectReportDates = (date: string, from = rangeStart) => {
+    const start = from > date ? date : from;
+    setSelectedDate(date);
+    setRangeStart(start);
+    setParams({ period, date, from: start }, { replace: true });
+  };
   return (
-    <AppShell
+    <Shell
       active="dashboard"
       calendarDate={selectedDate}
-      onSelectDate={(date) => {
-        setSelectedDate(date);
-        if (date < rangeStart) setRangeStart(date);
-      }}
-      calendarControls={
-        <div className="dashboard-date-controls" data-no-swipe>
-          <label className="dashboard-period-select">
-            <span>조회 기간</span>
-            <select
-              aria-label="건강 변화 조회 기간"
-              value={period}
-              onChange={(event) => setPeriod(event.target.value as HealthPeriod)}
-            >
-              {(Object.keys(healthPeriods) as HealthPeriod[]).map((value) => (
-                <option key={value} value={value}>
-                  {healthPeriods[value].label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="dashboard-date-field">
-            <span>{period === "custom" ? "날짜 범위" : "기준 날짜"}</span>
-            <PixelDatePicker
-              label={period === "custom" ? "조회 날짜 범위" : "조회 기준 날짜"}
-              value={selectedDate}
-              max={game.date}
-              range={
-                period === "custom"
-                  ? {
-                      start: rangeStart,
-                      onChange: (start, end) => {
-                        setRangeStart(start);
-                        setSelectedDate(end);
-                      },
-                    }
-                  : undefined
-              }
-              onChange={(value) => {
-                if (!value || value > game.date) return;
-                setSelectedDate(value);
-                if (value < rangeStart) setRangeStart(value);
-              }}
-            />
-          </div>
-        </div>
-      }
+      onSelectDate={(date) => selectReportDates(date)}
+      showCalendar={false}
     >
       <div className="dashboard-heading">
         <PageHeading
           title="HEALTH DASHBOARD"
-          subtitle={`${periodInfo.label} 건강 기록과 ${dino.name}의 성장을 확인하세요`}
+          subtitle={`${periodInfo.label === "기간" ? "선택한 기간의" : periodInfo.label} 건강 기록과 변화를 확인하세요`}
         />
-        <p className="dashboard-range-label" aria-live="polite">
-          {range.start === range.end ? range.end : `${range.start} ~ ${range.end}`}
-        </p>
+        <QuestCalendar
+          game={game}
+          selected={selectedDate}
+          rangeLabel={range.start === range.end ? range.end : `${range.start} ~ ${range.end}`}
+          onSelect={(date) => selectReportDates(date)}
+          controls={
+            <div className="dashboard-date-controls" data-no-swipe>
+              <label className="dashboard-period-select">
+                <span>조회 기간</span>
+                <PixelSelect
+                  aria-label="건강 변화 조회 기간"
+                  value={period}
+                  onValueChange={(value) => setReportPeriod(value as HealthPeriod)}
+                >
+                  {(Object.keys(healthPeriods) as HealthPeriod[]).map((value) => (
+                    <option key={value} value={value}>
+                      {healthPeriods[value].label}
+                    </option>
+                  ))}
+                </PixelSelect>
+              </label>
+              <div className="dashboard-date-field">
+                <span>{period === "custom" ? "날짜 범위" : "기준 날짜"}</span>
+                <PixelDatePicker
+                  label={period === "custom" ? "조회 날짜 범위" : "조회 기준 날짜"}
+                  value={selectedDate}
+                  max={game.date}
+                  range={
+                    period === "custom"
+                      ? {
+                          start: rangeStart,
+                          onChange: (start, end) => {
+                            selectReportDates(end, start);
+                          },
+                        }
+                      : undefined
+                  }
+                  onChange={(value) => {
+                    if (!value || value > game.date) return;
+                    selectReportDates(value);
+                  }}
+                />
+              </div>
+            </div>
+          }
+        />
       </div>
       {!data ? (
         <p role="status">
           {isError ? "기록을 불러오지 못했어요." : "건강 기록을 불러오고 있어요."}
         </p>
+      ) : !detailed ? (
+        <DashboardSummary
+          data={data}
+          period={period}
+          date={selectedDate}
+          reportUrl={reportUrl}
+          from={rangeStart}
+        />
       ) : (
         <div className="dashboard-period-content" tabIndex={0} aria-label="대시보드 리포트 스크롤">
           <section className="health-report cream-card" aria-labelledby="report-title">
-            <section className="health-growth-card" aria-label="건강 점수와 공룡 성장">
+            <section className="health-growth-card" aria-label="유저 건강 점수">
               <div className="health-score">
                 <h3>{periodInfo.heading} HEALTH SCORE</h3>
-                <strong className="score-number">
-                  <AnimatedNumber value={data.score} />
-                </strong>
-                <span className="score-total">/ 100</span>
-                <b className="score-rank">RANK: A</b>
+                <div className="score-value">
+                  <strong className="score-number">
+                    <AnimatedNumber value={data.score} />
+                  </strong>
+                  <span className="score-total">/ 100</span>
+                </div>
+                <b className="score-rank">RANK: A · 데모</b>
                 <p>
                   {periodInfo.previous}보다 {periodInfo.delta}점 올랐어요!
                 </p>
@@ -316,25 +447,6 @@ export function DashboardPage() {
                   <i className="metric-fill" style={{ width: `${data.score}%` }} />
                 </div>
               </div>
-              <Link to="/buff" className="growth-insight">
-                <DinosaurArt pose="portrait" alt={`성장한 ${dino.name}`} />
-                <div>
-                  <h3>
-                    <span>{dino.name} 성장</span>
-                    <span>
-                      +<AnimatedNumber value={12} />%
-                    </span>
-                  </h3>
-                  <p>
-                    건강 점수 {data.score - periodInfo.delta} → {data.score} · 공격력 100 → 112
-                  </p>
-                  <p>
-                    오늘 퀘스트 {game.completed.length}/5 · 이번 주 {weeklyCompletedDays(game)}일
-                    달성
-                  </p>
-                  <small>꾸준한 실천이 성장으로 이어져요. 능력치는 데모예요.</small>
-                </div>
-              </Link>
             </section>
             <div className="report-body" key={`${period}-${range.start}-${range.end}`}>
               <header>
@@ -350,25 +462,25 @@ export function DashboardPage() {
               <dl>
                 <div>
                   <dt>{selectedDate === game.date ? "오늘 퀘스트" : "선택일 퀘스트"}</dt>
-                  <dd>{selectedQuests} / 5</dd>
+                  <dd>
+                    {selectedQuests} / {mainQuests.length}
+                  </dd>
                 </div>
                 <div>
                   <dt>{selectedDate === game.date ? "이번 주 달성" : "선택 주 달성"}</dt>
                   <dd>{weeklyCompletedDays(game, selectedDate)}일</dd>
                 </div>
               </dl>
-              <p className="report-next">
-                <PixelIcon name="quests" />
-                <span>
-                  {game.completed.length === 5
-                    ? "오늘 퀘스트를 모두 완료했어요."
-                    : `다음 실천 · ${quests.find((quest) => !game.completed.includes(quest.id))?.title}`}
-                </span>
-              </p>
+
               <small>점수와 추이는 데모이며 퀘스트 현황은 이 기기의 실제 기록이에요.</small>
+              <BloodPressureReport
+                bp={data.bpResult}
+                model={data.modelResult}
+                ranker={data.rankerResult}
+              />
               <Link to="/risk" className="disease-card" aria-label="질환 위험도 상세 보기">
                 <header>
-                  <h3>질환 위험도</h3>
+                  <h3>질환 위험도 · 데모</h3>
                   <small>
                     {registeredOn ? `등록일 ${registeredOn.replaceAll("-", ".")}` : "등록일 미등록"}
                   </small>
@@ -431,91 +543,112 @@ export function DashboardPage() {
           </section>
         </div>
       )}
-    </AppShell>
+    </Shell>
   );
 }
 
-const products = [
-  {
-    name: "닭가슴살 세트",
-    sub: "주간 특가 15% · 실물 상품",
-    price: 450,
-    image: assets.shop.imgProductPhoto,
-    badge: "WEEKLY -15%",
-    wide: true,
-  },
-  {
-    name: "홍삼 선물세트",
-    sub: "RRR · 실물 상품",
-    price: 620,
-    image: assets.shop.imgProductPhoto1,
-  },
-  { name: "멀티비타민", sub: "RRR · 실물 상품", price: 120, image: assets.shop.imgProductPhoto2 },
-  {
-    name: "프로틴 음료",
-    sub: "BEST · 이번 주 구매 1위",
-    price: 300,
-    image: assets.shop.imgProductPhoto3,
-    badge: "BEST 1",
-    wide: true,
-  },
-  { name: "오트밀", sub: "아침 식사 · 이미지 예시", price: 180, image: "/assets/shop/oatmeal.jpg" },
-  {
-    name: "아몬드 토핑",
-    sub: "견과류 · 이미지 예시",
-    price: 160,
-    image: "/assets/shop/almonds.jpg",
-  },
-];
+const products = retailReferences.map((reference, index) => ({
+  ...reference,
+  name: reference.product,
+  sub: reference.pack,
+  price: discountedRetailRp(reference.referenceWon),
+  image: [
+    assets.shop.imgProductPhoto,
+    assets.shop.imgProductPhoto1,
+    assets.shop.imgProductPhoto2,
+    assets.shop.imgProductPhoto3,
+    "/assets/shop/oatmeal.jpg",
+    "/assets/shop/almonds.jpg",
+  ][index],
+  badge: "-10%",
+}));
 export function ShopPage({ customize = false }: { customize?: boolean }) {
   const { game, claimBonus } = useGameStore();
   const dino = dinosaurs[game.dinosaur];
   const notice = useNotice();
   const navigate = useNavigate();
   const [walletTrigger, setWalletTrigger] = useState<HTMLElement | null>(null);
+  const [productDetail, setProductDetail] = useState<{
+    item: (typeof products)[number];
+    trigger: HTMLElement;
+  } | null>(null);
   return (
     <AppShell active="shop">
       <PageHeading title="REX SHOP" subtitle={`건강 퀘스트 보상으로 ${dino.name} 꾸미기`} />
       <section className="shop-wallet" aria-label="GOLD 지갑">
         <div className="wallet-heading">
-          <h3>
-            <PixelIcon name="coin" /> GOLD
-          </h3>
-          <div className="wallet-balance">
-            <strong>
-              <AnimatedNumber value={game.gold} separator />
-              <small>G</small>
-            </strong>
+          <div className="wallet-currency wallet-gold">
+            <h3>
+              <PixelIcon name="coin" /> GOLD
+            </h3>
+            <div className="wallet-balance">
+              <strong>
+                <AnimatedNumber value={game.gold} separator />
+                <small>G</small>
+              </strong>
+            </div>
+            <small>공룡 꾸미기</small>
           </div>
+          <div className="wallet-currency wallet-rp" aria-label={`보유 RP ${game.rp}`}>
+            <h3>
+              <PixelIcon name="shop" /> RP
+            </h3>
+            <strong>
+              <AnimatedNumber value={game.rp} separator />
+            </strong>
+            <small>현실 리워드 · 데모</small>
+          </div>
+        </div>
+        <div className="wallet-actions">
           <button
             className="wallet-convert"
             onClick={(event) => setWalletTrigger(event.currentTarget)}
           >
             전환 ⇄
           </button>
+          <button
+            className="daily-bonus"
+            disabled={game.bonusClaimed}
+            aria-label={
+              game.bonusClaimed ? "오늘의 무료 GOLD 받기 완료" : "오늘의 무료 GOLD 10개 받기"
+            }
+            onClick={() => {
+              claimBonus();
+              notice("오늘의 무료 GOLD 10개를 받았어요!");
+            }}
+          >
+            {game.bonusClaimed ? "오늘 보상 완료 ✓" : "일일 보상 +10 G"}
+          </button>
         </div>
-        <p>
-          전투 클리어와 레벨업으로 GOLD를 모아요
-          <br />
-          <span>현실 상품에는 RP 사용</span>
-        </p>
-        <button
-          className="daily-bonus"
-          disabled={game.bonusClaimed}
-          aria-label={
-            game.bonusClaimed ? "오늘의 무료 GOLD 받기 완료" : "오늘의 무료 GOLD 10개 받기"
-          }
-          onClick={() => {
-            claimBonus();
-            notice("오늘의 무료 GOLD 10개를 받았어요!");
-          }}
-        >
-          {game.bonusClaimed ? "오늘 보상 완료 ✓" : "일일 보상 +10 G"}
-        </button>
       </section>
       {walletTrigger && (
         <GameWallet onClose={() => setWalletTrigger(null)} returnFocusTo={walletTrigger} />
       )}
+      {productDetail && (
+        <InfoDialog
+          title={productDetail.item.name}
+          returnFocusTo={productDetail.trigger}
+          onClose={() => setProductDetail(null)}
+          confirmLabel="닫기"
+        >
+          <div className="retail-price-detail">
+            <p>{productDetail.item.pack}</p>
+            <p>쿠팡 참고 판매가 {productDetail.item.referenceWon.toLocaleString()}원</p>
+            <strong>10% 할인 · {productDetail.item.price.toLocaleString()} RP</strong>
+            <small>
+              1 RP = 1원 · 확인일 {retailPricePolicy.checkedOn} · {productDetail.item.sourceAge}
+            </small>
+            <a href={productDetail.item.sourceUrl} target="_blank" rel="noreferrer">
+              쿠팡에서 상품·가격 확인 ›
+            </a>
+            <p>
+              실시간 가격·배송비·재고와 다를 수 있어요. 현재는 교환 데모이며 RP를 차감하거나
+              주문하지 않아요.
+            </p>
+          </div>
+        </InfoDialog>
+      )}
+
       <section className="shop-catalog">
         <div className="shop-tabs" aria-label="상품 분류">
           {["추천", "꾸미기"].map((label, i) => (
@@ -549,40 +682,61 @@ export function ShopPage({ customize = false }: { customize?: boolean }) {
             role="region"
             aria-label="꾸미기 상품 목록"
           >
-            <AccessoryCatalog />
+            <div className="shop-companion-banner">
+              <DinosaurArt pose="portrait" alt="" />
+              <div>
+                <strong>{dino.name}의 모험 옷장</strong>
+                <small>GOLD로 꾸미고, 캐릭터에서 장착해요.</small>
+              </div>
+              <Link to="/character?tab=accessories">보유 아이템 ›</Link>
+            </div>
+            <AccessoryCatalog showHeader={false} />
             <GoldEffects />
           </div>
         ) : (
           <>
             <div className="product-scroll" role="region" aria-label="상품 목록" tabIndex={0}>
+              <header className="shop-section-heading">
+                <h3>이번 주 추천</h3>
+                <small>RP · 교환 데모</small>
+              </header>
               <div className="product-grid">
                 {products.map((p, i) => (
                   <button
                     key={p.name}
-                    className={`product product-${i} ${p.wide ? "wide" : ""}`}
-                    onClick={() =>
-                      notice(
-                        `${p.name} · ${p.price} RP — 실제 상품 교환은 서버 연동 후 제공됩니다. RP는 차감되지 않아요.`,
-                      )
-                    }
+                    className={`product product-${i}${i === 0 ? " product-featured" : ""}`}
+                    onClick={(event) => setProductDetail({ item: p, trigger: event.currentTarget })}
                   >
+                    <span className="product-topline">
+                      <span className={`product-badge ${i === 0 ? "sale" : ""}`}>
+                        {p.badge ?? "REWARD"}
+                      </span>
+                      <small>RP SHOP</small>
+                    </span>
                     <span className="product-photo">
                       <img src={p.image} alt={p.name} />
                     </span>
-                    <span className="rrr-badge">RRR</span>
-                    <span className="product-price">{p.price} RP</span>
-                    {p.badge && (
-                      <span className={`product-badge ${i === 0 ? "sale" : ""}`}>{p.badge}</span>
-                    )}
                     <strong>{p.name}</strong>
                     <small>{p.sub}</small>
+                    <small className="retail-reference">
+                      쿠팡 참고 {p.referenceWon.toLocaleString()}원 · 10% 할인
+                    </small>
+                    <span className="product-footer">
+                      <span className="product-price">{p.price.toLocaleString()} RP</span>
+                      <span className="product-action">
+                        교환 보기 <span aria-hidden="true">›</span>
+                      </span>
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
             <details className="shop-photo-credits">
               <summary>상품 이미지 출처</summary>
-              <p>추가 품목과 RP 가격은 데모 예시입니다.</p>
+              <p>
+                쿠팡의 날짜가 있는 참고 가격에서 10%를 내린 RP예요. 1 RP = 1원 기준이며 실시간
+                판매가·배송비·재고와 다를 수 있어요. 이미지는 상품 유형 예시예요.
+              </p>
               <a
                 href="https://commons.wikimedia.org/wiki/File:Oatmeal_(1).jpg"
                 target="_blank"

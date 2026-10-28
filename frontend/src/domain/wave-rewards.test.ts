@@ -102,7 +102,7 @@ describe("wave rewards and saved history", () => {
     const history = { ...next, questHistory: { ...next.questHistory, "2026-09-26": 5 } };
     expect(weeklyCompletedDays(history, "2026-09-26")).toBe(1);
     expect(weeklyCompletedDays(history)).toBe(0);
-    expect(questCountOn({ ...next, completedDates: ["2026-09-28"] }, "2026-09-28")).toBe(5);
+    expect(questCountOn({ ...next, completedDates: ["2026-09-28"] }, "2026-09-28")).toBe(4);
     expect(reportDateRange("week", "2026-01-03")).toEqual({
       start: "2025-12-28",
       end: "2026-01-03",

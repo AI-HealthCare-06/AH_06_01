@@ -1,0 +1,190 @@
+.main-screen .greeting {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) repeat(3, 44px);
+  align-items: center;
+  gap: 4px;
+  height: auto;
+  min-height: 64px;
+  padding-bottom: 8px;
+}
+.greeting .avatar {
+  width: 44px;
+  height: 44px;
+}
+.greeting .greeting-copy h1 {
+  font-size: calc(20px * var(--ui-text-scale, 1));
+  line-height: 26px;
+}
+.greeting .weather-greeting {
+  max-width: 100%;
+  min-width: 0;
+}
+.greeting .weather-greeting button {
+  width: 100%;
+  min-width: 0;
+}
+.greeting .weather-greeting button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.greeting .weather-greeting .pixel-icon {
+  flex-shrink: 0;
+}
+.main-screen .greeting :is(.medication-header-button, .search-button, .menu-button) {
+  position: static;
+  inset: auto;
+  width: 44px;
+  height: 44px;
+}
+.profile-avatar:not([data-avatar="default"]) img {
+  transform: none;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.member-card .member-avatar-button {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  flex-shrink: 0;
+  border: 2px solid #243b30;
+  box-shadow: 2px 2px #a99e6b;
+}
+.member-avatar-button small {
+  position: absolute;
+  inset: auto 0 0;
+  background: #243b30;
+  color: #fff4ce;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 16px;
+}
+.my-page-screen .member-card {
+  height: auto;
+  min-height: 94px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.member-card > div {
+  flex: 1;
+  min-width: 0;
+}
+.member-card h2 {
+  overflow-wrap: anywhere;
+}
+.member-card > strong {
+  margin: 0 0 0 auto;
+  align-self: center;
+}
+dialog.info-dialog:has(.profile-avatar-picker) {
+  width: min(500px, calc(100vw - 32px));
+  max-width: 500px;
+  max-height: calc(100svh - 32px);
+  padding: 16px;
+}
+.profile-avatar-picker .avatar-picker-current {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.avatar-picker-current > .profile-avatar {
+  width: 56px;
+  height: 56px;
+  border: 2px solid #243b30;
+  flex-shrink: 0;
+}
+.avatar-picker-current strong {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.info-dialog .avatar-picker-current p {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  margin: 4px 0 0;
+}
+.avatar-default-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 8px;
+  border: 2px solid #a99e6b;
+  background: #e5ddb0;
+}
+.avatar-default-choice img {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+}
+.avatar-default-choice[aria-pressed="true"] {
+  border-color: #e84a3c;
+}
+.profile-avatar-picker section {
+  margin-top: 16px;
+}
+.avatar-picker-options {
+  max-height: min(420px, calc(100svh - 300px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 3px 3px 0;
+}
+.profile-avatar-picker h3 {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 8px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
+  color: #243b30;
+}
+.profile-avatar-picker h3 small {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.profile-avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.profile-avatar-grid button {
+  position: relative;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 3px;
+  border: 2px solid #a99e6b;
+  box-shadow: 2px 2px #858267;
+  background: #e5ddb0;
+}
+.profile-avatar-grid img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.profile-avatar-grid span {
+  display: block;
+  margin-top: 4px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 14px;
+}
+.profile-avatar-grid [aria-pressed="true"] {
+  border-color: #e84a3c;
+  background: #ffe486;
+}
+.profile-avatar-grid b {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0 2px;
+  background: #e84a3c;
+  color: #fff4ce;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+@media (max-width: 359px) {
+  .greeting .greeting-copy h1 {
+    font-size: calc(16px * var(--ui-text-scale, 1));
+    line-height: 22px;
+  }
+  .greeting .weather-greeting button {
+    font-size: calc(10px * var(--ui-text-scale, 1));
+  }
+}

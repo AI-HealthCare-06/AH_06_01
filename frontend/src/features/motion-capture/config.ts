@@ -1,6 +1,7 @@
 export const motionConfig = {
   version: "rules-v1.3-selfie",
   frameIntervalMs: 100,
+  qualitySlotMs: 100,
   objectIntervalMs: 200,
   objectMaxAgeMs: 500,
   objectAcquireScore: 0.4,

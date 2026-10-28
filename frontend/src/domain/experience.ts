@@ -31,3 +31,6 @@ export function levelUpGold(before: number, after: number) {
   const last = experienceProgress(after).level;
   return ((last * (last + 1) - first * (first + 1)) / 2) * 500;
 }
+
+// Combat is a small daily supplement, at most half the smallest first quest reward.
+export const dailyCombatExperienceLimit = (total: number) => questExperience(40, total);

@@ -20,16 +20,15 @@ import {
 } from "./battle-geometry";
 import { z } from "zod";
 import type { GameState, QuestId } from "./game";
+import { questEffects } from "./quest-policy";
 import { experienceProgress, levelUpGold } from "./experience";
 import {
   characterStats,
-  hydrationPenalty,
   incomingDamage,
   monsterGold,
   monsterStats,
   meleeHpMultiplier,
   revivalDelay,
-  sleepGoldMultiplier,
   spawnInterval,
   simultaneousSpawnChance,
   simultaneousSpawnCooldownMultiplier,
@@ -37,18 +36,24 @@ import {
   wavePolicies,
   healthOrbDropChance,
   healthOrbRecovery,
+  combatBalanceRevision,
 } from "./game-policy";
 
-export const questBuffs: { id: QuestId; label: string; stat: string; effect: string }[] = [
-  { id: "medicine", label: "ATK", stat: "AD", effect: "공격력 +10%/중첩 · 최대 +30%" },
-  { id: "meal", label: "DEF", stat: "DEF", effect: "받는 피해 −20%/중첩 · 최대 −60%" },
-  { id: "walk", label: "CRT", stat: "CRT", effect: "6,000보 이후 2,000보마다 +20% · 최대 100%" },
-  { id: "water", label: "SPD", stat: "AS", effect: "공격속도 +40%/인정 · 120분 간격 · 최대 +80%" },
+export const questBuffs: {
+  id: Exclude<QuestId, "survey">;
+  label: string;
+  stat: string;
+  effect: string;
+}[] = [
+  { id: "medicine", label: "ATK", stat: "AD", effect: questEffects.medicine },
+  { id: "meal", label: "DEF", stat: "DEF", effect: questEffects.meal },
+  { id: "walk", label: "CRT", stat: "CRT", effect: questEffects.walk },
+  { id: "water", label: "SPD", stat: "AS", effect: questEffects.water },
   {
     id: "sleep",
     label: "GOLD",
     stat: "GOLD",
-    effect: "7시간 +10% · 8시간 이상 +20% · 5시간 미만 감소",
+    effect: questEffects.sleep,
   },
 ];
 export type DebugBuffs = Partial<
@@ -70,16 +75,13 @@ export function battleBuffStats(
   const base = characterStats(experienceProgress(game.experience).level);
   const count = (id: QuestId) => game.activity[id] ?? (game.completed.includes(id) ? 1 : 0);
   const debug = import.meta.env.DEV ? game.debugBuffs : undefined;
-  const adBonus = debug?.adBonus ?? Math.min(30, count("medicine") * 10) / 100;
+  const adBonus = debug?.adBonus ?? Math.min(1, count("medicine")) * 0.1;
   const defBonus = debug?.defBonus ?? Math.min(60, count("meal") * 20) / 100;
-  const asBonus =
-    debug?.asBonus ?? Math.min(2, count("water")) * 0.4 - hydrationPenalty(game.hydrationRatio);
+  const asBonus = debug?.asBonus ?? Math.min(2, count("water")) * 0.4;
   const crt =
     debug?.crt ??
     Math.min(1, Math.max(0, Math.floor(((game.steps?.count ?? 0) - 6000) / 2000)) * 0.2);
-  const gold =
-    debug?.gold ??
-    sleepGoldMultiplier(game.sleepHours ?? (game.completed.includes("sleep") ? 7 : null));
+  const gold = debug?.gold ?? 1;
   return {
     ...base,
     dinosaur: game.dinosaur,
@@ -94,6 +96,7 @@ export function battleBuffStats(
   };
 }
 export const combatSchema = z.object({
+  balanceRevision: z.number().int().min(1).default(1),
   pendingGold: z.number().int().nonnegative().default(0),
   stage: z.number().int().min(1).max(5),
   wave: z.number().int().min(1).max(10),
@@ -165,6 +168,7 @@ export const combatSchema = z.object({
         vy: z.number().finite(),
         age: z.number().nonnegative(),
         travelled: z.number().nonnegative(),
+        targetId: z.number().int().optional(),
         maxTravel: z.number().positive().optional(),
         damage: z.number().nonnegative(),
         critical: z.boolean(),
@@ -211,11 +215,20 @@ export const combatSchema = z.object({
       aimY: z.number().finite().optional(),
     })
     .nullable(),
-  loot: z.object({ time: z.number(), gold: z.number() }).nullable(),
+  loot: z
+    .object({
+      time: z.number(),
+      gold: z.number(),
+      x: z.number().finite().optional(),
+      y: z.number().finite().optional(),
+      experience: z.number().int().min(0).max(1).default(1),
+    })
+    .nullable(),
 });
 export type CombatState = z.infer<typeof combatSchema>;
 export function initialCombat(hp = 50): CombatState {
   return {
+    balanceRevision: combatBalanceRevision,
     pendingGold: 0,
     stage: 1,
     wave: 1,
@@ -280,7 +293,7 @@ function nextRandom(state: CombatState) {
   state.seed = (Math.imul(state.seed, 1664525) + 1013904223) >>> 0;
   return state.seed / 4294967296;
 }
-export const playerProjectileSpeed = 240; // design pixels / second
+export const playerProjectileSpeed = 300; // design pixels / second
 export const meleeDamageMultiplier = 1.15;
 export const healthOrbDuration = 900;
 export const healthOrbAbsorptionDuration = 400;
@@ -299,6 +312,7 @@ export function advanceCombat(
   duration: number,
   totalExperience?: number,
   autoRestart = true,
+  experienceBudget = Number.POSITIVE_INFINITY,
 ) {
   const state: CombatState = {
     ...input,
@@ -309,8 +323,30 @@ export function advanceCombat(
     transition: input.transition ? { ...input.transition } : null,
     lastAttack: input.lastAttack ? { ...input.lastAttack } : null,
   };
+  if ((state.balanceRevision ?? 1) < combatBalanceRevision) {
+    for (const enemy of state.enemies) {
+      const stats = monsterStats(state.stage, state.wave, enemy.rank);
+      const hp = enemy.ranged ? stats.hp : Math.round(stats.hp * meleeHpMultiplier);
+      enemy.hp = Math.min(1, enemy.hp / enemy.maxHp) * hp;
+      enemy.maxHp = hp;
+      enemy.ad = stats.ad * (enemy.ranged ? 1 : 1.1);
+    }
+    for (const shot of state.projectiles) {
+      const owner = state.enemies.find((enemy) => enemy.id === enemyProjectileOwner(shot));
+      if (owner) shot.damage = incomingDamage(owner.ad, buffs.def, buffs.defBonus);
+    }
+    for (const shot of state.playerProjectiles) {
+      const speed = Math.hypot(shot.vx, shot.vy);
+      if (speed > 0) {
+        shot.vx *= playerProjectileSpeed / speed;
+        shot.vy *= playerProjectileSpeed / speed;
+      }
+    }
+    state.balanceRevision = combatBalanceRevision;
+  }
   let gold = 0,
-    defeats = 0;
+    defeats = 0,
+    experience = 0;
   const hitTarget = (target: CombatState["enemies"][number], damage: number, critical: boolean) => {
     if (target.hp <= 0) return;
     const body = enemyGeometry(target.distance, target.art, target.rank, target.ranged).hitbox;
@@ -322,7 +358,9 @@ export function advanceCombat(
     const reward = monsterGold(state.stage, state.wave, target.rank, buffs.gold);
     state.pendingGold += reward;
     defeats++;
-    if (totalExperience !== undefined) {
+    const earnedExperience = totalExperience !== undefined && experience < experienceBudget ? 1 : 0;
+    if (earnedExperience && totalExperience !== undefined) {
+      experience++;
       const before = totalExperience++;
       state.pendingGold += levelUpGold(before, totalExperience);
       const nextLevel = experienceProgress(totalExperience).level;
@@ -333,7 +371,7 @@ export function advanceCombat(
       }
     }
     state.killed++;
-    state.loot = { time: state.clock, gold: reward };
+    state.loot = { time: state.clock, gold: reward, experience: earnedExperience, ...center(body) };
     state.enemies = state.enemies.filter((enemy) => enemy.id !== target.id);
     state.projectiles = state.projectiles.filter(
       (shot) => enemyProjectileOwner(shot) !== target.id,
@@ -434,6 +472,11 @@ export function advanceCombat(
       enemy.attackIn = Math.max(0, enemy.attackIn - dt);
     }
     state.playerProjectiles = state.playerProjectiles.filter((shot) => {
+      if (
+        !state.enemies.length ||
+        (shot.targetId !== undefined && !state.enemies.some((e) => e.id === shot.targetId))
+      )
+        return false;
       const before = playerProjectileGeometry(shot).hitbox;
       shot.x += (shot.vx * dt) / 1000;
       shot.y += (shot.vy * dt) / 1000;
@@ -456,11 +499,19 @@ export function advanceCombat(
       }
       return shot.travelled < (shot.maxTravel ?? playerAttackRange * arena.pixelsPerUnit);
     });
+    state.playerProjectiles = state.playerProjectiles.filter(
+      (shot) =>
+        state.enemies.length > 0 &&
+        (shot.targetId === undefined || state.enemies.some((e) => e.id === shot.targetId)),
+    );
     state.attackIn = Math.max(0, state.attackIn - dt);
     const pending = state.lastAttack;
     if (state.hp > 0 && pending?.resolved === false && state.clock >= pending.impactAt!) {
       pending.resolved = true;
-      if (pending.mode === "ranged") {
+      if (
+        pending.mode === "ranged" &&
+        state.enemies.some((enemy) => enemy.id === pending.targetId)
+      ) {
         const source = playerReleasePosition(buffs.dinosaur, player);
         const dx = (pending.aimX ?? source.x + 200) - source.x,
           dy = (pending.aimY ?? source.y) - source.y;
@@ -468,6 +519,7 @@ export function advanceCombat(
         const shot = {
           id: `p-${state.clock}`,
           dinosaur: buffs.dinosaur,
+          targetId: pending.targetId,
           ...source,
           vx: (dx / length) * playerProjectileSpeed,
           vy: (dy / length) * playerProjectileSpeed,
@@ -493,7 +545,7 @@ export function advanceCombat(
       } else if (pending.mode === "melee") {
         for (const enemy of [...state.enemies])
           if (inPlayerMeleeRange(enemy, player)) hitTarget(enemy, pending.damage, pending.critical);
-      } else {
+      } else if (pending.mode !== "ranged") {
         // Preserve a saved pre-projectile strike once, then use the new rules.
         const target = state.enemies.find((enemy) => enemy.id === pending.targetId);
         if (target) hitTarget(target, pending.damage, pending.critical);
@@ -603,5 +655,5 @@ export function advanceCombat(
       state.lastAttack = null;
     }
   }
-  return { combat: state, gold, defeats };
+  return { combat: state, gold, defeats, experience };
 }
