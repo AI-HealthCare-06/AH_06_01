@@ -100,14 +100,43 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  android:
+    name: Android compile
+    needs: frontend-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      CI: "true"
+      TZ: Asia/Seoul
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: ./.github/actions/android-toolchain
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync android
+      - name: Compile Android without production signing secrets
+        working-directory: frontend/android
+        run: bash ./gradlew assembleDebug --no-daemon
+
   frontend:
     name: Frontend
     if: always()
-    needs: [frontend-check, browser]
+    needs: [frontend-check, browser, android]
     runs-on: ubuntu-latest
     steps:
       - name: Require checks and every browser shard
         env:
           CHECKS_RESULT: ${{ needs.frontend-check.result }}
           BROWSER_RESULT: ${{ needs.browser.result }}
-        run: test "$CHECKS_RESULT" = success && test "$BROWSER_RESULT" = success
+          ANDROID_RESULT: ${{ needs.android.result }}
+        run: test "$CHECKS_RESULT" = success && test "$BROWSER_RESULT" = success && test "$ANDROID_RESULT" = success
