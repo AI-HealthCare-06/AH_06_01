@@ -9,7 +9,7 @@ for (const [seed, count, cooldown] of [
     page,
   }) => {
     await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
-  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
+    await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
     await page.goto("/home");
     await page.evaluate(async (seed) => {
       const path = "/src/stores/game-store.ts";

@@ -15,7 +15,7 @@ for (let dinosaur = 0; dinosaur < dinosaurMotions.length; dinosaur++)
         page,
       }) => {
         await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
-  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
+        await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
         await page.goto("/home");
         await page.evaluate(
           async ({ ranged, asBonus, dinosaur }) => {
