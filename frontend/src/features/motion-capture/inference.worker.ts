@@ -6,11 +6,14 @@ import {
 } from "@mediapipe/tasks-vision";
 import type { Detection } from "@mediapipe/tasks-vision";
 import { motionConfig } from "./config";
-import { extractObservation } from "./features";
+import { extractInjectionHands, extractObservation } from "./features";
 import type { MotionObservation, MotionQuest, WorkerRequest, WorkerResponse } from "./types";
 
 let sessionId = "";
 let quest: MotionQuest = "water";
+let processMode = false;
+let injectionMode = false;
+let previousDrink: MotionObservation | null = null;
 let face: FaceLandmarker | null = null;
 let hand: HandLandmarker | null = null;
 let object: ObjectDetector | null = null;
@@ -23,6 +26,9 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
   if (data.type === "init") {
     sessionId = data.sessionId;
     quest = data.quest;
+    processMode = data.process === true;
+    injectionMode = data.injection === true;
+    previousDrink = null;
     try {
       const base = data.baseUrl;
       const files = await FilesetResolver.forVisionTasks(`${base}/vendor/mediapipe/wasm`, true);
@@ -32,18 +38,20 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
         ...files,
         wasmLoaderPath: `${files.wasmLoaderPath}?task=${task}`,
       });
-      send({ type: "loading", sessionId, message: "얼굴 추적 모델을 준비하고 있어요…" });
-      face = await FaceLandmarker.createFromOptions(filesFor("face"), {
-        baseOptions: {
-          modelAssetPath: `${base}/models/motion-capture/face_landmarker.task`,
-          delegate: "CPU",
-        },
-        runningMode: "VIDEO",
-        numFaces: 2,
-        outputFaceBlendshapes: false,
-        outputFacialTransformationMatrixes: false,
-        canvas: new OffscreenCanvas(1, 1),
-      });
+      if (!injectionMode)
+        send({ type: "loading", sessionId, message: "얼굴 추적 모델을 준비하고 있어요…" });
+      if (!injectionMode)
+        face = await FaceLandmarker.createFromOptions(filesFor("face"), {
+          baseOptions: {
+            modelAssetPath: `${base}/models/motion-capture/face_landmarker.task`,
+            delegate: "CPU",
+          },
+          runningMode: "VIDEO",
+          numFaces: 2,
+          outputFaceBlendshapes: false,
+          outputFacialTransformationMatrixes: false,
+          canvas: new OffscreenCanvas(1, 1),
+        });
       send({ type: "loading", sessionId, message: "손 추적 모델을 준비하고 있어요…" });
       hand = await HandLandmarker.createFromOptions(filesFor("hand"), {
         baseOptions: {
@@ -57,7 +65,7 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
         minTrackingConfidence: 0.5,
         canvas: new OffscreenCanvas(1, 1),
       });
-      if (quest === "water") {
+      if (quest === "water" || processMode) {
         send({ type: "loading", sessionId, message: "컵과 병 탐지 모델을 준비하고 있어요…" });
         object = await ObjectDetector.createFromOptions(filesFor("object"), {
           baseOptions: {
@@ -86,7 +94,7 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
     return;
   }
   try {
-    if (data.sessionId !== sessionId || !face || !hand) return;
+    if (data.sessionId !== sessionId || (!injectionMode && !face) || !hand) return;
     const started = performance.now();
     const { image, timestamp } = data;
     const resized =
@@ -96,8 +104,13 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
       detections = [];
       objectAt = -Infinity;
       previous = null;
+      previousDrink = null;
     }
-    const faceResult = face.detectForVideo(image, timestamp);
+    const faceResult = face?.detectForVideo(image, timestamp) ?? {
+      faceLandmarks: [],
+      faceBlendshapes: [],
+      facialTransformationMatrixes: [],
+    };
     const handResult = hand.detectForVideo(image, timestamp);
     if (object && timestamp - objectAt >= motionConfig.objectIntervalMs) {
       detections = object.detectForVideo(image, timestamp).detections;
@@ -114,6 +127,47 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
       previous,
       objectAt,
     );
+    let process;
+    if (processMode) {
+      const handObservation =
+        quest === "medicine"
+          ? observation
+          : extractObservation(
+              "medicine",
+              faceResult,
+              handResult,
+              [],
+              timestamp,
+              image.width,
+              image.height,
+              null,
+            );
+      const drinkObservation =
+        quest === "water"
+          ? observation
+          : extractObservation(
+              "water",
+              faceResult,
+              handResult,
+              timestamp - objectAt <= motionConfig.objectMaxAgeMs ? detections : [],
+              timestamp,
+              image.width,
+              image.height,
+              previousDrink,
+              objectAt,
+            );
+      if (drinkObservation.valid) previousDrink = drinkObservation;
+      else if (
+        drinkObservation.trackingChanged ||
+        (previousDrink && timestamp - previousDrink.timestamp > motionConfig.waterMaxGapMs)
+      )
+        previousDrink = null;
+      if (resized) {
+        handObservation.faceTrackingChanged = true;
+        drinkObservation.faceTrackingChanged = true;
+      }
+      process = { hand: handObservation, drink: drinkObservation };
+    }
     if (resized) observation.trackingChanged = true;
     if (quest !== "water" || observation.valid) previous = observation;
     else if (
@@ -121,7 +175,16 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
       (previous && timestamp - previous.timestamp > motionConfig.waterMaxGapMs)
     )
       previous = null;
-    send({ type: "observation", sessionId, observation, latencyMs: performance.now() - started });
+    send({
+      type: "observation",
+      sessionId,
+      observation,
+      ...(process ? { process } : {}),
+      ...(injectionMode
+        ? { injection: extractInjectionHands(handResult, timestamp, image.width, image.height) }
+        : {}),
+      latencyMs: performance.now() - started,
+    });
   } catch (error) {
     console.error("Motion inference failed", error);
     send({

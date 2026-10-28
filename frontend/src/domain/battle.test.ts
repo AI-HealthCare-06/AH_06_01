@@ -14,7 +14,7 @@ import { colliderStopDistance } from "./battle-geometry";
 import { experienceProgress } from "./experience";
 
 describe("document combat rules", () => {
-  it("simulates a full 24 hours without reward attenuation and expires buffs at midnight", () => {
+  it("simulates a full 24 hours with a daily EXP budget and expires buffs at midnight", () => {
     const now = new Date(2026, 8, 29, 0).getTime();
     const game = { ...initialGame("2026-09-29"), battleUpdatedAt: now };
     const offline = tickBattle(game, now + 86_400_000);
@@ -24,6 +24,8 @@ describe("document combat rules", () => {
       1,
       86_400_000,
       game.experience,
+      true,
+      40,
     );
     expect(offline.gold).toBe(game.gold + direct.gold);
     expect(offline.battleDefeats).toBe(direct.defeats);
@@ -41,9 +43,11 @@ describe("document combat rules", () => {
       1,
       3_600_000,
       night.experience,
+      true,
+      40,
     );
     const morning = rollDay(
-      { ...night, experience: night.experience + before.defeats },
+      { ...night, experience: night.experience + before.experience },
       "2026-09-30",
     );
     const after = advanceCombat(
@@ -52,6 +56,8 @@ describe("document combat rules", () => {
       experienceProgress(morning.experience).level,
       3_600_000,
       morning.experience,
+      true,
+      40,
     );
     const across = tickBattle(night, now + 25 * 3_600_000);
     expect(across.gold).toBe(night.gold + before.gold + after.gold);
@@ -73,7 +79,7 @@ describe("document combat rules", () => {
       { hp: 150, ad: 57, def: 30 },
       { hp: 185, ad: 70, def: 37 },
     ]);
-    expect(monsterStats(1, 10)).toEqual({ hp: 105, ad: 25, knockback: 0.2 });
+    expect(monsterStats(1, 10)).toEqual({ hp: 75, ad: 13.75, knockback: 0.2 });
     expect(monsterStats(3, 5, "elite")).toEqual({ hp: 540, ad: 60.06, knockback: 0.1 });
     expect(monsterStats(5, 10, "boss").knockback).toBe(0.05);
     expect(incomingDamage(20, 100, 0.6)).toBeCloseTo(0.8);
@@ -83,13 +89,13 @@ describe("document combat rules", () => {
   it("spawns at 3.5s intervals with stronger melee HP and fires ranged attacks immediately", () => {
     const buffs = battleBuffStats(initialGame());
     const first = advanceCombat(initialCombat(), buffs, 1, 50);
-    expect(first.combat.enemies[0].hp).toBe(96);
-    expect(first.combat.enemies[0].ad).toBe(22);
+    expect(first.combat.enemies[0].hp).toBe(69);
+    expect(first.combat.enemies[0].ad).toBeCloseTo(12.1);
     expect(first.combat.enemies[0].distance).toBeCloseTo(6.93);
     expect(first.combat.lastAttack?.mode).toBe("ranged");
     const launched = advanceCombat(first.combat, buffs, 1, 150).combat;
     expect(launched.playerProjectiles).toHaveLength(1);
-    expect(launched.enemies[0].hp).toBe(96);
+    expect(launched.enemies[0].hp).toBe(69);
     const waiting = advanceCombat(
       { ...first.combat, attackIn: 5000 },
       { ...buffs, attack: 0 },
@@ -159,24 +165,25 @@ describe("document combat rules", () => {
     );
     expect(elite.combat.enemies[0].rank).toBe("elite");
   });
-  it("applies stacks/caps, data-driven CRT, sleep and hydration without guessing absent data", () => {
+  it("applies stacks/caps, data-driven CRT and hydration without a retired sleep Gold buff without guessing absent data", () => {
     const game = {
       ...initialGame(),
       activity: { medicine: 9, meal: 9, water: 9 },
       sleepHours: 8,
+      completed: ["sleep" as const],
       steps: { date: "2026-09-29", count: 16000, source: "healthkit" as const, syncedAt: 1 },
     };
     expect(battleBuffStats(game)).toMatchObject({
-      attack: 26,
-      adBonus: 0.3,
+      attack: 22,
+      adBonus: 0.1,
       defBonus: 0.6,
       asBonus: 0.8,
       crt: 1,
-      gold: 1.2,
+      gold: 1,
     });
     expect(battleBuffStats({ ...game, steps: { ...game.steps, count: 6000 } }).crt).toBe(0);
     expect(battleBuffStats({ ...game, steps: { ...game.steps, count: 8000 } }).crt).toBe(0.2);
-    expect([null, 3, 4, 5, 7, 8].map(sleepGoldMultiplier)).toEqual([1, 0.8, 0.9, 1, 1.1, 1.2]);
+    expect([null, 3, 4, 5, 7, 8].map(sleepGoldMultiplier)).toEqual([1, 1, 1, 1, 1.1, 1.2]);
     expect([null, 0.1, 0.25, 0.5, 0.75].map(hydrationPenalty)).toEqual([0, 0.3, 0.2, 0.1, 0]);
     expect(battleBuffStats(rollDay(game, "2099-01-01")).adBonus).toBe(0);
   });

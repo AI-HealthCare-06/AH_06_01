@@ -1,0 +1,1442 @@
+[
+  {
+    "food_code": "DEV-0001",
+    "name": "쌀밥",
+    "category": "밥류",
+    "serving_g": 210.0,
+    "per_100g": {
+      "energy_kcal": 143.0,
+      "carb_g": 31.7,
+      "sugar_g": 0.1,
+      "protein_g": 2.7,
+      "fat_g": 0.3,
+      "sat_fat_g": 0.1,
+      "sodium_mg": 2.0,
+      "fiber_g": 0.3,
+      "potassium_mg": 30.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0002",
+    "name": "잡곡밥",
+    "category": "밥류",
+    "serving_g": 210.0,
+    "per_100g": {
+      "energy_kcal": 150.0,
+      "carb_g": 32.0,
+      "sugar_g": 0.2,
+      "protein_g": 3.5,
+      "fat_g": 0.8,
+      "sat_fat_g": 0.2,
+      "sodium_mg": 2.0,
+      "fiber_g": 1.8,
+      "potassium_mg": 90.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0003",
+    "name": "현미밥",
+    "category": "밥류",
+    "serving_g": 210.0,
+    "per_100g": {
+      "energy_kcal": 150.0,
+      "carb_g": 32.0,
+      "sugar_g": 0.3,
+      "protein_g": 3.0,
+      "fat_g": 1.0,
+      "sat_fat_g": 0.2,
+      "sodium_mg": 3.0,
+      "fiber_g": 1.5,
+      "potassium_mg": 80.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0004",
+    "name": "보리밥",
+    "category": "밥류",
+    "serving_g": 210.0,
+    "per_100g": {
+      "energy_kcal": 145.0,
+      "carb_g": 31.0,
+      "sugar_g": 0.3,
+      "protein_g": 3.2,
+      "fat_g": 0.6,
+      "sat_fat_g": 0.1,
+      "sodium_mg": 2.0,
+      "fiber_g": 2.5,
+      "potassium_mg": 70.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0005",
+    "name": "비빔밥",
+    "category": "밥류",
+    "serving_g": 450.0,
+    "per_100g": {
+      "energy_kcal": 140.0,
+      "carb_g": 22.0,
+      "sugar_g": 2.5,
+      "protein_g": 5.5,
+      "fat_g": 3.5,
+      "sat_fat_g": 0.8,
+      "sodium_mg": 300.0,
+      "fiber_g": 1.8,
+      "potassium_mg": 180.0,
+      "cholesterol_mg": 40.0
+    }
+  },
+  {
+    "food_code": "DEV-0006",
+    "name": "김밥",
+    "category": "밥류",
+    "serving_g": 250.0,
+    "per_100g": {
+      "energy_kcal": 170.0,
+      "carb_g": 28.0,
+      "sugar_g": 2.5,
+      "protein_g": 5.5,
+      "fat_g": 4.0,
+      "sat_fat_g": 1.0,
+      "sodium_mg": 400.0,
+      "fiber_g": 1.2,
+      "potassium_mg": 140.0,
+      "cholesterol_mg": 30.0
+    }
+  },
+  {
+    "food_code": "DEV-0007",
+    "name": "볶음밥",
+    "category": "밥류",
+    "serving_g": 350.0,
+    "per_100g": {
+      "energy_kcal": 180.0,
+      "carb_g": 26.0,
+      "sugar_g": 1.5,
+      "protein_g": 5.0,
+      "fat_g": 6.5,
+      "sat_fat_g": 1.3,
+      "sodium_mg": 400.0,
+      "fiber_g": 0.8,
+      "potassium_mg": 120.0,
+      "cholesterol_mg": 45.0
+    }
+  },
+  {
+    "food_code": "DEV-0008",
+    "name": "카레라이스",
+    "category": "밥류",
+    "serving_g": 450.0,
+    "per_100g": {
+      "energy_kcal": 140.0,
+      "carb_g": 22.0,
+      "sugar_g": 3.0,
+      "protein_g": 3.5,
+      "fat_g": 4.0,
+      "sat_fat_g": 1.7,
+      "sodium_mg": 350.0,
+      "fiber_g": 1.2,
+      "potassium_mg": 160.0,
+      "cholesterol_mg": 10.0
+    }
+  },
+  {
+    "food_code": "DEV-0009",
+    "name": "김치찌개",
+    "category": "찌개 및 전골류",
+    "serving_g": 400.0,
+    "per_100g": {
+      "energy_kcal": 45.0,
+      "carb_g": 3.0,
+      "sugar_g": 1.2,
+      "protein_g": 3.5,
+      "fat_g": 2.3,
+      "sat_fat_g": 0.8,
+      "sodium_mg": 420.0,
+      "fiber_g": 1.0,
+      "potassium_mg": 150.0,
+      "cholesterol_mg": 8.0
+    }
+  },
+  {
+    "food_code": "DEV-0010",
+    "name": "된장찌개",
+    "category": "찌개 및 전골류",
+    "serving_g": 400.0,
+    "per_100g": {
+      "energy_kcal": 50.0,
+      "carb_g": 3.5,
+      "sugar_g": 1.0,
+      "protein_g": 4.0,
+      "fat_g": 2.2,
+      "sat_fat_g": 0.4,
+      "sodium_mg": 480.0,
+      "fiber_g": 1.3,
+      "potassium_mg": 180.0,
+      "cholesterol_mg": 3.0
+    }
+  },
+  {
+    "food_code": "DEV-0011",
+    "name": "순두부찌개",
+    "category": "찌개 및 전골류",
+    "serving_g": 400.0,
+    "per_100g": {
+      "energy_kcal": 55.0,
+      "carb_g": 2.5,
+      "sugar_g": 0.8,
+      "protein_g": 4.5,
+      "fat_g": 3.2,
+      "sat_fat_g": 0.9,
+      "sodium_mg": 380.0,
+      "fiber_g": 0.6,
+      "potassium_mg": 140.0,
+      "cholesterol_mg": 30.0
+    }
+  },
+  {
+    "food_code": "DEV-0012",
+    "name": "부대찌개",
+    "category": "찌개 및 전골류",
+    "serving_g": 400.0,
+    "per_100g": {
+      "energy_kcal": 80.0,
+      "carb_g": 5.0,
+      "sugar_g": 1.5,
+      "protein_g": 4.5,
+      "fat_g": 4.8,
+      "sat_fat_g": 1.7,
+      "sodium_mg": 520.0,
+      "fiber_g": 0.8,
+      "potassium_mg": 140.0,
+      "cholesterol_mg": 15.0
+    }
+  },
+  {
+    "food_code": "DEV-0013",
+    "name": "미역국",
+    "category": "국 및 탕류",
+    "serving_g": 350.0,
+    "per_100g": {
+      "energy_kcal": 18.0,
+      "carb_g": 1.0,
+      "sugar_g": 0.2,
+      "protein_g": 1.5,
+      "fat_g": 0.9,
+      "sat_fat_g": 0.2,
+      "sodium_mg": 300.0,
+      "fiber_g": 0.5,
+      "potassium_mg": 60.0,
+      "cholesterol_mg": 3.0
+    }
+  },
+  {
+    "food_code": "DEV-0014",
+    "name": "소고기무국",
+    "category": "국 및 탕류",
+    "serving_g": 350.0,
+    "per_100g": {
+      "energy_kcal": 30.0,
+      "carb_g": 1.5,
+      "sugar_g": 0.6,
+      "protein_g": 3.0,
+      "fat_g": 1.4,
+      "sat_fat_g": 0.5,
+      "sodium_mg": 280.0,
+      "fiber_g": 0.4,
+      "potassium_mg": 110.0,
+      "cholesterol_mg": 8.0
+    }
+  },
+  {
+    "food_code": "DEV-0015",
+    "name": "곰탕",
+    "category": "국 및 탕류",
+    "serving_g": 500.0,
+    "per_100g": {
+      "energy_kcal": 40.0,
+      "carb_g": 0.5,
+      "sugar_g": 0.1,
+      "protein_g": 5.5,
+      "fat_g": 1.8,
+      "sat_fat_g": 0.7,
+      "sodium_mg": 250.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 80.0,
+      "cholesterol_mg": 20.0
+    }
+  },
+  {
+    "food_code": "DEV-0016",
+    "name": "설렁탕",
+    "category": "국 및 탕류",
+    "serving_g": 500.0,
+    "per_100g": {
+      "energy_kcal": 45.0,
+      "carb_g": 1.5,
+      "sugar_g": 0.1,
+      "protein_g": 5.0,
+      "fat_g": 2.0,
+      "sat_fat_g": 0.8,
+      "sodium_mg": 230.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 80.0,
+      "cholesterol_mg": 20.0
+    }
+  },
+  {
+    "food_code": "DEV-0017",
+    "name": "갈비탕",
+    "category": "국 및 탕류",
+    "serving_g": 500.0,
+    "per_100g": {
+      "energy_kcal": 60.0,
+      "carb_g": 1.0,
+      "sugar_g": 0.3,
+      "protein_g": 6.0,
+      "fat_g": 3.5,
+      "sat_fat_g": 1.4,
+      "sodium_mg": 280.0,
+      "fiber_g": 0.1,
+      "potassium_mg": 100.0,
+      "cholesterol_mg": 25.0
+    }
+  },
+  {
+    "food_code": "DEV-0018",
+    "name": "삼계탕",
+    "category": "국 및 탕류",
+    "serving_g": 800.0,
+    "per_100g": {
+      "energy_kcal": 90.0,
+      "carb_g": 4.0,
+      "sugar_g": 0.2,
+      "protein_g": 10.0,
+      "fat_g": 3.8,
+      "sat_fat_g": 1.1,
+      "sodium_mg": 200.0,
+      "fiber_g": 0.2,
+      "potassium_mg": 120.0,
+      "cholesterol_mg": 50.0
+    }
+  },
+  {
+    "food_code": "DEV-0019",
+    "name": "육개장",
+    "category": "국 및 탕류",
+    "serving_g": 500.0,
+    "per_100g": {
+      "energy_kcal": 45.0,
+      "carb_g": 2.0,
+      "sugar_g": 0.6,
+      "protein_g": 4.5,
+      "fat_g": 2.2,
+      "sat_fat_g": 0.6,
+      "sodium_mg": 330.0,
+      "fiber_g": 0.8,
+      "potassium_mg": 130.0,
+      "cholesterol_mg": 12.0
+    }
+  },
+  {
+    "food_code": "DEV-0020",
+    "name": "감자탕",
+    "category": "국 및 탕류",
+    "serving_g": 600.0,
+    "per_100g": {
+      "energy_kcal": 110.0,
+      "carb_g": 4.0,
+      "sugar_g": 1.0,
+      "protein_g": 10.0,
+      "fat_g": 6.0,
+      "sat_fat_g": 2.2,
+      "sodium_mg": 420.0,
+      "fiber_g": 1.0,
+      "potassium_mg": 220.0,
+      "cholesterol_mg": 40.0
+    }
+  },
+  {
+    "food_code": "DEV-0021",
+    "name": "배추김치",
+    "category": "김치류",
+    "serving_g": 40.0,
+    "per_100g": {
+      "energy_kcal": 25.0,
+      "carb_g": 4.0,
+      "sugar_g": 1.8,
+      "protein_g": 1.8,
+      "fat_g": 0.5,
+      "sat_fat_g": 0.1,
+      "sodium_mg": 650.0,
+      "fiber_g": 2.5,
+      "potassium_mg": 280.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0022",
+    "name": "깍두기",
+    "category": "김치류",
+    "serving_g": 40.0,
+    "per_100g": {
+      "energy_kcal": 30.0,
+      "carb_g": 5.0,
+      "sugar_g": 3.0,
+      "protein_g": 1.5,
+      "fat_g": 0.4,
+      "sat_fat_g": 0.1,
+      "sodium_mg": 600.0,
+      "fiber_g": 1.8,
+      "potassium_mg": 250.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0023",
+    "name": "콩나물무침",
+    "category": "나물·숙채류",
+    "serving_g": 60.0,
+    "per_100g": {
+      "energy_kcal": 45.0,
+      "carb_g": 3.5,
+      "sugar_g": 0.8,
+      "protein_g": 3.5,
+      "fat_g": 2.3,
+      "sat_fat_g": 0.3,
+      "sodium_mg": 380.0,
+      "fiber_g": 2.0,
+      "potassium_mg": 160.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0024",
+    "name": "시금치나물",
+    "category": "나물·숙채류",
+    "serving_g": 60.0,
+    "per_100g": {
+      "energy_kcal": 50.0,
+      "carb_g": 4.0,
+      "sugar_g": 1.2,
+      "protein_g": 3.0,
+      "fat_g": 2.8,
+      "sat_fat_g": 0.4,
+      "sodium_mg": 420.0,
+      "fiber_g": 2.4,
+      "potassium_mg": 450.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0025",
+    "name": "오이무침",
+    "category": "생채·무침류",
+    "serving_g": 60.0,
+    "per_100g": {
+      "energy_kcal": 35.0,
+      "carb_g": 5.0,
+      "sugar_g": 3.0,
+      "protein_g": 1.2,
+      "fat_g": 1.2,
+      "sat_fat_g": 0.2,
+      "sodium_mg": 400.0,
+      "fiber_g": 1.0,
+      "potassium_mg": 160.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0026",
+    "name": "멸치볶음",
+    "category": "볶음류",
+    "serving_g": 20.0,
+    "per_100g": {
+      "energy_kcal": 330.0,
+      "carb_g": 25.0,
+      "sugar_g": 15.0,
+      "protein_g": 30.0,
+      "fat_g": 12.0,
+      "sat_fat_g": 2.0,
+      "sodium_mg": 1600.0,
+      "fiber_g": 1.0,
+      "potassium_mg": 900.0,
+      "cholesterol_mg": 250.0
+    }
+  },
+  {
+    "food_code": "DEV-0027",
+    "name": "제육볶음",
+    "category": "볶음류",
+    "serving_g": 200.0,
+    "per_100g": {
+      "energy_kcal": 210.0,
+      "carb_g": 8.0,
+      "sugar_g": 5.0,
+      "protein_g": 15.0,
+      "fat_g": 13.0,
+      "sat_fat_g": 4.3,
+      "sodium_mg": 600.0,
+      "fiber_g": 0.8,
+      "potassium_mg": 300.0,
+      "cholesterol_mg": 55.0
+    }
+  },
+  {
+    "food_code": "DEV-0028",
+    "name": "잡채",
+    "category": "볶음류",
+    "serving_g": 150.0,
+    "per_100g": {
+      "energy_kcal": 150.0,
+      "carb_g": 22.0,
+      "sugar_g": 6.0,
+      "protein_g": 3.5,
+      "fat_g": 5.5,
+      "sat_fat_g": 0.9,
+      "sodium_mg": 380.0,
+      "fiber_g": 1.3,
+      "potassium_mg": 120.0,
+      "cholesterol_mg": 10.0
+    }
+  },
+  {
+    "food_code": "DEV-0029",
+    "name": "두부조림",
+    "category": "조림류",
+    "serving_g": 80.0,
+    "per_100g": {
+      "energy_kcal": 110.0,
+      "carb_g": 4.5,
+      "sugar_g": 2.5,
+      "protein_g": 8.5,
+      "fat_g": 6.5,
+      "sat_fat_g": 1.0,
+      "sodium_mg": 450.0,
+      "fiber_g": 0.8,
+      "potassium_mg": 150.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0030",
+    "name": "계란말이",
+    "category": "전·적 및 부침류",
+    "serving_g": 80.0,
+    "per_100g": {
+      "energy_kcal": 160.0,
+      "carb_g": 2.5,
+      "sugar_g": 1.0,
+      "protein_g": 11.0,
+      "fat_g": 12.0,
+      "sat_fat_g": 3.3,
+      "sodium_mg": 350.0,
+      "fiber_g": 0.2,
+      "potassium_mg": 140.0,
+      "cholesterol_mg": 380.0
+    }
+  },
+  {
+    "food_code": "DEV-0031",
+    "name": "계란후라이",
+    "category": "전·적 및 부침류",
+    "serving_g": 50.0,
+    "per_100g": {
+      "energy_kcal": 195.0,
+      "carb_g": 1.0,
+      "sugar_g": 0.4,
+      "protein_g": 13.0,
+      "fat_g": 15.0,
+      "sat_fat_g": 4.0,
+      "sodium_mg": 200.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 140.0,
+      "cholesterol_mg": 420.0
+    }
+  },
+  {
+    "food_code": "DEV-0032",
+    "name": "두부부침",
+    "category": "전·적 및 부침류",
+    "serving_g": 100.0,
+    "per_100g": {
+      "energy_kcal": 150.0,
+      "carb_g": 3.0,
+      "sugar_g": 0.5,
+      "protein_g": 11.0,
+      "fat_g": 10.5,
+      "sat_fat_g": 1.6,
+      "sodium_mg": 200.0,
+      "fiber_g": 0.5,
+      "potassium_mg": 130.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0033",
+    "name": "김치전",
+    "category": "전·적 및 부침류",
+    "serving_g": 150.0,
+    "per_100g": {
+      "energy_kcal": 180.0,
+      "carb_g": 22.0,
+      "sugar_g": 2.0,
+      "protein_g": 4.5,
+      "fat_g": 8.5,
+      "sat_fat_g": 1.3,
+      "sodium_mg": 550.0,
+      "fiber_g": 1.5,
+      "potassium_mg": 180.0,
+      "cholesterol_mg": 15.0
+    }
+  },
+  {
+    "food_code": "DEV-0034",
+    "name": "해물파전",
+    "category": "전·적 및 부침류",
+    "serving_g": 150.0,
+    "per_100g": {
+      "energy_kcal": 190.0,
+      "carb_g": 22.0,
+      "sugar_g": 2.0,
+      "protein_g": 7.0,
+      "fat_g": 8.5,
+      "sat_fat_g": 1.4,
+      "sodium_mg": 450.0,
+      "fiber_g": 1.2,
+      "potassium_mg": 180.0,
+      "cholesterol_mg": 40.0
+    }
+  },
+  {
+    "food_code": "DEV-0035",
+    "name": "고등어구이",
+    "category": "구이류",
+    "serving_g": 100.0,
+    "per_100g": {
+      "energy_kcal": 230.0,
+      "carb_g": 0.1,
+      "sugar_g": 0.0,
+      "protein_g": 21.0,
+      "fat_g": 16.0,
+      "sat_fat_g": 4.0,
+      "sodium_mg": 400.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 330.0,
+      "cholesterol_mg": 70.0
+    }
+  },
+  {
+    "food_code": "DEV-0036",
+    "name": "연어구이",
+    "category": "구이류",
+    "serving_g": 100.0,
+    "per_100g": {
+      "energy_kcal": 210.0,
+      "carb_g": 0.0,
+      "sugar_g": 0.0,
+      "protein_g": 22.0,
+      "fat_g": 13.0,
+      "sat_fat_g": 2.8,
+      "sodium_mg": 70.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 380.0,
+      "cholesterol_mg": 60.0
+    }
+  },
+  {
+    "food_code": "DEV-0037",
+    "name": "꽁치구이",
+    "category": "구이류",
+    "serving_g": 100.0,
+    "per_100g": {
+      "energy_kcal": 250.0,
+      "carb_g": 0.1,
+      "sugar_g": 0.0,
+      "protein_g": 20.0,
+      "fat_g": 18.5,
+      "sat_fat_g": 4.0,
+      "sodium_mg": 300.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 280.0,
+      "cholesterol_mg": 70.0
+    }
+  },
+  {
+    "food_code": "DEV-0038",
+    "name": "불고기",
+    "category": "구이류",
+    "serving_g": 200.0,
+    "per_100g": {
+      "energy_kcal": 190.0,
+      "carb_g": 8.0,
+      "sugar_g": 6.0,
+      "protein_g": 16.0,
+      "fat_g": 10.0,
+      "sat_fat_g": 3.8,
+      "sodium_mg": 500.0,
+      "fiber_g": 0.5,
+      "potassium_mg": 280.0,
+      "cholesterol_mg": 50.0
+    }
+  },
+  {
+    "food_code": "DEV-0039",
+    "name": "돼지갈비구이",
+    "category": "구이류",
+    "serving_g": 200.0,
+    "per_100g": {
+      "energy_kcal": 260.0,
+      "carb_g": 10.0,
+      "sugar_g": 8.0,
+      "protein_g": 17.0,
+      "fat_g": 17.0,
+      "sat_fat_g": 6.0,
+      "sodium_mg": 520.0,
+      "fiber_g": 0.3,
+      "potassium_mg": 270.0,
+      "cholesterol_mg": 65.0
+    }
+  },
+  {
+    "food_code": "DEV-0040",
+    "name": "삼겹살구이",
+    "category": "구이류",
+    "serving_g": 150.0,
+    "per_100g": {
+      "energy_kcal": 380.0,
+      "carb_g": 0.2,
+      "sugar_g": 0.0,
+      "protein_g": 17.0,
+      "fat_g": 34.0,
+      "sat_fat_g": 12.0,
+      "sodium_mg": 60.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 270.0,
+      "cholesterol_mg": 70.0
+    }
+  },
+  {
+    "food_code": "DEV-0041",
+    "name": "곱창구이",
+    "category": "구이류",
+    "serving_g": 150.0,
+    "per_100g": {
+      "energy_kcal": 300.0,
+      "carb_g": 2.0,
+      "sugar_g": 0.5,
+      "protein_g": 13.0,
+      "fat_g": 27.0,
+      "sat_fat_g": 12.0,
+      "sodium_mg": 200.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 150.0,
+      "cholesterol_mg": 200.0
+    }
+  },
+  {
+    "food_code": "DEV-0042",
+    "name": "닭가슴살",
+    "category": "구이류",
+    "serving_g": 100.0,
+    "per_100g": {
+      "energy_kcal": 110.0,
+      "carb_g": 0.0,
+      "sugar_g": 0.0,
+      "protein_g": 23.0,
+      "fat_g": 1.5,
+      "sat_fat_g": 0.4,
+      "sodium_mg": 60.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 330.0,
+      "cholesterol_mg": 60.0
+    }
+  },
+  {
+    "food_code": "DEV-0043",
+    "name": "닭볶음탕",
+    "category": "찜류",
+    "serving_g": 300.0,
+    "per_100g": {
+      "energy_kcal": 130.0,
+      "carb_g": 6.0,
+      "sugar_g": 3.0,
+      "protein_g": 13.0,
+      "fat_g": 6.0,
+      "sat_fat_g": 1.7,
+      "sodium_mg": 450.0,
+      "fiber_g": 1.0,
+      "potassium_mg": 260.0,
+      "cholesterol_mg": 60.0
+    }
+  },
+  {
+    "food_code": "DEV-0044",
+    "name": "후라이드치킨",
+    "category": "튀김류",
+    "serving_g": 200.0,
+    "per_100g": {
+      "energy_kcal": 290.0,
+      "carb_g": 10.0,
+      "sugar_g": 0.5,
+      "protein_g": 20.0,
+      "fat_g": 19.0,
+      "sat_fat_g": 5.0,
+      "sodium_mg": 520.0,
+      "fiber_g": 0.5,
+      "potassium_mg": 250.0,
+      "cholesterol_mg": 90.0
+    }
+  },
+  {
+    "food_code": "DEV-0045",
+    "name": "돈까스",
+    "category": "튀김류",
+    "serving_g": 200.0,
+    "per_100g": {
+      "energy_kcal": 280.0,
+      "carb_g": 18.0,
+      "sugar_g": 2.0,
+      "protein_g": 14.0,
+      "fat_g": 17.0,
+      "sat_fat_g": 5.0,
+      "sodium_mg": 400.0,
+      "fiber_g": 1.0,
+      "potassium_mg": 220.0,
+      "cholesterol_mg": 50.0
+    }
+  },
+  {
+    "food_code": "DEV-0046",
+    "name": "새우튀김",
+    "category": "튀김류",
+    "serving_g": 100.0,
+    "per_100g": {
+      "energy_kcal": 260.0,
+      "carb_g": 20.0,
+      "sugar_g": 1.0,
+      "protein_g": 11.0,
+      "fat_g": 15.0,
+      "sat_fat_g": 2.5,
+      "sodium_mg": 400.0,
+      "fiber_g": 0.8,
+      "potassium_mg": 150.0,
+      "cholesterol_mg": 90.0
+    }
+  },
+  {
+    "food_code": "DEV-0047",
+    "name": "짜장면",
+    "category": "면 및 만두류",
+    "serving_g": 650.0,
+    "per_100g": {
+      "energy_kcal": 140.0,
+      "carb_g": 23.0,
+      "sugar_g": 4.0,
+      "protein_g": 4.5,
+      "fat_g": 3.5,
+      "sat_fat_g": 1.0,
+      "sodium_mg": 380.0,
+      "fiber_g": 1.5,
+      "potassium_mg": 130.0,
+      "cholesterol_mg": 6.0
+    }
+  },
+  {
+    "food_code": "DEV-0048",
+    "name": "짬뽕",
+    "category": "면 및 만두류",
+    "serving_g": 900.0,
+    "per_100g": {
+      "energy_kcal": 75.0,
+      "carb_g": 10.0,
+      "sugar_g": 1.5,
+      "protein_g": 4.5,
+      "fat_g": 2.0,
+      "sat_fat_g": 0.4,
+      "sodium_mg": 420.0,
+      "fiber_g": 1.0,
+      "potassium_mg": 120.0,
+      "cholesterol_mg": 25.0
+    }
+  },
+  {
+    "food_code": "DEV-0049",
+    "name": "라면",
+    "category": "면 및 만두류",
+    "serving_g": 550.0,
+    "per_100g": {
+      "energy_kcal": 110.0,
+      "carb_g": 15.0,
+      "sugar_g": 1.0,
+      "protein_g": 2.5,
+      "fat_g": 4.3,
+      "sat_fat_g": 2.0,
+      "sodium_mg": 420.0,
+      "fiber_g": 0.7,
+      "potassium_mg": 70.0,
+      "cholesterol_mg": 1.0
+    }
+  },
+  {
+    "food_code": "DEV-0050",
+    "name": "냉면(물냉면)",
+    "category": "면 및 만두류",
+    "serving_g": 800.0,
+    "per_100g": {
+      "energy_kcal": 85.0,
+      "carb_g": 17.0,
+      "sugar_g": 3.0,
+      "protein_g": 3.0,
+      "fat_g": 0.5,
+      "sat_fat_g": 0.1,
+      "sodium_mg": 330.0,
+      "fiber_g": 0.5,
+      "potassium_mg": 80.0,
+      "cholesterol_mg": 15.0
+    }
+  },
+  {
+    "food_code": "DEV-0051",
+    "name": "잔치국수",
+    "category": "면 및 만두류",
+    "serving_g": 600.0,
+    "per_100g": {
+      "energy_kcal": 80.0,
+      "carb_g": 15.0,
+      "sugar_g": 1.0,
+      "protein_g": 3.0,
+      "fat_g": 1.0,
+      "sat_fat_g": 0.2,
+      "sodium_mg": 380.0,
+      "fiber_g": 0.5,
+      "potassium_mg": 60.0,
+      "cholesterol_mg": 15.0
+    }
+  },
+  {
+    "food_code": "DEV-0052",
+    "name": "칼국수",
+    "category": "면 및 만두류",
+    "serving_g": 700.0,
+    "per_100g": {
+      "energy_kcal": 85.0,
+      "carb_g": 15.0,
+      "sugar_g": 0.8,
+      "protein_g": 3.5,
+      "fat_g": 1.2,
+      "sat_fat_g": 0.3,
+      "sodium_mg": 400.0,
+      "fiber_g": 0.6,
+      "potassium_mg": 80.0,
+      "cholesterol_mg": 10.0
+    }
+  },
+  {
+    "food_code": "DEV-0053",
+    "name": "만두(찐만두)",
+    "category": "면 및 만두류",
+    "serving_g": 150.0,
+    "per_100g": {
+      "energy_kcal": 210.0,
+      "carb_g": 26.0,
+      "sugar_g": 2.0,
+      "protein_g": 8.5,
+      "fat_g": 8.0,
+      "sat_fat_g": 2.5,
+      "sodium_mg": 450.0,
+      "fiber_g": 1.5,
+      "potassium_mg": 200.0,
+      "cholesterol_mg": 20.0
+    }
+  },
+  {
+    "food_code": "DEV-0054",
+    "name": "떡볶이",
+    "category": "떡류",
+    "serving_g": 250.0,
+    "per_100g": {
+      "energy_kcal": 200.0,
+      "carb_g": 40.0,
+      "sugar_g": 10.0,
+      "protein_g": 3.5,
+      "fat_g": 2.5,
+      "sat_fat_g": 0.5,
+      "sodium_mg": 500.0,
+      "fiber_g": 1.2,
+      "potassium_mg": 120.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0055",
+    "name": "순대",
+    "category": "기타",
+    "serving_g": 150.0,
+    "per_100g": {
+      "energy_kcal": 190.0,
+      "carb_g": 25.0,
+      "sugar_g": 0.5,
+      "protein_g": 8.0,
+      "fat_g": 6.5,
+      "sat_fat_g": 2.0,
+      "sodium_mg": 500.0,
+      "fiber_g": 1.0,
+      "potassium_mg": 120.0,
+      "cholesterol_mg": 60.0
+    }
+  },
+  {
+    "food_code": "DEV-0056",
+    "name": "샐러드(채소)",
+    "category": "생채·무침류",
+    "serving_g": 150.0,
+    "per_100g": {
+      "energy_kcal": 20.0,
+      "carb_g": 3.5,
+      "sugar_g": 2.0,
+      "protein_g": 1.2,
+      "fat_g": 0.2,
+      "sat_fat_g": 0.0,
+      "sodium_mg": 15.0,
+      "fiber_g": 1.8,
+      "potassium_mg": 220.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0057",
+    "name": "닭가슴살샐러드",
+    "category": "생채·무침류",
+    "serving_g": 250.0,
+    "per_100g": {
+      "energy_kcal": 80.0,
+      "carb_g": 4.0,
+      "sugar_g": 2.0,
+      "protein_g": 11.0,
+      "fat_g": 2.2,
+      "sat_fat_g": 0.5,
+      "sodium_mg": 200.0,
+      "fiber_g": 1.5,
+      "potassium_mg": 300.0,
+      "cholesterol_mg": 30.0
+    }
+  },
+  {
+    "food_code": "DEV-0058",
+    "name": "삶은계란",
+    "category": "기타",
+    "serving_g": 50.0,
+    "per_100g": {
+      "energy_kcal": 145.0,
+      "carb_g": 0.8,
+      "sugar_g": 0.6,
+      "protein_g": 12.5,
+      "fat_g": 9.5,
+      "sat_fat_g": 3.0,
+      "sodium_mg": 130.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 130.0,
+      "cholesterol_mg": 380.0
+    }
+  },
+  {
+    "food_code": "DEV-0059",
+    "name": "고구마(찐)",
+    "category": "기타",
+    "serving_g": 150.0,
+    "per_100g": {
+      "energy_kcal": 130.0,
+      "carb_g": 31.0,
+      "sugar_g": 9.0,
+      "protein_g": 1.4,
+      "fat_g": 0.2,
+      "sat_fat_g": 0.0,
+      "sodium_mg": 15.0,
+      "fiber_g": 2.8,
+      "potassium_mg": 380.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0060",
+    "name": "식빵",
+    "category": "빵 및 과자류",
+    "serving_g": 60.0,
+    "per_100g": {
+      "energy_kcal": 265.0,
+      "carb_g": 49.0,
+      "sugar_g": 5.0,
+      "protein_g": 9.0,
+      "fat_g": 3.5,
+      "sat_fat_g": 0.8,
+      "sodium_mg": 480.0,
+      "fiber_g": 2.5,
+      "potassium_mg": 110.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0061",
+    "name": "크로와상",
+    "category": "빵 및 과자류",
+    "serving_g": 60.0,
+    "per_100g": {
+      "energy_kcal": 410.0,
+      "carb_g": 45.0,
+      "sugar_g": 8.0,
+      "protein_g": 8.0,
+      "fat_g": 21.0,
+      "sat_fat_g": 12.0,
+      "sodium_mg": 470.0,
+      "fiber_g": 2.5,
+      "potassium_mg": 120.0,
+      "cholesterol_mg": 65.0
+    }
+  },
+  {
+    "food_code": "DEV-0062",
+    "name": "생크림케이크",
+    "category": "빵 및 과자류",
+    "serving_g": 100.0,
+    "per_100g": {
+      "energy_kcal": 330.0,
+      "carb_g": 40.0,
+      "sugar_g": 25.0,
+      "protein_g": 5.0,
+      "fat_g": 17.0,
+      "sat_fat_g": 10.0,
+      "sodium_mg": 200.0,
+      "fiber_g": 0.5,
+      "potassium_mg": 100.0,
+      "cholesterol_mg": 90.0
+    }
+  },
+  {
+    "food_code": "DEV-0063",
+    "name": "감자칩",
+    "category": "빵 및 과자류",
+    "serving_g": 60.0,
+    "per_100g": {
+      "energy_kcal": 540.0,
+      "carb_g": 53.0,
+      "sugar_g": 1.0,
+      "protein_g": 6.5,
+      "fat_g": 34.0,
+      "sat_fat_g": 3.5,
+      "sodium_mg": 520.0,
+      "fiber_g": 4.0,
+      "potassium_mg": 1200.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0064",
+    "name": "견과류(혼합)",
+    "category": "기타",
+    "serving_g": 25.0,
+    "per_100g": {
+      "energy_kcal": 600.0,
+      "carb_g": 20.0,
+      "sugar_g": 4.0,
+      "protein_g": 18.0,
+      "fat_g": 52.0,
+      "sat_fat_g": 6.0,
+      "sodium_mg": 5.0,
+      "fiber_g": 7.0,
+      "potassium_mg": 650.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0065",
+    "name": "햄",
+    "category": "기타",
+    "serving_g": 50.0,
+    "per_100g": {
+      "energy_kcal": 300.0,
+      "carb_g": 3.0,
+      "sugar_g": 1.0,
+      "protein_g": 13.0,
+      "fat_g": 26.0,
+      "sat_fat_g": 9.0,
+      "sodium_mg": 950.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 230.0,
+      "cholesterol_mg": 70.0
+    }
+  },
+  {
+    "food_code": "DEV-0066",
+    "name": "소시지",
+    "category": "기타",
+    "serving_g": 50.0,
+    "per_100g": {
+      "energy_kcal": 280.0,
+      "carb_g": 5.0,
+      "sugar_g": 2.0,
+      "protein_g": 12.0,
+      "fat_g": 24.0,
+      "sat_fat_g": 8.0,
+      "sodium_mg": 800.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 200.0,
+      "cholesterol_mg": 60.0
+    }
+  },
+  {
+    "food_code": "DEV-0067",
+    "name": "사과",
+    "category": "과일류",
+    "serving_g": 200.0,
+    "per_100g": {
+      "energy_kcal": 53.0,
+      "carb_g": 14.0,
+      "sugar_g": 11.0,
+      "protein_g": 0.2,
+      "fat_g": 0.2,
+      "sat_fat_g": 0.0,
+      "sodium_mg": 1.0,
+      "fiber_g": 1.9,
+      "potassium_mg": 110.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0068",
+    "name": "바나나",
+    "category": "과일류",
+    "serving_g": 120.0,
+    "per_100g": {
+      "energy_kcal": 90.0,
+      "carb_g": 23.0,
+      "sugar_g": 14.0,
+      "protein_g": 1.1,
+      "fat_g": 0.3,
+      "sat_fat_g": 0.1,
+      "sodium_mg": 1.0,
+      "fiber_g": 1.9,
+      "potassium_mg": 360.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0069",
+    "name": "귤",
+    "category": "과일류",
+    "serving_g": 100.0,
+    "per_100g": {
+      "energy_kcal": 45.0,
+      "carb_g": 11.0,
+      "sugar_g": 9.0,
+      "protein_g": 0.7,
+      "fat_g": 0.1,
+      "sat_fat_g": 0.0,
+      "sodium_mg": 1.0,
+      "fiber_g": 1.0,
+      "potassium_mg": 150.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0070",
+    "name": "우유",
+    "category": "유제품류",
+    "serving_g": 200.0,
+    "per_100g": {
+      "energy_kcal": 65.0,
+      "carb_g": 4.8,
+      "sugar_g": 4.8,
+      "protein_g": 3.2,
+      "fat_g": 3.6,
+      "sat_fat_g": 2.3,
+      "sodium_mg": 40.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 150.0,
+      "cholesterol_mg": 12.0
+    }
+  },
+  {
+    "food_code": "DEV-0071",
+    "name": "저지방우유",
+    "category": "유제품류",
+    "serving_g": 200.0,
+    "per_100g": {
+      "energy_kcal": 45.0,
+      "carb_g": 4.9,
+      "sugar_g": 4.9,
+      "protein_g": 3.4,
+      "fat_g": 1.2,
+      "sat_fat_g": 0.8,
+      "sodium_mg": 45.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 160.0,
+      "cholesterol_mg": 5.0
+    }
+  },
+  {
+    "food_code": "DEV-0072",
+    "name": "플레인요거트",
+    "category": "유제품류",
+    "serving_g": 100.0,
+    "per_100g": {
+      "energy_kcal": 60.0,
+      "carb_g": 4.7,
+      "sugar_g": 4.5,
+      "protein_g": 3.5,
+      "fat_g": 3.0,
+      "sat_fat_g": 1.9,
+      "sodium_mg": 45.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 150.0,
+      "cholesterol_mg": 12.0
+    }
+  },
+  {
+    "food_code": "DEV-0073",
+    "name": "두유",
+    "category": "음료 및 차류",
+    "serving_g": 190.0,
+    "per_100g": {
+      "energy_kcal": 60.0,
+      "carb_g": 6.0,
+      "sugar_g": 4.0,
+      "protein_g": 3.5,
+      "fat_g": 2.5,
+      "sat_fat_g": 0.4,
+      "sodium_mg": 50.0,
+      "fiber_g": 0.5,
+      "potassium_mg": 150.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0074",
+    "name": "아메리카노",
+    "category": "음료 및 차류",
+    "serving_g": 350.0,
+    "per_100g": {
+      "energy_kcal": 2.0,
+      "carb_g": 0.3,
+      "sugar_g": 0.0,
+      "protein_g": 0.1,
+      "fat_g": 0.0,
+      "sat_fat_g": 0.0,
+      "sodium_mg": 2.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 50.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0075",
+    "name": "카페라떼",
+    "category": "음료 및 차류",
+    "serving_g": 350.0,
+    "per_100g": {
+      "energy_kcal": 45.0,
+      "carb_g": 4.0,
+      "sugar_g": 4.0,
+      "protein_g": 2.3,
+      "fat_g": 2.2,
+      "sat_fat_g": 1.4,
+      "sodium_mg": 35.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 110.0,
+      "cholesterol_mg": 8.0
+    }
+  },
+  {
+    "food_code": "DEV-0076",
+    "name": "믹스커피",
+    "category": "음료 및 차류",
+    "serving_g": 120.0,
+    "per_100g": {
+      "energy_kcal": 45.0,
+      "carb_g": 7.5,
+      "sugar_g": 5.5,
+      "protein_g": 0.4,
+      "fat_g": 1.4,
+      "sat_fat_g": 1.2,
+      "sodium_mg": 15.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 40.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0077",
+    "name": "콜라",
+    "category": "음료 및 차류",
+    "serving_g": 250.0,
+    "per_100g": {
+      "energy_kcal": 42.0,
+      "carb_g": 10.6,
+      "sugar_g": 10.6,
+      "protein_g": 0.0,
+      "fat_g": 0.0,
+      "sat_fat_g": 0.0,
+      "sodium_mg": 4.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 2.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0078",
+    "name": "오렌지주스",
+    "category": "음료 및 차류",
+    "serving_g": 200.0,
+    "per_100g": {
+      "energy_kcal": 45.0,
+      "carb_g": 10.5,
+      "sugar_g": 9.0,
+      "protein_g": 0.7,
+      "fat_g": 0.1,
+      "sat_fat_g": 0.0,
+      "sodium_mg": 2.0,
+      "fiber_g": 0.2,
+      "potassium_mg": 180.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0079",
+    "name": "맥주",
+    "category": "주류",
+    "serving_g": 500.0,
+    "per_100g": {
+      "energy_kcal": 43.0,
+      "carb_g": 3.6,
+      "sugar_g": 0.0,
+      "protein_g": 0.5,
+      "fat_g": 0.0,
+      "sat_fat_g": 0.0,
+      "sodium_mg": 4.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 30.0,
+      "cholesterol_mg": 0.0
+    }
+  },
+  {
+    "food_code": "DEV-0080",
+    "name": "소주",
+    "category": "주류",
+    "serving_g": 50.0,
+    "per_100g": {
+      "energy_kcal": 115.0,
+      "carb_g": 0.1,
+      "sugar_g": 0.0,
+      "protein_g": 0.0,
+      "fat_g": 0.0,
+      "sat_fat_g": 0.0,
+      "sodium_mg": 1.0,
+      "fiber_g": 0.0,
+      "potassium_mg": 1.0,
+      "cholesterol_mg": 0.0
+    }
+  }
+]

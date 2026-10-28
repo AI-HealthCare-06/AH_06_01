@@ -1,0 +1,216 @@
+.daily-survey-dialog {
+  width: min(440px, calc(100vw - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  padding: 0;
+  color: #20382f;
+  overflow: hidden;
+}
+.daily-survey-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.daily-survey-dialog::backdrop {
+  background: rgb(26 31 27 / 70%);
+}
+.daily-survey-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  color: #fff3ce;
+  background: #3e4035;
+  border-bottom: 3px solid #20382f;
+}
+.daily-survey-header h2 {
+  margin: 6px 0 0;
+  font-size: calc(21px * var(--ui-text-scale, 1));
+}
+.daily-survey-header small {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.daily-survey-header button {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  color: #fff3ce;
+  background: transparent;
+  border: 1px solid #b0ac89;
+  font: inherit;
+  font-size: calc(26px * var(--ui-text-scale, 1));
+}
+.daily-survey {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.daily-survey-progress {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #b0ac89;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+}
+.daily-survey-progress progress {
+  width: 100%;
+  height: 10px;
+  appearance: none;
+  border: 1px solid #8d896b;
+  background: #dedcc7;
+}
+.daily-survey-progress progress::-webkit-progress-bar {
+  background: #dedcc7;
+}
+.daily-survey-progress progress::-webkit-progress-value {
+  background: #e74736;
+}
+.daily-survey-progress progress::-moz-progress-bar {
+  background: #e74736;
+}
+.daily-survey-content {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+  min-width: 0;
+  padding: 18px 16px;
+}
+.daily-survey h3 {
+  margin: 0 0 12px;
+  font-size: calc(22px * var(--ui-text-scale, 1));
+}
+.daily-survey h3:focus {
+  outline: none;
+}
+.daily-survey p {
+  line-height: 1.6;
+}
+.daily-survey-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 12px 0;
+}
+.daily-survey-field > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.daily-survey-field input,
+.daily-survey-field select {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #8d896b;
+  border-radius: 0;
+  color: #20382f;
+  background: #fff9e7;
+  font: inherit;
+  padding: 8px;
+}
+.daily-survey-field small {
+  white-space: nowrap;
+}
+.daily-survey-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+}
+.daily-survey-footer {
+  display: grid;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 14px 16px;
+  background: #eeead3;
+  border-top: 1px solid #8d896b;
+}
+.daily-survey-footer small {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.daily-survey-actions {
+  display: flex;
+  gap: 10px;
+}
+.daily-survey-actions .primary-button {
+  flex: 2;
+}
+.daily-survey-actions .secondary-button {
+  flex: 1;
+}
+.daily-survey-footer .primary-button,
+.daily-survey-footer .secondary-button {
+  margin: 0;
+  min-height: 46px;
+  text-align: center;
+}
+.daily-survey-skip {
+  padding: 8px;
+  border: 0;
+  color: #315d4e;
+  background: transparent;
+  font: inherit;
+  text-decoration: underline;
+}
+.daily-survey-review {
+  margin: 12px 0;
+}
+.daily-survey-review > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed #b0ac89;
+}
+.daily-survey-review dt {
+  grid-column: 1;
+  font-weight: bold;
+}
+.daily-survey-review dd {
+  grid-column: 1;
+  margin: 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.daily-survey-review button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  padding: 8px;
+  color: #20382f;
+  background: #e5dfb1;
+  border: 1px solid #8d896b;
+  font: inherit;
+}
+.daily-survey [role="alert"] {
+  margin: 0;
+  color: #a43f31;
+}
+.daily-survey [role="status"] {
+  color: #205d40;
+}
+@media (max-width: 350px) {
+  .daily-survey-grid {
+    gap: 0 8px;
+  }
+  .daily-survey-header {
+    padding: 12px;
+    gap: 8px;
+  }
+  .daily-survey-header h2 {
+    font-size: calc(18px * var(--ui-text-scale, 1));
+  }
+  .daily-survey-field > span {
+    gap: 3px;
+  }
+  .daily-survey-field small {
+    font-size: calc(11px * var(--ui-text-scale, 1));
+  }
+}
+
+.daily-survey-dialog,
+.daily-survey-dialog button,
+.daily-survey-dialog a {
+  border-radius: 0;
+}

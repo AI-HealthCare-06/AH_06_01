@@ -1,0 +1,6 @@
+{
+  "profile": "rexrun",
+  "region": "ap-southeast-2",
+  "expectedAccountId": "",
+  "resourcePrefix": "rexrun-test"
+}

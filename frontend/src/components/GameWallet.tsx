@@ -39,7 +39,7 @@ export function GameWallet({
             <small>현실 리워드용</small>
           </div>
         </dl>
-        <h4>100 GOLD → 1 RP</h4>
+        <h4>{rpPolicy.goldPerRp.toLocaleString()} GOLD → 1 RP</h4>
         <p>
           남은 전환 한도 · 오늘 {allowance.daily} / 이번 주 {allowance.weekly.toLocaleString()} /
           이번 달 {allowance.monthly.toLocaleString()} RP

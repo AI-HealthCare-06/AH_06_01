@@ -1,0 +1,751 @@
+/* Keep the greeting and navigation balanced after moving quest discovery into its own tab. */
+.main-screen .greeting {
+  grid-template-columns: 44px minmax(0, 1fr) repeat(2, 44px);
+}
+.main-screen .greeting .medication-header-button {
+  right: 44px;
+}
+.main-screen .greeting .greeting-copy {
+  min-width: 0;
+}
+.dashboard-screen .dashboard-heading .quest-calendar {
+  margin: 12px 0 8px;
+  padding: 0;
+  width: 100%;
+}
+.dashboard-screen .dashboard-heading .calendar-disclosure {
+  min-height: 44px;
+}
+.dashboard-screen .dashboard-heading .dashboard-range-label {
+  margin: 10px 0 0;
+}
+.dashboard-screen .dashboard-heading .calendar-help-popover {
+  z-index: 15;
+}
+.dashboard-quest-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+  padding: 10px;
+  border: 2px solid #203b32;
+  background: #e5ddb0;
+  color: #203b32;
+  box-shadow: 2px 2px #a99e6b;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+  font-weight: 700;
+}
+.dashboard-quest-link .pixel-icon {
+  width: 18px;
+  height: 18px;
+}
+.stitch-analysis .blood-pressure-entry-button {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  min-height: 40px;
+}
+.stitch-analysis .stitch-section-heading {
+  gap: 8px;
+}
+.stitch-analysis .stitch-section-heading h3 {
+  font-size: calc(14px * var(--ui-text-scale, 1));
+}
+.stitch-analysis .stitch-section-heading p {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.dashboard-screen .dashboard-heading {
+  overflow: visible;
+}
+
+.quests-screen .main-content {
+  overflow-y: auto;
+}
+.quests-screen .quest-list {
+  display: grid;
+  gap: 10px;
+}
+.quests-screen .quest-row {
+  width: 100%;
+  min-height: 76px;
+  text-align: left;
+}
+.quests-screen .quest-summary {
+  min-height: 100px;
+  height: auto;
+  padding: 10px;
+}
+.quests-screen .weekly-reward {
+  margin-bottom: 12px;
+}
+.quest-modal-copy p {
+  margin: 10px 0;
+}
+.quest-modal-copy dl {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #a99e6b;
+  background: #f3e7c8;
+}
+.quest-modal-copy dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.quest-modal-copy dd {
+  margin: 0;
+  font-weight: 700;
+}
+.quest-modal-copy small {
+  color: #526447;
+  display: block;
+  line-height: 1.7;
+}
+.quest-modal-copy > a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  margin-top: 10px;
+  color: #205d40;
+}
+.quest-auth-back {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  color: #fff4ce;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+}
+.camera-screen .page-heading {
+  height: auto;
+  padding-top: 4px;
+  padding-bottom: 14px;
+}
+.camera-screen .camera-proof-return {
+  width: 100%;
+}
+.camera-screen .camera-proof-return:disabled {
+  color: #657052;
+  background: #e4e2cf;
+}
+
+.battle-status-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.bottom-navigation a {
+  position: relative;
+}
+.bottom-navigation a[data-battle-feedback="clear"] {
+  background: #397a4b;
+  color: #fff4ce;
+  box-shadow: inset 0 -4px #99c184;
+}
+.bottom-navigation a[data-battle-feedback="defeat"] {
+  background: #b43d2e;
+  color: #fff4ce;
+  box-shadow: inset 0 -4px #e84a3c;
+}
+.bottom-navigation a[data-battle-feedback] .navigation-icon {
+  filter: brightness(0) invert(93%) sepia(24%) saturate(494%) hue-rotate(340deg);
+}
+.battle-tab-badge {
+  position: absolute;
+  left: 50%;
+  top: -9px;
+  transform: translateX(-50%);
+  padding: 3px 4px;
+  border: 1px solid #fff4ce;
+  background: inherit;
+  color: inherit;
+  font: 6px/1.3 var(--pixel);
+}
+
+.vault-dinosaurs {
+  padding: 8px 6px;
+  margin-bottom: 12px;
+  background: #fff4ce;
+  border: 2px solid #b8a363;
+}
+.vault-dino-picker {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 6px;
+  align-items: center;
+}
+.vault-dino-picker > button {
+  min-width: 44px;
+  min-height: 48px;
+  border: 2px solid #9f975f;
+  background: #233f36;
+  color: #ffe486;
+  font: 18px/1 var(--pixel);
+}
+.character-vault .vault-dino-grid {
+  display: flex;
+  gap: 8px;
+  position: relative;
+  padding: 3px calc(50% - 32px);
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: calc(50% - 32px);
+}
+.vault-dino-grid::-webkit-scrollbar {
+  display: none;
+}
+.character-vault .vault-dino-grid .style-card {
+  display: flex;
+  flex: 0 0 64px;
+  min-height: 64px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: 2px solid #a99e6b;
+  background: #e5ddb0;
+  scroll-snap-align: center;
+  opacity: 0.55;
+}
+.character-vault .vault-dino-grid .style-card[data-equipped="true"] {
+  opacity: 1;
+  border-color: #e84a3c;
+  box-shadow: inset 0 -3px #e84a3c;
+}
+.character-vault .vault-dino-grid .dinosaur-art {
+  width: 42px;
+  height: 38px;
+  object-fit: contain;
+}
+.vault-dino-grid .style-card span {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.character-vault .vault-hero {
+  margin-bottom: 4px;
+}
+.character-vault .vault-hero-stage {
+  min-height: 184px;
+}
+.character-vault .vault-hero .character-equipped-preview {
+  max-width: 220px;
+}
+.character-vault .vault-skin-name {
+  padding: 8px 0 12px;
+  margin-top: 0;
+}
+.character-vault .vault-skin-name small {
+  margin-top: 4px;
+}
+.equipment-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.equipment-modal-grid > button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  min-width: 0;
+  border: 2px solid #a99e6b;
+  background: #f3e7c8;
+  text-align: center;
+}
+.equipment-modal-grid > button[aria-pressed="true"] {
+  border-color: #e84a3c;
+  box-shadow: inset 0 -3px #e84a3c;
+}
+.equipment-modal-grid img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.equipment-modal-grid strong {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.equipment-modal-grid small {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.equipment-modal-content > a {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+  border: 1px solid #a99e6b;
+  background: #e5ddb0;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+dialog.info-dialog:has(.equipment-modal-content),
+dialog.info-dialog:has(.quest-modal-copy) {
+  padding: 16px;
+  width: min(360px, calc(100vw - 24px));
+  max-width: 360px;
+}
+@media (max-width: 359px) {
+  .main-screen .greeting {
+    grid-template-columns: 44px minmax(0, 1fr) repeat(2, 44px);
+    gap: 3px;
+  }
+  .greeting .avatar {
+    width: 44px;
+    height: 44px;
+  }
+  .stitch-analysis .stitch-section-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+  .vault-hero-heading > small {
+    font-size: calc(8px * var(--ui-text-scale, 1));
+  }
+  .vault-dino-picker {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 4px;
+  }
+  .vault-dino-picker > button {
+    min-width: 44px;
+  }
+}
+
+.quests-screen .quest-list {
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.quests-screen .quest-row {
+  background: #fff8e7;
+  border: 2px solid #a99e6b;
+  padding: 10px;
+}
+.main-screen .main-content > .dark-shell {
+  left: 0;
+  right: 0;
+}
+
+/* Compact reminders and quest-specific camera verification. */
+.medication-card .medication-heading {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.medication-heading h3 {
+  margin: 0;
+}
+.medication-notification-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  margin: 0 0 0 auto;
+  min-width: 0;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.medication-notification-options legend {
+  float: left;
+  padding: 0;
+  margin-right: 8px;
+}
+.medication-notification-options label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 3px;
+}
+.medication-notification-options input {
+  margin: 0;
+  accent-color: #205d40;
+}
+.medication-card .medication-notification-hint {
+  margin: 4px 0 10px;
+}
+.medication-alarm-setting {
+  display: block;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #205d40;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.quest-camera-dialog {
+  width: min(420px, calc(100vw - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 0;
+  border: 2px solid var(--ink);
+  background: var(--cream);
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.quest-camera-dialog::backdrop {
+  background: #0009;
+}
+.quest-camera-dialog > header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px 4px 14px;
+  background: var(--cream);
+  border-bottom: 1px solid #a99e6b;
+}
+.quest-camera-dialog h2 {
+  margin: 0;
+  font-size: calc(17px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.quest-camera-dialog > header button {
+  flex: 0 0 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  font-size: calc(26px * var(--ui-text-scale, 1));
+}
+.quest-camera-dialog .camera-card {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+  padding: 12px;
+}
+.quest-camera-dialog .camera-mode {
+  margin-top: 0;
+}
+.quest-camera-dialog .camera-viewfinder {
+  width: min(100%, 240px, 31.5dvh);
+  aspect-ratio: 3/4;
+  margin: 12px auto 0;
+}
+.quest-camera-dialog .camera-proof-return {
+  width: 100%;
+}
+.quest-camera-dialog .camera-proof-return:disabled {
+  color: #657052;
+  background: #e4e2cf;
+}
+
+/* A single, readable progress summary; touch-first appearance selection. */
+.quest-summary .quest-summary-detail {
+  display: block;
+  width: 100%;
+}
+.quest-summary .summary-track {
+  width: 100%;
+  height: 14px;
+  border: 1px solid #8a8b6a;
+  margin: 10px 0;
+}
+.quest-weekly-inline {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  color: #294839;
+}
+.quest-summary-copy {
+  min-width: 0;
+  flex: 1;
+}
+.vault-dino-picker,
+.vault-skin-picker {
+  grid-template-columns: minmax(0, 1fr);
+}
+.equipment-modal-content .empty-inventory {
+  color: #294839;
+  line-height: 1.7;
+}
+.stitch-quick-actions .summary-report-link {
+  position: relative;
+  justify-content: center;
+  font-size: calc(16px * var(--ui-text-scale, 1));
+  text-align: center;
+  padding-inline: 12px;
+}
+.stitch-quick-actions .summary-report-link > span {
+  position: absolute;
+  right: 10px;
+}
+.dashboard-heading .calendar-disclosure.dashboard-range-label {
+  margin-top: 12px;
+  padding-block: 2px;
+  border-bottom: 1px dashed #a99e6b;
+}
+.dashboard-heading .calendar-disclosure.dashboard-range-label > span {
+  font-size: calc(13px * var(--ui-text-scale, 1));
+}
+
+.demo-mode-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 4px 12px 10px;
+  color: #294839;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.demo-mode-banner small {
+  line-height: 1.5;
+}
+.demo-mode-banner button {
+  flex-shrink: 0;
+  min-height: 36px;
+  background: transparent;
+  border: 0;
+  color: #205d40;
+  font: inherit;
+  text-decoration: underline;
+}
+
+.quest-hub-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+.quest-hub-tabs button {
+  min-height: 44px;
+  border: 2px solid #203b32;
+  background: #e5ddb3;
+  color: #203b32;
+  font-weight: 700;
+}
+.quest-hub-tabs button[aria-selected="true"] {
+  background: #35576b;
+  color: #ffe486;
+  box-shadow: inset 0 -4px #e5483c;
+}
+.sub-quest-panel > header p {
+  font-size: calc(13px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.sub-quest-card {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin: 12px 0;
+  padding: 14px;
+  text-align: left;
+  color: #203b32;
+}
+.sub-quest-rank {
+  color: #ab7030;
+  font: 13px/1.8 var(--pixel);
+}
+.sub-quest-card h4 {
+  font-size: calc(16px * var(--ui-text-scale, 1));
+  margin: 0;
+}
+.sub-quest-card p {
+  font-size: calc(13px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+  margin-block: 8px;
+}
+.sub-quest-card small,
+.analysis-note {
+  display: block;
+  color: #536348;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.sub-quest-empty {
+  padding: 16px;
+}
+.quest-model-summary {
+  padding: 14px;
+  margin-top: 16px;
+  color: #203b32;
+}
+.quest-model-summary h3 {
+  font-size: calc(17px * var(--ui-text-scale, 1));
+  margin: 0;
+}
+.quest-model-summary p {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.analysis-as-of {
+  color: #58664d;
+}
+.model-pipeline {
+  display: grid;
+  gap: 6px;
+  margin-block: 12px;
+}
+.model-pipeline > div {
+  padding: 12px;
+  border-left: 3px solid #c4aa52;
+  background: #e8e1c3;
+}
+.model-pipeline > span {
+  text-align: center;
+  color: #8a8b6a;
+}
+.model-pipeline strong {
+  display: block;
+  margin-top: 6px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
+}
+.model-pipeline p {
+  margin-bottom: 0;
+}
+.m2-status-mix {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  margin-block: 16px;
+}
+.m2-status-mix i {
+  background: #9c9b87;
+}
+.m2-status-mix i[data-status="positive"] {
+  background: #dbb750;
+}
+.m2-status-mix i[data-status="negative"] {
+  background: #6b9b62;
+}
+.m2-status-mix i[data-status="not_applicable"] {
+  background: #66828a;
+}
+.m2-state-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-block: 12px;
+}
+.m2-state-grid > div {
+  padding: 8px;
+  border-bottom: 1px solid #c9c19a;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.m2-state-grid dd {
+  margin: 0;
+  font-weight: 700;
+  color: #58664d;
+}
+.m2-state-grid > div[data-status="positive"] dd {
+  color: #8b6118;
+}
+.analysis-probabilities > div {
+  display: grid;
+  grid-template-columns: 55px 1fr 45px;
+  gap: 8px;
+  align-items: center;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.analysis-probabilities progress {
+  width: 100%;
+  accent-color: #35576b;
+}
+.health-history-overview {
+  margin-top: 16px;
+}
+.health-history-overview > header {
+  margin-bottom: 10px;
+}
+.health-history-overview h3 {
+  font-size: calc(17px * var(--ui-text-scale, 1));
+  margin: 0;
+}
+.health-record-card {
+  padding: 12px;
+  margin-block: 10px;
+  color: #203b32;
+}
+.health-record-card header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.health-record-card h4 {
+  margin: 0;
+  font-size: calc(15px * var(--ui-text-scale, 1));
+}
+.health-record-card strong {
+  font-size: calc(20px * var(--ui-text-scale, 1));
+}
+.health-record-card strong small {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  font-weight: normal;
+}
+.health-record-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 10px;
+}
+.health-record-chart text {
+  font:
+    10px Galmuri11,
+    sans-serif;
+  fill: #58664d;
+}
+.chart-legend {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.chart-legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.chart-legend i {
+  width: 8px;
+  height: 8px;
+}
+.health-record-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+.health-record-grid .health-record-card {
+  min-width: 0;
+  margin-top: 0;
+}
+@media (max-width: 360px) {
+  .health-record-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quest-growth-note {
+  display: block;
+  margin-top: 8px;
+  color: #58664d;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.6;
+}
+
+.sub-quest-panel > header {
+  padding: 14px;
+  color: #fff4ce;
+}
+.sub-quest-panel > header h3 {
+  margin: 0;
+  font-size: calc(17px * var(--ui-text-scale, 1));
+}
+.sub-quest-panel > header p,
+.sub-quest-panel > .analysis-note {
+  color: #e8ddb5;
+}
+.sub-quest-panel > .analysis-note {
+  margin: 12px;
+}

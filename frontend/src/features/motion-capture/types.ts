@@ -1,8 +1,18 @@
+import type { InjectionObservation } from "./injection";
+
 export type MotionQuest = "water" | "medicine";
 export type InputSource = "camera" | "sample";
 export type Point = { x: number; y: number };
 export type ObjectBox = Point & { width: number; height: number; label: string };
-export type MotionStage = "ready" | "approaching" | "at_mouth" | "returning" | "detected";
+export type ProcessTrace = { event: string; timestamp: number };
+export type ProcessProgress = {
+  phase: "hand" | "drink" | "injection" | "complete";
+  completedSteps: string[];
+  trace: ProcessTrace[];
+};
+export type ProcessObservation = { hand: MotionObservation; drink: MotionObservation };
+export type MotionStage =
+  "ready" | "approaching" | "at_mouth" | "at_site" | "returning" | "detected";
 export type MotionObservation = {
   frameWidth: number;
   frameHeight: number;
@@ -11,6 +21,8 @@ export type MotionObservation = {
   reason: string;
   distance: number | null;
   objectAtMouth: boolean;
+  pinchRatio?: number;
+  faceTrackingChanged?: boolean;
   trackingChanged: boolean;
   mouth: Point | null;
   faceWidth: number | null;
@@ -22,6 +34,7 @@ export type MotionObservation = {
 };
 export type DetectionProgress = {
   stage: MotionStage;
+  process?: ProcessProgress;
   holdProgress: number;
   validObservationRatio: number;
   message: string;
@@ -32,9 +45,15 @@ export type MotionResult = {
   eventId: string | null;
   questId: MotionQuest;
   inputSource: InputSource;
-  kind: "drinking_motion" | "hand_to_mouth_motion" | null;
+  kind:
+    | "drinking_motion"
+    | "hand_to_mouth_motion"
+    | "oral_medication_process"
+    | "injection_site_hand_process"
+    | null;
   decision: "detected" | "inconclusive" | "cancelled";
-  detector: "rules_v1";
+  detector: "rules_v1" | "process_rules_v2" | "injection_rules_v1";
+  process?: ProcessProgress;
   modelManifestVersion: string;
   configVersion: string;
   startedAt: string;
@@ -43,15 +62,29 @@ export type MotionResult = {
   validObservationRatio: number;
   classificationScore: null;
   preparationSource: "not_required" | "user_ack";
-  verificationLevel: "local_demo";
+  verificationLevel: "local_demo" | "experimental_process";
   userConfirmed: boolean;
   reasonCodes: string[];
 };
 export type WorkerRequest =
-  | { type: "init"; sessionId: string; quest: MotionQuest; baseUrl: string }
+  | {
+      type: "init";
+      sessionId: string;
+      quest: MotionQuest;
+      baseUrl: string;
+      process?: boolean;
+      injection?: boolean;
+    }
   | { type: "frame"; sessionId: string; image: ImageBitmap; timestamp: number };
 export type WorkerResponse =
   | { type: "ready"; sessionId: string }
   | { type: "loading"; sessionId: string; message: string }
-  | { type: "observation"; sessionId: string; observation: MotionObservation; latencyMs: number }
+  | {
+      type: "observation";
+      sessionId: string;
+      observation: MotionObservation;
+      process?: ProcessObservation;
+      injection?: InjectionObservation;
+      latencyMs: number;
+    }
   | { type: "error"; sessionId: string; message: string };

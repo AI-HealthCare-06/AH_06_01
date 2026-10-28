@@ -32,6 +32,23 @@ export const healthPeriods = {
 } as const;
 export type HealthPeriod = keyof typeof healthPeriods;
 
+export function reportSelection(params: URLSearchParams, today: string) {
+  const candidate = params.get("period");
+  const period: HealthPeriod =
+    candidate && Object.hasOwn(healthPeriods, candidate) ? (candidate as HealthPeriod) : "week";
+  const validDate = (value: string | null) => {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const date = new Date(`${value}T00:00:00Z`);
+    return (
+      Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value && value <= today
+    );
+  };
+  const date = validDate(params.get("date")) ? params.get("date")! : today;
+  const from =
+    validDate(params.get("from")) && params.get("from")! <= date ? params.get("from")! : date;
+  return { period, date, from };
+}
+
 export function reportDateRange(period: HealthPeriod, end: string, from?: string) {
   const date = new Date(`${end}T12:00:00`);
   if (period === "custom") return { start: from && from <= end ? from : end, end };

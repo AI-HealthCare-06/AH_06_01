@@ -1,9 +1,10 @@
+import { selectPixelOption } from "./helpers/controls";
 import { expect, test } from "@playwright/test";
 
 test("period changes preserve the score animation and keep all sections in one scrollable report", async ({
   page,
 }) => {
-  await page.goto("/dashboard");
+  await page.goto("/dashboard/report");
   const score = page.locator(".score-number .number-visual");
   await expect(score).toHaveAttribute("data-value", "82");
   await page.locator(".health-score").evaluate((element) => {
@@ -16,7 +17,7 @@ test("period changes preserve the score animation and keep all sections in one s
   });
   const report = page.getByRole("region", { name: "REPORT", exact: true });
   for (const period of ["day", "month", "year", "week"]) {
-    await page.getByRole("combobox", { name: "건강 변화 조회 기간" }).selectOption(period);
+    await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), period);
     await expect(score).toHaveAttribute("data-value", "82");
     expect(
       await page
@@ -36,20 +37,10 @@ test("period changes preserve the score animation and keep all sections in one s
   const scroll = page.getByLabel("대시보드 리포트 스크롤", { exact: true });
   for (const width of [320, 526]) {
     await page.setViewportSize({ width, height: 844 });
-    expect(
-      await scroll.evaluate((element) => {
-        const style = getComputedStyle(element);
-        return (
-          style.scrollbarWidth === "none" &&
-          style.overflowY === "auto" &&
-          element.scrollHeight > element.clientHeight
-        );
-      }),
-    ).toBe(true);
-    await scroll.focus();
-    await scroll.press("End");
+    expect(await scroll.evaluate((element) => getComputedStyle(element).overflowY)).toBe("visible");
+    await report.locator(".prediction-note").scrollIntoViewIfNeeded();
     await expect(report.locator(".prediction-note")).toBeInViewport();
-    expect(await scroll.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
     expect(await scroll.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
       true,
     );

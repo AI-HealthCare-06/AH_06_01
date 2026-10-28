@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { authenticateQuest } from "./fixtures/quest-evidence";
 
 test("quest EXP appears below HP in a thin gray and green gauge and survives reload", async ({
   page,
@@ -20,15 +21,16 @@ test("quest EXP appears below HP in a thin gray and green gauge and survives rel
   await expect(page.locator(".stage-egg, .stage-flag, .pixel-stage-dot")).toHaveCount(0);
 
   await page.goto("/quests/meal");
+  await authenticateQuest(page, "meal");
   await page.getByRole("button", { name: "완료 체크하기" }).click();
   await page.goto("/home");
-  await expect(exp).toHaveText("EXP 030/100");
-  await expect(exp).toHaveAttribute("aria-valuenow", "30");
+  await expect(exp).toHaveText("EXP 020/122");
+  await expect(exp).toHaveAttribute("aria-valuenow", "20");
   expect(await exp.locator("i").evaluate((e) => getComputedStyle(e).backgroundColor)).toBe(
     "rgb(83, 166, 110)",
   );
   await page.reload();
-  await expect(exp).toHaveText("EXP 030/100");
+  await expect(exp).toHaveText("EXP 020/122");
   await page.goto("/quests/meal");
   await expect(page.getByRole("button", { name: "오늘 완료한 퀘스트예요" })).toBeDisabled();
 });
@@ -43,11 +45,12 @@ test("level-up carries surplus EXP and all existing level labels agree", async (
     }));
     useGameStore.getState().togglePause();
   });
-  await page.goto("/quests/medicine");
+  await page.goto("/quests/water");
+  await authenticateQuest(page, "water");
   await page.getByRole("button", { name: "완료 체크하기" }).click();
   await page.goto("/home");
   await expect(page.locator(".level")).toContainText("Lv.2");
-  await expect(page.getByRole("progressbar", { name: "레벨 경험치" })).toHaveText("EXP 010/122");
+  await expect(page.getByRole("progressbar", { name: "레벨 경험치" })).toHaveText("EXP 090/122");
   await page.goto("/me");
   await expect(page.locator(".member-card")).toContainText("Lv.2");
   await page.goto("/buff");

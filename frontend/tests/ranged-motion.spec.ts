@@ -14,8 +14,8 @@ for (let dinosaur = 0; dinosaur < dinosaurMotions.length; dinosaur++)
       test(`${dinosaurMotions[dinosaur][0]} plays IDLE between ${ranged ? "ranged" : "melee"} attacks at AS +${asBonus * 100}%`, async ({
         page,
       }) => {
-        await page.clock.install();
-        await page.clock.pauseAt(new Date());
+        await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
         await page.goto("/home");
         await page.evaluate(
           async ({ ranged, asBonus, dinosaur }) => {
@@ -106,8 +106,8 @@ for (let dinosaur = 0; dinosaur < dinosaurMotions.length; dinosaur++)
 test("six dinosaurs share IDLE body size and foot or hover anchors in both attack modes", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   const canvas = page.locator(".battle-dinosaur canvas");
   for (let dinosaur = 0; dinosaur < 6; dinosaur++) {
@@ -197,8 +197,8 @@ test("six dinosaurs share IDLE body size and foot or hover anchors in both attac
 test("Stego tail sweep renders all twelve poses, contacts on pose six, and moves body boxes together", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   const times = [14, 41, 68, 95, 123, 150, 185, 219, 254, 288, 323, 358];
   const hashes = new Set<number>();

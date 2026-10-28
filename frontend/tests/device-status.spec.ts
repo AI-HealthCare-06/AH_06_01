@@ -86,7 +86,7 @@ for (const mode of ["missing", "blocked"]) {
       "aria-label",
       "네트워크 연결됨 (브라우저 기준)",
     );
-    await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
+    await page.getByRole("link", { name: "Quest", exact: true }).click();
     await expect(page.locator(".quest-list")).toBeVisible();
     await expect(page.locator(".battery-percent")).toHaveText("—");
     expect(errors).toEqual([]);
@@ -108,7 +108,7 @@ test("all web tabs share screen height and navigation bounds with centered statu
     for (const route of ["home", "quests", "dashboard", "shop"]) {
       await page.goto(`/${route}`);
       await page.evaluate(() => document.fonts.ready);
-      if (route === "dashboard") await page.locator(".impact-card").waitFor();
+      if (route === "dashboard") await page.locator(".dashboard-summary").waitFor();
       bounds.push(
         await page.evaluate(() => {
           const screen = document.querySelector(".main-screen")!.getBoundingClientRect();
@@ -148,9 +148,9 @@ test("mobile tabs stay the same height without duplicating OS status indicators"
   try {
     const heights = [];
     for (const route of ["home", "quests", "dashboard", "shop"]) {
-      await page.goto(`http://127.0.0.1:5173/${route}`);
+      await page.goto(`http://127.0.0.1:${process.env.REXRUN_TEST_PORT || "5173"}/${route}`);
       await page.evaluate(() => document.fonts.ready);
-      if (route === "dashboard") await page.locator(".impact-card").waitFor();
+      if (route === "dashboard") await page.locator(".dashboard-summary").waitFor();
       await expect(page.locator(".status-bar")).toHaveCount(0);
       heights.push(
         await page

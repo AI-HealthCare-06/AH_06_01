@@ -26,7 +26,7 @@ test("main tabs follow the requested order and swipe respects direction, edges a
     "Shop",
     "Character",
     "Home",
-    "Camera",
+    "Quest",
     "Dashboard",
   ]);
   await swipe(page, 100);
@@ -40,12 +40,14 @@ test("main tabs follow the requested order and swipe respects direction, edges a
   await swipe(page, -100);
   await expect(page).toHaveURL(/\/character$/);
   await expect(page.locator(".character-screen")).toBeVisible();
-  await swipe(page, -100);
+  await swipe(page, -100, 0, ".vault-skin-grid");
+  await expect(page).toHaveURL(/\/character$/);
+  await swipe(page, -100, 0, ".vault-heading");
   await expect(page).toHaveURL(/\/home$/);
   await expect(page.locator(".home-screen")).toBeVisible();
   await swipe(page, -100, 0, ".dino-feedback");
-  await expect(page).toHaveURL(/\/camera$/);
-  await expect(page.locator(".camera-screen")).toBeVisible();
+  await expect(page).toHaveURL(/\/quests$/);
+  await expect(page.locator(".quests-screen")).toBeVisible();
   await swipe(page, -100, 0, ".greeting");
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.locator(".dashboard-screen")).toBeVisible();
@@ -53,8 +55,8 @@ test("main tabs follow the requested order and swipe respects direction, edges a
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.locator(".dashboard-screen")).toBeVisible();
   await swipe(page, 100, 0, ".greeting");
-  await expect(page).toHaveURL(/\/camera$/);
-  await expect(page.locator(".camera-screen")).toBeVisible();
+  await expect(page).toHaveURL(/\/quests$/);
+  await expect(page.locator(".quests-screen")).toBeVisible();
   await page.goto("/shop/customize");
   await expect(page).toHaveURL(/\/shop\/customize$/);
   await swipe(page, -100);
@@ -64,8 +66,8 @@ test("main tabs follow the requested order and swipe respects direction, edges a
 test("compact HUD toggles buffs and hit art lasts 200ms without stopping attack cooldowns", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await expect(page.locator(".battle-buffs")).toBeHidden();
   await page.getByRole("button", { name: "버프 목록 펼치기" }).click();

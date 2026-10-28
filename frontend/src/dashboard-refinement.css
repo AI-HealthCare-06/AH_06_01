@@ -1,0 +1,279 @@
+/* One scroll surface for reports; keep the calendar and navigation outside it. */
+.dashboard-screen .main-content {
+  display: block;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+.dashboard-screen .dashboard-period-content {
+  overflow: visible;
+  height: auto;
+  min-height: 0;
+  flex: none;
+}
+.dashboard-screen .main-content > .dark-shell {
+  display: none;
+}
+.dashboard-screen .dashboard-heading {
+  position: relative;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border: 2px solid #203b32;
+  background: #203b32;
+  color: #fff3cd;
+}
+.dashboard-screen .dashboard-heading .page-heading {
+  position: static;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+.dashboard-screen .dashboard-heading .page-heading h2 {
+  color: #f4d77d;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.dashboard-screen .dashboard-heading .page-heading p {
+  margin-top: 2px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.4;
+}
+.dashboard-screen .dashboard-range-label {
+  margin-top: 4px;
+  line-height: 1.4;
+  color: #e7ddbc;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  text-align: left;
+}
+.dashboard-summary {
+  padding: 12px;
+  background: #f8edce;
+}
+.dashboard-summary .summary-score {
+  position: relative;
+  align-items: center;
+  min-height: 100px;
+  padding: 12px;
+  box-shadow: none;
+}
+.dashboard-summary .summary-score h3,
+.dashboard-summary .summary-score p,
+.dashboard-summary .summary-score .score-number {
+  inset: auto;
+  transform: none;
+}
+.dashboard-summary .summary-score .score-number {
+  display: block;
+  line-height: 1.1;
+  font-size: calc(38px * var(--ui-text-scale, 1));
+}
+.dashboard-summary .summary-quests {
+  border: 0;
+  background: transparent;
+}
+.dashboard-summary .summary-quests dl {
+  margin-block: 12px;
+}
+.summary-quests dl > div {
+  background: #fff9e8;
+}
+.dashboard-summary .summary-pressure {
+  padding: 12px;
+  background: #fff9e8;
+}
+.summary-pressure > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.summary-pressure h3 {
+  margin: 0;
+}
+.summary-pressure > div {
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+.summary-pressure strong {
+  font-size: calc(25px * var(--ui-text-scale, 1));
+  line-height: 1.3;
+}
+.summary-pressure p {
+  color: #526447;
+}
+.dashboard-summary .bp-stage-card {
+  margin: 12px 0;
+  padding: 12px;
+  border-color: #a99e6b;
+  background: #fff9e8;
+}
+.dashboard-summary .summary-report-link {
+  margin-top: 12px;
+  background: #f3d87e;
+}
+.dashboard-summary .summary-data-note {
+  color: #526447;
+}
+.calendar-disclosure {
+  border-bottom-width: 1px;
+}
+.calendar-disclosure button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 6px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #203b32;
+  font-size: calc(18px * var(--ui-text-scale, 1));
+}
+.quest-calendar .dashboard-date-controls select,
+.quest-calendar .dashboard-date-controls .pixel-date-trigger {
+  height: 44px;
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid #a39c72;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.blood-pressure-entry-button {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 2px solid #203b32;
+  border-radius: 0;
+  background: #f4df9c;
+  color: #203b32;
+  font:
+    700 13px/1.4 "Galmuri11",
+    sans-serif;
+  white-space: nowrap;
+}
+.blood-pressure-entry > small {
+  display: block;
+  max-width: 210px;
+  margin-top: 5px;
+}
+.blood-pressure-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.blood-pressure-fields label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.blood-pressure-fields input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px;
+  border: 2px solid #3c5448;
+  border-radius: 0;
+  color: #203b32;
+  background: #fff9e8;
+  font:
+    700 22px/1.2 "Galmuri11",
+    sans-serif;
+}
+.blood-pressure-fields > span,
+.blood-pressure-fields > p {
+  grid-column: 1 / -1;
+}
+.blood-pressure-fields > span {
+  color: #526447;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.blood-pressure-fields > p[role="alert"] {
+  margin: 0;
+  color: #a83125;
+}
+.bp-report > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.bp-report > header > span {
+  flex-basis: 100%;
+}
+.dashboard-report-web > main {
+  background: #f8edce;
+}
+.dashboard-report-web .health-report {
+  border: 0;
+  background: transparent;
+}
+.dashboard-report-web .report-body {
+  display: grid;
+  gap: 14px;
+  border: 0;
+  padding: 16px 0;
+  background: transparent;
+}
+.dashboard-report-web .report-body > :is(header, p, dl, small, section, a) {
+  margin-block: 0;
+}
+.dashboard-report-web .bp-report,
+.dashboard-report-web .report-body .disease-card,
+.dashboard-report-web .report-body .health-trend,
+.dashboard-report-web .report-body .impact-card {
+  background: #fff9e8;
+  border: 2px solid #a99e6b;
+  box-shadow: 3px 3px #d0c298;
+}
+.camera-medication-quests {
+  scroll-margin-top: 12px;
+}
+.camera-medication-quests header b {
+  white-space: nowrap;
+}
+.camera-medication-quests .dose-list li {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.camera-medication-quests .dose-verification-actions {
+  max-width: 110px;
+}
+.camera-medication-quests .dose-verification-actions button {
+  width: 100%;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.camera-medication-quests button:disabled {
+  background: #e4e2cf;
+  color: #66705a;
+}
+.medication-camera-shortcut {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  margin-top: 10px;
+  color: #205d40;
+}
+@media (max-width: 374px) {
+  .dashboard-summary {
+    padding: 10px;
+  }
+  .dashboard-summary .summary-score h3 {
+    font-size: calc(9px * var(--ui-text-scale, 1));
+  }
+  .camera-medication-quests .dose-list li {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .camera-medication-quests .dose-verification-actions {
+    grid-column: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: none;
+  }
+  .camera-medication-quests .dose-list time {
+    font-size: calc(15px * var(--ui-text-scale, 1));
+  }
+}

@@ -8,8 +8,8 @@ for (const [seed, count, cooldown] of [
   test(`spawn group ${count} waits ${cooldown}ms and preserves its remaining cooldown across pause/reload`, async ({
     page,
   }) => {
-    await page.clock.install();
-    await page.clock.pauseAt(new Date());
+    await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
     await page.goto("/home");
     await page.evaluate(async (seed) => {
       const path = "/src/stores/game-store.ts";
@@ -58,8 +58,8 @@ for (const [seed, count, cooldown] of [
 test("game controls open three working, persistent settings and account page has no reset toggles", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
@@ -120,7 +120,7 @@ test("game controls open three working, persistent settings and account page has
   await trigger.click();
   const dialog = page.getByRole("dialog", { name: "게임 설정" });
   const names = ["Wave 자동 재시작", "피해 수치 표시", "몬스터 체력바 표시"];
-  await expect(dialog.getByRole("switch")).toHaveCount(3);
+  await expect(dialog.getByRole("switch")).toHaveCount(5);
   for (const name of names) {
     const toggle = dialog.getByRole("switch", { name, exact: true });
     await expect(toggle).toBeChecked();
@@ -151,8 +151,8 @@ test("game controls open three working, persistent settings and account page has
 test("each dinosaur releases from its horn, foreclaw or just ahead of its visible mouth", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   for (let dinosaur = 0; dinosaur < 6; dinosaur++) {
     const source = await page.evaluate(async (dinosaur) => {
@@ -247,7 +247,7 @@ test("prediction delta stays smaller and centered above its arrow on narrow and 
   await page.emulateMedia({ reducedMotion: "reduce" });
   for (const width of [320, 390, 534]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto("/dashboard");
+    await page.goto("/dashboard/report");
     await expect(page.locator(".impact-card")).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     for (const row of await page.locator(".impact-card .risk-change").all()) {

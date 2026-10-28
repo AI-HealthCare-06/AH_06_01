@@ -1,0 +1,301 @@
+/* Follow-up controls retain the app palette and pixel borders. */
+.repeat-time-button {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.survey-slider {
+  display: grid;
+  gap: 16px;
+}
+.survey-slider output {
+  justify-self: end;
+  font-weight: bold;
+  font-size: calc(22px * var(--ui-text-scale, 1));
+  color: #205d40;
+}
+.survey-slider input[type="range"] {
+  appearance: none;
+  width: 100%;
+  height: 20px;
+  background: #d3cba5;
+  border: 2px solid #20382f;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+.survey-slider input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 30px;
+  height: 34px;
+  background: #e74736;
+  border: 3px solid #20382f;
+  box-shadow: 3px 3px #20382f;
+}
+.survey-slider input[type="range"]::-moz-range-thumb {
+  width: 26px;
+  height: 30px;
+  border-radius: 0;
+  background: #e74736;
+  border: 3px solid #20382f;
+}
+.survey-slider .survey-scale-anchors {
+  margin: 0;
+}
+.survey-unknown-button {
+  min-height: 48px;
+  border: 2px solid #8d896b;
+  background: #fff9e7;
+  color: #20382f;
+  font: inherit;
+}
+.survey-unknown-button[aria-pressed="true"] {
+  background: #e5dfb1;
+  border-color: #20382f;
+}
+.app-toggle-switch {
+  min-width: 58px;
+  width: 58px;
+  height: 32px;
+  padding: 3px;
+  border: 2px solid #20382f;
+  background: #a6a88c;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.app-toggle-switch span {
+  width: 22px;
+  height: 22px;
+  background: #fff3ce;
+  border: 2px solid #20382f;
+}
+.app-toggle-switch[aria-checked="true"] {
+  background: #4e9b69;
+  justify-content: flex-end;
+}
+.app-toggle-switch:disabled {
+  opacity: 0.55;
+}
+.medication-reminder-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.medication-edit-dialog {
+  width: min(430px, calc(100vw - 28px));
+  max-height: calc(100dvh - 72px);
+  overflow: auto;
+  padding: 18px;
+  color: #20382f;
+  background: #fff9e7;
+  border: 3px solid #20382f;
+  box-shadow: 5px 5px #20382f;
+}
+.medication-edit-dialog::backdrop {
+  background: #14241db3;
+}
+.medication-edit-dialog > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.medication-edit-dialog h2 {
+  font-size: calc(20px * var(--ui-text-scale, 1));
+  margin: 0;
+}
+.medication-edit-dialog > header button {
+  width: 44px;
+  min-height: 44px;
+  background: #e5dfb1;
+  border: 2px solid #20382f;
+  font-size: calc(22px * var(--ui-text-scale, 1));
+}
+.medication-edit-fields label {
+  min-width: 0;
+}
+.medication-kind-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.medication-kind-options label {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px;
+  width: auto !important;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+.medication-kind-options input[type="radio"] {
+  width: 20px !important;
+  height: 20px;
+  flex: 0 0 20px;
+  margin: 0;
+}
+.medication-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.medication-edit-actions button {
+  min-height: 46px;
+  flex: 1 1 100px;
+}
+.dashboard-screen .hero-vitals dd {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.dashboard-screen .hero-vitals dd small {
+  margin-left: auto;
+  text-align: right;
+}
+.dashboard-screen .calendar-toolbar {
+  padding-top: 16px;
+}
+.dashboard-screen .weekly-calendar {
+  gap: 5px;
+  padding: 8px 0;
+}
+.dashboard-screen .weekly-calendar > button {
+  min-height: 66px;
+  padding: 5px 2px;
+}
+.dashboard-screen .weekly-calendar > button strong {
+  font-size: calc(24px * var(--ui-text-scale, 1));
+}
+.my-page-screen .account-menu > button,
+.my-page-screen .settings-summary-row {
+  height: calc(88px * var(--ui-text-scale, 1));
+  min-height: calc(88px * var(--ui-text-scale, 1));
+  padding: 14px 16px;
+  margin: 0 0 12px;
+  box-sizing: border-box;
+}
+.my-page-screen .account-menu > button h3 {
+  margin: 0;
+  font-size: calc(18px * var(--ui-text-scale, 1));
+  line-height: 1.45;
+}
+.my-page-screen .account-menu > button p,
+.settings-summary-row small {
+  margin: 4px 0 0;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.my-page-screen .account-menu {
+  gap: 0;
+}
+.my-page-screen .settings-summary-row strong {
+  font-size: calc(18px * var(--ui-text-scale, 1));
+}
+.page-back,
+.quest-back,
+.report-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 100px;
+  min-height: 48px;
+  padding: 10px 14px !important;
+  margin: 12px 0 16px !important;
+  font-size: calc(17px * var(--ui-text-scale, 1)) !important;
+}
+.page-heading {
+  margin-bottom: 14px;
+}
+.page-heading:has(p:empty) p {
+  display: none;
+}
+.avatar-upload-choice {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 8px;
+  padding: 12px;
+  border: 2px solid #20382f;
+  background: #e5dfb1;
+  font-weight: bold;
+}
+.avatar-upload-choice input {
+  max-width: 100%;
+  font: inherit;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+}
+.profile-avatar[data-avatar="custom"] img {
+  image-rendering: auto;
+  object-fit: cover;
+}
+.font-size-options {
+  border: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.font-size-options label {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 50px;
+  padding: 10px;
+  border: 2px solid #8d896b;
+}
+.font-size-options input {
+  width: 20px;
+  height: 20px;
+  accent-color: #e74736;
+}
+.update-available {
+  border-color: #e74736 !important;
+  box-shadow:
+    inset 5px 0 #e74736,
+    3px 3px #20382f !important;
+  background: #fff0bd !important;
+}
+.update-available b {
+  color: #d13f2c;
+}
+
+.quest-auth-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  margin: 12px 0 16px;
+  padding: 10px 14px;
+  font-size: calc(17px * var(--ui-text-scale, 1));
+}
+
+/* Seven enlarged dates still fit at the smallest supported width and text scale. */
+.dashboard-screen .weekly-calendar {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  height: auto;
+  min-height: 82px;
+  gap: 3px;
+}
+.dashboard-screen .weekly-calendar > button {
+  min-width: 0;
+}
+.dashboard-screen .weekly-calendar > button strong {
+  font-size: calc(clamp(18px, 5.5vw, 24px) * var(--ui-text-scale, 1));
+}
+.avatar-upload-choice {
+  min-width: 0;
+}
+.avatar-upload-choice input[type="file"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+@media (max-width: 359px) {
+  .profile-avatar-grid {
+    grid-template-columns: repeat(4, minmax(44px, 1fr));
+  }
+}

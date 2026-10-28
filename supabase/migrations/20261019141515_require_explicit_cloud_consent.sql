@@ -1,0 +1,1 @@
+-- No-op: duplicate reservation; preceding migration implements consent validation.

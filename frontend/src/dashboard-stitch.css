@@ -1,0 +1,509 @@
+/* Stitch section order and proportions, rendered with REXRUN's existing pixel UI. */
+.dashboard-theme {
+  --pixel: "Press Start 2P", "Galmuri11", sans-serif;
+  font-family: "Galmuri11", sans-serif;
+}
+.dashboard-screen .dashboard-heading {
+  padding: 12px 0;
+  border: 0;
+  border-bottom: 1px dashed #a99e6b;
+  background: transparent;
+  color: #243b30;
+  margin-bottom: 18px;
+}
+.dashboard-screen .dashboard-heading .page-heading h2 {
+  color: #243b30;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.dashboard-screen .dashboard-heading .page-heading p,
+.dashboard-screen .dashboard-range-label {
+  color: #526447;
+}
+.dashboard-screen .dashboard-heading .page-heading::before,
+.dashboard-screen .dashboard-heading .page-heading::after {
+  display: none;
+}
+.dashboard-theme .dashboard-summary {
+  display: grid;
+  gap: 20px;
+  padding: 0 2px 8px 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.dashboard-theme .dashboard-summary .stitch-health-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px;
+  min-height: 0;
+  background: #35576b;
+  border: 2px solid #203b32;
+  box-shadow: 3px 3px #172820;
+  color: #fff4ce;
+}
+.stitch-health-hero > header,
+.stitch-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.dashboard-theme .stitch-health-hero h3 {
+  font: 8px/1.8 var(--pixel);
+  color: #fff4ce;
+  overflow-wrap: anywhere;
+}
+.pixel-tag {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 4px 6px;
+  background: #e5ddb0;
+  border: 1px solid #a99e6b;
+  color: #243b30;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.dashboard-theme .summary-score .hero-ring-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+.score-ring {
+  position: relative;
+  width: 100%;
+  max-width: 180px;
+}
+.score-ring > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.score-ring-track {
+  stroke: #f3e7c830;
+}
+.ring-0 {
+  color: #f4d77d;
+}
+.ring-1 {
+  color: #ea7465;
+}
+.ring-2 {
+  color: #99c184;
+}
+.score-ring-fill {
+  stroke: currentColor;
+  stroke-linecap: butt;
+}
+.score-ring-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.dashboard-theme .summary-score .score-ring-value .score-number {
+  color: #ffe486;
+  font: 28px/1.3 var(--pixel);
+  letter-spacing: -1px;
+}
+.score-ring-value > span {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.hero-vitals {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  min-width: 0;
+}
+.hero-vitals > div {
+  padding: 6px 8px;
+  background: #203b3280;
+  border-left: 3px solid currentColor;
+}
+.hero-vitals dt {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.hero-vitals dt i {
+  width: 5px;
+  height: 5px;
+  background: currentColor;
+}
+.hero-vitals dd {
+  margin: 3px 0 0;
+  font-size: calc(15px * var(--ui-text-scale, 1));
+  font-weight: 700;
+}
+.hero-vitals dd small {
+  display: block;
+  margin-top: 2px;
+  color: #fff4ce;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  font-weight: 400;
+}
+.dashboard-theme .summary-score .hero-delta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #e5ddb060;
+  color: #ffe486;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.hero-delta small {
+  color: #e7ddbc;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.stitch-section-heading h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.stitch-section-heading .pixel-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+.stitch-section-heading p {
+  margin-top: 5px;
+  color: #526447;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.stitch-section-heading small {
+  color: #657052;
+  font-size: calc(9px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.stitch-progress {
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid #858267;
+  background: #d5ceb0;
+}
+.stitch-progress > i {
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, #397a4b 0 7px, #e5ddb0 7px 9px);
+}
+.stitch-quest-panel > .stitch-progress {
+  margin-top: 12px;
+}
+.stitch-quest-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+.stitch-quest-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 8px;
+  box-shadow: 2px 2px #a99e6b;
+}
+.stitch-quest-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 40px;
+  color: #35576b;
+  background: #e5ddb0;
+  border: 1px solid #a99e6b;
+}
+.stitch-quest-icon :is(img, svg) {
+  width: 25px;
+  height: 25px;
+  image-rendering: pixelated;
+}
+.stitch-quest-copy {
+  min-width: 0;
+}
+.stitch-quest-copy h4 {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.stitch-quest-copy > small {
+  display: block;
+  margin: 2px 0 6px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+  color: #526447;
+}
+.stitch-quest-copy > .stitch-progress {
+  width: min(100%, 140px);
+  height: 5px;
+}
+.stitch-quest-reward {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  color: #243b30;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.stitch-quest-reward b {
+  color: #35576b;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  white-space: nowrap;
+}
+.stitch-history-note {
+  padding: 12px;
+  background: #fff8e7;
+  border: 1px solid #a99e6b;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.8;
+}
+.stitch-trends {
+  padding: 14px;
+  box-shadow: 3px 3px #a99e6b;
+}
+.stitch-metric-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  margin: 14px 0;
+}
+.stitch-metric-tabs button {
+  min-height: 44px;
+  padding: 5px 2px;
+  background: #e5ddb0;
+  border: 1px solid #a99e6b;
+  color: #243b30;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.stitch-metric-tabs button[aria-pressed="true"] {
+  background: #35576b;
+  color: #fff4ce;
+  box-shadow: inset 0 -3px #e84a3c;
+}
+.stitch-metric-panel {
+  min-height: 234px;
+}
+.dashboard-theme .stitch-trends .health-trend {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.stitch-trends .health-trend > header {
+  display: none;
+}
+.stitch-trends .health-trend > p {
+  padding-top: 8px;
+  border-top: 1px dashed #a99e6b;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.stitch-trends .health-trend > p small {
+  display: block;
+  margin-top: 5px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.stitch-trends .trend-bars {
+  height: 160px;
+}
+.stitch-trends .trend-column > div {
+  height: 120px;
+}
+.stitch-metric-value {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.stitch-metric-value small {
+  color: #526447;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.stitch-metric-value strong {
+  display: block;
+  color: #243b30;
+  font-size: calc(25px * var(--ui-text-scale, 1));
+  line-height: 1.6;
+}
+.stitch-metric-value strong span {
+  margin-left: 5px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  font-weight: 400;
+}
+.stitch-telemetry-bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  height: 144px;
+  margin-top: 12px;
+}
+.stitch-telemetry-column {
+  display: grid;
+  grid-template-rows: 16px minmax(0, 1fr) 18px;
+  gap: 5px;
+  min-width: 0;
+  text-align: center;
+}
+.stitch-telemetry-column > strong {
+  color: #35576b;
+  font-size: calc(9px * var(--ui-text-scale, 1));
+  white-space: nowrap;
+}
+.stitch-telemetry-column > div {
+  display: flex;
+  align-items: end;
+  border-bottom: 1px solid #a99e6b;
+}
+.stitch-telemetry-column i {
+  display: block;
+  width: 100%;
+  background: repeating-linear-gradient(0deg, #397a4b 0 7px, #fff8e7 7px 9px);
+}
+.stitch-telemetry-column > small {
+  color: #526447;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.stitch-chart-note {
+  margin-top: 10px;
+  color: #526447;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.dashboard-theme .summary-pressure.stitch-analysis {
+  padding: 14px;
+  border: 2px solid #a99e6b;
+  background: #fff8e7;
+  color: #243b30;
+  box-shadow: 3px 3px #a99e6b;
+}
+.stitch-analysis > header {
+  margin-bottom: 14px;
+}
+.dashboard-theme .stitch-analysis .stitch-health-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 6px;
+}
+.stitch-health-grid > div {
+  padding: 10px 4px;
+  min-width: 0;
+  text-align: center;
+  background: #f3e7c8;
+  border: 1px solid #a99e6b;
+}
+.dashboard-theme .stitch-health-grid strong {
+  display: block;
+  margin: 7px 0;
+  color: #243b30;
+  font-size: calc(16px * var(--ui-text-scale, 1));
+  overflow-wrap: anywhere;
+}
+.stitch-health-grid small {
+  display: block;
+  color: #526447;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.stitch-analysis .summary-pressure-status {
+  margin: 10px 0;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.dashboard-theme .stitch-analysis .bp-stage-card {
+  padding: 12px;
+  margin: 0;
+  background: #e5ddb0;
+  border: 1px solid #a99e6b;
+  border-left: 4px solid #397a4b;
+}
+.stitch-analysis .bp-stage-card h4 {
+  margin-bottom: 8px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
+}
+.stitch-analysis .bp-stage-card > strong {
+  font-size: calc(18px * var(--ui-text-scale, 1));
+}
+.stitch-analysis .bp-stage-card small {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.stitch-analysis .bp-stage-card a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.stitch-quick-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+.stitch-quick-actions .blood-pressure-entry-button {
+  width: 100%;
+  height: 100%;
+  min-height: 56px;
+  background: #e5ddb0;
+  box-shadow: 2px 2px #a99e6b;
+}
+.dashboard-theme .stitch-quick-actions .summary-report-link {
+  min-height: 56px;
+  margin: 0;
+  padding: 8px;
+  background: #ffe486;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.6;
+}
+.dashboard-theme .summary-data-note {
+  margin: 0;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.8;
+}
+@media (max-width: 359px) {
+  .dashboard-theme .dashboard-summary .stitch-health-hero,
+  .stitch-trends,
+  .dashboard-theme .summary-pressure.stitch-analysis {
+    padding: 10px;
+  }
+  .dashboard-theme .stitch-health-hero h3 {
+    font-size: calc(7px * var(--ui-text-scale, 1));
+  }
+  .dashboard-theme .summary-score .score-ring-value .score-number {
+    font-size: calc(23px * var(--ui-text-scale, 1));
+  }
+  .hero-vitals > div {
+    padding: 5px;
+  }
+  .hero-vitals dt {
+    font-size: calc(10px * var(--ui-text-scale, 1));
+  }
+  .stitch-quest-row {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 8px 6px;
+  }
+  .stitch-quest-icon {
+    width: 28px;
+    height: 36px;
+  }
+  .stitch-quest-copy h4 {
+    font-size: calc(11px * var(--ui-text-scale, 1));
+  }
+  .stitch-quest-reward b {
+    font-size: calc(9px * var(--ui-text-scale, 1));
+  }
+  .stitch-metric-tabs button {
+    font-size: calc(10px * var(--ui-text-scale, 1));
+  }
+  .dashboard-theme .stitch-health-grid strong {
+    font-size: calc(14px * var(--ui-text-scale, 1));
+  }
+}

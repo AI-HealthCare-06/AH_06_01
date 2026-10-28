@@ -1,0 +1,638 @@
+/* Mobile game menus use the existing bitmap fonts, square frames and hard shadows. */
+.vault-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 14px 4px;
+  color: #fff4ce;
+}
+.vault-heading h2 {
+  margin: 0;
+  font: 14px/1.7 var(--pixel);
+}
+.vault-heading p {
+  margin: 4px 0 0;
+  color: #e9cf74;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.vault-dashboard-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 44px;
+  padding: 6px;
+  border: 2px solid #a99e6b;
+  box-shadow: 2px 2px #18231d;
+  background: #233f36;
+  color: #fff4ce;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.vault-dashboard-link .pixel-icon {
+  width: 14px;
+  height: 14px;
+}
+.character-vault .vault-scroll {
+  padding: 2px 3px 16px;
+}
+.character-vault .vault-hero {
+  padding: 0;
+  margin-bottom: 14px;
+  overflow: hidden;
+  border: 2px solid #b8a363;
+  background: #fff4ce;
+}
+.vault-hero-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px;
+  background: #20372e;
+  color: #fff4ce;
+  border-bottom: 2px solid #172820;
+}
+.vault-hero-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vault-level {
+  padding: 5px;
+  background: #f4d575;
+  color: #26382c;
+  font: 9px/1.5 var(--pixel);
+}
+.vault-hero-heading h3 {
+  margin: 0;
+  font-size: calc(18px * var(--ui-text-scale, 1));
+}
+.vault-hero-heading > small {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  color: #c3dab1;
+}
+.character-vault .vault-hero-stage {
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  gap: 6px;
+  min-height: 166px;
+  padding: 12px 10px;
+  background-color: #35576b;
+  background-image:
+    linear-gradient(90deg, #f8eed50a 1px, transparent 1px),
+    linear-gradient(#f8eed50a 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+.character-vault .vault-equipment-slot {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  height: auto;
+  min-height: 76px;
+  padding: 4px 2px;
+  border: 2px solid #b8a363;
+  background: #233f4e;
+  box-shadow: 2px 2px #172820;
+  color: #fff4ce;
+  line-height: 1.5;
+}
+.vault-slot-head {
+  grid-column: 1;
+  grid-row: 1;
+}
+.vault-slot-pet {
+  grid-column: 3;
+  grid-row: 1;
+}
+.vault-equipment-slot small {
+  font: 7px/1.6 var(--pixel);
+  color: #e9cf74;
+}
+.vault-equipment-slot img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.vault-equipment-slot > span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  font: 22px/1 var(--pixel);
+  color: #91aab0;
+}
+.vault-equipment-slot b {
+  font-size: calc(8px * var(--ui-text-scale, 1));
+  white-space: nowrap;
+}
+.character-vault .vault-hero .character-equipped-preview {
+  grid-column: 2;
+  grid-row: 1;
+  position: relative;
+  max-width: 212px;
+  height: 142px;
+  isolation: isolate;
+}
+.vault-hero .character-equipped-preview::before {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 0;
+  height: 8px;
+  background: #d3ce8e;
+  box-shadow: 0 5px #243b30;
+  z-index: -1;
+}
+.character-vault .vault-hero .character-equipped-preview > .dinosaur-art {
+  height: 142px;
+}
+.vault-skin-picker {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 0;
+}
+.vault-skin-picker > button {
+  min-height: 44px;
+  padding: 0;
+  border: 2px solid #9f975f;
+  box-shadow: 2px 2px #d1c38e;
+  background: #243b30;
+  color: #fff4ce;
+  font-size: calc(28px * var(--ui-text-scale, 1));
+  line-height: 1;
+}
+.vault-skin-picker output {
+  text-align: center;
+  color: #243b30;
+}
+.vault-skin-picker strong,
+.vault-skin-picker small {
+  display: block;
+}
+.vault-skin-picker strong {
+  font-size: calc(14px * var(--ui-text-scale, 1));
+}
+.vault-skin-picker small {
+  margin-top: 4px;
+  color: #657052;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.character-vault .vault-skins {
+  border: 0;
+  padding: 10px;
+  background: transparent;
+}
+.character-vault .vault-skin-grid {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #9f975f #e4d9af;
+  overscroll-behavior-x: contain;
+}
+.character-vault .vault-skin-grid .style-card {
+  flex: 0 0 44px;
+  min-height: 44px;
+  padding: 2px;
+  border: 2px solid #a8a574;
+}
+.vault-skin-grid .style-card > .dinosaur-art {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+.character-vault .vault-skins > small {
+  text-align: center;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+  color: #657052;
+}
+.vault-battle-summary {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 14px;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border-top: 2px solid #c5b87f;
+  background: #e5ddb0;
+  color: #304a37;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.vault-battle-summary b {
+  margin-left: 3px;
+  color: #1c3026;
+  font-size: calc(14px * var(--ui-text-scale, 1));
+}
+.vault-battle-summary .pixel-icon {
+  width: 14px;
+  height: 14px;
+}
+.vault-roster-panel {
+  padding: 10px 0 0;
+  border-top: 2px solid #747358;
+}
+.character-vault .roster-heading {
+  margin: 0 0 8px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+}
+.character-vault .roster-heading small {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.roster-heading strong small {
+  margin-left: 6px;
+}
+.character-vault .vault-roster {
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.character-vault .vault-roster button {
+  min-height: 60px;
+}
+.character-vault .vault-roster .dinosaur-art {
+  height: 40px;
+}
+.character-vault .vault-inventory {
+  padding: 10px;
+  border: 2px solid #a5a077;
+  background: #162b24;
+  scroll-margin-top: 4px;
+}
+.vault-inventory .empty-inventory {
+  margin: 10px 0;
+  color: #c7cfba;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.8;
+}
+
+.shop-screen .page-heading {
+  flex-shrink: 0;
+  height: auto;
+  padding: 12px 4px;
+}
+.shop-screen .page-heading h2 {
+  font-size: calc(16px * var(--ui-text-scale, 1));
+  line-height: 1.8;
+}
+.shop-screen .page-heading p {
+  margin-top: 4px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.shop-screen .shop-wallet {
+  display: block;
+  flex-shrink: 0;
+  min-height: 0;
+  padding: 10px;
+  border: 2px solid #b8a363;
+  box-shadow: 3px 3px #172820;
+}
+.shop-screen .shop-wallet .wallet-heading {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+.wallet-currency {
+  min-width: 0;
+  padding: 2px 0 6px;
+}
+.wallet-rp {
+  border-left: 1px solid #658393;
+  padding-left: 10px;
+}
+.shop-screen .shop-wallet .wallet-heading h3 {
+  gap: 6px;
+  margin: 0 0 6px;
+  font: 10px/1.7 var(--pixel);
+}
+.shop-screen .wallet-currency .pixel-icon {
+  width: 14px;
+  height: 14px;
+}
+.shop-screen .wallet-balance > strong,
+.wallet-rp > strong {
+  display: block;
+  color: #ffe486;
+  font:
+    700 22px/1.3 "Galmuri11",
+    sans-serif;
+  white-space: nowrap;
+}
+.shop-screen .wallet-balance small {
+  margin-left: 3px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.wallet-currency > small {
+  display: block;
+  margin-top: 4px;
+  color: #d6e1d7;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.wallet-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.shop-screen .wallet-actions button {
+  position: static;
+  grid-column: auto;
+  grid-row: auto;
+  width: auto;
+  height: auto;
+  min-height: 44px;
+  padding: 6px;
+  border: 2px solid #a99e6b;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.shop-screen .wallet-actions .daily-bonus {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  background: #f2d78c;
+  color: #26382c;
+  box-shadow: 2px 2px #172820;
+}
+.shop-screen .shop-catalog {
+  margin-top: 14px;
+  padding: 0 0 2px;
+}
+.shop-screen .shop-catalog::before {
+  display: none;
+}
+.shop-screen .shop-tabs {
+  height: auto;
+  gap: 6px;
+  border-bottom: 2px solid #b8a363;
+  padding-bottom: 8px;
+}
+.shop-screen .shop-tab {
+  min-height: 44px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+  border: 2px solid #a99e6b;
+}
+.shop-screen .product-scroll,
+.shop-screen .customize-scroll {
+  margin: 0;
+  padding: 12px 3px 16px;
+}
+.shop-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: #fff4ce;
+}
+.shop-section-heading h3 {
+  margin: 0;
+  font-size: calc(14px * var(--ui-text-scale, 1));
+}
+.shop-section-heading > small {
+  color: #e9cf74;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.shop-screen .product-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: none;
+  gap: 10px;
+}
+.shop-screen .product {
+  grid-column: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 2px solid #a99e6b;
+  box-shadow: 3px 3px #172820;
+  background: #fff4d7;
+  color: #24382c;
+}
+.product-topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+.product-topline > small {
+  color: #657052;
+  font-size: calc(7px * var(--ui-text-scale, 1));
+}
+.shop-screen .product-badge {
+  position: static;
+  height: auto;
+  padding: 3px 4px;
+  font-size: calc(8px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+  border: 1px solid #a99e6b;
+}
+.shop-screen .product-photo {
+  position: static;
+  height: 90px;
+  border: 1px solid #c6b892;
+  padding: 4px;
+  background: #f3edd9;
+}
+.shop-screen .product > strong {
+  position: static;
+  font-size: calc(13px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.shop-screen .product > small {
+  position: static;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+  color: #657052;
+  white-space: normal;
+  word-break: keep-all;
+}
+.product-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 6px;
+  border-top: 1px dashed #b4a674;
+}
+.shop-screen .product-price {
+  position: static;
+  display: block;
+  width: auto;
+  height: auto;
+  border: 0;
+  background: transparent;
+  color: #b2432f;
+  font-size: calc(14px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+}
+.product-action {
+  color: #40593c;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.6;
+}
+.shop-screen .product-featured {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 98px minmax(0, 1fr);
+  column-gap: 12px;
+  border-color: #e6ba57;
+  background: #f8e6ae;
+}
+.product-featured .product-topline {
+  grid-column: 1 / -1;
+}
+.shop-screen .product-featured .product-photo {
+  grid-column: 1;
+  grid-row: 2 / 5;
+  height: 104px;
+}
+.product-featured > strong,
+.product-featured > small,
+.product-featured .product-footer {
+  grid-column: 2;
+}
+.shop-screen .shop-photo-credits {
+  flex-shrink: 0;
+  margin: 4px 2px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
+}
+.shop-companion-banner {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 2px solid #b8a363;
+  background: #263f32;
+  color: #fff4ce;
+}
+.shop-companion-banner .dinosaur-art {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+.shop-companion-banner strong,
+.shop-companion-banner small {
+  display: block;
+}
+.shop-companion-banner strong {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.shop-companion-banner small {
+  margin-top: 4px;
+  color: #c7cfba;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+}
+.shop-companion-banner > a {
+  display: grid;
+  align-items: center;
+  min-height: 44px;
+  color: #e9cf74;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  white-space: nowrap;
+}
+.shop-screen .accessory-filters button,
+.character-vault .accessory-filters button {
+  min-height: 44px;
+}
+.shop-screen .accessory-grid,
+.character-vault .accessory-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.shop-screen .accessory-item,
+.character-vault .accessory-item {
+  padding: 6px;
+  background: #233f36;
+  border-color: #a99e6b;
+}
+.shop-screen .accessory-item[data-equipped="true"],
+.character-vault .accessory-item[data-equipped="true"] {
+  border-color: #71bf8b;
+}
+.shop-screen .accessory-item img,
+.character-vault .accessory-item img {
+  height: 64px;
+  background: #35576b;
+  image-rendering: pixelated;
+}
+.shop-screen .accessory-item > span,
+.character-vault .accessory-item > span {
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px solid #658375;
+}
+.shop-screen .accessory-item small,
+.character-vault .accessory-item small {
+  font-size: calc(8px * var(--ui-text-scale, 1));
+}
+.shop-screen .accessory-item img {
+  height: 56px;
+}
+.shop-screen .accessory-item small {
+  display: none;
+}
+.shop-screen .accessory-item b {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.shop-screen .gold-effects,
+.character-vault .gold-effects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 2px solid #747358;
+}
+.shop-screen .gold-effects h4,
+.character-vault .gold-effects h4,
+.shop-screen .gold-effects p,
+.character-vault .gold-effects p {
+  grid-column: 1 / -1;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.shop-screen .gold-effects button,
+.character-vault .gold-effects button {
+  min-height: 54px;
+  line-height: 1.8;
+}
+@media (max-width: 359px) {
+  .vault-heading h2 {
+    font-size: calc(12px * var(--ui-text-scale, 1));
+  }
+  .vault-dashboard-link .pixel-icon {
+    display: none;
+  }
+  .character-vault .vault-roster {
+    gap: 3px;
+  }
+  .shop-screen .wallet-balance > strong,
+  .wallet-rp > strong {
+    font-size: calc(20px * var(--ui-text-scale, 1));
+  }
+  .product-topline > small {
+    display: none;
+  }
+  .shop-screen .product-featured {
+    grid-template-columns: 86px minmax(0, 1fr);
+    column-gap: 8px;
+  }
+  .shop-companion-banner {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+  }
+  .shop-companion-banner small {
+    display: none;
+  }
+}

@@ -1,5 +1,6 @@
 ext {
-    minSdkVersion = 26
+    rgcfaIncludeGoogle = true
+    minSdkVersion = 28
     compileSdkVersion = 36
     targetSdkVersion = 36
     androidxActivityVersion = '1.11.0'

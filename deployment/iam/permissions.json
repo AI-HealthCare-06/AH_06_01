@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ListPublicAssets",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
+      "Resource": "arn:aws:s3:::rexrun-test-web-webassets27872646-fo2kto1cdq5i"
+    },
+    {
+      "Sid": "PublishPublicAssets",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": "arn:aws:s3:::rexrun-test-web-webassets27872646-fo2kto1cdq5i/*"
+    },
+    {
+      "Sid": "RefreshPublicDistribution",
+      "Effect": "Allow",
+      "Action": ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"],
+      "Resource": "arn:aws:cloudfront::862330372849:distribution/E2X0UT8JSNCKQ3"
+    }
+  ]
+}

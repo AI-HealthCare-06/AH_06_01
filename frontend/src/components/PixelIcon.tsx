@@ -1,4 +1,7 @@
 const paths = {
+  pill: "M14 2h6v2h3v3h1v6h-2v3L10 24H4v-2H1v-3H0v-6h2v-3zM14 5l-4 4 7 7 4-4V8h-2V5z",
+  medicine:
+    "M9 1h7v2h3v3h3v7h-2v3h-3v3h-3v3H7v-2H4v-3H1v-7h2V7h3V4h3zM10 5v3H7v3H5v5h3v3h3v-3h3v-3h3v-3h-3V7h-3V5z",
   cloud: "M6 7h3V4h8v3h3v3h3v9H1v-9h5z",
   rain: "M6 5h3V2h8v3h3v3h3v7H1V8h5zM4 17h3v5H4zM11 18h3v6h-3zM18 17h3v5h-3z",
   snow: "M10 1h4v6h3V4h3v3h-3v3h6v4h-6v3h3v3h-3v-3h-3v6h-4v-6H7v3H4v-3h3v-3H1v-4h6V7H4V4h3v3h3z",

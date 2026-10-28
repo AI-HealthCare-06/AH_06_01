@@ -1,10 +1,11 @@
+import { selectPixelOption } from "./helpers/controls";
 import { expect, test } from "@playwright/test";
 
 test("wave clear, background travel, walking and pause use the same simulation clock", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
@@ -73,8 +74,8 @@ test("wave clear, background travel, walking and pause use the same simulation c
 test("debug level controls change real stats and persist without awarding gold", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   await page.getByRole("button", { name: "전투 디버그 표시" }).click();
@@ -97,8 +98,8 @@ test("debug level controls change real stats and persist without awarding gold",
 test("separate customization shop buys once and equips from character inventory", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/shop");
   await page.getByRole("button", { name: "꾸미기", exact: true }).click();
   await expect(page).toHaveURL(/\/shop\/customize$/);
@@ -113,14 +114,18 @@ test("separate customization shop buys once and equips from character inventory"
   await page.getByRole("link", { name: "보유 아이템 ›" }).click();
   await expect(page).toHaveURL(/\/character\?tab=accessories$/);
   await page.getByRole("button", { name: "비행사 모자 장착", exact: true }).click();
+  await expect(page.locator(".vault-slot-head img")).toHaveAttribute("src", /AviatorCap.png$/);
+  await expect(page.getByRole("button", { name: "머리 장식 관리 · 비행사 모자" })).toBeAttached();
   await page.reload();
   await expect(page.getByRole("button", { name: "비행사 모자 장착 해제" })).toHaveAttribute(
-    "data-equipped",
+    "aria-pressed",
     "true",
   );
   expect(
     await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!).gold),
   ).toBe(760);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByRole("link", { name: "Home", exact: true }).click();
   await expect(page.locator(".battle-dinosaur .equipped-head")).toHaveAttribute(
     "src",
@@ -135,21 +140,22 @@ test("compact report controls, risk ordering and Galaxy-shaped preview fit narro
     await page.setViewportSize({ width, height: 694 });
     await page.goto("/dashboard");
     const select = page.getByRole("combobox", { name: "건강 변화 조회 기간" });
-    await select.selectOption("year");
+    await selectPixelOption(select, "year");
     const heading = (await page.locator(".dashboard-heading .page-heading").boundingBox())!;
     const control = (await select.boundingBox())!;
-    const label = (await page.locator(".dashboard-period-select > span").boundingBox())!;
+    const label = (await page.locator(".dashboard-period-select > span").first().boundingBox())!;
     const week = (await page.locator(".weekly-calendar").boundingBox())!;
     expect(control.width).toBeGreaterThanOrEqual(64);
-    expect(control.y + control.height).toBeLessThanOrEqual(week.y);
-    expect(week.y + week.height).toBeLessThan(heading.y);
+    expect(control.y).toBeGreaterThanOrEqual(week.y + week.height);
+    expect(heading.y + heading.height).toBeLessThan(week.y);
     expect(label.y + label.height).toBeLessThan(control.y);
-    const risk = (await page.locator(".disease-card").boundingBox())!;
-    const trend = (await page.locator(".health-trend").boundingBox())!;
-    expect(risk.y).toBeLessThan(trend.y);
     expect(
       await page.locator(".mobile-screen").evaluate((el) => el.getBoundingClientRect().height),
     ).toBe(844);
+    await page.getByRole("link", { name: "상세 건강 보고서 웹으로 보기" }).click();
+    const risk = (await page.locator(".disease-card").boundingBox())!;
+    const trend = (await page.locator(".health-trend").boundingBox())!;
+    expect(risk.y).toBeLessThan(trend.y);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     );

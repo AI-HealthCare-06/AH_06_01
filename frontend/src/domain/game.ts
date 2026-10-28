@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { profileQuestSchema, emptyProfileQuests } from "./profile-quests";
+import { dailySurveySchema, latestSurveyPressure, validDailySurvey } from "./daily-survey";
 import { accessories } from "../design/accessories";
 import { defaultDinosaurStyles, skinIds } from "./appearance";
 import type { SkinId } from "./appearance";
@@ -13,7 +15,13 @@ import {
   travelDuration,
 } from "./battle";
 import { stagePolicies, wavePolicies } from "./game-policy";
-import { experienceProgress, levelUpGold, questExperience } from "./experience";
+import { questRewards, allQuestsGoldBonus } from "./quest-policy";
+import {
+  dailyCombatExperienceLimit,
+  experienceProgress,
+  levelUpGold,
+  questExperience,
+} from "./experience";
 import { effectCatalog, rpAllowance, rpPolicy } from "./economy";
 import type { EffectId } from "./economy";
 
@@ -25,7 +33,10 @@ export const stepSnapshotSchema = z.object({
 });
 export type StepSnapshot = z.infer<typeof stepSnapshotSchema>;
 
-export const questIds = ["medicine", "meal", "walk", "water", "sleep"] as const;
+export const questIds = ["medicine", "meal", "walk", "water", "sleep", "survey"] as const;
+export const mainQuestIds = ["medicine", "meal", "walk", "survey"] as const;
+export const mainQuestCount = (completed: readonly string[]) =>
+  mainQuestIds.filter((id) => completed.includes(id)).length;
 export type QuestId = (typeof questIds)[number];
 export type Quest = {
   id: QuestId;
@@ -40,12 +51,12 @@ export type Quest = {
 export const quests: Quest[] = [
   {
     id: "medicine",
-    title: "약 복용하기",
-    shortTitle: "약 복용",
+    title: "약 / 영양제 복용",
+    shortTitle: "약 / 영양제",
     progress: 1,
     progressLabel: "오전 8:00 · 완료",
-    experience: 20,
-    reason: "복용 중이라고 설정한 약을 잊지 않도록 알려주는 체크예요.",
+    experience: questRewards.medicine.experience,
+    reason: "등록한 약이나 영양제의 복용 시간을 잊지 않도록 기록하는 체크예요.",
   },
   {
     id: "meal",
@@ -53,7 +64,7 @@ export const quests: Quest[] = [
     shortTitle: "건강한 식사",
     progress: 1,
     progressLabel: "오전 8:30 · 완료",
-    experience: 30,
+    experience: questRewards.meal.experience,
     reason: "오늘의 식사 습관을 확인하고 꾸준히 기록해요.",
   },
   {
@@ -62,17 +73,16 @@ export const quests: Quest[] = [
     shortTitle: "6,000걸음",
     progress: 0.54,
     progressLabel: "3,240 / 6,000걸음",
-    experience: 50,
-    reason:
-      "꾸준한 걷기는 혈압과 혈당 관리에 도움이 되고, 오늘의 위험도를 낮추는 가장 쉬운 시작이에요.",
+    experience: questRewards.walk.experience,
+    reason: "나에게 맞는 걷기 습관을 기록해요. 건강 앱의 오늘 걸음 수로 목표 달성을 확인해요.",
   },
   {
     id: "water",
-    title: "물 8잔 마시기",
+    title: "물 마시기 실천",
     shortTitle: "물 마시기",
     progress: 0,
-    progressLabel: "0 / 8잔",
-    experience: 30,
+    progressLabel: "동작 인증 대기",
+    experience: questRewards.water.experience,
     reason: "오늘의 물 마시기 실천을 기록해요. 개인별 안내에 맞춰 실천해 주세요.",
   },
   {
@@ -81,9 +91,23 @@ export const quests: Quest[] = [
     shortTitle: "수면",
     progress: 370 / 420,
     progressLabel: "6시간 10분",
-    experience: 40,
+    experience: questRewards.sleep.experience,
     reason: "어젯밤의 수면을 돌아보고 일정한 수면 습관을 기록해요.",
   },
+  {
+    id: "survey",
+    title: "오늘의 건강 서베이",
+    shortTitle: "건강 서베이",
+    progress: 0,
+    progressLabel: "오늘의 기록 대기",
+    experience: questRewards.survey.experience,
+    reason: "매일의 혈압·맥박·수면과 생활 기록을 남겨 대시보드 분석에 활용해요.",
+  },
+];
+
+export const mainQuests = [
+  quests.find((q) => q.id === "survey")!,
+  ...quests.filter((q) => q.id !== "survey" && mainQuestIds.some((id) => id === q.id)),
 ];
 
 export const gameSchema = z
@@ -122,6 +146,33 @@ export const gameSchema = z
     completedDates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).default([]),
     questHistory: z.record(z.string(), z.number().int().min(0).max(5)).default({}),
     battleDefeats: z.number().int().nonnegative().default(0),
+    combatExperienceToday: z.number().int().nonnegative().default(0),
+    questHistoryDetails: z.record(z.string(), z.array(z.enum(questIds))).default({}),
+    profileQuests: profileQuestSchema.default(emptyProfileQuests),
+    dailySurveys: z.record(z.string(), dailySurveySchema).default({}),
+    sleepExperience: z
+      .record(
+        z.string(),
+        z.object({
+          base: z.number().int().nonnegative(),
+          experience: z.number().int().nonnegative(),
+          baseline: z.number().int().nonnegative(),
+        }),
+      )
+      .default({}),
+    healthHistory: z
+      .record(
+        z.string(),
+        z.object({
+          steps: z.number().nonnegative().nullable(),
+          sleepHours: z.number().min(0).max(24).nullable(),
+          systolic: z.number().nullable().optional(),
+          diastolic: z.number().nullable().optional(),
+          restingHr: z.number().nullable().optional(),
+          glucose: z.number().nullable().optional(),
+        }),
+      )
+      .default({}),
     dinosaur: z.number().int().min(0).max(5),
     dinosaurStyles: z
       .array(z.enum(skinIds))
@@ -191,6 +242,12 @@ export function initialGame(date = localDate()): GameState {
     completedDates: [],
     questHistory: {},
     battleDefeats: 0,
+    combatExperienceToday: 0,
+    questHistoryDetails: {},
+    profileQuests: emptyProfileQuests(),
+    dailySurveys: {},
+    sleepExperience: {},
+    healthHistory: {},
     dinosaur: 0,
     dinosaurStyles: defaultDinosaurStyles(),
     lastReward: null,
@@ -204,8 +261,27 @@ export function rollDay(state: GameState, date = localDate()): GameState {
     date,
     questHistory: {
       ...state.questHistory,
-      [state.date]: state.sampleDay ? 0 : state.completed.length,
+      [state.date]: state.sampleDay
+        ? 0
+        : state.allDoneBonusClaimed
+          ? mainQuestCount(state.completed) === mainQuestIds.length
+            ? mainQuestIds.length
+            : 5
+          : mainQuestCount(state.completed),
     },
+    questHistoryDetails: {
+      ...state.questHistoryDetails,
+      [state.date]: state.sampleDay ? [] : state.completed,
+    },
+    healthHistory: {
+      ...state.healthHistory,
+      [state.date]: {
+        ...state.healthHistory[state.date],
+        steps: state.steps?.count ?? null,
+        sleepHours: state.sleepHours,
+      },
+    },
+    combatExperienceToday: 0,
     completed: [],
     bonusClaimed: false,
     allDoneBonusClaimed: false,
@@ -248,21 +324,26 @@ export function completeQuest(
   now = Date.now(),
 ): GameState {
   const current = rollDay(state, date);
-  if (current.completed.includes(id)) return current;
+  if (id === "sleep" || current.completed.includes(id)) return current;
+  if (id === "survey" && !validDailySurvey(current.dailySurveys[date], date, now)) return current;
   if (id === "walk" && (!current.steps || current.steps.count < 6000)) return current;
   if (id === "water" && current.lastWaterAt !== null && now - current.lastWaterAt < 7_200_000)
     return current;
   const quest = quests.find((item) => item.id === id);
   if (!quest) throw new Error("존재하지 않는 퀘스트입니다.");
   const completed = [...current.completed, id];
-  const allDone = completed.length === quests.length;
+  const allDone = mainQuestCount(completed) === mainQuestIds.length;
   const gained = questExperience(quest.experience, current.experience);
   const experience = current.experience + gained;
-  const gold = levelUpGold(current.experience, experience);
+  const gold =
+    levelUpGold(current.experience, experience) +
+    questRewards[id].gold +
+    (allDone && !current.allDoneBonusClaimed ? allQuestsGoldBonus : 0);
   return {
     ...current,
     completed,
-    questHistory: { ...current.questHistory, [date]: completed.length },
+    questHistory: { ...current.questHistory, [date]: mainQuestCount(completed) },
+    questHistoryDetails: { ...current.questHistoryDetails, [date]: completed },
     gold: current.gold + gold,
     experience,
     activity: { ...current.activity, [id]: 1 },
@@ -274,6 +355,69 @@ export function completeQuest(
         ? [...new Set([...current.completedDates, date])].slice(-365)
         : current.completedDates,
     lastReward: { questId: id, gold, experience: gained },
+  };
+}
+
+export function recordDailySurvey(
+  state: GameState,
+  value: unknown,
+  date = localDate(),
+  now = Date.now(),
+): GameState {
+  const survey = validDailySurvey(value, date, now);
+  if (!survey) return state;
+  const current = rollDay(state, date);
+  const pressure = latestSurveyPressure(survey);
+  const next = {
+    ...current,
+    sampleDay: false,
+    sleepHours: survey.sleepHours,
+    dailySurveys: { ...current.dailySurveys, [date]: survey },
+    healthHistory: {
+      ...current.healthHistory,
+      [date]: {
+        ...current.healthHistory[date],
+        steps:
+          current.steps?.date === date
+            ? current.steps.count
+            : (current.healthHistory[date]?.steps ?? null),
+        sleepHours: survey.sleepHours,
+        systolic: pressure?.systolic ?? null,
+        diastolic: pressure?.diastolic ?? null,
+        restingHr: survey.restingHr,
+        glucose: survey.fastingGlucose,
+      },
+    },
+  };
+  return awardSleepExperience(completeQuest(next, "survey", date, now), survey.sleepHours, date);
+}
+
+// Game reward only: 20 base EXP per recorded hour, capped at 8 hours (160).
+// Corrections can only increase the day's highest earned amount; they cannot reset it.
+export function awardSleepExperience(
+  state: GameState,
+  hours: number | null,
+  date = state.date,
+): GameState {
+  if (date !== state.date || hours === null || !Number.isFinite(hours) || hours < 0 || hours > 24)
+    return state;
+  const base = Math.min(160, Math.floor(hours * 20));
+  const prior = state.sleepExperience[date];
+  if (!prior && state.completed.includes("sleep")) return state; // Preserve already earned legacy sleep rewards.
+  const baseline = prior?.baseline ?? state.experience;
+  const target = questExperience(base, baseline);
+  const delta = Math.max(0, target - (prior?.experience ?? 0));
+  if (!delta) return state;
+  const experience = state.experience + delta;
+  return {
+    ...state,
+    experience,
+    gold: state.gold + levelUpGold(state.experience, experience),
+    sleepExperience: Object.fromEntries(
+      Object.entries({ ...state.sleepExperience, [date]: { base, experience: target, baseline } })
+        .sort(([a], [b]) => a.localeCompare(b))
+        .slice(-365),
+    ),
   };
 }
 
@@ -314,7 +458,11 @@ export function restoreGame(value: unknown): GameState {
     (result.data.sampleDay
       ? 0
       : quests.reduce(
-          (total, quest) => total + (completed.includes(quest.id) ? quest.experience : 0),
+          (total, quest) =>
+            total +
+            (completed.includes(quest.id)
+              ? { medicine: 20, meal: 30, walk: 50, water: 30, sleep: 40, survey: 0 }[quest.id]
+              : 0),
           0,
         ));
   const combat =
@@ -326,11 +474,12 @@ export function restoreGame(value: unknown): GameState {
 }
 
 export function stageProgress(game: GameState): number {
-  const sum = quests.reduce((total, q) => total + questProgress(game, q), 0);
-  return Math.floor((sum / quests.length) * 10);
+  const sum = mainQuests.reduce((total, q) => total + questProgress(game, q), 0);
+  return Math.floor((sum / mainQuests.length) * 10);
 }
 
 export function questProgress(game: GameState, quest: Quest): number {
+  if (quest.id === "sleep" && game.sleepHours !== null) return Math.min(1, game.sleepHours / 7);
   if (quest.id === "walk")
     return game.completed.includes("walk") ? 1 : Math.min(1, (game.steps?.count ?? 0) / 6000);
   return game.completed.includes(quest.id)
@@ -341,16 +490,19 @@ export function questProgress(game: GameState, quest: Quest): number {
 }
 
 export function questProgressLabel(game: GameState, quest: Quest): string {
+  if (quest.id === "sleep" && !game.completed.includes("sleep") && game.sleepHours !== null)
+    return `${Number(game.sleepHours.toFixed(1))}시간 / 7시간`;
   if (quest.id === "walk")
     return `${(game.steps?.count ?? 0).toLocaleString("ko-KR")} / 6,000걸음${game.completed.includes("walk") ? " · 완료" : ""}`;
   if (game.completed.includes(quest.id))
     return game.sampleDay && quest.progress === 1 ? quest.progressLabel : "완료";
   if (game.sampleDay && quest.progress < 1) return quest.progressLabel;
   return {
+    survey: "오늘의 기록 대기",
     medicine: "미완료",
     meal: "미완료",
     walk: "0 / 6,000걸음",
-    water: "0 / 8잔",
+    water: "동작 인증 대기",
     sleep: "0시간 / 7시간",
   }[quest.id];
 }
@@ -369,15 +521,26 @@ export function weeklyCompletedDays(game: GameState, anchor = game.date): number
   const week = new Set(calendarWeek(anchor).map((day) => day.date));
   const completed = new Set([
     ...game.completedDates,
-    ...Object.keys(game.questHistory).filter((date) => game.questHistory[date] === 5),
+    ...Object.keys(game.questHistory).filter(
+      (date) =>
+        game.questHistory[date] === 5 ||
+        (game.questHistoryDetails[date] &&
+          mainQuestCount(game.questHistoryDetails[date]) === mainQuestIds.length),
+    ),
   ]);
   return Math.min(5, [...completed].filter((date) => week.has(date) && date <= game.date).length);
 }
 
 export function questCountOn(game: GameState, date: string): number {
   if (date > game.date) return 0;
-  if (date === game.date) return game.sampleDay ? 0 : game.completed.length;
-  return game.questHistory[date] ?? (game.completedDates.includes(date) ? 5 : 0);
+  if (date === game.date) return game.sampleDay ? 0 : mainQuestCount(game.completed);
+  if (game.completedDates.includes(date)) return mainQuestIds.length;
+  return game.questHistoryDetails[date]
+    ? mainQuestCount(game.questHistoryDetails[date])
+    : Math.min(
+        mainQuestIds.length,
+        game.questHistory[date] ?? (game.completedDates.includes(date) ? mainQuestIds.length : 0),
+      );
 }
 
 export function tickBattle(state: GameState, now = Date.now()): GameState {
@@ -400,12 +563,14 @@ export function tickBattle(state: GameState, now = Date.now()): GameState {
       end - cursor,
       current.experience,
       current.waveAutoRestart,
+      Math.max(0, dailyCombatExperienceLimit(current.experience) - current.combatExperienceToday),
     );
     current = {
       ...current,
       combat: result.combat,
       gold: current.gold + result.gold,
-      experience: current.experience + result.defeats,
+      experience: current.experience + result.experience,
+      combatExperienceToday: current.combatExperienceToday + result.experience,
       battleDefeats: current.battleDefeats + result.defeats,
     };
     cursor = end;
@@ -518,7 +683,7 @@ export function repeatDemoQuest(state: GameState, id: QuestId, now = Date.now())
   if ((id !== "meal" && id !== "water") || !current.completed.includes(id)) return current;
   const count = current.activity[id] ?? 1;
   if (
-    count >= 6 ||
+    count >= questRewards[id].maxActivities ||
     (id === "water" && current.lastWaterAt !== null && now - current.lastWaterAt < 120 * 60_000)
   )
     return current;

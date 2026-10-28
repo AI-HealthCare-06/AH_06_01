@@ -1,7 +1,7 @@
 import { calendarWeek } from "./calendar";
 import type { QuestId } from "./game";
 
-export const rpPolicy = { goldPerRp: 100, daily: 150, weekly: 1000, monthly: 4000 };
+export const rpPolicy = { goldPerRp: 1000, daily: 150, weekly: 1000, monthly: 4000 };
 export const effectCatalog = [
   { id: "original", name: "클래식 타격", price: 0 },
   { id: "emerald", name: "에메랄드 타격", price: 1000 },

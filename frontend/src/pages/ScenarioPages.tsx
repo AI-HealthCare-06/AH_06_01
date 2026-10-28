@@ -1,9 +1,13 @@
+import { TextSizeSetting } from "../components/TextSizeSetting";
 import { useState } from "react";
+import { CloudStatus } from "../cloud/CloudStatus";
+import { cloudEnabled } from "../cloud/client";
+import { signOutCloud } from "../cloud/sync";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ScenarioShell } from "../components/AppShell";
 import { useNotice } from "../components/NoticeProvider";
 import { assets } from "../design/assets";
-import { quests, questProgress, questProgressLabel } from "../domain/game";
+import { quests, mainQuestCount, questProgress, questProgressLabel } from "../domain/game";
 import { InfoDialog } from "../components/InfoDialog";
 import { useGameStore } from "../stores/game-store";
 import { useProfileStore } from "../stores/profile-store";
@@ -11,10 +15,18 @@ import { dinosaurs } from "../design/dinosaurs";
 import { DinosaurArt } from "../components/DinosaurArt";
 import { StepConnection } from "../components/StepConnection";
 import { useDeviceStore } from "../stores/device-store";
+import { useSessionStore } from "../stores/session-store";
+import { useMedicationStore } from "../stores/medication-store";
 import { ProfileAvatar } from "../components/ProfileAvatar";
+import { ProfileAvatarPicker } from "../components/ProfileAvatarPicker";
+import { MobileUpdateStatus } from "../components/MobileUpdateStatus";
 import { experienceProgress, questExperience } from "../domain/experience";
+import { questRewards, questConditions } from "../domain/quest-policy";
 import { battleBuffStats, questBuffs } from "../domain/battle";
-import { directRewardPreview } from "../domain/economy";
+import { dailyDoses } from "../domain/medications";
+import { questVerified, validQuestProof } from "../domain/quest-verification";
+import { useQuestVerificationStore } from "../stores/quest-verification-store";
+import { QuestHelp } from "../components/QuestHelp";
 import {
   battleNotificationPermission,
   requestBattleNotifications,
@@ -24,9 +36,19 @@ export function QuestDetailPage() {
   const { id } = useParams();
   const { game, complete, repeat } = useGameStore();
   const navigate = useNavigate();
+  const medicationSchedules = useMedicationStore((state) => state.medications);
+  const taken = useMedicationStore((state) => state.taken);
+  const proofs = useQuestVerificationStore((state) => state.proofs);
   const q = quests.find((q) => q.id === id);
   if (!q) return <Navigate to="/quests" replace />;
+  if (q.id === "survey" || q.id === "sleep") return <Navigate to="/daily-survey" replace />;
   const done = game.completed.includes(q.id);
+  const verified = questVerified(
+    game,
+    q.id,
+    proofs[q.id],
+    dailyDoses(medicationSchedules, game.date, taken),
+  );
   const waterCooling =
     q.id === "water" &&
     game.lastWaterAt !== null &&
@@ -34,102 +56,128 @@ export function QuestDetailPage() {
   const progress = Math.round(questProgress(game, q) * 100);
   return (
     <ScenarioShell className="quest-detail-screen" camera={assets["quest-detail"].imgEllipse}>
-      <Link className="quest-back" to="/quests">
-        ← 오늘의 퀘스트
-      </Link>
-      <div className="quest-detail-heading">
-        <span>
-          {q.id === "walk" ? "6K" : q.id === "water" ? "8" : q.id === "sleep" ? "7H" : "✓"}
-        </span>
-        <div>
-          <h1>{q.title}</h1>
-          <p>
-            {done
-              ? "오늘 완료했어요"
-              : q.id === "walk"
-                ? `진행 ${questProgressLabel(game, q).replace("걸음", "")}`
-                : questProgressLabel(game, q)}
-          </p>
+      <article className="quest-sheet" aria-labelledby="quest-title">
+        <div className="quest-log-toolbar">
+          <Link className="quest-back" to="/home">
+            ← 홈
+          </Link>
+          <span>
+            DAILY
+            <br />
+            QUEST
+          </span>
         </div>
-      </div>
-      <div
-        className="detail-track"
-        role="progressbar"
-        aria-label="퀘스트 진행률"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={progress}
-      >
-        <i style={{ width: `${progress}%` }} />
-        <b>{progress}%</b>
-      </div>
-      <section className="cream-card quest-reason">
-        <h2>왜 이 퀘스트인가요?</h2>
-        <p>{q.reason}</p>
-        {q.id === "walk" && <span>위험도 -0.2%p</span>}
-      </section>
-      <h2 className="reward-label">완료하면</h2>
-      <div className="quest-reward">
-        <div>
-          <strong>+{questExperience(q.experience, game.experience)}</strong>
-          <b>EXP</b>
-        </div>
-        <p>{questBuffs.find((buff) => buff.id === q.id)!.effect}</p>
-      </div>
-      <button
-        className="primary-button complete-quest"
-        disabled={done || q.id === "walk" || waterCooling}
-        onClick={() => {
-          complete(q.id);
-          navigate("/reward");
-        }}
-      >
-        {done
-          ? "오늘 완료한 퀘스트예요"
-          : q.id === "walk"
-            ? "6,000걸음 달성 시 자동 완료"
-            : waterCooling
-              ? "물 인정 간격 120분 대기 중"
-              : "완료 체크하기"}
-      </button>
-      {q.id === "walk" ? (
-        <StepConnection />
-      ) : (
-        <>
-          <p className="complete-help">
-            데모 완료 체크로 EXP·버프를 확인해요.{" "}
-            {directRewardPreview(q.id) > 0 &&
-              `직접 보상 ${directRewardPreview(q.id)} Gold는 인증·서버 검증 후 지급됩니다.`}
-          </p>
-          {q.id !== "sleep" && (
-            <Link className="camera-quest-link" to={`/camera?quest=${q.id}`}>
-              카메라로 실천 기록 남기기
-            </Link>
+        <header className="quest-detail-heading">
+          <span className="quest-goal-badge">{q.id === "walk" ? "6K" : "✓"}</span>
+          <div className="quest-detail-copy">
+            <small>오늘의 목표</small>
+            <h1 id="quest-title">{q.title}</h1>
+            <p>
+              {done
+                ? "오늘 완료했어요"
+                : q.id === "walk"
+                  ? "진행 " + questProgressLabel(game, q).replace("걸음", "")
+                  : questProgressLabel(game, q)}
+            </p>
+          </div>
+          <QuestHelp title="왜 이 퀘스트인가요?" label="퀘스트 설명">
+            <p>{q.reason}</p>
+          </QuestHelp>
+        </header>
+        <section className="quest-progress" aria-label="퀘스트 진행 현황">
+          <div className="quest-progress-meta">
+            <span>진행 상황</span>
+            <strong className="quest-progress-value">{progress}%</strong>
+          </div>
+          <div
+            className="detail-track"
+            role="progressbar"
+            aria-label="퀘스트 진행률"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+          >
+            <i style={{ width: String(progress) + "%" }} aria-hidden="true" />
+          </div>
+        </section>
+        <div className="quest-objective">
+          {q.id === "walk" ? (
+            <StepConnection />
+          ) : (
+            <>
+              <p className="complete-help">
+                {q.id === "medicine"
+                  ? "등록한 각 복약·투약 시간에 사진을 인증하고 기록해 주세요."
+                  : verified
+                    ? "인증을 확인했어요. 완료 버튼으로 보상을 받아 주세요."
+                    : q.id === "meal"
+                      ? "직접 촬영한 식사 사진을 제출하면 완료 버튼이 활성화돼요."
+                      : "실제 카메라에서 물 마시는 동작을 인식하고 확인해 주세요. 샘플 시연은 인증되지 않아요."}{" "}
+                {questConditions[q.id]}
+              </p>
+              <Link className="camera-quest-link" to={`/camera?quest=${q.id}`}>
+                {q.id === "medicine"
+                  ? "복약 일정·사진 인증하기"
+                  : q.id === "meal"
+                    ? "식사 사진 인증하기"
+                    : "물 마시기 동작 인증하기"}
+              </Link>
+            </>
           )}
-        </>
-      )}
-      {done && (q.id === "meal" || q.id === "water") && (
-        <div className="cream-card repeat-quest">
-          <p>초과 클리어 · 최초 EXP의 10% · 최대 5회</p>
+        </div>
+        <footer className="quest-claim">
+          <div className="quest-reward">
+            <div>
+              <strong>+{questExperience(q.experience, game.experience)}</strong>
+              <b>EXP</b>
+            </div>
+            <p>{questBuffs.find((buff) => buff.id === q.id)?.effect ?? questConditions[q.id]}</p>
+          </div>
           <button
-            disabled={
-              (game.activity[q.id] ?? 1) >= 6 ||
-              (q.id === "water" &&
-                game.lastWaterAt !== null &&
-                game.battleUpdatedAt - game.lastWaterAt < 7_200_000)
-            }
+            className="primary-button complete-quest"
+            disabled={done || !verified || q.id === "walk" || waterCooling}
             onClick={() => {
-              repeat(q.id);
-              navigate("/reward");
+              if (complete(q.id)) navigate("/reward");
             }}
           >
-            초과 클리어 데모 ({Math.max(0, (game.activity[q.id] ?? 1) - 1)} / 5)
+            {done
+              ? "오늘 완료한 퀘스트예요"
+              : q.id === "walk"
+                ? "6,000걸음 달성 시 자동 완료"
+                : q.id === "medicine"
+                  ? "복약 사진 인증·기록 후 자동 완료"
+                  : waterCooling
+                    ? "물 인정 간격 120분 대기 중"
+                    : verified
+                      ? "완료 체크하기"
+                      : "인증 후 완료할 수 있어요"}
           </button>
-          {q.id === "water" && (
-            <small>물 인정 간격 120분 · 실제 섭취 안내는 개인별 목표를 따라 주세요.</small>
-          )}
-        </div>
-      )}
+        </footer>
+        {done && (q.id === "meal" || q.id === "water") && (
+          <div className="cream-card repeat-quest">
+            <p>추가 인증 · 최초 EXP의 10% · 최대 {questRewards[q.id].maxActivities - 1}회</p>
+            <button
+              disabled={
+                (game.activity[q.id] ?? 1) >= questRewards[q.id].maxActivities ||
+                !validQuestProof(proofs[q.id], q.id) ||
+                (q.id === "water" &&
+                  game.lastWaterAt !== null &&
+                  game.battleUpdatedAt - game.lastWaterAt < 7_200_000)
+              }
+              onClick={() => {
+                if (repeat(q.id)) navigate("/reward");
+              }}
+            >
+              인증 후 초과 클리어 ({Math.max(0, (game.activity[q.id] ?? 1) - 1)} /{" "}
+              {questRewards[q.id].maxActivities - 1})
+            </button>
+            <small>매번 새로운 사진·동작 인증이 필요해요. 사용한 인증은 다시 쓸 수 없어요.</small>
+            {q.id === "water" && (
+              <small>물 인정 간격 120분 · 실제 섭취 안내는 개인별 목표를 따라 주세요.</small>
+            )}
+          </div>
+        )}
+      </article>
     </ScenarioShell>
   );
 }
@@ -147,7 +195,7 @@ export function RewardPage() {
       </div>
       <strong className="reward-coins">+{reward?.experience ?? 0} EXP</strong>
       {!!reward?.gold && (
-        <p className="level-up-reward">LEVEL UP · +{reward.gold.toLocaleString()} GOLD</p>
+        <p className="level-up-reward">퀘스트·레벨업 보상 · +{reward.gold.toLocaleString()} GOLD</p>
       )}
       <div className="cream-card reward-stats">
         <h2>{dino.name}가 더 강해졌어요!</h2>
@@ -159,7 +207,7 @@ export function RewardPage() {
               : "퀘스트를 완료해 성장해요"}
           </strong>
         </div>
-        <p>오늘 완료 {game.completed.length} / 5</p>
+        <p>오늘 완료 {mainQuestCount(game.completed)} / 4</p>
       </div>
       <Link className="primary-button reward-next" to="/buff">
         강해진 {dino.name} 보기
@@ -195,7 +243,9 @@ export function BuffPage() {
         {quests.map((q) => (
           <Link className="cream-card" to={`/quests/${q.id}`} key={q.id}>
             <b>{q.shortTitle}</b>
-            <small>{questBuffs.find((buff) => buff.id === q.id)!.effect}</small>
+            <small>
+              {questBuffs.find((buff) => buff.id === q.id)?.effect ?? questConditions[q.id]}
+            </small>
             <strong className={game.completed.includes(q.id) ? "green" : "red"}>
               {game.completed.includes(q.id)
                 ? "완료"
@@ -217,6 +267,8 @@ export function BuffPage() {
 export function MyPage() {
   const { game, resetDemo } = useGameStore();
   const clearProfile = useProfileStore((s) => s.clear);
+  const name = useProfileStore((s) => s.profile.name);
+  const [avatarTrigger, setAvatarTrigger] = useState<HTMLButtonElement | null>(null);
   const navigate = useNavigate();
   const notice = useNotice();
   const [dialog, setDialog] = useState<string | null>(null);
@@ -224,9 +276,16 @@ export function MyPage() {
   const [notificationPermission, setNotificationPermission] = useState(
     battleNotificationPermission,
   );
-  function logout() {
+  async function logout() {
+    if (cloudEnabled) await signOutCloud();
+    useSessionStore.getState().signOut();
     useDeviceStore.getState().disconnect();
     resetDemo();
+    useGameStore.getState().suspendSession();
+    void useMedicationStore
+      .getState()
+      .clear()
+      .catch(() => notice("게임은 중지됐어요. 복용 알림 취소 상태는 기기 설정에서 확인해 주세요."));
     clearProfile(true);
     navigate("/login");
   }
@@ -235,17 +294,23 @@ export function MyPage() {
       <button
         className="page-back"
         onClick={() => {
-          if (window.history.state?.idx > 0) navigate(-1);
-          else navigate("/home");
+          navigate("/home");
         }}
       >
         ← 뒤로가기
       </button>
       <h1>MY PAGE</h1>
       <section className="cream-card member-card">
-        <ProfileAvatar />
+        <button
+          className="member-avatar-button"
+          aria-label="프로필 이미지 변경"
+          onClick={(event) => setAvatarTrigger(event.currentTarget)}
+        >
+          <ProfileAvatar />
+          <small>변경</small>
+        </button>
         <div>
-          <h2>민 님</h2>
+          <h2>{name} 님</h2>
           <p>
             {dinosaurs[game.dinosaur].name} · Lv.{experienceProgress(game.experience).level}
           </p>
@@ -255,6 +320,11 @@ export function MyPage() {
       <h2 className="account-heading">계정 및 건강 정보</h2>
       <div className="account-menu">
         {[
+          {
+            title: "복용 중인 약 / 영양제 관리",
+            desc: "약 / 영양제·복용량·시간",
+            action: () => navigate("/medications"),
+          },
           {
             title: "건강 정보 수정",
             desc: "나이·키·몸무게·혈압·혈당",
@@ -297,6 +367,9 @@ export function MyPage() {
           </button>
         ))}
       </div>
+      <TextSizeSetting />
+      <CloudStatus />
+      <MobileUpdateStatus />
       <button className="logout-button" onClick={logout}>
         <svg viewBox="0 0 24 24" aria-hidden="true" shapeRendering="crispEdges">
           <path fill="currentColor" d="M3 3h9v3H6v12h6v3H3zM15 6h3v3h3v6h-3v3h-3v-3H9v-3h9V9h-3z" />
@@ -304,10 +377,17 @@ export function MyPage() {
         <span>로그아웃</span>
       </button>
       <p className="app-version">REXRUN v0.1</p>
+      {avatarTrigger && (
+        <ProfileAvatarPicker onClose={() => setAvatarTrigger(null)} returnFocusTo={avatarTrigger} />
+      )}
       {dialog && (
         <InfoDialog title={dialog} onClose={() => setDialog(null)} returnFocusTo={dialogTrigger}>
           {dialog === "개인정보 및 이용약관" ? (
-            "현재는 UI 개발용 데모입니다. 건강 프로필 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 이 기기에는 프로필 등록 일자, 공룡과 꾸미기 선택, 퀘스트 완료·GOLD, 연결한 오늘의 걸음 수와 동기화 시각이 저장됩니다. 사진은 촬영 화면에만 유지되며 서버에 전송하지 않습니다. 날씨에 위치 사용을 허용하면 반올림한 좌표를 Open-Meteo에 보내며 좌표는 저장하지 않습니다. 로그아웃하면 등록 일자·걸음 수·퀘스트 기록이 초기화됩니다."
+            cloudEnabled ? (
+              "현재는 개발 테스트용 앱입니다. 로그인은 Supabase Auth에서 처리합니다. 저장 동의 후 이름·아바타·건강 설문·복약 일정과 기록·걸음 수·퀘스트·게임 기록을 AWS 수집 API(시드니)를 거쳐 Supabase DB(서울)에 계정별로 저장합니다. 오프라인 기록은 이 기기에 보관하고 재연결 시 전송합니다. 전송 동의를 끄면 이후 전송을 중단하며 기존 서버 기록은 유지됩니다. 푸시를 켜면 기기 토큰을 저장하고 Firebase Cloud Messaging으로 일반적인 퀘스트 완료 알림을 보냅니다. 알림에 약 이름·용량·건강 수치는 포함하지 않습니다. 사진과 카메라 영상은 서버에 전송하지 않습니다. 날씨 기능은 동의한 경우 반올림한 좌표만 Open-Meteo에 전송합니다. 로그아웃하면 로컬 게임·걸음 동기화를 중단하고 현재 화면과 복약 예약 알림을 초기화합니다. 계정별 오프라인 대기 기록과 서버 기록은 삭제되지 않습니다. 건강 예측은 데모이며 의료 판정 서비스는 연결하지 않았습니다."
+            ) : (
+              "현재는 UI 개발용 데모입니다. 건강 프로필 입력값은 메모리에서만 사용하고, 이메일·비밀번호는 저장하거나 전송하지 않습니다. 이 기기에는 프로필 등록 일자·아바타 선택, 공룡과 꾸미기 선택, 퀘스트 완료·GOLD, 연결한 오늘의 걸음 수와 동기화 시각이 저장됩니다. 사진은 촬영 화면에만 유지되며 서버에 전송하지 않습니다. 날씨에 위치 사용을 허용하면 반올림한 좌표를 Open-Meteo에 보내며 좌표는 저장하지 않습니다. 약 이름·용량·복용 시간과 복용 기록은 이 기기에만 저장됩니다. 로그아웃하면 게임과 걸음 동기화가 중지되고, 복약 정보·예약 알림·등록 일자·걸음 수·퀘스트 기록이 초기화됩니다."
+            )
           ) : dialog === "알림 설정" ? (
             <div className="battle-notification-settings">
               <h3>Wave 실패 알림</h3>
@@ -358,7 +438,9 @@ export function MyPage() {
               <section>
                 <h3>수면 시간</h3>
                 <p>
-                  웨어러블 수면 기록 연동 준비 중 · 현재 수면 기록을 읽거나 자동 완료하지 않아요.
+                  수면 퀘스트에서 직접 입력한 시간을 확인하거나 삼성 헬스·워치 기록을 연결해 주세요.
+                  직접 입력은 자기보고로 인증하며, 워치 연동은 수면 읽기 권한이 필요해요. 수면 7시간
+                  이상을 확인하면 완료할 수 있어요.
                 </p>
               </section>
               <StepConnection />

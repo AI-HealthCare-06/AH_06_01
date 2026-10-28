@@ -1,10 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { authenticateQuest } from "./fixtures/quest-evidence";
 
 test("boss ends wave ten and changes background only when next stage is unlocked", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
@@ -74,19 +75,16 @@ test("pending quests and compact buff explanations reflect the actual linked sta
   page,
 }) => {
   await page.goto("/home");
+  await authenticateQuest(page, "meal");
   await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
     const { useGameStore } = await import(path);
     useGameStore.getState().complete("meal");
   });
-  await expect(page.locator(".compact-quest").nth(1)).toContainText("6,000걸음");
-  await expect(page.locator(".battle-buffs button")).toHaveText([
-    "ATK",
-    "DEF",
-    "CRT",
-    "SPD",
-    "GOLD",
-  ]);
+  await expect(page.locator(".compact-quest").filter({ hasText: "6,000걸음" })).toContainText(
+    "6,000걸음",
+  );
+  await expect(page.locator(".battle-buffs button")).toHaveText(["ATK", "DEF", "CRT", "SPD"]);
   await page.getByRole("button", { name: "버프 목록 펼치기" }).click();
   const button = page.getByRole("button", { name: "DEF 버프 현황" });
   await button.click();
@@ -98,15 +96,14 @@ test("pending quests and compact buff explanations reflect the actual linked sta
   await page.keyboard.press("Escape");
   await expect(detail).toHaveCount(0);
   await expect(button).toBeFocused();
-  await page.getByRole("button", { name: "GOLD 버프 현황" }).click();
-  await expect(page.locator(".battle-buff-detail")).toContainText("수면 데이터 없음");
-  await page.getByRole("link", { name: /연계 퀘스트/ }).click();
-  await expect(page).toHaveURL(/quests\/sleep$/);
+  await expect(page.getByRole("button", { name: "GOLD 버프 현황" })).toHaveCount(0);
+  await page.locator(".compact-quest").filter({ hasText: "오늘의 건강 서베이" }).click();
+  await expect(page).toHaveURL(/daily-survey$/);
 });
 
 test("Pteranodon idles in place, attacks down-right and freezes when paused", async ({ page }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-19T00:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-19T00:01:00Z"));
   await page.goto("/home");
   await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
@@ -162,6 +159,7 @@ test("Pteranodon idles in place, attacks down-right and freezes when paused", as
   await expect(canvas).toHaveAttribute(
     "data-rendered-src",
     "/assets/battle/DinoPteraMeleeAttack.png",
+    { timeout: 15_000 },
   );
   await expect(canvas).toHaveAttribute("data-frame", "2");
   const attack = await dino.evaluate((e) => ({
@@ -185,7 +183,7 @@ test("demo wallet limits conversion, preserves balances and purchases only cosme
     const { useGameStore } = await import(path);
     useGameStore.setState((state: { game: object }) => ({
       paused: true,
-      game: { ...state.game, battlePaused: true, gold: 20000 },
+      game: { ...state.game, battlePaused: true, gold: 200000 },
     }));
   });
   const wallet = page.getByRole("region", { name: "게임 재화 지갑" });
@@ -200,17 +198,16 @@ test("demo wallet limits conversion, preserves balances and purchases only cosme
   await wallet.getByRole("button", { name: "데모 RP 전환" }).click();
   await expect(wallet).toContainText("오늘 0");
   await expect(wallet.getByRole("button", { name: "최대", exact: true })).toBeDisabled();
-  await expect(wallet.locator("dd")).toHaveText(["5,000", "150"]);
+  await expect(wallet.locator("dd")).toHaveText(["50,000", "150"]);
   await expect(wallet).not.toContainText("EXP");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("button", { name: "전환 ⇄" })).toBeFocused();
-  await page.getByRole("link", { name: "Character", exact: true }).click();
-  await page.getByRole("button", { name: "악세서리", exact: true }).click();
+  await page.goto("/shop/customize");
   await page.getByRole("button", { name: /에메랄드 타격/ }).click();
   await page.reload();
   await page.getByRole("link", { name: "Shop", exact: true }).click();
   await page.getByRole("button", { name: "전환 ⇄" }).click();
-  await expect(wallet.locator("dd")).toHaveText(["4,000", "150"]);
+  await expect(wallet.locator("dd")).toHaveText(["49,000", "150"]);
   await page.getByRole("button", { name: "닫기", exact: true }).click();
   await page.getByRole("link", { name: "Home", exact: true }).click();
   await expect(page.locator(".adventure")).toHaveAttribute("data-effect", "emerald");

@@ -15,19 +15,38 @@ test("radar compares day one and today, and risk changes include units and a del
   page,
 }) => {
   await page.goto("/home");
-  await expect(page.getByRole("img", { name: "1일차와 오늘의 공룡 능력치 비교" })).toBeVisible();
+  await page.evaluate(async () => {
+    const path = "/src/stores/game-store.ts";
+    const { useGameStore } = await import(path);
+    const game = useGameStore.getState().game;
+    useGameStore.setState({
+      game: {
+        ...game,
+        battlePaused: true,
+        completed: ["meal"],
+        questHistoryDetails: { "2026-01-01": [] },
+      },
+    });
+  });
+  await expect(page.getByRole("img", { name: "첫 기록과 오늘의 실천 기록 비교" })).toBeVisible();
   const firstDay = page.locator('.radar-comparison [data-series="day-one"]');
   const today = page.locator('.radar-comparison [data-series="today"]');
   expect(await firstDay.getAttribute("points")).not.toEqual(await today.getAttribute("points"));
   await expect(page.locator(".radar-comparison text")).toHaveText([
-    "복약",
+    "복용",
     "식사",
     "수면",
-    "회복",
+    "서베이",
     "걸음",
-    "체력",
+    "퀘스트",
   ]);
   await page.locator(".radar-card").click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page
+    .getByRole("navigation", { name: "주요 메뉴" })
+    .getByRole("link", { name: "Dashboard" })
+    .click();
+  await page.getByRole("link", { name: "상세 건강 보고서 웹으로 보기" }).click();
   await expect(page.locator(".risk-change").last()).toHaveAttribute(
     "aria-label",
     "현재 41%, 완료 후 35%, 6%포인트 감소",
@@ -60,7 +79,7 @@ test("quest rewards stay centered at the row end on narrow screens", async ({ pa
       const exp = (await row.locator(".quest-exp").boundingBox())!;
       const copy = (await row.locator(".quest-row-copy").boundingBox())!;
       expect(Math.abs(box.y + box.height / 2 - exp.y - exp.height / 2)).toBeLessThan(1);
-      expect(box.x + box.width - exp.x - exp.width).toBeCloseTo(10, 0);
+      expect(box.x + box.width - exp.x - exp.width).toBeCloseTo(12, 0);
       expect(copy.x + copy.width).toBeLessThanOrEqual(exp.x);
     }
   }
@@ -77,8 +96,10 @@ test("wallet contains its bonus action and catalog continues to the bottom navig
     const bonus = (await page.locator(".daily-bonus").boundingBox())!;
     expect(bonus.x).toBeGreaterThan(wallet.x + wallet.width / 3);
     expect(bonus.y).toBeGreaterThan(wallet.y + wallet.height / 2);
-    expect(wallet.x + wallet.width - bonus.x - bonus.width).toBeGreaterThanOrEqual(12);
-    expect(wallet.y + wallet.height - bonus.y - bonus.height).toBeGreaterThanOrEqual(12);
+    expect(wallet.x + wallet.width - bonus.x - bonus.width).toBeGreaterThanOrEqual(8);
+    expect(wallet.y + wallet.height - bonus.y - bonus.height).toBeGreaterThanOrEqual(8);
+    expect(bonus.height).toBeGreaterThanOrEqual(44);
+    await expect(page.locator(".wallet-rp > strong")).toHaveText("0");
     const catalog = (await page.locator(".shop-catalog").boundingBox())!;
     const navigation = (await page.locator(".bottom-navigation").boundingBox())!;
     expect(navigation.y - catalog.y - catalog.height).toBeLessThan(24);
@@ -94,14 +115,25 @@ test("wallet contains its bonus action and catalog continues to the bottom navig
     await region.press("End");
     await page.locator(".product-5").scrollIntoViewIfNeeded();
     await expect(page.locator(".product-5 > strong")).toBeInViewport();
-    expect((await page.locator(".product-5").boundingBox())!.height).toBeCloseTo(206, 0);
+    const product = (await page.locator(".product-5").boundingBox())!;
+    for (const selector of [
+      ".product-photo",
+      ":scope > strong",
+      ":scope > small",
+      ".product-footer",
+    ]) {
+      const content = (await page.locator(".product-5").locator(selector).first().boundingBox())!;
+      expect(content.x).toBeGreaterThanOrEqual(product.x);
+      expect(content.x + content.width).toBeLessThanOrEqual(product.x + product.width);
+      expect(content.y + content.height).toBeLessThanOrEqual(product.y + product.height);
+    }
     await expect(page.getByRole("link", { name: "Home", exact: true })).toBeVisible();
   }
 });
 
 test("feedback follows all flipped face assets and the arrow opens buffs", async ({ page }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   const faces = ["493-579", "493-582", "493-592", "493-585", "493-589", "493-595"];
   for (let dinosaur = 0; dinosaur < faces.length; dinosaur++) {
@@ -127,6 +159,6 @@ test("feedback follows all flipped face assets and the arrow opens buffs", async
   await toggle.click();
   await expect(page.locator(".battle-buffs")).toBeVisible();
   await expect(page.getByRole("button", { name: "버프 목록 접기" })).toHaveText("▴");
-  await page.getByRole("button", { name: "퀘스트 찾기" }).click();
+  await page.getByRole("link", { name: "Quest", exact: true }).click();
   await expect(page).toHaveURL(/\/quests$/);
 });

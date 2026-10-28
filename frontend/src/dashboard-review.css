@@ -1,0 +1,358 @@
+/* Shared components / REXRUN 2.0: paper selected tile, red icon and hard underline. */
+.bottom-navigation a.active {
+  background: #f3e7c8;
+  color: #f04438;
+  box-shadow: inset 0 -4px #e84a3c;
+}
+.bottom-navigation .navigation-icon {
+  display: block;
+}
+.character-vault .vault-skin-picker {
+  padding: 0;
+  gap: 8px;
+}
+.character-vault .vault-skin-grid {
+  position: relative;
+  min-width: 0;
+  padding: 4px calc(50% - 36px);
+  gap: 8px;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: calc(50% - 36px);
+}
+.character-vault .vault-skin-grid::-webkit-scrollbar {
+  display: none;
+}
+.character-vault .vault-skin-grid .style-card {
+  flex-basis: 72px;
+  min-height: 64px;
+  scroll-snap-align: center;
+  transform: scale(0.85);
+  opacity: 0.5;
+  transition:
+    transform 240ms ease,
+    opacity 240ms ease,
+    border-color 240ms ease;
+}
+.character-vault .vault-skin-grid .style-card[data-equipped="true"] {
+  transform: scale(1);
+  opacity: 1;
+}
+.character-vault .vault-skin-grid .style-card > .dinosaur-art {
+  width: 64px;
+  height: 56px;
+}
+.vault-skin-name {
+  display: block;
+  margin-top: 8px;
+  text-align: center;
+  color: #243b30;
+}
+.vault-skin-name strong,
+.vault-skin-name small {
+  display: block;
+}
+.vault-skin-name strong {
+  font-size: calc(14px * var(--ui-text-scale, 1));
+}
+.vault-skin-name small {
+  margin-top: 4px;
+  color: #657052;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.vault-collection-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+.vault-collection-tabs button {
+  min-height: 44px;
+  padding: 8px;
+  border: 2px solid #a99e6b;
+  box-shadow: 2px 2px #172820;
+  background: #e5ddb0;
+  color: #263d36;
+  font-size: calc(14px * var(--ui-text-scale, 1));
+  font-weight: 700;
+}
+.vault-collection-tabs [aria-selected="true"] {
+  background: #35576b;
+  color: #ffe486;
+  box-shadow:
+    inset 0 -3px #e84a3c,
+    2px 2px #172820;
+}
+.dashboard-summary {
+  padding: 12px;
+  border: 2px solid #243b30;
+  box-shadow: 3px 3px #172820;
+  background: #fff4d7;
+}
+.dashboard-summary .summary-score {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  height: auto;
+  min-height: 0;
+  padding: 12px;
+  background: #35576b;
+  color: #fff4ce;
+  border: 2px solid #243b30;
+}
+.dashboard-summary .summary-score h3 {
+  position: static;
+  margin: 0;
+  font: 10px/1.8 var(--pixel);
+  align-self: center;
+}
+.summary-score > div {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.dashboard-summary .summary-score .score-number {
+  position: static;
+  font:
+    700 38px/1.2 "Galmuri11",
+    sans-serif;
+  letter-spacing: 0;
+}
+.summary-score > div > span {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.dashboard-summary .summary-score p {
+  position: static;
+  grid-column: 1 / -1;
+  max-width: none;
+  margin: 0;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.8;
+}
+.summary-score p b {
+  color: #ffe486;
+}
+.dashboard-summary .summary-quests {
+  padding: 0;
+}
+.dashboard-summary .summary-quests dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+.summary-quests dl > div {
+  padding: 10px;
+  background: #e5ddb0;
+  border: 2px solid #9f975f;
+}
+.dashboard-summary .summary-quests dt {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.6;
+}
+.dashboard-summary .summary-quests dd {
+  margin: 5px 0 0;
+  color: #205d40;
+  font-size: calc(24px * var(--ui-text-scale, 1));
+  line-height: 1.3;
+}
+.summary-pressure {
+  padding: 10px;
+  border: 2px solid #a99e6b;
+  background: #f8eed5;
+  color: #243b30;
+}
+.summary-pressure h3 {
+  margin: 0 0 8px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
+}
+.summary-pressure > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.summary-pressure strong {
+  font-size: calc(20px * var(--ui-text-scale, 1));
+}
+.summary-pressure small {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.8;
+}
+.summary-pressure p {
+  margin: 8px 0 0;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.summary-pressure.red {
+  border-color: #d3483a;
+}
+.summary-pressure.red p {
+  color: #b43d2e;
+  font-weight: 700;
+}
+.summary-model {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.8;
+  margin: 10px 0;
+}
+.summary-report-link,
+.summary-next-quest {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px;
+  border: 2px solid #243b30;
+  background: #ffe486;
+  color: #243b30;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  font-weight: 700;
+  line-height: 1.7;
+  box-shadow: 2px 2px #b8a363;
+}
+.summary-next-quest {
+  margin-top: 10px;
+  background: #e5ddb0;
+}
+.summary-data-note {
+  display: block;
+  margin-top: 12px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  line-height: 1.8;
+  color: #657052;
+}
+.character-report-link {
+  margin-top: 16px;
+}
+.character-buffs-summary p {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.8;
+}
+.character-buffs-summary > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #205d40;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.dashboard-report-web {
+  width: min(1040px, calc(100% - 32px));
+  margin: 24px auto;
+  color: #243b30;
+}
+.web-report-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #172820;
+  background: #243b30;
+  color: #fff4ce;
+}
+.web-report-toolbar > span {
+  font: 10px/1.8 var(--pixel);
+}
+.web-report-toolbar a,
+.web-report-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px;
+  border: 2px solid #a99e6b;
+  background: #f3e7c8;
+  color: #243b30;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.dashboard-report-web > main {
+  padding: 24px;
+  border: 2px solid #172820;
+  background: #f3e7c8;
+}
+.dashboard-report-web .dashboard-heading {
+  background: #243b30;
+  color: #fff4ce;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.dashboard-report-web .page-heading {
+  height: auto;
+  padding: 0;
+}
+.dashboard-report-web .page-heading h2 {
+  font-size: clamp(12px, 2.6vw, 18px);
+  line-height: 1.8;
+}
+.dashboard-report-web .dashboard-period-content,
+.dashboard-report-web .character-dashboard-content {
+  overflow: visible;
+  height: auto;
+  max-height: none;
+  padding: 0;
+}
+.dashboard-report-web .health-report {
+  height: auto;
+  min-height: 0;
+}
+.dashboard-report-web :is(.cream-card, .health-score, .risk-tile, .disease-card, .impact-card) {
+  border-radius: 0;
+}
+.dashboard-report-web :is(.disease-card, .impact-card) {
+  box-shadow: 3px 3px #858267;
+}
+.dashboard-report-web .character-radar-section {
+  padding: 16px;
+  background: #243b30;
+}
+.dashboard-report-web > footer {
+  padding: 16px;
+  background: #243b30;
+  color: #fff4ce;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.8;
+}
+@media (max-width: 600px) {
+  .dashboard-report-web > main {
+    padding: 12px;
+  }
+  .web-report-toolbar > span {
+    order: -1;
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .character-vault .vault-skin-grid .style-card {
+    transition: none;
+  }
+}
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+  body {
+    background: white;
+    print-color-adjust: exact;
+  }
+  .dashboard-report-web {
+    width: 100%;
+    margin: 0;
+  }
+  .web-report-toolbar > a,
+  .web-report-toolbar > button,
+  .dashboard-report-web .weekly-calendar,
+  .dashboard-report-web .dashboard-date-controls {
+    display: none;
+  }
+  .dashboard-report-web > main {
+    padding: 12px;
+  }
+  .dashboard-report-web .bp-report,
+  .dashboard-report-web .impact-card,
+  .dashboard-report-web .character-dashboard-card,
+  .dashboard-report-web .disease-card {
+    break-inside: avoid;
+  }
+}

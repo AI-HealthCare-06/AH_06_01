@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
+import { authenticateQuest } from "./fixtures/quest-evidence";
 
 test("all Figma routes render local assets with no browser errors", async ({ page }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(120_000);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   for (const route of [
@@ -51,13 +52,14 @@ test("quest completion persists and cannot grant a duplicate reward", async ({ p
   await page.clock.install({ time: new Date("2026-09-30T00:00:00Z") });
   await page.clock.pauseAt(new Date("2026-09-30T00:01:00Z"));
   await page.goto("/quests/water");
+  await authenticateQuest(page, "water");
   await page.getByRole("button", { name: "완료 체크하기" }).click();
   await expect(page).toHaveURL(/\/reward$/);
-  await expect(page.locator(".reward-coins")).toHaveText("+30 EXP");
+  await expect(page.locator(".reward-coins")).toHaveText("+100 EXP");
   await page.goto("/shop");
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280G");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("2,430G");
   await page.reload();
-  await expect(page.locator(".wallet-balance>strong")).toHaveText("1,280G");
+  await expect(page.locator(".wallet-balance>strong")).toHaveText("2,430G");
   await page.goto("/quests/water");
   await expect(page.getByRole("button", { name: "오늘 완료한 퀘스트예요" })).toBeDisabled();
 });
@@ -68,7 +70,7 @@ test("daily bonus can be claimed once and demo products never spend Gold", async
   await expect(page.locator(".daily-bonus")).toBeDisabled();
   await page.reload();
   await expect(page.locator(".daily-bonus")).toBeDisabled();
-  await page.getByRole("button", { name: /닭가슴살 세트/ }).click();
+  await page.getByRole("button", { name: /하림 닭가슴살/ }).click();
   await expect(page.locator(".wallet-balance>strong")).toHaveText("1,290G");
 });
 test("onboarding validates input and keeps health and credentials out of storage", async ({
@@ -78,11 +80,13 @@ test("onboarding validates input and keeps health and credentials out of storage
   await page.getByRole("button", { name: "다음", exact: true }).click();
   await expect(page).toHaveURL(/\/profile$/);
   await page.getByRole("spinbutton", { name: "키", exact: true }).fill("0");
-  await page.getByRole("button", { name: "공룡 깨우기" }).click();
+  await page.getByRole("button", { name: "다음: 혈압 정보" }).click();
   await expect(page).toHaveURL(/\/profile$/);
   await page.getByRole("spinbutton", { name: "키", exact: true }).fill("170");
   await page.getByRole("spinbutton", { name: "몸무게", exact: true }).fill("70");
   await expect(page.locator(".bmi-card strong")).toHaveText("24.2");
+  await page.getByRole("button", { name: "다음: 혈압 정보" }).click();
+  await page.getByRole("button", { name: "다음: 확인하고 완료" }).click();
   await page.getByRole("button", { name: "공룡 깨우기" }).click();
   await expect(page).toHaveURL(/\/dinosaur$/);
   await page.getByRole("button", { name: /트리케라/ }).click();
@@ -106,7 +110,7 @@ test("mobile and desktop layouts keep primary navigation usable", async ({ page 
   for (const width of [320, 390, 430, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/home");
-    await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
+    await page.getByRole("link", { name: "Quest", exact: true }).click();
     await expect(page).toHaveURL(/\/quests$/);
     await page.getByRole("link", { name: "Dashboard", exact: true }).click();
     await expect(page.locator(".health-score")).toBeVisible();

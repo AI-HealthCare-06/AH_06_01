@@ -1,3 +1,4 @@
+import { useAudioStore } from "../services/game-audio";
 import type { GameState } from "../domain/game";
 import { useGameStore } from "../stores/game-store";
 import { InfoDialog } from "./InfoDialog";
@@ -11,9 +12,22 @@ export function BattleSettingsDialog({
   trigger: HTMLButtonElement;
   onClose: () => void;
 }) {
+  const audio = useAudioStore();
   const setWaveAutoRestart = useGameStore((state) => state.setWaveAutoRestart);
   const setDisplay = useGameStore((state) => state.setBattleDisplaySetting);
   const settings = [
+    {
+      title: "배경 음악 BGM",
+      enabled: audio.bgm,
+      description: "맵별 배경 음악",
+      toggle: () => audio.set("bgm", !audio.bgm),
+    },
+    {
+      title: "공격 효과음 SFX",
+      enabled: audio.sfx,
+      description: "캐릭터·공격 디자인별 효과음",
+      toggle: () => audio.set("sfx", !audio.sfx),
+    },
     {
       title: "Wave 자동 재시작",
       enabled: game.waveAutoRestart,

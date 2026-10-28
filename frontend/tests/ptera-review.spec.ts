@@ -7,8 +7,8 @@ for (const [dinosaur, name] of [
   test(`${name} fires toward its target, rotates the artwork, and grows the visible debug hitbox`, async ({
     page,
   }) => {
-    await page.clock.install();
-    await page.clock.pauseAt(new Date());
+    await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
     await page.goto("/home");
     await page.evaluate(async (dinosaur) => {
       const path = "/src/stores/game-store.ts";
@@ -155,8 +155,8 @@ for (const [dinosaur, name] of [
 test("vault immediately applies a character and clears its predecessor's shots and wind-up", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";

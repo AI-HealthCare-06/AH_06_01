@@ -69,7 +69,7 @@ describe("ranged attacks and contact melee", () => {
       expect(shot.vx).toBeGreaterThan(0);
       const verticalDirection = Math.sign(started.lastAttack!.aimY! - shot.y);
       expect(Math.sign(shot.vy)).toBe(verticalDirection);
-      expect(Math.hypot(shot.vx, shot.vy)).toBeCloseTo(240, 5);
+      expect(Math.hypot(shot.vx, shot.vy)).toBeCloseTo(300, 5);
       expect(shot.vy / shot.vx).toBeCloseTo(
         (started.lastAttack!.aimY! - shot.y) / (started.lastAttack!.aimX! - shot.x),
         5,

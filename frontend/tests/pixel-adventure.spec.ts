@@ -16,7 +16,7 @@ test("Sunday calendar follows today across midnight and month end", async ({ pag
   await page.clock.fastForward(61_000);
   await expect(page.locator('[aria-current="date"]')).toHaveAttribute(
     "aria-label",
-    "10월 1일 목요일 오늘 · 퀘스트 0/5",
+    "10월 1일 목요일 오늘 · 퀘스트 0/4",
   );
 });
 
@@ -41,29 +41,34 @@ test("device snapshots update the walk bar and complete without a manual button"
   await expect(bar).toHaveAttribute("aria-valuenow", "50");
   await sync(6000);
   await expect(bar).toHaveAttribute("aria-valuenow", "100");
-  await expect(page.locator(".quest-row").nth(2).locator(".pixel-check")).toBeVisible();
+  await expect(
+    page.locator(".quest-row").filter({ hasText: "6,000걸음" }).locator(".pixel-check"),
+  ).toBeVisible();
   await sync(6800);
   await page.goto("/shop");
-  await expect(page.locator(".wallet-balance > strong")).toHaveText("1,280G");
+  await expect(page.locator(".wallet-balance > strong")).toHaveText("2,580G");
   await page.goto("/quests/walk");
   await expect(page.getByRole("button", { name: "오늘 완료한 퀘스트예요" })).toBeDisabled();
 });
 
 test("wave combat pauses, requires multiple hits and awards Gold separately", async ({ page }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.clock.runFor(50);
   await expect(page.locator(".battle-enemy")).toHaveCount(1);
-  await expect(page.locator(".enemy-hp").first()).toHaveAttribute("aria-valuenow", "96");
+  await expect(page.locator(".enemy-hp").first()).toHaveAttribute("aria-valuenow", "69");
   await page.getByRole("button", { name: "모험 일시정지" }).click();
   const enemyPosition = await page.locator(".battle-enemy").getAttribute("style");
   await page.clock.runFor(10_000);
   await expect(page.locator(".battle-enemy")).toHaveAttribute("style", enemyPosition!);
   await page.getByRole("button", { name: "모험 재개" }).click();
   await page.clock.runFor(800);
-  await expect(page.locator(".enemy-hp").first()).toHaveAttribute("aria-valuenow", "76");
-  await page.clock.runFor(2000);
+  await expect(page.locator(".enemy-hp").first()).toHaveAttribute("aria-valuenow", "49");
+  for (let tick = 0; tick < 20; tick++) {
+    await page.clock.runFor(100);
+    if (await page.locator(".battle-coin").count()) break;
+  }
   await expect(page.locator(".battle-coin")).toContainText("+30 G");
   await expect(page.getByRole("progressbar", { name: "스테이지 몬스터 처치" })).toHaveAttribute(
     "aria-valuenow",
@@ -71,7 +76,10 @@ test("wave combat pauses, requires multiple hits and awards Gold separately", as
   );
   await page.clock.runFor(600);
   await expect(page.locator(".battle-enemy")).toHaveCount(0);
-  await page.clock.runFor(100);
+  for (let tick = 0; tick < 30; tick++) {
+    await page.clock.runFor(100);
+    if (await page.locator(".battle-enemy").count()) break;
+  }
   expect(await page.locator(".battle-enemy").count()).toBeGreaterThanOrEqual(1);
   expect(await page.locator(".battle-enemy").count()).toBeLessThanOrEqual(3);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!));
@@ -101,10 +109,13 @@ test("camera requests on click, captures, and stops all tracks on navigation", a
     });
     Reflect.set(window, "cameraTest", { tracks, requests: () => requests });
   });
-  await page.goto("/camera");
+  await page.goto("/camera?quest=meal");
   expect(await page.evaluate(() => Reflect.get(window, "cameraTest").requests())).toBe(0);
   await page.getByRole("button", { name: "카메라 켜기" }).click();
   await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
+  await expect
+    .poll(() => page.locator("video").evaluate((v: HTMLVideoElement) => v.videoWidth))
+    .toBeGreaterThan(0);
   await page.getByRole("button", { name: "촬영하기" }).click();
   await expect(page.getByAltText("촬영한 퀘스트 사진")).toBeVisible();
   expect(
@@ -116,7 +127,7 @@ test("camera requests on click, captures, and stops all tracks on navigation", a
   ).toBe(true);
   await page.getByRole("button", { name: "다시 촬영" }).click();
   await expect(page.getByRole("button", { name: "촬영하기" })).toBeVisible();
-  await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
+  await page.getByRole("link", { name: "Quest", exact: true }).click();
   await expect(page).toHaveURL(/\/quests$/);
   await expect(page.locator(".camera-card")).toHaveCount(0);
   expect(
@@ -137,7 +148,7 @@ test("camera denial gives a retry path", async ({ page }) => {
       },
     }),
   );
-  await page.goto("/camera");
+  await page.goto("/camera?quest=meal");
   await page.getByRole("button", { name: "카메라 켜기" }).click();
   await expect(page.locator(".camera-status")).toContainText("권한이 꺼져");
   await expect(page.getByRole("button", { name: "카메라 켜기" })).toBeEnabled();
