@@ -1,3 +1,4 @@
+import { useGameAudio } from "../services/game-audio";
 import {
   arena,
   enemyGeometry,
@@ -56,6 +57,13 @@ export function AdventureScene({
   onTogglePause: () => void;
 }) {
   const battle = game.combat;
+  useGameAudio({
+    stage: battle.stage,
+    dinosaur: game.dinosaur,
+    effect: game.battleEffect,
+    attack: battle.lastAttack?.time ?? null,
+    paused: paused || battle.recovery > 0,
+  });
   const buffs = battleBuffStats(game);
   const experience = experienceProgress(game.experience);
   const [selected, setSelected] = useState<QuestId | null>(null);
@@ -352,23 +360,25 @@ export function AdventureScene({
             aria-label="오늘의 퀘스트 버프"
             hidden={!buffsExpanded}
           >
-            {questBuffs.map((buff) => (
-              <button
-                key={buff.id}
-                data-buff={buff.id}
-                data-active={active[buff.id]}
-                data-debuff={
-                  (buff.id === "water" && buffs.asBonus < 0) ||
-                  (buff.id === "sleep" && buffs.gold < 1)
-                }
-                aria-label={`${buff.label} 버프 현황`}
-                aria-expanded={selected === buff.id}
-                aria-controls={selected === buff.id ? "battle-buff-detail" : undefined}
-                onClick={() => setSelected(selected === buff.id ? null : buff.id)}
-              >
-                {buff.label}
-              </button>
-            ))}
+            {questBuffs
+              .filter((buff) => buff.id !== "sleep")
+              .map((buff) => (
+                <button
+                  key={buff.id}
+                  data-buff={buff.id}
+                  data-active={active[buff.id]}
+                  data-debuff={
+                    (buff.id === "water" && buffs.asBonus < 0) ||
+                    (buff.id === "sleep" && buffs.gold < 1)
+                  }
+                  aria-label={`${buff.label} 버프 현황`}
+                  aria-expanded={selected === buff.id}
+                  aria-controls={selected === buff.id ? "battle-buff-detail" : undefined}
+                  onClick={() => setSelected(selected === buff.id ? null : buff.id)}
+                >
+                  {buff.label}
+                </button>
+              ))}
           </div>
           {selectedBuff && (
             <section
@@ -678,10 +688,33 @@ export function AdventureScene({
           <div
             className="battle-coin"
             key={`loot-${battle.loot.time}`}
-            aria-label={`몬스터 처치 EXP 1 · 미확정 ${battle.loot.gold} Gold`}
+            data-gold-target="character"
+            style={{
+              left:
+                (battle.loot.x ?? 240) +
+                (center(player.hitbox).x - (battle.loot.x ?? 240)) *
+                  (reducedMotion
+                    ? 1
+                    : 1 - (1 - Math.min(1, (battle.clock - battle.loot.time) / 720)) ** 2),
+              top:
+                (battle.loot.y ?? 190) +
+                (center(player.hitbox).y - (battle.loot.y ?? 190)) *
+                  (reducedMotion
+                    ? 1
+                    : 1 - (1 - Math.min(1, (battle.clock - battle.loot.time) / 720)) ** 2),
+              right: "auto",
+              bottom: "auto",
+              animation: "none",
+              transform: "translate(-50%, -50%)",
+              opacity: Math.max(0, 1 - Math.max(0, battle.clock - battle.loot.time - 600) / 120),
+            }}
+            aria-label={`몬스터 처치 EXP ${battle.loot.experience} · 미확정 ${battle.loot.gold} Gold`}
           >
             <PixelIcon name="coin" />
-            <b>+1 EXP · +{battle.loot.gold} G</b>
+            <b>
+              {battle.loot.experience ? `+${battle.loot.experience} EXP · ` : ""}+{battle.loot.gold}{" "}
+              G
+            </b>
           </div>
         )}
         {battle.recovery > 0 && (

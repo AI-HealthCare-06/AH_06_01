@@ -5,7 +5,13 @@ import { useGameStore } from "../stores/game-store";
 import { InfoDialog } from "./InfoDialog";
 import { useNotice } from "./NoticeProvider";
 
-export function AccessoryCatalog({ inventory = false }: { inventory?: boolean }) {
+export function AccessoryCatalog({
+  inventory = false,
+  showHeader = true,
+}: {
+  inventory?: boolean;
+  showHeader?: boolean;
+}) {
   const { game, buyAccessory, equipAccessory } = useGameStore();
   const [category, setCategory] = useState("all");
   const [preview, setPreview] = useState<{
@@ -19,12 +25,14 @@ export function AccessoryCatalog({ inventory = false }: { inventory?: boolean })
       className="accessory-catalog"
       aria-label={inventory ? "보유한 꾸미기 아이템" : "꾸미기 상품"}
     >
-      <header>
-        <h3>{inventory ? "MY ITEMS" : "DINO ITEMS"}</h3>
-        <Link to={inventory ? "/shop/customize" : "/character?tab=accessories"}>
-          {inventory ? "꾸미기 상점 ›" : "보유 아이템 ›"}
-        </Link>
-      </header>
+      {showHeader && (
+        <header>
+          <h3>{inventory ? "MY ITEMS" : "DINO ITEMS"}</h3>
+          <Link to={inventory ? "/shop/customize" : "/character?tab=accessories"}>
+            {inventory ? "꾸미기 상점 ›" : "보유 아이템 ›"}
+          </Link>
+        </header>
+      )}
       <div className="accessory-filters" aria-label="꾸미기 분류">
         {[
           ["all", "전체"],
@@ -72,7 +80,7 @@ export function AccessoryCatalog({ inventory = false }: { inventory?: boolean })
                               : "장착하기"
                             : owned
                               ? "보유 중"
-                              : `● ${item.price}`}
+                              : `${item.price} G`}
                         </b>
                       </span>
                     </button>

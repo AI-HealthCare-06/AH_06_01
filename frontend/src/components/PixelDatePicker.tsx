@@ -1,3 +1,4 @@
+import { PixelSelect } from "./PixelSelect";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
 import { localDate } from "../domain/calendar";
 import { PixelIcon } from "./PixelIcon";
@@ -176,11 +177,11 @@ function DateDialog({
         >
           ‹
         </button>
-        <select
+        <PixelSelect
           aria-label="연도 선택"
           value={year}
-          onChange={(event) =>
-            moveFocus(inMonth(Number(event.target.value), monthIndex, parse(focused).getDate()))
+          onValueChange={(value) =>
+            moveFocus(inMonth(Number(value), monthIndex, parse(focused).getDate()))
           }
         >
           {years.map((item) => (
@@ -188,12 +189,12 @@ function DateDialog({
               {item}년
             </option>
           ))}
-        </select>
-        <select
+        </PixelSelect>
+        <PixelSelect
           aria-label="월 선택"
           value={monthIndex}
-          onChange={(event) =>
-            moveFocus(inMonth(year, Number(event.target.value), parse(focused).getDate()))
+          onValueChange={(value) =>
+            moveFocus(inMonth(year, Number(value), parse(focused).getDate()))
           }
         >
           {Array.from({ length: 12 }, (_, i) => (
@@ -205,7 +206,7 @@ function DateDialog({
               {i + 1}월
             </option>
           ))}
-        </select>
+        </PixelSelect>
         <button
           type="button"
           aria-label="다음 달"

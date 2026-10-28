@@ -1,3 +1,4 @@
+import { selectPixelOption } from "./helpers/controls";
 import { test, expect } from "@playwright/test";
 
 test("system notification permission is requested only from the settings button", async ({
@@ -29,7 +30,9 @@ test("onboarding runs once, health edits save straight home, and later logins sk
 }) => {
   await page.goto("/login");
   await page.getByRole("button", { name: "다음", exact: true }).click();
-  await expect(page.locator(".profile-title-row")).toContainText("STEP 01");
+  await expect(page.locator(".profile-title-row")).toContainText("1 / 3");
+  await page.getByRole("button", { name: "다음: 혈압 정보" }).click();
+  await page.getByRole("button", { name: "다음: 확인하고 완료" }).click();
   await page.getByRole("button", { name: "공룡 깨우기" }).click();
   await expect(page).toHaveURL(/\/dinosaur$/);
   await page.getByRole("button", { name: /스테고/ }).click();
@@ -40,6 +43,20 @@ test("onboarding runs once, health edits save straight home, and later logins sk
   await page.getByRole("button", { name: /건강 정보 수정/ }).click();
   await expect(page.locator(".profile-title-row")).not.toContainText("STEP 01");
   await page.getByRole("spinbutton", { name: "나이", exact: true }).fill("46");
+  await page.getByRole("button", { name: "다음: 혈압 / 공복 혈당" }).click();
+  await page.getByRole("button", { name: "다음: 앓고 있는 지병" }).click();
+  for (const title of [
+    "그 밖의 만성질환",
+    "특수 이력 / 치료 상태",
+    "복용 중인 약과 시간",
+    "생활습관",
+    "음주 습관",
+    "추가 분석 정보",
+    "가족력",
+    "확인하고 완료",
+  ]) {
+    await page.getByRole("button", { name: `다음: ${title}`, exact: true }).click();
+  }
   await page.getByRole("button", { name: "변경 저장하고 홈으로" }).click();
   await expect(page).toHaveURL(/\/home$/);
   await expect(page.locator(".feedback-copy")).toContainText("스테고");
@@ -135,7 +152,11 @@ test("failed wave sends one alert, OFF persists and holds combat until a manual 
   await page.clock.runFor(50);
   await expect(page.locator(".battle-recovery")).toContainText("자동 재시작 OFF");
   await expect(page.locator(".feedback-copy")).toContainText("스테고: 잠깐 쉬어가도 괜찮아요!");
-  await expect(page.locator(".notice")).toContainText("WAVE 2 클리어 실패");
+  await expect(page.getByRole("link", { name: "Home", exact: true })).toHaveAttribute(
+    "data-battle-feedback",
+    "defeat",
+  );
+  await expect(page.locator(".notice.visible")).toHaveCount(0);
   expect(await page.evaluate(() => Reflect.get(window, "battleNotifications"))).toHaveLength(1);
   expect(
     await page.evaluate(
@@ -156,19 +177,19 @@ test("failed wave sends one alert, OFF persists and holds combat until a manual 
   await expect(page.locator(".battle-enemy")).toHaveCount(1);
 });
 
-test("dashboard filters sit above the week, range picker commits both dates, and numeric styles fit", async ({
+test("dashboard filters share the range below the week, range picker commits both dates, and numeric styles fit", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.clock.install({ time: new Date("2026-10-01T03:00:00Z") });
   for (const width of [320, 390, 534]) {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto("/dashboard");
+    await page.goto("/dashboard/report");
     await expect(page.locator(".health-score")).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     const controls = (await page.locator(".dashboard-date-controls").boundingBox())!;
     const week = (await page.locator(".weekly-calendar").boundingBox())!;
-    expect(controls.y + controls.height).toBeLessThanOrEqual(week.y);
+    expect(controls.y).toBeGreaterThanOrEqual(week.y + week.height);
     expect((await page.locator(".calendar-help-toggle svg").boundingBox())!.width).toBeCloseTo(
       19.8,
       1,
@@ -190,7 +211,7 @@ test("dashboard filters sit above the week, range picker commits both dates, and
         .locator(".pixel-date-trigger")
         .evaluate((node) => getComputedStyle(node).fontFamily),
     ).toContain("Galmuri11");
-    await page.getByLabel("건강 변화 조회 기간").selectOption("custom");
+    await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "custom");
     await page.getByRole("button", { name: "조회 날짜 범위" }).click();
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("button", { name: "이전 달", exact: true }).click();
@@ -198,7 +219,7 @@ test("dashboard filters sit above the week, range picker commits both dates, and
     await expect(dialog).toBeVisible();
     await dialog.getByRole("button", { name: "2026년 9월 30일", exact: true }).click();
     await expect(dialog).toHaveCount(0);
-    await expect(page.locator(".dashboard-range-label")).toHaveText("2026-09-20 ~ 2026-09-30");
+    await expect(page.locator(".dashboard-range-label")).toContainText("2026-09-20 ~ 2026-09-30");
     await expect(page.locator(".trend-column small").first()).toHaveText("09.20");
     await page.goto("/shop");
     await page.evaluate(async () => {
@@ -206,15 +227,13 @@ test("dashboard filters sit above the week, range picker commits both dates, and
       const { useGameStore } = await import(path);
       useGameStore.setState(({ game }: { game: object }) => ({ game: { ...game, gold: 22128 } }));
     });
-    const gold = page.locator(".wallet-heading h3");
+    const gold = page.locator(".wallet-gold");
     const amount = page.locator(".wallet-balance > strong");
-    expect(await gold.evaluate((node) => getComputedStyle(node).fontSize)).toBe(
-      await amount.evaluate((node) => getComputedStyle(node).fontSize),
-    );
     const a = (await gold.boundingBox())!,
       b = (await amount.boundingBox())!;
-    expect(Math.abs(a.y + a.height / 2 - b.y - b.height / 2)).toBeLessThan(1);
-    expect(b.x - (a.x + a.width)).toBeGreaterThanOrEqual(10);
+    expect(b.x).toBeGreaterThanOrEqual(a.x);
+    expect(b.x + b.width).toBeLessThanOrEqual(a.x + a.width);
+    expect(await amount.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
       width,
     );
@@ -224,10 +243,10 @@ test("dashboard filters sit above the week, range picker commits both dates, and
 test("today feedback reflects zero, partial and full quest completion", async ({ page }) => {
   await page.goto("/home");
   for (const [completed, title, count] of [
-    [[], "오늘의 실천을 기다려요", "0/5"],
-    [["medicine"], "조금씩 성장하고 있어요", "1/5"],
-    [["medicine", "meal", "walk"], "오늘 잘하고 있어요", "3/5"],
-    [["medicine", "meal", "walk", "water", "sleep"], "오늘 모두 해냈어요", "5/5"],
+    [[], "오늘의 실천을 기다려요", "0/4"],
+    [["medicine"], "조금씩 성장하고 있어요", "1/4"],
+    [["medicine", "meal", "walk"], "오늘 잘하고 있어요", "3/4"],
+    [["medicine", "meal", "walk", "survey"], "오늘 모두 해냈어요", "메인 퀘스트를 모두 완료"],
   ] as const) {
     await page.evaluate(async (completed) => {
       const path = "/src/stores/game-store.ts";

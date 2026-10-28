@@ -1,0 +1,289 @@
+.meal-analysis-panel,
+.meal-upload,
+.meal-history {
+  background: #fff8e5;
+  border: 2px solid #203b32;
+  padding: 14px;
+  color: #203b32;
+  margin: 14px 0;
+  overflow-wrap: anywhere;
+}
+.meal-analysis-panel > header,
+.meal-history > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.meal-analysis-panel h3,
+.meal-history h3,
+.meal-upload h3 {
+  margin: 4px 0 10px;
+}
+.meal-analysis-panel p,
+.meal-upload p,
+.meal-history p {
+  line-height: 1.65;
+}
+.meal-analysis-panel button,
+.meal-upload button,
+.meal-history button,
+.meal-analysis-panel input:not([type="checkbox"]),
+.meal-analysis-panel select,
+.meal-upload input,
+.meal-history input {
+  font: inherit;
+  min-height: 44px;
+  max-width: 100%;
+  border: 2px solid #60715c;
+  background: #efe6c9;
+  color: #203b32;
+  padding: 8px 10px;
+  box-sizing: border-box;
+}
+.meal-analysis-panel .primary-button {
+  background: #e5483c;
+  color: #fff8e5;
+  border-color: #203b32;
+}
+.meal-analysis-panel button:disabled {
+  opacity: 0.55;
+}
+.diet-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 14px 0;
+}
+.diet-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.7;
+  margin: 14px 0;
+}
+.diet-check input {
+  height: 22px;
+  width: 22px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+.diet-photo-note,
+.diet-footnote {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  color: #355347;
+  line-height: 1.7;
+}
+.diet-status {
+  min-height: 2em;
+}
+.diet-result-source {
+  padding: 10px;
+  background: #e8deb2;
+  border-left: 4px solid #35576b;
+  font-weight: bold;
+}
+.diet-record-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 8px;
+}
+.diet-record-fields label,
+.diet-item label {
+  display: grid;
+  gap: 5px;
+  margin: 8px 0;
+}
+.diet-record-fields input,
+.diet-record-fields select,
+.diet-item input,
+.diet-item select {
+  width: 100%;
+  min-width: 0;
+}
+.diet-item {
+  border: 1px solid #a99e6b;
+  min-width: 0;
+  padding: 10px;
+  margin: 12px 0;
+}
+.diet-item legend {
+  font-weight: bold;
+  padding: 0 5px;
+}
+.diet-item > small {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.diet-missing {
+  color: #8c3329;
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.diet-save {
+  width: 100%;
+  margin: 8px 0;
+}
+.diet-nutrition {
+  margin: 16px 0;
+  padding: 12px;
+  background: #efe6c9;
+  border: 1px solid #a99e6b;
+}
+.diet-nutrition > small {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  line-height: 1.6;
+  display: block;
+  margin-top: 10px;
+}
+.diet-main-nutrients {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.diet-main-nutrients > div {
+  background: #35576b;
+  color: #fff8e5;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+.diet-main-nutrients strong {
+  font-size: calc(22px * var(--ui-text-scale, 1));
+  overflow-wrap: anywhere;
+}
+.diet-main-nutrients small {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.diet-macro-track {
+  display: flex;
+  height: 16px;
+  border: 1px solid #203b32;
+  margin: 14px 0 8px;
+}
+.diet-macro-track i {
+  display: block;
+}
+.diet-macro-track .carb {
+  background: #35576b;
+}
+.diet-macro-track .protein {
+  background: #678958;
+}
+.diet-macro-track .fat {
+  background: #e9cf66;
+}
+.diet-macros p {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.diet-nutrition details summary {
+  padding: 10px 0;
+  cursor: pointer;
+}
+.diet-nutrition dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #a99e6b;
+}
+.diet-nutrition dd {
+  margin: 0;
+  text-align: right;
+}
+.diet-nutrition dd small {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.meal-upload img {
+  width: 100%;
+  max-height: 340px;
+  object-fit: contain;
+  background: #203b32;
+  margin: 12px 0;
+}
+.meal-upload label {
+  display: grid;
+  gap: 8px;
+}
+.meal-upload > small {
+  display: block;
+  line-height: 1.7;
+  margin-top: 10px;
+}
+.meal-history ol {
+  list-style: none;
+  padding: 0;
+}
+.meal-history li {
+  border-top: 1px dashed #a99e6b;
+  padding: 14px 0;
+}
+.meal-history li header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.meal-history li span {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.meal-records-entry {
+  display: block;
+  color: #203b32;
+  background: #e8deb2;
+  border: 2px solid #203b32;
+  padding: 12px;
+  margin: 12px 0;
+  text-align: center;
+  text-decoration: none;
+  min-height: 44px;
+}
+.meal-analysis-panel > header small {
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  letter-spacing: 1px;
+}
+.meal-analysis-panel > header a {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  white-space: nowrap;
+}
+.diet-connection-note {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+}
+.diet-connection-note button {
+  display: block;
+  margin-top: 8px;
+}
+@media (max-width: 350px) {
+  .diet-main-nutrients strong {
+    font-size: calc(19px * var(--ui-text-scale, 1));
+  }
+  .diet-record-fields {
+    grid-template-columns: 1fr;
+  }
+  .meal-history > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+.meal-upload .meal-file-picker {
+  position: relative;
+  min-height: 48px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #203b32;
+  background: #35576b;
+  color: #fff8e5;
+  padding: 12px;
+  cursor: pointer;
+}
+.meal-file-picker input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  cursor: pointer;
+}
+.meal-file-picker:focus-within {
+  outline: 3px solid #e5483c;
+  outline-offset: 2px;
+}

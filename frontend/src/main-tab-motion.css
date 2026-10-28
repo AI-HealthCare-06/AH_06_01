@@ -1,0 +1,81 @@
+/* Page travel stays smooth while artwork, borders and fonts keep their pixel rendering. */
+html[data-main-tab-motion] .main-screen {
+  view-transition-name: main-tab-page;
+}
+html[data-main-tab-motion] .main-screen .greeting {
+  view-transition-name: main-tab-header;
+}
+html[data-main-tab-motion] .main-screen .bottom-navigation {
+  view-transition-name: main-tab-navigation;
+}
+html[data-main-tab-motion] .main-screen .status-bar {
+  view-transition-name: main-tab-status;
+}
+html[data-main-tab-motion] .main-screen .home-indicator {
+  view-transition-name: main-tab-indicator;
+}
+html[data-main-tab-motion="next"] {
+  --tab-travel: 100%;
+}
+html[data-main-tab-motion="previous"] {
+  --tab-travel: -100%;
+}
+html[data-main-tab-motion]::view-transition {
+  pointer-events: none;
+}
+html[data-main-tab-motion]::view-transition-group(*) {
+  animation-duration: 240ms;
+  animation-timing-function: cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+html[data-main-tab-motion]::view-transition-group(main-tab-page) {
+  overflow: clip;
+  animation: none;
+  background: var(--paper);
+}
+html[data-main-tab-motion]::view-transition-old(main-tab-page),
+html[data-main-tab-motion]::view-transition-new(main-tab-page) {
+  height: 100%;
+  mix-blend-mode: normal;
+  animation: 240ms cubic-bezier(0.2, 0.75, 0.25, 1) both tab-page-enter;
+}
+html[data-main-tab-motion]::view-transition-old(main-tab-page) {
+  animation-name: tab-page-exit;
+}
+html[data-main-tab-motion]::view-transition-old(root),
+html[data-main-tab-motion]::view-transition-old(main-tab-header),
+html[data-main-tab-motion]::view-transition-old(main-tab-navigation),
+html[data-main-tab-motion]::view-transition-old(main-tab-status),
+html[data-main-tab-motion]::view-transition-old(main-tab-indicator) {
+  display: none;
+}
+html[data-main-tab-motion]::view-transition-new(root),
+html[data-main-tab-motion]::view-transition-new(main-tab-header),
+html[data-main-tab-motion]::view-transition-new(main-tab-navigation),
+html[data-main-tab-motion]::view-transition-new(main-tab-status),
+html[data-main-tab-motion]::view-transition-new(main-tab-indicator) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+@keyframes tab-page-enter {
+  from {
+    transform: translateX(var(--tab-travel));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes tab-page-exit {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-1 * var(--tab-travel)));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-main-tab-motion]::view-transition-group(*),
+  html[data-main-tab-motion]::view-transition-old(*),
+  html[data-main-tab-motion]::view-transition-new(*) {
+    animation: none;
+  }
+}

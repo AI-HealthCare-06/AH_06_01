@@ -109,7 +109,7 @@ b {
   justify-content: space-between;
   padding-inline: 18px;
   color: var(--ink);
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .device-time {
@@ -145,7 +145,7 @@ b {
   height: 20px;
 }
 .battery-percent {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   line-height: 14px;
   font-variant-numeric: tabular-nums;
 }
@@ -190,7 +190,7 @@ b {
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   line-height: 9px;
 }
 .greeting {
@@ -220,11 +220,11 @@ b {
   min-width: 0;
 }
 .greeting-copy h1 {
-  font-size: 21px;
+  font-size: calc(21px * var(--ui-text-scale, 1));
   line-height: 26px;
 }
 .greeting-copy p {
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   line-height: 20px;
   margin-top: 3px;
   white-space: nowrap;
@@ -272,7 +272,7 @@ b {
   height: 44px;
   display: grid;
   place-items: center;
-  font-size: 23px;
+  font-size: calc(23px * var(--ui-text-scale, 1));
   line-height: 34.5px;
 }
 .weekly-calendar {
@@ -291,12 +291,12 @@ b {
 }
 .weekly-calendar span {
   display: block;
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   line-height: 14px;
 }
 .weekly-calendar strong {
   display: block;
-  font-size: 18px;
+  font-size: calc(18px * var(--ui-text-scale, 1));
   line-height: 27px;
   padding-left: 3px;
   margin-top: 2px;
@@ -355,7 +355,7 @@ b {
   justify-content: center;
   gap: 8px;
   padding: 8px 4px;
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   font-weight: 700;
   line-height: 18px;
   text-align: center;
@@ -379,18 +379,18 @@ b {
 }
 .page-heading h2 {
   font-family: var(--pixel);
-  font-size: 19px;
+  font-size: calc(19px * var(--ui-text-scale, 1));
   line-height: 26px;
   font-weight: 400;
   white-space: nowrap;
 }
 .page-heading p {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   line-height: 18px;
   margin-top: 4px;
 }
 .dashboard-screen .page-heading h2 {
-  font-size: 17px;
+  font-size: calc(17px * var(--ui-text-scale, 1));
 }
 .design-canvas {
   position: relative;
@@ -445,11 +445,11 @@ b {
   flex-direction: column;
 }
 .feedback-copy strong {
-  font-size: 14px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
   line-height: 19px;
 }
 .feedback-copy small {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   line-height: 13px;
 }
 .dino-feedback > b {
@@ -458,7 +458,7 @@ b {
   top: 50%;
   transform: translateY(-50%);
   color: #bd3b2f;
-  font-size: 26px;
+  font-size: calc(26px * var(--ui-text-scale, 1));
   line-height: 31px;
 }
 .pixel-grass {
@@ -506,7 +506,7 @@ b {
   text-shadow: 1px 1px #171b16;
 }
 .adventure-title p {
-  font-size: 11.5px;
+  font-size: calc(11.5px * var(--ui-text-scale, 1));
   line-height: 18px;
   margin-top: 1px;
 }
@@ -521,13 +521,13 @@ b {
   border-radius: 5px;
   background: #203b4a;
   color: #ffe486;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 15px;
   text-align: center;
 }
 .stage-label small {
   display: block;
-  font-size: 8px;
+  font-size: calc(8px * var(--ui-text-scale, 1));
   line-height: 12px;
 }
 .pause-adventure {
@@ -589,7 +589,7 @@ b {
   gap: 3px;
 }
 .level {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   line-height: 12px;
   color: #fff4ce;
   font-weight: 700;
@@ -612,7 +612,7 @@ b {
   inset: -1px 0 0;
   text-align: center;
   color: var(--cream);
-  font-size: 8.5px;
+  font-size: calc(8.5px * var(--ui-text-scale, 1));
   line-height: 10px;
 }
 .idle-dino {
@@ -653,7 +653,7 @@ b {
   left: 215px;
   top: 160px;
   color: #f0ac2c;
-  font-size: 14px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
 }
 .battle-animated {
   animation-duration: 2.8s;
@@ -780,14 +780,14 @@ b {
   position: absolute;
   left: 10px;
   top: 5px;
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .stage-progress > b {
   position: absolute;
   left: 278px;
   top: 5px;
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   color: #ffd34a;
 }
 .stage-track {
@@ -854,7 +854,7 @@ b {
   height: 17px;
 }
 .radar-heading h3 {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 16px;
   white-space: nowrap;
 }
@@ -864,7 +864,7 @@ b {
   justify-content: center;
   gap: 8px;
   min-height: 20px;
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
 }
 .radar-legend > span {
   display: flex;
@@ -953,14 +953,14 @@ b {
 }
 .compact-quest strong {
   display: block;
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   line-height: 17px;
   white-space: nowrap;
   font-family: "Galmuri11", sans-serif;
 }
 .compact-quest small {
   display: block;
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   line-height: 14px;
   color: #8c6950;
   white-space: nowrap;
@@ -982,7 +982,7 @@ b {
   background: #898d75;
 }
 .compact-walk small {
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
 }
 .quest-summary {
   position: relative;
@@ -1029,12 +1029,12 @@ b {
   flex-shrink: 0;
 }
 .quest-summary h3 {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   line-height: 16px;
   white-space: nowrap;
 }
 .quest-summary p {
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   font-weight: 700;
   color: #397a4b;
   margin: 0;
@@ -1067,7 +1067,7 @@ b {
   background: var(--ink);
   border-radius: 6px;
   color: var(--gold);
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .quest-summary-reward img {
@@ -1106,7 +1106,7 @@ b {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 19px;
+  font-size: calc(19px * var(--ui-text-scale, 1));
   line-height: 22px;
   font-weight: 700;
 }
@@ -1180,7 +1180,7 @@ b {
   margin-left: auto;
   min-width: 50px;
   text-align: right;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 16px;
   color: #b7790c;
   font-weight: 700;
@@ -1214,7 +1214,7 @@ b {
   gap: 29px;
 }
 .weekly-reward strong {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   color: var(--green);
   white-space: nowrap;
   width: 97px;
@@ -1258,7 +1258,7 @@ b {
   position: absolute;
   left: 73px;
   top: 52px;
-  font-size: 14px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .score-rank {
@@ -1312,7 +1312,7 @@ b {
   letter-spacing: 1px;
 }
 .disease-card header small {
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   color: #65624e;
 }
 .risk-grid {
@@ -1329,7 +1329,7 @@ b {
   background: #f4e9c9;
 }
 .risk-tile h4 {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #25251f;
   font-weight: 400;
   line-height: 17px;
@@ -1369,7 +1369,7 @@ b {
 }
 .risk-tile small {
   display: block;
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   line-height: 12px;
 }
 .impact-card {
@@ -1383,7 +1383,7 @@ b {
   white-space: nowrap;
 }
 .impact-card header > small {
-  font-size: 7px;
+  font-size: calc(7px * var(--ui-text-scale, 1));
   color: #625f4e;
   white-space: nowrap;
 }
@@ -1392,7 +1392,7 @@ b {
   gap: 13px;
   align-items: center;
   margin-left: 5px;
-  font-size: 7px;
+  font-size: calc(7px * var(--ui-text-scale, 1));
   white-space: nowrap;
   font-weight: 700;
 }
@@ -1421,7 +1421,7 @@ b {
   height: 26px;
 }
 .impact-row > span {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
 }
 .impact-bars {
   display: flex;
@@ -1463,7 +1463,7 @@ b {
   align-items: center;
 }
 .risk-change-arrow {
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -1477,7 +1477,7 @@ b {
 .chart-axis {
   display: flex;
   justify-content: space-between;
-  font-size: 6px;
+  font-size: calc(6px * var(--ui-text-scale, 1));
   color: #625f4e;
   margin: 5px 94px 0 66px;
 }
@@ -1558,7 +1558,7 @@ b {
 }
 .wallet-balance > span {
   color: #f3b52c;
-  font-size: 26px;
+  font-size: calc(26px * var(--ui-text-scale, 1));
   line-height: 36px;
 }
 .wallet-balance > strong {
@@ -1619,7 +1619,7 @@ b {
   align-items: center;
   justify-content: center;
   padding: 4px 6px;
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
 }
 .shop-tab[aria-pressed="true"] {
   box-shadow: 0 3px 0 #192218;
@@ -1656,10 +1656,10 @@ b {
   color: #304b2f;
 }
 .shop-tab-1 strong {
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
 }
 .shop-tab-1 small {
-  font-size: 6px;
+  font-size: calc(6px * var(--ui-text-scale, 1));
   line-height: 8px;
 }
 .shop-tab-1:after {
@@ -1698,7 +1698,7 @@ b {
   color: var(--gold);
 }
 .customization-intro > span {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   font-weight: 700;
   padding: 3px 7px;
   color: #eff8dc;
@@ -1708,7 +1708,7 @@ b {
 }
 .customization-intro > p {
   flex-basis: 100%;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 17px;
 }
 .character-collection + .character-collection {
@@ -1731,17 +1731,17 @@ b {
   object-fit: contain;
 }
 .character-collection h3 {
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   line-height: 19px;
 }
 .character-collection header p {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   line-height: 15px;
   color: #59634b;
 }
 .character-collection header > span {
   margin-left: auto;
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   font-weight: 700;
   color: #2e5636;
   white-space: nowrap;
@@ -1786,12 +1786,12 @@ b {
   margin: 6px 3px 0;
 }
 .style-card > strong {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 16px;
 }
 .style-card > small {
   margin-top: 2px;
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   line-height: 13px;
   color: #626652;
 }
@@ -1814,7 +1814,7 @@ b {
 .style-preview-copy {
   display: block;
   margin-top: 14px;
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   color: #56604b;
 }
 .dialog-cancel {
@@ -1825,7 +1825,7 @@ b {
   border-radius: 10px;
   background: #eee5c9;
   color: var(--ink);
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .product {
@@ -1871,7 +1871,7 @@ b {
   background: #efb31f;
   border: 1px solid var(--ink);
   border-radius: 4px;
-  font-size: 8px;
+  font-size: calc(8px * var(--ui-text-scale, 1));
   font-weight: 700;
   width: 36px;
   height: 21px;
@@ -1890,7 +1890,7 @@ b {
   height: 21px;
   display: grid;
   place-items: center;
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .product-badge {
@@ -1902,7 +1902,7 @@ b {
   background: #efb31f;
   height: 18px;
   padding: 3px 7px;
-  font-size: 8px;
+  font-size: calc(8px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .product-badge.sale {
@@ -1913,17 +1913,17 @@ b {
   position: absolute;
   left: 8px;
   top: 164px;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 15px;
 }
 .product.wide > strong {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
 }
 .product > small {
   position: absolute;
   left: 8px;
   top: 185px;
-  font-size: 7px;
+  font-size: calc(7px * var(--ui-text-scale, 1));
   color: #77745e;
   line-height: 10px;
   white-space: nowrap;
@@ -1943,7 +1943,7 @@ b {
   color: var(--ink);
 }
 .bonus-diamond {
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
   color: #d94b3d;
 }
 .daily-bonus-copy {
@@ -1956,13 +1956,13 @@ b {
   white-space: nowrap;
 }
 .daily-bonus-copy small {
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   font-weight: 700;
   line-height: 10px;
   color: #795400;
 }
 .daily-bonus > b {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   line-height: 22px;
   border: 1px solid var(--ink);
   border-radius: 5px;
@@ -2019,11 +2019,11 @@ b {
   border-radius: 3px;
 }
 .scenario-heading h1 {
-  font-size: 23px;
+  font-size: calc(23px * var(--ui-text-scale, 1));
   line-height: 29px;
 }
 .scenario-heading p {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 17px;
   margin-top: 5px;
 }
@@ -2042,7 +2042,7 @@ b {
   background: var(--red);
   border: 1.5px solid var(--ink);
   border-radius: 12px;
-  font-size: 16px;
+  font-size: calc(16px * var(--ui-text-scale, 1));
   font-weight: 700;
   color: #fff4ce;
 }
@@ -2062,7 +2062,7 @@ b {
   border: 1px solid #e5c984;
   border-radius: 12px;
   box-shadow: 0 5px 30px #0006;
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   line-height: 1.6;
   z-index: 30;
   opacity: 0;
@@ -2078,7 +2078,7 @@ b {
   position: absolute;
   right: 8px;
   top: 8px;
-  font-size: 22px;
+  font-size: calc(22px * var(--ui-text-scale, 1));
 }
 .login-screen .scenario-content {
   margin: 0 16px;
@@ -2119,14 +2119,14 @@ b {
   position: absolute;
   left: 81px;
   top: 274px;
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   color: var(--red);
 }
 .login-hero p {
   position: absolute;
   left: 291px;
   top: 311px;
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   font-weight: 700;
   line-height: 10px;
 }
@@ -2139,18 +2139,18 @@ b {
   padding: 14px 24px 0;
 }
 .login-form h1 {
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   line-height: 18px;
   color: #ffd34a;
 }
 .login-form > p {
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   margin-top: 3px;
   line-height: 13px;
 }
 .login-form > label {
   display: block;
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   font-weight: 700;
   line-height: 15px;
   margin-top: 9px;
@@ -2173,7 +2173,7 @@ b {
   border: 0;
   background: none;
   padding: 0;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #5d6258;
   outline-offset: 7px;
 }
@@ -2186,7 +2186,7 @@ b {
   height: 44px;
 }
 .password-input input {
-  font-size: 16px;
+  font-size: calc(16px * var(--ui-text-scale, 1));
   color: var(--ink);
 }
 .password-input button {
@@ -2195,7 +2195,7 @@ b {
 .login-next {
   height: 50px;
   margin-top: 16px;
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
   border-radius: 10px;
   position: relative;
   overflow: hidden;
@@ -2204,7 +2204,7 @@ b {
   position: absolute;
   right: 40px;
   top: 6px;
-  font-size: 26px;
+  font-size: calc(26px * var(--ui-text-scale, 1));
 }
 .login-next:after {
   content: "";
@@ -2218,7 +2218,7 @@ b {
   box-shadow: 11px 0 #c6352d;
 }
 .signup-link {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   display: block;
   text-align: center;
   margin-top: 21px;
@@ -2246,7 +2246,7 @@ b {
   gap: 12px;
 }
 .profile-heading h1 {
-  font-size: 23px;
+  font-size: calc(23px * var(--ui-text-scale, 1));
   line-height: 32px;
 }
 .profile-title-row > span {
@@ -2259,14 +2259,14 @@ b {
   font: 400 7px/12px var(--pixel);
 }
 .profile-heading h2 {
-  font-size: 20px;
+  font-size: calc(20px * var(--ui-text-scale, 1));
   line-height: 29px;
   margin-top: 18px;
   color: var(--gold);
   word-break: keep-all;
 }
 .profile-heading p {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   line-height: 20px;
   margin-top: 10px;
   color: #e2e6d6;
@@ -2287,14 +2287,14 @@ b {
   padding: 0 0 10px;
   margin-bottom: 12px;
   border-bottom: 1px solid #bdc7ae40;
-  font-size: 14px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
   font-weight: 700;
   line-height: 20px;
 }
 .profile-section-note {
   margin: -2px 0 12px;
   color: #c6d2c3;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 18px;
 }
 .profile-grid {
@@ -2306,7 +2306,7 @@ b {
   grid-template-columns: minmax(0, 1fr);
 }
 .profile-grid label {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   font-weight: 700;
   line-height: 18px;
   min-width: 0;
@@ -2355,7 +2355,7 @@ b {
   color: var(--ink);
   width: 100%;
   padding: 0 12px;
-  font-size: 16px;
+  font-size: calc(16px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .health-input {
@@ -2373,7 +2373,7 @@ b {
   min-width: 0;
   color: var(--ink);
   font-weight: 700;
-  font-size: 16px;
+  font-size: calc(16px * var(--ui-text-scale, 1));
   line-height: 24px;
   appearance: textfield;
   -moz-appearance: textfield;
@@ -2387,7 +2387,7 @@ b {
   flex-shrink: 0;
   white-space: nowrap;
   color: #59664f;
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   font-weight: 500;
 }
 .health-select {
@@ -2415,7 +2415,7 @@ b {
   display: block;
   margin-top: 6px;
   color: #c6d2c3;
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   font-weight: 400;
   line-height: 18px;
 }
@@ -2434,7 +2434,7 @@ b {
   border: 1px solid #839582;
   border-radius: 9px;
   background: #243d42;
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .health-options {
@@ -2462,7 +2462,7 @@ b {
   border: 1px solid transparent;
   border-radius: 5px;
   color: #d5ded0;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
 }
 .health-options input:checked + span {
   color: var(--ink);
@@ -2485,19 +2485,19 @@ b {
 }
 .bmi-card small {
   display: block;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #5d6258;
   font-weight: 700;
   line-height: 17px;
 }
 .bmi-card strong {
   display: block;
-  font-size: 26px;
+  font-size: calc(26px * var(--ui-text-scale, 1));
   line-height: 32px;
   font-variant-numeric: tabular-nums;
 }
 .bmi-card > span {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 18px;
   color: #59664f;
   text-align: right;
@@ -2511,7 +2511,7 @@ b {
 }
 .profile-submit > span {
   font-family: var(--pixel);
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
 }
 .privacy-note {
   display: flex;
@@ -2519,7 +2519,7 @@ b {
   gap: 8px;
   justify-content: center;
   margin-top: -8px;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 18px;
   color: #c6d2c3;
 }
@@ -2545,7 +2545,7 @@ b {
   z-index: -1;
 }
 .dinosaur-screen .scenario-heading p {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   color: #ffd34a;
 }
 .dinosaur-grid {
@@ -2570,13 +2570,13 @@ b {
   position: absolute;
   left: 12.5px;
   top: 80.5px;
-  font-size: 14px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
 }
 .dinosaur-card > small {
   position: absolute;
   left: 12.5px;
   top: 103.5px;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #5d6258;
 }
 .dinosaur-card.selected {
@@ -2601,7 +2601,7 @@ b {
   color: #fff8e7;
   display: grid;
   place-items: center;
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .dinosaur-0 {
@@ -2665,11 +2665,11 @@ b {
   padding: 11px 16px;
 }
 .dinosaur-callout h2 {
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
   line-height: 20px;
 }
 .dinosaur-callout p {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   color: #5d6258;
   margin-top: 6px;
 }
@@ -2702,7 +2702,7 @@ b {
   padding: 7px 12px;
   background: #171b16;
   border-radius: 8px;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   line-height: 14px;
   color: #fff4ce;
 }
@@ -2711,7 +2711,7 @@ b {
   left: 16px;
   bottom: 18px;
   color: #fff4ce;
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
   line-height: 21px;
 }
 .initial-scene {
@@ -2733,24 +2733,24 @@ b {
   padding: 12px 14px;
 }
 .first-risk h2 {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   color: #5d6258;
   line-height: 17px;
 }
 .first-risk > strong {
   display: block;
-  font-size: 32px;
+  font-size: calc(32px * var(--ui-text-scale, 1));
   line-height: 42px;
   color: #b63b30;
 }
 .first-risk p {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #2b7a4b;
   margin-top: 4px;
   line-height: 16px;
 }
 .first-quests-title {
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
   line-height: 22px;
   margin-top: 16px;
 }
@@ -2776,11 +2776,11 @@ b {
   background: #57a768;
 }
 .first-quest b {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   flex: 1;
 }
 .first-quest > strong {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   color: #b63b30;
   width: 74px;
 }
@@ -2788,13 +2788,13 @@ b {
   margin-top: 28px;
 }
 .first-result-note {
-  font-size: 9px;
+  font-size: calc(9px * var(--ui-text-scale, 1));
   color: #e8e0be;
   text-align: center;
   margin-top: 13px;
 }
 .quest-back {
-  font-size: 21px;
+  font-size: calc(21px * var(--ui-text-scale, 1));
   font-weight: 700;
   line-height: 30px;
   display: block;
@@ -2814,16 +2814,16 @@ b {
   border-radius: 14px;
   display: grid;
   place-items: center;
-  font-size: 22px;
+  font-size: calc(22px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .quest-detail-heading h1 {
-  font-size: 22px;
+  font-size: calc(22px * var(--ui-text-scale, 1));
   line-height: 28px;
   margin-top: 4px;
 }
 .quest-detail-heading p {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   line-height: 17px;
   margin-top: 9px;
 }
@@ -2848,7 +2848,7 @@ b {
   position: absolute;
   right: 18px;
   top: -5px;
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
 }
 .quest-reason {
   height: 176px;
@@ -2856,12 +2856,12 @@ b {
   padding: 14px 16px;
 }
 .quest-reason h2 {
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
   line-height: 20px;
   color: #b63b30;
 }
 .quest-reason p {
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   line-height: 16px;
   max-width: 202px;
   margin-top: 14px;
@@ -2877,11 +2877,11 @@ b {
   background: #d9e8ce;
   border-radius: 8px;
   color: #2b7a4b;
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .reward-label {
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   line-height: 18px;
   margin-top: 30px;
 }
@@ -2899,14 +2899,14 @@ b {
 }
 .quest-reward strong {
   color: var(--gold);
-  font-size: 28px;
+  font-size: calc(28px * var(--ui-text-scale, 1));
   line-height: 35px;
 }
 .quest-reward b {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
 }
 .quest-reward p {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   font-weight: 700;
   margin-top: 8px;
 }
@@ -2915,7 +2915,7 @@ b {
 }
 .complete-help {
   text-align: center;
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   color: #e8e0be;
   margin-top: 16px;
 }
@@ -2924,7 +2924,7 @@ b {
 }
 .reward-screen h1 {
   text-align: center;
-  font-size: 25px;
+  font-size: calc(25px * var(--ui-text-scale, 1));
   line-height: 31px;
   white-space: nowrap;
 }
@@ -2946,7 +2946,7 @@ b {
   display: block;
   text-align: center;
   margin-top: 23px;
-  font-size: 26px;
+  font-size: calc(26px * var(--ui-text-scale, 1));
   line-height: 33px;
 }
 .reward-stats {
@@ -2955,28 +2955,28 @@ b {
   padding: 14px 16px;
 }
 .reward-stats h2 {
-  font-size: 16px;
+  font-size: calc(16px * var(--ui-text-scale, 1));
   line-height: 21px;
 }
 .reward-stats > div {
   display: grid;
   grid-template-columns: 148px 1fr;
   margin-top: 12px;
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   color: #2b7a4b;
 }
 .reward-stats p {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #5d6258;
   margin-top: 10px;
 }
 .reward-next {
   margin: 177px 20px 0;
   width: calc(100% - 40px);
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
 }
 .buff-screen .scenario-heading h1 {
-  font-size: 21px;
+  font-size: calc(21px * var(--ui-text-scale, 1));
 }
 .buff-screen .scenario-heading p {
   font-weight: 700;
@@ -3000,7 +3000,7 @@ b {
 }
 .buff-scene > strong {
   bottom: 24px;
-  font-size: 14px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
 }
 .buff-message {
   height: 82px;
@@ -3008,11 +3008,11 @@ b {
   padding: 13px 14px;
 }
 .buff-message h2 {
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
   line-height: 21px;
 }
 .buff-message p {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #5d6258;
   margin-top: 9px;
 }
@@ -3027,14 +3027,14 @@ b {
   justify-content: space-between;
   height: 38px;
   padding: 0 33px 0 12px;
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
 }
 .buff-quests strong {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
 }
 .buff-note {
   text-align: center;
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   color: #e8e0be;
   margin-top: 40px;
 }
@@ -3046,11 +3046,11 @@ b {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .my-page-screen h1 {
-  font-size: 22px;
+  font-size: calc(22px * var(--ui-text-scale, 1));
   line-height: 29px;
 }
 .member-card {
@@ -3070,21 +3070,21 @@ b {
   background: #ffd34a;
   display: grid;
   place-items: center;
-  font-size: 14px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .member-card h2 {
-  font-size: 18px;
+  font-size: calc(18px * var(--ui-text-scale, 1));
   line-height: 24px;
 }
 .member-card p {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   color: #5d6258;
   margin-top: 6px;
   white-space: nowrap;
 }
 .member-card > strong {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #b63b30;
   margin-left: auto;
   align-self: flex-start;
@@ -3093,7 +3093,7 @@ b {
   white-space: nowrap;
 }
 .account-heading {
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   line-height: 18px;
   margin-top: 28px;
 }
@@ -3111,17 +3111,17 @@ b {
   text-align: left;
 }
 .account-menu h3 {
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   line-height: 18px;
 }
 .account-menu p {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   color: #727668;
   margin-top: 5px;
   line-height: 15px;
 }
 .account-menu button > span {
-  font-size: 24px;
+  font-size: calc(24px * var(--ui-text-scale, 1));
   color: #b63b30;
   line-height: 30px;
   margin-right: 6px;
@@ -3140,7 +3140,7 @@ b {
   color: #a72e24;
   box-shadow: 0 3px 0 #171b16;
   width: 100%;
-  font-size: 14px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .logout-button svg {
@@ -3156,7 +3156,7 @@ b {
   transform: translateY(2px);
 }
 .app-version {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   color: #e8e0be;
   text-align: center;
   margin-top: 29px;
@@ -3178,11 +3178,11 @@ b {
   padding: 24px;
 }
 .info-dialog h2 {
-  font-size: 18px;
+  font-size: calc(18px * var(--ui-text-scale, 1));
 }
 .info-dialog p,
 .info-dialog .dialog-body {
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-text-scale, 1));
   line-height: 1.7;
   margin: 16px 0;
 }
@@ -3199,16 +3199,19 @@ b {
   }
 }
 .mobile-screen[data-device-preview="false"] {
+  max-width: none;
+  width: 100%;
+  margin: 0;
   min-height: 100svh;
   padding-top: max(12px, env(safe-area-inset-top));
   padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 @media (max-width: 374px) {
   .greeting-copy h1 {
-    font-size: 19px;
+    font-size: calc(19px * var(--ui-text-scale, 1));
   }
   .greeting-copy p {
-    font-size: 11px;
+    font-size: calc(11px * var(--ui-text-scale, 1));
   }
   .greeting {
     gap: 8px;
@@ -3217,13 +3220,13 @@ b {
     padding-left: 5px;
   }
   .page-heading h2 {
-    font-size: 16px;
+    font-size: calc(16px * var(--ui-text-scale, 1));
   }
   .dashboard-screen .page-heading h2 {
-    font-size: 14px;
+    font-size: calc(14px * var(--ui-text-scale, 1));
   }
   .compact-quest strong {
-    font-size: 10px;
+    font-size: calc(10px * var(--ui-text-scale, 1));
   }
   .compact-quests {
     padding-left: 4px;
@@ -3236,99 +3239,99 @@ b {
     gap: 3px;
   }
   .compact-quest-title h3 {
-    font-size: 11px;
+    font-size: calc(11px * var(--ui-text-scale, 1));
   }
   .score-rank {
-    font-size: 11px;
+    font-size: calc(11px * var(--ui-text-scale, 1));
   }
   .health-score p {
-    font-size: 10px;
+    font-size: calc(10px * var(--ui-text-scale, 1));
     left: 112px;
   }
   .score-track {
     left: 112px;
   }
   .health-score h3 {
-    font-size: 9px;
+    font-size: calc(9px * var(--ui-text-scale, 1));
   }
   .impact-card h3 {
-    font-size: 11px;
+    font-size: calc(11px * var(--ui-text-scale, 1));
     letter-spacing: 0;
   }
   .chart-legend {
     gap: 5px;
-    font-size: 6px;
+    font-size: calc(6px * var(--ui-text-scale, 1));
   }
   .impact-row {
     grid-template-columns: 45px minmax(0, 1fr) 80px;
     gap: 6px;
   }
   .growth-insight h3 {
-    font-size: 9px;
+    font-size: calc(9px * var(--ui-text-scale, 1));
   }
   .growth-insight p {
-    font-size: 9px;
+    font-size: calc(9px * var(--ui-text-scale, 1));
   }
   .shop-wallet p {
-    font-size: 9px;
+    font-size: calc(9px * var(--ui-text-scale, 1));
   }
   .shop-tabs {
     gap: 6px;
   }
   .shop-tab {
     padding-inline: 4px;
-    font-size: 11px;
+    font-size: calc(11px * var(--ui-text-scale, 1));
   }
   .shop-tab-content {
     gap: 4px;
   }
   .product-price {
     width: 47px;
-    font-size: 8px;
+    font-size: calc(8px * var(--ui-text-scale, 1));
   }
   .rrr-badge {
     left: 6px;
     width: 30px;
-    font-size: 7px;
+    font-size: calc(7px * var(--ui-text-scale, 1));
   }
   .quest-summary {
     padding-left: 9px;
     gap: 8px;
   }
   .quest-summary h3 {
-    font-size: 10px;
+    font-size: calc(10px * var(--ui-text-scale, 1));
   }
   .quest-row-copy h3 {
-    font-size: 11px;
+    font-size: calc(11px * var(--ui-text-scale, 1));
   }
   .weekly-reward h3 {
-    font-size: 10px;
+    font-size: calc(10px * var(--ui-text-scale, 1));
   }
   .scenario-content {
     margin-left: 18px;
     margin-right: 18px;
   }
   .scenario-heading h1 {
-    font-size: 20px;
+    font-size: calc(20px * var(--ui-text-scale, 1));
   }
   .dinosaur-card img {
     max-width: 80%;
     left: 20px;
   }
   .dinosaur-card strong {
-    font-size: 12px;
+    font-size: calc(12px * var(--ui-text-scale, 1));
   }
   .dinosaur-callout h2 {
-    font-size: 13px;
+    font-size: calc(13px * var(--ui-text-scale, 1));
   }
   .quest-detail-heading {
     gap: 10px;
   }
   .quest-detail-heading h1 {
-    font-size: 18px;
+    font-size: calc(18px * var(--ui-text-scale, 1));
   }
   .reward-screen h1 {
-    font-size: 21px;
+    font-size: calc(21px * var(--ui-text-scale, 1));
   }
   .reward-stats {
     margin-left: 0;
@@ -3339,13 +3342,13 @@ b {
   }
   .member-card > strong {
     margin-right: 0;
-    font-size: 9px;
+    font-size: calc(9px * var(--ui-text-scale, 1));
   }
   .member-card h2 {
-    font-size: 16px;
+    font-size: calc(16px * var(--ui-text-scale, 1));
   }
   .member-card p {
-    font-size: 10px;
+    font-size: calc(10px * var(--ui-text-scale, 1));
   }
   .login-form {
     padding-left: 18px;
@@ -3442,11 +3445,11 @@ b {
   outline: none;
 }
 .risk-screen h1 {
-  font-size: 21px;
+  font-size: calc(21px * var(--ui-text-scale, 1));
   line-height: 29px;
 }
 .risk-screen .scenario-content > h2 {
-  font-size: 14px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
   line-height: 20px;
   margin-top: 9px;
 }
@@ -3462,7 +3465,7 @@ b {
   border-radius: 8px;
   background: #fff8e7;
   color: #fff4ce;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .period-tabs button[aria-pressed="true"] {
@@ -3478,14 +3481,14 @@ b {
   height: 73px;
 }
 .risk-history h3 {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #5d6258;
   line-height: 16px;
 }
 .risk-history header > strong {
   display: block;
   color: #b63b30;
-  font-size: 28px;
+  font-size: calc(28px * var(--ui-text-scale, 1));
   line-height: 36px;
   margin-top: 4px;
 }
@@ -3494,10 +3497,10 @@ b {
   left: 174px;
   top: 31px;
   color: #2b7a4b;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
 }
 .risk-history > p {
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   color: #5d6258;
   word-spacing: 5px;
   margin-left: 14px;
@@ -3514,7 +3517,7 @@ b {
   padding: 12px;
 }
 .risk-summary h3 {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   line-height: 18px;
 }
 .risk-summary p {
@@ -3524,16 +3527,16 @@ b {
   gap: 17px;
 }
 .risk-summary p > strong {
-  font-size: 30px;
+  font-size: calc(30px * var(--ui-text-scale, 1));
   line-height: 37px;
   color: #2b7a4b;
 }
 .risk-summary p > span {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
 }
 .risk-summary b {
   display: block;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #b63b30;
   margin-top: 13px;
 }
@@ -3556,18 +3559,18 @@ b {
   padding: 0 25px 0 12px;
 }
 .week-summary h3 {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #5d6258;
 }
 .week-summary strong {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   min-width: 60px;
 }
 .withered-screen .scenario-heading h1 {
-  font-size: 21px;
+  font-size: calc(21px * var(--ui-text-scale, 1));
 }
 .withered-screen .scenario-heading p {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   margin-top: 7px;
 }
 .withered-scene {
@@ -3587,7 +3590,7 @@ b {
   padding: 8px 11px;
   width: 142px;
   height: 30px;
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   font-weight: 700;
 }
 .withered-scene img {
@@ -3605,7 +3608,7 @@ b {
   right: 0;
   text-align: center;
   top: 270px;
-  font-size: 14px;
+  font-size: calc(14px * var(--ui-text-scale, 1));
   color: #5d6258;
 }
 .withered-message {
@@ -3614,18 +3617,18 @@ b {
   padding: 13px 14px;
 }
 .withered-message h2 {
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
   color: #b63b30;
   line-height: 20px;
 }
 .withered-message p {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   line-height: 16px;
   margin-top: 14px;
 }
 .withered-screen .primary-button {
   margin-top: 30px;
-  font-size: 15px;
+  font-size: calc(15px * var(--ui-text-scale, 1));
 }
 .return-reminder {
   height: 82px;
@@ -3634,11 +3637,11 @@ b {
   position: relative;
 }
 .return-reminder h3 {
-  font-size: 11px;
+  font-size: calc(11px * var(--ui-text-scale, 1));
   color: #5d6258;
 }
 .return-reminder p {
-  font-size: 12px;
+  font-size: calc(12px * var(--ui-text-scale, 1));
   font-weight: 700;
   margin-top: 9px;
 }
@@ -3646,17 +3649,17 @@ b {
   position: absolute;
   right: 26px;
   bottom: 12px;
-  font-size: 10px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
   color: #5d6258;
 }
 @media (max-width: 374px) {
   .risk-screen h1 {
-    font-size: 18px;
+    font-size: calc(18px * var(--ui-text-scale, 1));
   }
   .risk-history header > b {
     left: auto;
     right: 0;
-    font-size: 9px;
+    font-size: calc(9px * var(--ui-text-scale, 1));
   }
   .risk-summary {
     gap: 10px;

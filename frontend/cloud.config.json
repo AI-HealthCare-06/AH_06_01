@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "supabaseUrl": "https://bjyanmywcclymklgcrhi.supabase.co",
+  "publishableKey": "sb_publishable_Q-EY4EVwICQXGeZz_gkTBQ_UDfGtOJD",
+  "apiUrl": "https://t7uhzwx69l.execute-api.ap-southeast-2.amazonaws.com",
+  "providers": {
+    "google": true,
+    "kakao": true,
+    "naver": true
+  }
+}

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { authenticateQuest } from "./fixtures/quest-evidence";
 
 test("every quest shows its actual progress and completion updates the bar", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -7,8 +8,8 @@ test("every quest shows its actual progress and completion updates the bar", asy
     await page.goto("/quests");
     await page.evaluate(() => document.fonts.ready);
     const bars = page.locator(".quest-list").getByRole("progressbar");
-    await expect(bars).toHaveCount(5);
-    for (const [index, expected] of [0, 0, 0, 0, 0].entries()) {
+    await expect(bars).toHaveCount(4);
+    for (const [index, expected] of [0, 0, 0, 0].entries()) {
       await expect(bars.nth(index)).toHaveAttribute("aria-valuenow", String(expected));
       const ratio = await bars
         .nth(index)
@@ -24,7 +25,7 @@ test("every quest shows its actual progress and completion updates the bar", asy
     for (const row of await page.locator(".quest-row").all()) {
       const bounds = (await row.boundingBox())!;
       const checkbox = (await row.locator(".checkbox").boundingBox())!;
-      expect(checkbox.x - bounds.x).toBeCloseTo(10, 0);
+      expect(checkbox.x - bounds.x).toBeCloseTo(12, 0);
       expect(
         await row
           .locator(".quest-row-copy")
@@ -32,15 +33,16 @@ test("every quest shows its actual progress and completion updates the bar", asy
       ).toBe(true);
     }
   }
-  await page.getByRole("link", { name: /물 8잔 마시기/ }).click();
+  await page.getByRole("tab", { name: "Sub Quest", exact: true }).click();
+  await page.getByRole("button", { name: /물 마시기 실천/ }).click();
+  await page.getByRole("link", { name: "진행·보상 자세히 보기" }).click();
+  await authenticateQuest(page, "water");
   await page.getByRole("button", { name: "완료 체크하기" }).click();
   await expect(page).toHaveURL(/\/reward$/);
   await page.goto("/quests");
-  await expect(page.getByRole("progressbar", { name: "물 8잔 마시기 진행도" })).toHaveAttribute(
-    "aria-valuenow",
-    "100",
-  );
-  await expect(page.locator(".quest-row .pixel-check")).toHaveCount(1);
+  await page.getByRole("tab", { name: "Sub Quest", exact: true }).click();
+  await expect(page.getByRole("button", { name: /물 마시기 실천/ })).toContainText("오늘 완료");
+  await expect(page.getByRole("button", { name: /물 마시기 실천/ })).not.toContainText("인증 대기");
 });
 
 test("numbers count up on tab entry and animate new rewards without changing their real value", async ({
@@ -84,7 +86,7 @@ test("charts and progress bars replay when returning to their tab", async ({ pag
       Reflect.set(window, "previousRadar", element);
       Reflect.set(window, "previousRadarAnimation", element.getAnimations()[0]);
     });
-  await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
+  await page.getByRole("link", { name: "Quest", exact: true }).click();
   await page
     .locator(".quest-row-progress .metric-fill")
     .first()
@@ -107,7 +109,7 @@ test("charts and progress bars replay when returning to their tab", async ({ pag
         );
       }),
   ).toBe(true);
-  await page.getByRole("button", { name: "퀘스트 찾기", exact: true }).click();
+  await page.getByRole("link", { name: "Quest", exact: true }).click();
   expect(
     await page
       .locator(".quest-row-progress .metric-fill")
@@ -123,6 +125,7 @@ test("charts and progress bars replay when returning to their tab", async ({ pag
       }),
   ).toBe(true);
   await page.getByRole("link", { name: "Dashboard", exact: true }).click();
+  await page.getByRole("link", { name: "상세 건강 보고서 웹으로 보기" }).click();
   await expect(page.locator(".impact-bars .metric-fill")).toHaveCount(6);
   expect(
     await page
@@ -145,7 +148,7 @@ test("reduced motion immediately shows final metrics and stops entry animations"
   );
   // Resume the test clock so the dashboard's async query notifications can run.
   await page.clock.resume();
-  for (const route of ["home", "quests", "dashboard", "shop"]) {
+  for (const route of ["home", "quests", "dashboard", "dashboard/report", "shop"]) {
     await page.goto(`/${route}`);
     await page.locator(".animated-number").first().waitFor();
     const animations = await page

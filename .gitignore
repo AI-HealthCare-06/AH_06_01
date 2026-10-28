@@ -31,3 +31,15 @@ docs/*.pdf
 docs/아키텍처 이미지.png
 docs/산출물_목록.md
 docs/레포템플릿_전체내용.md
+
+# App deployment inputs and local build exclusions
+*.jks
+*.keystore
+/ai/m1_stage/artifacts/
+__pycache__/
+*.py[cod]
+supabase/.temp/
+cdk.out/
+*.private.json
+*.apk
+*.aab

@@ -6,6 +6,32 @@ import type {
 import { motionConfig as config } from "./config";
 import type { MotionObservation, MotionQuest, ObjectBox, Point } from "./types";
 
+import type { InjectionObservation } from "./injection";
+
+export function extractInjectionHands(
+  hands: HandLandmarkerResult,
+  timestamp: number,
+  frameWidth: number,
+  frameHeight: number,
+): InjectionObservation {
+  return {
+    timestamp,
+    frameWidth,
+    frameHeight,
+    hands: hands.landmarks.flatMap((points) => {
+      const palm = [0, 5, 9, 13, 17].map((index) => points[index]).filter(visible);
+      return palm.length >= 3
+        ? [
+            {
+              x: palm.reduce((s, p) => s + p.x, 0) / palm.length,
+              y: palm.reduce((s, p) => s + p.y, 0) / palm.length,
+            },
+          ]
+        : [];
+    }),
+  };
+}
+
 const length = (a: Point, b: Point, width: number, height: number) =>
   Math.hypot((a.x - b.x) * width, (a.y - b.y) * height);
 const midpoint = (a: Point, b: Point): Point => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
@@ -68,6 +94,7 @@ export function extractObservation(
         ? "한 사람만 화면에 담아 주세요."
         : "얼굴을 화면 중앙에 담아 주세요.";
     observation.trackingChanged = face.faceLandmarks.length > 1;
+    observation.faceTrackingChanged = face.faceLandmarks.length > 1;
     return observation;
   }
   const landmarks = face.faceLandmarks[0];
@@ -152,6 +179,17 @@ export function extractObservation(
     null,
   );
   observation.hand = hand;
+  if (quest === "medicine" && hand) {
+    const chosen = hands.landmarks.find((points) => {
+      const pinch = midpoint(points[4], points[8]);
+      return length(pinch, hand, width, height) < 0.01;
+    });
+    if (chosen && [chosen[0], chosen[4], chosen[8], chosen[9]].every(visible)) {
+      const palmLength = length(chosen[0], chosen[9], width, height);
+      if (palmLength >= 12)
+        observation.pinchRatio = length(chosen[4], chosen[8], width, height) / palmLength;
+    }
+  }
   observation.distance = hand ? length(hand, mouth, width, height) / faceWidth : null;
   if (hand && previousHand && length(hand, previousHand, width, height) / faceWidth > 1.5)
     observation.trackingChanged = true;
@@ -159,8 +197,10 @@ export function extractObservation(
     previous?.mouth &&
     (length(mouth, previous.mouth, width, height) / faceWidth > (quest === "water" ? 2 : 0.7) ||
       (quest === "water" && (faceScale < 0.5 || faceScale > 2)))
-  )
+  ) {
     observation.trackingChanged = true;
+    observation.faceTrackingChanged = true;
+  }
   if (quest === "water") {
     const anchor =
       previous?.valid && previous.object && previous.objectObservedAt !== null

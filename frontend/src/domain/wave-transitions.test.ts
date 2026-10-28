@@ -33,7 +33,7 @@ describe("mixed waves and travel", () => {
         expect(state.spawned).toBeLessThanOrEqual(cap);
         sizes.add(state.spawned);
         mixed ||= state.enemies.some((e) => e.ranged) && state.enemies.some((e) => !e.ranged);
-        const baseHp = { 1: 70, 3: 77, 4: 81, 5: 84, 10: 105 }[wave]!;
+        const baseHp = { 1: 50, 3: 55, 4: 57, 5: 60, 10: 75 }[wave]!;
         for (const enemy of state.enemies) {
           expect(enemy.hp).toBe(enemy.maxHp);
           expect(enemy.hp).toBe(Math.round(baseHp * (enemy.ranged ? 1 : 1.375)));

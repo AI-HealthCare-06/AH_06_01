@@ -1,0 +1,186 @@
+{
+  "id": "htn-diabetes-v1",
+  "note": "Synthetic demonstration only; not population averages or a prescription.",
+  "profile": {
+    "name": "Min",
+    "age": 52,
+    "sex": "male",
+    "height": 175,
+    "weight": 85,
+    "bloodPressure": "148 / 94",
+    "glucose": 150,
+    "smoking": false,
+    "hypertensionFamily": true,
+    "diabetesFamily": true,
+    "conditions": ["hypertension", "diabetes"],
+    "conditionStatus": "selected",
+    "pregnancyStatus": "none",
+    "htnStatus": "on_medication",
+    "alcoholDays": 0,
+    "alcoholWeek": 0,
+    "bingeMonthly": false,
+    "waistCm": 98,
+    "restingHeartRate": 80,
+    "educationYears": 12,
+    "sleepHours": 6.2,
+    "activeMinutesWeek": 90,
+    "familyHistory": ["hypertension", "diabetes"]
+  },
+  "medications": [
+    {
+      "id": "demo-htn",
+      "name": "고혈압약",
+      "dose": "등록된 처방량",
+      "condition": "hypertension",
+      "drugClass": "other",
+      "times": ["08:00", "13:00", "20:00"],
+      "active": true
+    },
+    {
+      "id": "demo-insulin",
+      "name": "인슐린",
+      "dose": "등록된 처방량",
+      "condition": "diabetes",
+      "drugClass": "other",
+      "times": ["08:00"],
+      "active": true
+    }
+  ],
+  "records": [
+    {
+      "steps": 3400,
+      "sleepHours": 5.4,
+      "systolic": 156,
+      "diastolic": 98,
+      "restingHr": 82,
+      "glucose": 162,
+      "completed": ["meal", "water", "medicine"],
+      "survey": {
+        "bedtime": "00:36",
+        "wakeTime": "06:00",
+        "activeMinutes": 15,
+        "sedentaryHours": 9,
+        "snoringScore": 6,
+        "daytimeSleepinessScore": 5,
+        "nocturia": false
+      }
+    },
+    {
+      "steps": 5200,
+      "sleepHours": 6.1,
+      "systolic": 152,
+      "diastolic": 96,
+      "restingHr": 80,
+      "glucose": 155,
+      "completed": ["medicine", "meal", "water"],
+      "survey": {
+        "bedtime": "23:54",
+        "wakeTime": "06:00",
+        "activeMinutes": 20,
+        "sedentaryHours": 8.5,
+        "snoringScore": 5,
+        "daytimeSleepinessScore": 4,
+        "nocturia": false
+      }
+    },
+    {
+      "steps": 4100,
+      "sleepHours": 5.8,
+      "systolic": 154,
+      "diastolic": 97,
+      "restingHr": 84,
+      "glucose": 159,
+      "completed": ["medicine", "meal"],
+      "survey": {
+        "bedtime": "00:12",
+        "wakeTime": "06:00",
+        "activeMinutes": 10,
+        "sedentaryHours": 10,
+        "snoringScore": 7,
+        "daytimeSleepinessScore": 6,
+        "nocturia": false
+      }
+    },
+    {
+      "steps": 6800,
+      "sleepHours": 7,
+      "systolic": 149,
+      "diastolic": 94,
+      "restingHr": 79,
+      "glucose": 151,
+      "completed": ["medicine", "meal", "walk", "water"],
+      "survey": {
+        "bedtime": "23:00",
+        "wakeTime": "06:00",
+        "activeMinutes": 25,
+        "sedentaryHours": 7.5,
+        "snoringScore": 3,
+        "daytimeSleepinessScore": 0,
+        "nocturia": false
+      }
+    },
+    {
+      "steps": 5600,
+      "sleepHours": 6.4,
+      "systolic": 150,
+      "diastolic": 95,
+      "restingHr": 81,
+      "glucose": 153,
+      "completed": ["medicine", "meal", "water"],
+      "survey": {
+        "bedtime": "23:36",
+        "wakeTime": "06:00",
+        "activeMinutes": 15,
+        "sedentaryHours": 9,
+        "snoringScore": 5,
+        "daytimeSleepinessScore": 4,
+        "nocturia": false
+      }
+    },
+    {
+      "steps": 4700,
+      "sleepHours": 5.6,
+      "systolic": 147,
+      "diastolic": 93,
+      "restingHr": 78,
+      "glucose": 148,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "00:24",
+        "wakeTime": "06:00",
+        "activeMinutes": 0,
+        "sedentaryHours": 10,
+        "snoringScore": 7,
+        "daytimeSleepinessScore": 6,
+        "nocturia": false
+      }
+    },
+    {
+      "steps": 4200,
+      "sleepHours": 6.2,
+      "systolic": 148,
+      "diastolic": 94,
+      "restingHr": 80,
+      "glucose": 150,
+      "completed": ["meal"],
+      "survey": {
+        "bedtime": "23:48",
+        "wakeTime": "06:00",
+        "activeMinutes": 5,
+        "sedentaryHours": 9,
+        "snoringScore": 6,
+        "daytimeSleepinessScore": 5,
+        "nocturia": false
+      }
+    }
+  ],
+  "m2": {
+    "snoring": true,
+    "daytime_sleepiness": true,
+    "nocturia": false,
+    "salty_habit": true,
+    "eating_out_per_week": 4,
+    "sedentary_hours": 9
+  },
+  "revision": "daily-survey-week-v2"
+}

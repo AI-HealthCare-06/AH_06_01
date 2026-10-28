@@ -1,3 +1,4 @@
+import { selectPixelOption } from "./helpers/controls";
 import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
@@ -71,15 +72,15 @@ test("dashboard alone shows quest borders and selected dates/ranges drive the re
   const days = page.locator(".weekly-calendar button");
   for (let i = 0; i < 3; i++) {
     await expect(days.nth(i)).toHaveAttribute("data-past", "true");
-    await expect(days.nth(i)).toHaveAttribute("data-completion", String(i));
+    await expect(days.nth(i)).toHaveAttribute("data-completion", String([0, 1, 3][i]));
   }
   await days.nth(2).click();
   await expect(page.getByRole("button", { name: "조회 기준 날짜" })).toHaveAttribute(
     "data-date",
     "2026-09-29",
   );
-  await expect(page.locator(".report-body dl")).toContainText("선택일 퀘스트4 / 5");
-  await page.getByLabel("건강 변화 조회 기간").selectOption("custom");
+  await expect(page.locator(".summary-score dl")).toContainText("4 / 4");
+  await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "custom");
   await page.getByRole("button", { name: "조회 날짜 범위" }).click();
   await page
     .getByRole("dialog")
@@ -89,7 +90,8 @@ test("dashboard alone shows quest borders and selected dates/ranges drive the re
     .getByRole("dialog")
     .getByRole("button", { name: "2026년 9월 29일", exact: true })
     .click();
-  await expect(page.locator(".dashboard-range-label")).toHaveText("2026-09-20 ~ 2026-09-29");
+  await expect(page.locator(".dashboard-range-label")).toContainText("2026-09-20 ~ 2026-09-29");
+  await page.getByRole("link", { name: "상세 건강 보고서 웹으로 보기" }).click();
   await expect(page.locator(".trend-column small").first()).toHaveText("09.20");
   await expect(page.locator(".trend-column small").last()).toHaveText("09.29");
   await page.getByRole("button", { name: "조회 날짜 범위" }).click();
@@ -153,8 +155,8 @@ test("pixel date picker limits future dates, handles leap years and returns keyb
   const bounds = (await dialog.boundingBox())!;
   expect(bounds.x).toBeGreaterThanOrEqual(0);
   expect(bounds.x + bounds.width).toBeLessThanOrEqual(320);
-  await dialog.getByLabel("연도 선택").selectOption("2024");
-  await dialog.getByLabel("월 선택").selectOption("1");
+  await selectPixelOption(dialog.getByRole("combobox", { name: "연도 선택", exact: true }), "2024");
+  await selectPixelOption(dialog.getByRole("combobox", { name: "월 선택", exact: true }), "1");
   const leapDay = dialog.getByRole("button", { name: "2024년 2월 29일", exact: true });
   await expect(leapDay).toBeFocused();
   await page.keyboard.press("ArrowLeft");
@@ -163,7 +165,7 @@ test("pixel date picker limits future dates, handles leap years and returns keyb
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toHaveAttribute("data-date", "2024-02-28");
   await expect(trigger).toBeFocused();
-  await expect(page.locator(".dashboard-range-label")).toHaveText("2024-02-22 ~ 2024-02-28");
+  await expect(page.locator(".dashboard-range-label")).toContainText("2024-02-22 ~ 2024-02-28");
   await trigger.click();
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Escape");
@@ -182,13 +184,18 @@ test("vault assets, wallet actions and date controls stay within mobile bounds",
       await page.evaluate(() => document.fonts.ready);
       if (route === "character") {
         await expect(page.locator(".vault-hero h3")).toHaveText("티라노");
-        await page.getByRole("button", { name: "다음 공룡" }).click();
+        await page.getByRole("button", { name: "트리케라 선택", exact: true }).click();
         await expect(page.locator(".vault-hero h3")).toHaveText("트리케라");
-        await page.getByRole("button", { name: "이전 공룡" }).click();
+        await page.getByRole("button", { name: "티라노 선택", exact: true }).click();
         for (const img of await page.locator(".character-vault img").all()) {
           await expect
             .poll(() => img.evaluate((node) => (node as HTMLImageElement).naturalWidth))
             .toBeGreaterThan(0);
+        }
+        for (const img of await page
+          .locator('.vault-hero-stage img, .vault-roster button[aria-pressed="true"] img')
+          .all()) {
+          await expect(img).toBeInViewport();
           const box = (await img.boundingBox())!;
           expect(box.width).toBeGreaterThan(0);
           expect(box.x).toBeGreaterThanOrEqual(0);
@@ -196,13 +203,14 @@ test("vault assets, wallet actions and date controls stay within mobile bounds",
         }
       }
       if (route === "shop") {
-        await expect(page.locator(".wallet-heading")).toContainText("GOLD1,280G전환");
+        await expect(page.locator(".wallet-balance .number-final")).toHaveText("1,280");
+        await expect(page.getByRole("button", { name: "전환 ⇄", exact: true })).toBeVisible();
         await expect(
           page.getByRole("button", { name: "오늘의 무료 GOLD 10개 받기" }),
         ).toBeVisible();
         const heading = (await page.locator(".wallet-heading").boundingBox())!;
-        const description = (await page.locator(".shop-wallet > p").boundingBox())!;
-        expect(description.y).toBeGreaterThanOrEqual(heading.y + heading.height);
+        const actions = (await page.locator(".wallet-actions").boundingBox())!;
+        expect(actions.y).toBeGreaterThanOrEqual(heading.y + heading.height);
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
         width,

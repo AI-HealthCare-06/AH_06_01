@@ -1,0 +1,9 @@
+{
+  "app": "npx --no-install tsx app.ts",
+  "versionReporting": false,
+  "context": {
+    "@aws-cdk/core:defaultCrossStackReferences": "strong",
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/aws-lambda:useCdkManagedLogGroup": false
+  }
+}

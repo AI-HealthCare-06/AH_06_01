@@ -1,0 +1,3 @@
+-r requirements.txt
+mangum==0.22.0
+boto3==1.43.119

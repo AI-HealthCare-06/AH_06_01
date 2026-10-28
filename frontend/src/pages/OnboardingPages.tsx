@@ -6,10 +6,10 @@ import { DesignCanvas } from "../components/DesignCanvas";
 import { useNotice } from "../components/NoticeProvider";
 import { assets } from "../design/assets";
 import { dinosaurs } from "../design/dinosaurs";
-import { bmi, profileSchema } from "../domain/profile";
 import { useProfileStore } from "../stores/profile-store";
 import { useGameStore } from "../stores/game-store";
 import { DinosaurArt } from "../components/DinosaurArt";
+import { useSessionStore } from "../stores/session-store";
 
 export function LoginPage() {
   const [visible, setVisible] = useState(false);
@@ -18,6 +18,8 @@ export function LoginPage() {
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     notice("데모 모험을 시작해요. 이메일과 비밀번호는 전송·저장하지 않아요.");
+    useSessionStore.getState().signIn();
+    useGameStore.getState().resumeSession();
     navigate(useProfileStore.getState().onboardingCompleted ? "/home" : "/profile");
   }
   return (
@@ -90,7 +92,7 @@ export function LoginPage() {
         <button className="primary-button login-next" type="submit" aria-label="다음">
           다음<span>›</span>
         </button>
-        <Link className="signup-link" to="/profile">
+        <Link className="signup-link" to="/profile?mode=signup">
           계정이 없나요? 가입하기 ›
         </Link>
       </form>
@@ -98,284 +100,7 @@ export function LoginPage() {
   );
 }
 
-export function ProfilePage() {
-  const { profile, setProfile, onboardingCompleted } = useProfileStore();
-  const [draft, setDraft] = useState(profile);
-  const [unknownMeasurements, setUnknownMeasurements] = useState({
-    bloodPressure: profile.bloodPressure === null,
-    glucose: profile.glucose === null,
-  });
-  const notice = useNotice();
-  const navigate = useNavigate();
-  function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const result = profileSchema.safeParse({
-      ...draft,
-      bloodPressure: unknownMeasurements.bloodPressure ? null : (draft.bloodPressure ?? ""),
-      glucose: unknownMeasurements.glucose ? null : (draft.glucose ?? ""),
-    });
-    if (!result.success) {
-      notice("입력값을 확인해 주세요. 혈압은 120 / 80 형식으로 입력해 주세요.");
-      return;
-    }
-    setProfile(result.data);
-    notice(
-      onboardingCompleted
-        ? "건강 정보를 변경했어요."
-        : "프로필 입력을 완료했어요. 건강 점수와 위험도는 체험용 예시예요.",
-    );
-    navigate(onboardingCompleted ? "/home" : "/dinosaur");
-  }
-  return (
-    <ScenarioShell
-      className="profile-screen"
-      background={assets.profile.imgHealthBackgroundPixelOcean}
-      camera={assets.profile.imgEllipse}
-    >
-      <header className="profile-heading">
-        <div className="profile-title-row">
-          <h1>건강 프로필</h1>
-          {!onboardingCompleted && <span>STEP 01</span>}
-        </div>
-        {onboardingCompleted ? (
-          <h2>내 건강 정보를 업데이트해요.</h2>
-        ) : (
-          <h2>
-            나를 위한 건강 모험,
-            <br />
-            여기서 시작해요.
-          </h2>
-        )}
-        <p>
-          기본 정보와 최근 측정값을 입력하고
-          <br />
-          {onboardingCompleted
-            ? "변경 내용을 저장하고 홈으로 돌아가세요."
-            : "함께할 공룡을 만나보세요."}
-        </p>
-      </header>
-      <form onSubmit={submit} className="profile-form">
-        <fieldset className="profile-section">
-          <legend>기본 정보</legend>
-          <div className="profile-grid">
-            <label>
-              나이
-              <div className="health-input">
-                <input
-                  aria-label="나이"
-                  type="number"
-                  inputMode="numeric"
-                  min="1"
-                  max="120"
-                  required
-                  value={Number.isFinite(draft.age) ? draft.age : ""}
-                  onChange={(e) => setDraft({ ...draft, age: e.target.valueAsNumber })}
-                />
-                <span>세</span>
-              </div>
-            </label>
-            <label>
-              성별
-              <div className="health-select">
-                <select
-                  value={draft.sex}
-                  onChange={(e) => setDraft({ ...draft, sex: e.target.value as "female" | "male" })}
-                >
-                  <option value="female">여성</option>
-                  <option value="male">남성</option>
-                </select>
-              </div>
-            </label>
-            <label>
-              키
-              <div className="health-input">
-                <input
-                  aria-label="키"
-                  type="number"
-                  inputMode="decimal"
-                  min="50"
-                  max="250"
-                  step="0.1"
-                  required
-                  value={Number.isFinite(draft.height) ? draft.height : ""}
-                  onChange={(e) => setDraft({ ...draft, height: e.target.valueAsNumber })}
-                />
-                <span>cm</span>
-              </div>
-            </label>
-            <label>
-              몸무게
-              <div className="health-input">
-                <input
-                  aria-label="몸무게"
-                  type="number"
-                  inputMode="decimal"
-                  min="1"
-                  max="500"
-                  step="0.1"
-                  required
-                  value={Number.isFinite(draft.weight) ? draft.weight : ""}
-                  onChange={(e) => setDraft({ ...draft, weight: e.target.valueAsNumber })}
-                />
-                <span>kg</span>
-              </div>
-            </label>
-          </div>
-        </fieldset>
-        <fieldset className="profile-section">
-          <legend>최근 건강 측정값</legend>
-          <p className="profile-section-note">
-            최근 측정값을 입력해 주세요. 값을 모르면 ‘모름’을 선택해도 괜찮아요.
-          </p>
-          <div className="profile-grid profile-measurements">
-            <div className="measurement-field">
-              <div className="measurement-label-row">
-                <label htmlFor="blood-pressure">혈압</label>
-                <label className="unknown-measurement">
-                  <input
-                    type="checkbox"
-                    aria-label="혈압 모름"
-                    checked={unknownMeasurements.bloodPressure}
-                    onChange={(e) =>
-                      setUnknownMeasurements({
-                        ...unknownMeasurements,
-                        bloodPressure: e.target.checked,
-                      })
-                    }
-                  />
-                  <span>모름</span>
-                </label>
-              </div>
-              <div className="health-input pressure-input">
-                <input
-                  id="blood-pressure"
-                  aria-label="혈압"
-                  type="text"
-                  placeholder={unknownMeasurements.bloodPressure ? "모름" : "120 / 80"}
-                  aria-describedby="blood-pressure-hint"
-                  disabled={unknownMeasurements.bloodPressure}
-                  required={!unknownMeasurements.bloodPressure}
-                  value={unknownMeasurements.bloodPressure ? "" : (draft.bloodPressure ?? "")}
-                  onChange={(e) => setDraft({ ...draft, bloodPressure: e.target.value })}
-                />
-                <span>mmHg</span>
-              </div>
-              <small id="blood-pressure-hint" className="field-hint">
-                수축기 / 이완기 순서 · 예: 120 / 80
-              </small>
-            </div>
-            <div className="measurement-field">
-              <div className="measurement-label-row">
-                <label htmlFor="fasting-glucose">공복 혈당</label>
-                <label className="unknown-measurement">
-                  <input
-                    type="checkbox"
-                    aria-label="공복 혈당 모름"
-                    checked={unknownMeasurements.glucose}
-                    onChange={(e) =>
-                      setUnknownMeasurements({
-                        ...unknownMeasurements,
-                        glucose: e.target.checked,
-                      })
-                    }
-                  />
-                  <span>모름</span>
-                </label>
-              </div>
-              <div className="health-input">
-                <input
-                  id="fasting-glucose"
-                  aria-label="공복 혈당"
-                  type="number"
-                  inputMode="numeric"
-                  min="1"
-                  max="1000"
-                  placeholder={unknownMeasurements.glucose ? "모름" : "예: 104"}
-                  disabled={unknownMeasurements.glucose}
-                  required={!unknownMeasurements.glucose}
-                  value={
-                    !unknownMeasurements.glucose && Number.isFinite(draft.glucose)
-                      ? (draft.glucose ?? "")
-                      : ""
-                  }
-                  onChange={(e) => setDraft({ ...draft, glucose: e.target.valueAsNumber })}
-                />
-                <span>mg/dL</span>
-              </div>
-            </div>
-          </div>
-        </fieldset>
-        <fieldset className="profile-section">
-          <legend>생활 습관과 가족력</legend>
-          <div className="health-toggles">
-            {(
-              [
-                { key: "smoking", label: "흡연 여부" },
-                { key: "hypertensionFamily", label: "고혈압 가족력" },
-                { key: "diabetesFamily", label: "당뇨 가족력" },
-              ] as const
-            ).map(({ key, label }) => (
-              <div key={key} className="health-option-row">
-                <span id={`${key}-label`}>{label}</span>
-                <div className="health-options" role="radiogroup" aria-labelledby={`${key}-label`}>
-                  {([false, true, null] as const).map((value) => (
-                    <label key={String(value)}>
-                      <input
-                        type="radio"
-                        name={key}
-                        value={String(value)}
-                        checked={draft[key] === value}
-                        onChange={() => setDraft({ ...draft, [key]: value })}
-                      />
-                      <span>
-                        {value === null
-                          ? "모름"
-                          : key === "smoking"
-                            ? value
-                              ? "예"
-                              : "아니요"
-                            : value
-                              ? "있음"
-                              : "없음"}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </fieldset>
-        <div className="cream-card bmi-card">
-          <div>
-            <small>나의 BMI</small>
-            <strong aria-live="polite">
-              {Number.isFinite(draft.height) && draft.height > 0 && Number.isFinite(draft.weight)
-                ? bmi(draft.height, draft.weight)
-                : "—"}
-            </strong>
-          </div>
-          <span>
-            입력한 키와 몸무게로
-            <br />
-            자동 계산해요.
-          </span>
-        </div>
-        <button className="primary-button profile-submit" type="submit">
-          {onboardingCompleted ? "변경 저장하고 홈으로" : "공룡 깨우기"}
-          <span aria-hidden="true">→</span>
-        </button>
-        <p className="privacy-note">
-          <img src={assets.profile.imgHealthFormPrivacyIcon} alt="" />
-          <span>
-            지금은 체험 화면이에요.
-            <br />
-            입력한 건강 정보는 저장되지 않아요.
-          </span>
-        </p>
-      </form>
-    </ScenarioShell>
-  );
-}
+export { ProfileSurvey as ProfilePage } from "./ProfileSurvey";
 
 export function DinosaurPage() {
   const { game, chooseDinosaur } = useGameStore();

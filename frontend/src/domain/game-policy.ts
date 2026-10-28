@@ -1,7 +1,8 @@
-// Supplied game/economy documents. Ranged Elite/Boss proposals use their midpoint.
+// 2026-10-21 opening balance: reduce repeated early failures before quest buffs exist.
+// Spawn timing, group odds, progression rewards and later stages keep their current rules.
 export const stagePolicies = [
-  { level: 1, hp: 70, ad: 20, gold: 30 },
-  { level: 5, hp: 120, ad: 30, gold: 34 },
+  { level: 1, hp: 50, ad: 11, gold: 30 },
+  { level: 5, hp: 100, ad: 22, gold: 34 },
   { level: 10, hp: 180, ad: 42, gold: 38 },
   { level: 15, hp: 240, ad: 54, gold: 43 },
   { level: 20, hp: 300, ad: 66, gold: 48 },
@@ -19,6 +20,7 @@ export const wavePolicies = [
   { count: 100, hp: 1.5, ad: 1.25, gold: 1.1, extra: "boss" },
 ] as const;
 export type MonsterRank = "normal" | "elite" | "boss";
+export const combatBalanceRevision = 2;
 export const rankPolicies = {
   normal: { hp: 1, ad: 1, gold: 1, knockback: 0.2 },
   elite: { hp: 2.5, ad: 1.3, gold: 5, knockback: 0.1 },
@@ -69,17 +71,7 @@ export function incomingDamage(ad: number, def: number, reduction: number) {
   return Math.max(ad - def, ad * 0.1) * (1 - reduction);
 }
 export function sleepGoldMultiplier(hours: number | null) {
-  return hours === null
-    ? 1
-    : hours < 4
-      ? 0.8
-      : hours < 5
-        ? 0.9
-        : hours < 7
-          ? 1
-          : hours < 8
-            ? 1.1
-            : 1.2;
+  return hours === null || hours < 7 ? 1 : hours < 8 ? 1.1 : 1.2;
 }
 export function hydrationPenalty(ratio: number | null) {
   return ratio === null || ratio >= 0.75 ? 0 : ratio >= 0.5 ? 0.1 : ratio >= 0.25 ? 0.2 : 0.3;

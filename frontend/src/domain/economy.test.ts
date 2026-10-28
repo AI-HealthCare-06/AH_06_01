@@ -15,18 +15,18 @@ describe("Gold currency and reward limits", () => {
     expect(migrated).toMatchObject({ version: 2, gold: 17458, lastReward: { gold: 1000 } });
     expect(migrated).not.toHaveProperty("coins");
     expect(migrated.lastReward).not.toHaveProperty("coins");
-    const spent = purchaseEffect(convertDemoRp(migrated, 100), "emerald");
+    const spent = purchaseEffect(convertDemoRp(migrated, 10), "emerald");
     expect(spent.gold).toBe(6458);
     expect(restoreGame(JSON.parse(JSON.stringify(spent)))).toEqual(spent);
     expect(restoreGame({ ...spent, coins: 6610 }).gold).toBe(6458);
     expect(restoreGame({ ...legacy, gold: undefined }).gold).toBe(6610);
   });
-  it("atomically exchanges Gold at 100:1, caps by all periods, and persists the ledger", () => {
+  it("atomically exchanges Gold at 1000:1, caps by all periods, and persists the ledger", () => {
     const date = "2026-09-29";
-    const game = { ...initialGame(date), gold: 100000 };
+    const game = { ...initialGame(date), gold: 200000 };
     expect(convertDemoRp(game, 151, date)).toBe(game);
     const changed = convertDemoRp(game, 150, date);
-    expect(changed).toMatchObject({ gold: 85000, rp: 150, experience: 0 });
+    expect(changed).toMatchObject({ gold: 50000, rp: 150, experience: 0 });
     expect(convertDemoRp(changed, 1, date)).toBe(changed);
     expect(restoreGame(JSON.parse(JSON.stringify(changed))).rpLedger).toEqual([
       { date, amount: 150 },

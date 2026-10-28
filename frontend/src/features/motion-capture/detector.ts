@@ -13,7 +13,14 @@ export class MotionDetector {
   private slots = new Map<number, boolean>();
   private ratio = 0;
 
-  constructor(quest: MotionQuest, preparationAcknowledged: boolean) {
+  private config: typeof config;
+
+  constructor(
+    quest: MotionQuest,
+    preparationAcknowledged: boolean,
+    overrides: Partial<typeof config> = {},
+  ) {
+    this.config = { ...config, ...overrides };
     this.quest = quest;
     this.preparationAcknowledged = preparationAcknowledged;
   }
@@ -28,15 +35,15 @@ export class MotionDetector {
     if (this.stage === "detected") return this.progress("동작을 감지했어요.");
     const valid = observation.valid && distance !== null && Number.isFinite(distance);
     this.firstTimestamp ??= timestamp;
-    const slot = Math.floor((timestamp - this.firstTimestamp) / 100);
+    const slot = Math.floor((timestamp - this.firstTimestamp) / this.config.qualitySlotMs);
     this.slots.set(slot, valid);
-    const firstSlot = Math.max(0, slot - 29);
+    const firstSlot = Math.max(0, slot - Math.ceil(3000 / this.config.qualitySlotMs) + 1);
     for (const key of this.slots.keys()) if (key < firstSlot) this.slots.delete(key);
     this.ratio = [...this.slots.values()].filter(Boolean).length / (slot - firstSlot + 1);
     const delta = this.previousTimestamp === null ? 0 : timestamp - this.previousTimestamp;
     let accumulated =
-      this.previousValid && valid && delta <= config.maxAccumulationGapMs ? delta : 0;
-    const gapLimit = this.quest === "water" ? config.waterMaxGapMs : config.maxGapMs;
+      this.previousValid && valid && delta <= this.config.maxAccumulationGapMs ? delta : 0;
+    const gapLimit = this.quest === "water" ? this.config.waterMaxGapMs : this.config.maxGapMs;
     const lost = this.lastValidAt !== null && timestamp - this.lastValidAt > gapLimit;
     if (lost || observation.trackingChanged) {
       this.resetCandidate();
@@ -50,16 +57,18 @@ export class MotionDetector {
       return this.progress("약 준비 확인을 먼저 선택해 주세요.");
 
     const far =
-      distance >= (this.quest === "water" ? config.waterLeaveDistance : config.leaveDistance);
+      distance >=
+      (this.quest === "water" ? this.config.waterLeaveDistance : this.config.leaveDistance);
     const near =
       this.quest === "water"
-        ? observation.objectAtMouth && distance <= config.waterEnterDistance
-        : distance <= config.enterDistance;
-    const holdTarget = this.quest === "water" ? config.waterHoldMs : config.medicineHoldMs;
+        ? observation.objectAtMouth && distance <= this.config.waterEnterDistance
+        : distance <= this.config.enterDistance;
+    const holdTarget =
+      this.quest === "water" ? this.config.waterHoldMs : this.config.medicineHoldMs;
     switch (this.stage) {
       case "ready":
         this.heldMs = far ? this.heldMs + accumulated : 0;
-        if (this.heldMs >= config.stableMs) {
+        if (this.heldMs >= this.config.stableMs) {
           this.stage = "approaching";
           this.heldMs = 0;
         }
@@ -71,7 +80,7 @@ export class MotionDetector {
         }
         break;
       case "at_mouth":
-        if (this.quest === "water" ? distance > config.waterHoldDistance : !near)
+        if (this.quest === "water" ? distance > this.config.waterHoldDistance : !near)
           this.resetCandidate();
         else {
           this.heldMs += accumulated;
@@ -84,8 +93,8 @@ export class MotionDetector {
       case "returning":
         this.heldMs = far ? this.heldMs + accumulated : 0;
         if (
-          this.heldMs >= config.stableMs &&
-          this.ratio >= config.minimumValidRatio &&
+          this.heldMs >= this.config.stableMs &&
+          this.ratio >= this.config.minimumValidRatio &&
           (this.quest !== "water" || observation.objectEvidence === "detected")
         )
           this.stage = "detected";
@@ -101,6 +110,7 @@ export class MotionDetector {
           ? "컵이나 병을 입으로 가져가 주세요."
           : "준비한 손을 입으로 가져가 주세요.",
       at_mouth: "입 근처에서 잠깐 유지해 주세요.",
+      at_site: "지정 부위 근처의 손 움직임을 관찰하고 있어요.",
       returning:
         this.quest === "water"
           ? "컵을 화면 안에서 입 아래로 살짝 내려 주세요."
@@ -127,9 +137,9 @@ export class MotionDetector {
     const target =
       this.stage === "at_mouth"
         ? this.quest === "water"
-          ? config.waterHoldMs
-          : config.medicineHoldMs
-        : config.stableMs;
+          ? this.config.waterHoldMs
+          : this.config.medicineHoldMs
+        : this.config.stableMs;
     return {
       stage: this.stage,
       holdProgress: Math.min(1, this.heldMs / target),

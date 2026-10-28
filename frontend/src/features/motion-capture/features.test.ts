@@ -4,7 +4,7 @@ import type {
   FaceLandmarkerResult,
   HandLandmarkerResult,
 } from "@mediapipe/tasks-vision";
-import { extractObservation } from "./features";
+import { extractInjectionHands, extractObservation } from "./features";
 import { MotionDetector } from "./detector";
 import type { MotionObservation } from "./types";
 
@@ -45,6 +45,25 @@ function moveHand(hands: HandLandmarkerResult, y: number, x = 0.5) {
 }
 
 describe("camera feature geometry", () => {
+  it("extracts injection hands independently of a face and ignores cropped palms", () => {
+    const { hands } = landmarks();
+    expect(extractInjectionHands(hands, 100, 640, 480).hands).toEqual([{ x: 0.5, y: 0.6 }]);
+    hands.landmarks[0].forEach((point) => (point.x = 1.5));
+    expect(extractInjectionHands(hands, 200, 640, 480).hands).toEqual([]);
+  });
+  it("measures pinch aperture relative to the selected visible palm", () => {
+    const { face, hands } = landmarks();
+    hands.landmarks[0][0].y = 0.8;
+    hands.landmarks[0][9].y = 0.6;
+    hands.landmarks[0][4].x = 0.48;
+    hands.landmarks[0][8].x = 0.52;
+    const feature = extractObservation("medicine", face, hands, [], 100, 640, 480, null);
+    expect(feature.pinchRatio).toBeCloseTo(25.6 / 96);
+    hands.landmarks[0][0].y = 1.1;
+    expect(
+      extractObservation("medicine", face, hands, [], 200, 640, 480, feature).pinchRatio,
+    ).toBeUndefined();
+  });
   it("normalizes pixel distance by face width instead of mixing x/y units or model z", () => {
     const { face, hands } = landmarks();
     const feature = extractObservation("medicine", face, hands, [], 100, 640, 480, null);

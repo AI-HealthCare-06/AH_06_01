@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 test("development debug boxes share combat coordinates, follow enemies and preserve controls", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.evaluate(async () => {
     const path = "/src/stores/game-store.ts";
@@ -169,8 +169,8 @@ test("development debug boxes share combat coordinates, follow enemies and prese
 test("monster range status uses the exact combat threshold including body contact", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.getByRole("button", { name: "전투 디버그 표시" }).click();
   for (const offset of [0.001, 0, -0.001]) {
@@ -226,8 +226,8 @@ test("monster range status uses the exact combat threshold including body contac
 test("monster debug boundary agrees with damage, cooldown and knockback for melee, ranged and boss", async ({
   page,
 }) => {
-  await page.clock.install();
-  await page.clock.pauseAt(new Date());
+  await page.clock.install({ time: new Date("2026-10-28T03:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-28T03:01:00Z"));
   await page.goto("/home");
   await page.getByRole("button", { name: "전투 디버그 표시" }).click();
   for (const [art, dinosaur] of [
@@ -309,7 +309,7 @@ test("monster debug boundary agrees with damage, cooldown and knockback for mele
         { art, dinosaur, phase },
       );
       expect(result.hp, `${art}/${dinosaur}: ${phase}`).toBe(
-        art === 0 ? (["knockback", "attack-again"].includes(phase) ? 40 : 50) : hp,
+        art === 0 ? (phase === "attack-again" ? 40 : 50) : hp,
       );
       const indicator = page.locator('[data-range-actor="M42"]');
       await expect(indicator).toHaveAttribute("data-in-range", String(inside));
