@@ -77,6 +77,19 @@
   width: 100%;
   max-width: 180px;
 }
+.score-source {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stitch-health-hero > header {
+  position: relative;
+}
+.score-source [role="tooltip"] {
+  inset: calc(100% + 6px) 0 auto;
+  background: #fff4ce;
+  color: #243b30;
+}
 .score-ring > svg {
   display: block;
   width: 100%;

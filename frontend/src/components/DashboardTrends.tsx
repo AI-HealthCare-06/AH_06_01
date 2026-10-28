@@ -5,6 +5,7 @@ import type { HealthPeriod } from "../services/health-history";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { HealthTrend } from "./HealthTrend";
 import { PixelIcon } from "./PixelIcon";
+import type { HealthScore } from "../domain/health-score";
 
 const metrics = { score: "건강 점수", quests: "퀘스트", steps: "걸음 수", sleep: "수면 시간" };
 type Metric = keyof typeof metrics;
@@ -13,14 +14,12 @@ export function DashboardTrends({
   game,
   date,
   period,
-  from,
   score,
 }: {
   game: GameState;
   date: string;
   period: HealthPeriod;
-  from?: string;
-  score: number;
+  score: HealthScore;
 }) {
   const [metric, setMetric] = useState<Metric>("score");
   const id = useId();
@@ -55,7 +54,7 @@ export function DashboardTrends({
             핵심 수치 변화 추이
           </h3>
         </div>
-        <span className="pixel-tag">{metric === "score" ? "데모" : "내 기록"}</span>
+        <span className="pixel-tag">기록 기반</span>
       </header>
       <div className="stitch-metric-tabs" role="group" aria-label="변화 추이 항목" data-no-swipe>
         {(Object.entries(metrics) as [Metric, string][]).map(([key, label]) => (
@@ -82,14 +81,14 @@ export function DashboardTrends({
           <>
             <div className="stitch-metric-value">
               <div>
-                <small>데모 건강 점수</small>
+                <small>선택 기간 실천 점수</small>
                 <strong>
-                  <AnimatedNumber value={score} />
+                  {score.score === null ? "—" : <AnimatedNumber value={score.score} />}
                   <span>/ 100</span>
                 </strong>
               </div>
             </div>
-            <HealthTrend period={period} today={date} from={from} />
+            <HealthTrend period={period} result={score} />
           </>
         ) : (
           <>
