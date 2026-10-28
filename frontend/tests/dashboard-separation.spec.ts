@@ -13,7 +13,7 @@ test("health dashboard has one view and keeps character selection in the main na
     .getByRole("navigation", { name: "주요 메뉴" })
     .getByRole("link", { name: "Character", exact: true })
     .click();
-  await expect(page).toHaveURL(/\/dashboard$/);
+  await expect(page).toHaveURL(/\/character$/);
   await expect(page.getByLabel("공룡 보관소", { exact: true })).toBeVisible();
   await expect(page.locator('a[href^="/dashboard/character"]')).toHaveCount(0);
   await expect(page.getByLabel("선택한 공룡 전투 능력치")).toHaveCount(0);
@@ -81,6 +81,6 @@ test("old character dashboard URLs preserve dates, game records, sign-in and med
 test("home radar opens the current health dashboard", async ({ page }) => {
   await page.goto("/home");
   await page.locator(".radar-card").click();
-  await expect(page).toHaveURL(/\/character$/);
+  await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.locator(".dashboard-summary")).toBeVisible();
 });

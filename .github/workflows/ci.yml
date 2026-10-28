@@ -31,10 +31,10 @@ jobs:
           GITHUB_HEAD_REF: ${{ github.head_ref }}
         run: node .github/scripts/check-git-flow.mjs
 
-  frontend:
-    name: Frontend
+  frontend-check:
+    name: Frontend checks
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: frontend
@@ -50,21 +50,64 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - name: Check deployment guards
-        run: node --test deployment/*.test.mjs
+      - name: Check deployment guards and native compatibility
         working-directory: .
+        run: |
+          node --test deployment/*.test.mjs
+          node deployment/release.mjs --validate-config
       - run: npm ci
       - run: npm run lint
       - run: npm run format:check
       - run: npm test
       - run: npm run build
+
+  browser:
+    name: Browser shard ${{ matrix.shard }}/4
+    needs: frontend-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      CI: "true"
+      TZ: Asia/Seoul
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - name: Run all browser scenarios across four shards
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: npm run test:e2e -- --shard="$SHARD/4"
       - name: Upload browser failure traces
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: browser-test-results
+          name: browser-test-results-${{ matrix.shard }}
           path: frontend/test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  frontend:
+    name: Frontend
+    if: always()
+    needs: [frontend-check, browser]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require checks and every browser shard
+        env:
+          CHECKS_RESULT: ${{ needs.frontend-check.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+        run: test "$CHECKS_RESULT" = success && test "$BROWSER_RESULT" = success

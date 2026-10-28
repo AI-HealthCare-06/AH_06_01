@@ -277,3 +277,14 @@
     font-size: calc(15px * var(--ui-text-scale, 1));
   }
 }
+
+/* Keep report cards within the available width with fallback fonts and desktop scrollbars. */
+.dashboard-report-web .report-body {
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+.dashboard-report-web .report-body > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}

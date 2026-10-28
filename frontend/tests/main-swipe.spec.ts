@@ -3,6 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 test.use({ isMobile: true, hasTouch: true, viewport: { width: 412, height: 892 } });
 
 async function fingerSwipe(page: Page, selector: string, dx: number, dy = 0) {
+  await expect(page.locator("html")).not.toHaveAttribute("data-main-tab-motion");
   const route = new URL(page.url()).pathname.split("/")[1];
   const target = page.locator(`.${route}-screen ${selector}`);
   await expect(target).toBeVisible();

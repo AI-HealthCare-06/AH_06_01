@@ -1,3 +1,4 @@
+import { expectNoHorizontalOverflow } from "./helpers/layout";
 import { expect, test } from "@playwright/test";
 
 test("date settings use a triangle while the calendar stays visible and selected dates persist", async ({
@@ -141,9 +142,7 @@ test("health reports stay in normal flow without horizontal overflow on phones",
     const heading = (await page.locator(".dashboard-heading").boundingBox())!,
       score = (await page.locator(".health-score").first().boundingBox())!;
     expect(score.y).toBeGreaterThanOrEqual(heading.y + heading.height);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-      true,
-    );
+    await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("dashboard-" + width + ".png"),
       fullPage: true,
@@ -158,8 +157,6 @@ test("health reports stay in normal flow without horizontal overflow on phones",
     await page.goto("/dashboard/report");
     await expect(page.getByRole("button", { name: "혈압 기록", exact: true })).toBeVisible();
     await expect(page.locator(".report-next")).toHaveCount(0);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-      true,
-    );
+    await expectNoHorizontalOverflow(page);
   }
 });

@@ -1,3 +1,4 @@
+import { expectNoHorizontalOverflow } from "./helpers/layout";
 import { selectPixelOption } from "./helpers/controls";
 import { expect, test } from "@playwright/test";
 
@@ -41,9 +42,7 @@ test("period changes preserve the score animation and keep all sections in one s
     await report.locator(".prediction-note").scrollIntoViewIfNeeded();
     await expect(report.locator(".prediction-note")).toBeInViewport();
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
-    expect(await scroll.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
-      true,
-    );
+    await expectNoHorizontalOverflow(page, '[aria-label="대시보드 리포트 스크롤"]');
     await report.getByRole("link", { name: "질환 위험도 상세 보기" }).scrollIntoViewIfNeeded();
     await expect(report.locator(".risk-tile").last()).toBeInViewport();
   }

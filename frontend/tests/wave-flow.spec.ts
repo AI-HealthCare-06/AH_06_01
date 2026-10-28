@@ -1,3 +1,4 @@
+import { expectNoHorizontalOverflow } from "./helpers/layout";
 import { selectPixelOption } from "./helpers/controls";
 import { expect, test } from "@playwright/test";
 
@@ -156,8 +157,6 @@ test("compact report controls, risk ordering and Galaxy-shaped preview fit narro
     const risk = (await page.locator(".disease-card").boundingBox())!;
     const trend = (await page.locator(".health-trend").boundingBox())!;
     expect(risk.y).toBeLessThan(trend.y);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-      width,
-    );
+    await expectNoHorizontalOverflow(page);
   }
 });
