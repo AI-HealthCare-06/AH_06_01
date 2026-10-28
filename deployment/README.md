@@ -4,7 +4,7 @@
 
 ## 실행 순서
 
-1. 같은 커밋에서 lint, 포맷, 단위 테스트, 빌드, 전체 Playwright 검사를 실행한다.
+1. 같은 커밋에서 lint, 포맷, 단위 테스트, 빌드, 전체 Playwright 4분할 검사와 production 서명키를 사용하지 않는 Android 컴파일 검사를 실행한다. 검증과 실제 게시가 같은 Android 도구 준비 액션을 사용한다.
 2. GitHub `production` 환경에서 AWS OIDC 임시 자격을 발급받는다. 환경의 배포 브랜치는 `main`만 허용한다.
 3. 현재 `origin/main`과 체크아웃 SHA가 일치하고 소스가 깨끗한지 확인한다. 네이티브 호환 지문과 기존 서명을 검사한다.
 4. Node 22, Java 21, Android 36에서 기존 서명 계보를 유지한 APK를 만든다. 웹 버전은 `1.6.<workflow run number>`로 부여한다. 재실행은 같은 버전이며, 다른 파일로 활성화된 버전을 덮어쓸 수 없다.

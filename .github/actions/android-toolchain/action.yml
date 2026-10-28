@@ -1,0 +1,15 @@
+name: REXRUN Android toolchain
+description: Prepare the same Java and Android SDK for validation and production builds
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+      with:
+        distribution: temurin
+        java-version: "21"
+    - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+      with:
+        packages: platform-tools
+        log-accepted-android-sdk-licenses: "false"
+    - shell: bash
+      run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
