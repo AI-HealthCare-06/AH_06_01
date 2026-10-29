@@ -8,23 +8,26 @@ import re
 def today_kst():
     return datetime.now(timezone(timedelta(hours=9))).date()
 
-def demo_remote(as_of=None):
+def demo_remote(as_of=None, persona_id="htn-diabetes-v1"):
     current = as_of or today_kst()
-    fixture_path = Path(__file__).with_name("demo-persona.json")
+    files = {"htn-diabetes-v1": "demo-persona.json", "office-month-v1": "demo-persona-office-month.json"}
+    if persona_id not in files:
+        raise ValueError("Unknown fixed demo persona")
+    fixture_path = Path(__file__).with_name(files[persona_id])
     if not fixture_path.exists():
-        fixture_path = Path(__file__).resolve().parents[3] / "frontend/src/design/demo-persona.json"
+        fixture_path = Path(__file__).resolve().parents[3] / "frontend/src/design" / files[persona_id]
     fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
     p = fixture["profile"]
-    history = {(current - timedelta(days=6-i)).isoformat(): record for i, record in enumerate(fixture["records"])}
+    history = {(current - timedelta(days=len(fixture["records"])-1-i)).isoformat(): record for i, record in enumerate(fixture["records"])}
     surveys = {}
     for day, row in history.items():
         answers = row["survey"]
         surveys[day] = {**answers, "date": day,
             "submittedAt": int(datetime.fromisoformat(day + "T00:00:00+09:00").timestamp() * 1000),
-            "bloodPressureStatus": "measured", "morning": {"systolic": row["systolic"], "diastolic": row["diastolic"]}, "evening": None,
-            "pulseStatus": "measured", "restingHr": row["restingHr"], "sleepStatus": "reported", "sleepInputKind": "times",
+            "bloodPressureStatus": "measured", "morning": {"systolic": row["systolic"], "diastolic": row["diastolic"]}, "evening": row.get("evening"),
+            "pulseStatus": "measured" if row["restingHr"] is not None else "not-measured", "restingHr": row["restingHr"], "sleepStatus": "reported", "sleepInputKind": "times",
             "sleepHours": row["sleepHours"], "fastingGlucose": row["glucose"],
-            "snoring": answers["snoringScore"] > 0, "daytimeSleepiness": answers["daytimeSleepinessScore"] > 0}
+            "snoring": None if answers["snoringScore"] is None else answers["snoringScore"] > 0, "daytimeSleepiness": None if answers["daytimeSleepinessScore"] is None else answers["daytimeSleepinessScore"] > 0}
     return {"health_profile": {"age": p["age"], "sex": p["sex"], "height_cm": p["height"],
         "weight_kg": p["weight"], "onboarding_bp_text": p["bloodPressure"], "fasting_glucose": p["glucose"], "details": p},
         "medications": fixture["medications"], "game": {"healthHistory": history, "dailySurveys": surveys,

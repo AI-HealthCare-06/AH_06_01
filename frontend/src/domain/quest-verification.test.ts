@@ -59,6 +59,7 @@ describe("quest evidence requirements", () => {
     // A successful experimental camera process is not an approved quest receipt.
     for (const fields of [
       { detector: "process_rules_v2" as const },
+      { detector: "process_rules_v3" as const },
       { detector: "injection_rules_v1" as const },
       { verificationLevel: "experimental_process" as const },
     ]) {
@@ -70,6 +71,14 @@ describe("quest evidence requirements", () => {
     expect(verification.getState().motion({ ...result, inputSource: "camera" })).toBe(true);
     expect(verification.getState().consume("water")).toBe(true);
     expect(verification.getState().motion({ ...result, inputSource: "camera" })).toBe(false);
+    expect(
+      verification.getState().motion({
+        ...result,
+        inputSource: "camera",
+        detector: "drinking_rules_v2",
+        eventId: "dynamic-water",
+      }),
+    ).toBe(true);
   });
   it("requires seven measured hours from the health store", () => {
     verification.getState().sleep(419, "health-connect", "2026-10-22");

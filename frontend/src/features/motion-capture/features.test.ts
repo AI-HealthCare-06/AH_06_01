@@ -45,6 +45,43 @@ function moveHand(hands: HandLandmarkerResult, y: number, x = 0.5) {
 }
 
 describe("camera feature geometry", () => {
+  it("measures palm tipping in depth without treating camera roll as wrist tipping", () => {
+    const { face, hands } = landmarks();
+    hands.landmarks[0].forEach((p) => {
+      p.z = 0;
+      p.y = 0.55;
+    });
+    hands.landmarks[0][0].y = 0.7;
+    const original = extractObservation("water", face, hands, [cup()], 100, 640, 480, null);
+    expect(original.drinkMotion?.handInclination).toBeCloseTo(0);
+    for (const points of [face.faceLandmarks[0], hands.landmarks[0]])
+      for (const p of points) {
+        const x = p.x;
+        p.x = 1 - p.y;
+        p.y = x;
+      }
+    const rotatedCup = cup();
+    rotatedCup.boundingBox = {
+      originX: 0.3 * 480,
+      originY: 0.45 * 640,
+      width: 0.25 * 480,
+      height: 0.15 * 640,
+      angle: 0,
+    };
+    const rolled = extractObservation("water", face, hands, [rotatedCup], 200, 480, 640, null);
+    expect(rolled.drinkMotion?.handInclination).toBeCloseTo(0);
+    for (const i of [5, 9, 13, 17]) hands.landmarks[0][i].z = 0.1;
+    const depth = extractObservation("water", face, hands, [rotatedCup], 300, 480, 640, null);
+    expect(depth.drinkMotion!.handInclination).toBeGreaterThan(25);
+  });
+  it("does not invent a palm angle from a cropped wrist or a collapsed palm", () => {
+    const { face, hands } = landmarks();
+    const collapsed = extractObservation("water", face, hands, [cup()], 100, 640, 480, null);
+    expect(collapsed.drinkMotion?.handInclination).toBeNull();
+    hands.landmarks[0][0].x = -0.1;
+    const cropped = extractObservation("water", face, hands, [cup()], 200, 640, 480, null);
+    expect(cropped.drinkMotion?.handInclination).toBeNull();
+  });
   it("extracts injection hands independently of a face and ignores cropped palms", () => {
     const { hands } = landmarks();
     expect(extractInjectionHands(hands, 100, 640, 480).hands).toEqual([{ x: 0.5, y: 0.6 }]);
@@ -187,7 +224,7 @@ describe("camera feature geometry", () => {
     expect(changed.trackingChanged).toBe(true);
   });
 
-  it("completes a visible approach, occluded drinking hold and visibly reacquired return", () => {
+  it("rejects an occluded mouth hold without visible tipping evidence", () => {
     const { face, hands } = landmarks();
     face.faceLandmarks[0][234].x = 0.375;
     face.faceLandmarks[0][454].x = 0.625;
@@ -214,9 +251,9 @@ describe("camera feature geometry", () => {
     for (let timestamp = 600; timestamp <= 1400; timestamp += 100) {
       expect(frame(timestamp, 0.5, []).stage).not.toBe("detected");
     }
-    expect(frame(1500, 0.9, [cup(0.8, 0.7, 0.1)]).stage).toBe("returning");
+    expect(frame(1500, 0.9, [cup(0.8, 0.7, 0.1)]).stage).not.toBe("detected");
     frame(1600, 0.9, [cup(0.8, 0.7, 0.1)]);
-    expect(frame(1700, 0.9, [cup(0.8, 0.7, 0.1)]).stage).toBe("detected");
+    expect(frame(1700, 0.9, [cup(0.8, 0.7, 0.1)]).stage).not.toBe("detected");
   });
 
   it("allows a detected selfie cup with cropped hands, but keeps hands required for medicine", () => {
@@ -323,7 +360,7 @@ describe("camera feature geometry", () => {
     );
   });
 
-  it("completes a close portrait sequence with cropped cup bottom and no visible hands", () => {
+  it("does not confirm a close portrait cup without tipping evidence", () => {
     const { face, hands } = landmarks();
     face.faceLandmarks[0][234].x = 0.2;
     face.faceLandmarks[0][454].x = 0.8;
@@ -361,10 +398,10 @@ describe("camera feature geometry", () => {
     for (let timestamp = 0; timestamp <= 400; timestamp += 100) frame(timestamp, 0.6);
     expect(frame(600, 0.35).stage).toBe("at_mouth");
     for (let timestamp = 700; timestamp <= 1400; timestamp += 100) frame(timestamp, 0.35);
-    expect(frame(1500, 0.35).stage).toBe("returning");
+    expect(frame(1500, 0.35).stage).not.not.toBe("detected");
     frame(1600, 0.6);
     frame(1700, 0.6);
     frame(1800, 0.6);
-    expect(frame(2000, 0.6).stage).toBe("detected");
+    expect(frame(2000, 0.6).stage).not.toBe("detected");
   });
 });

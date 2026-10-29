@@ -2,6 +2,7 @@ import { useId } from "react";
 import type { GameState } from "../domain/game";
 import { healthPeriods, reportDateRange, type HealthPeriod } from "../services/health-history";
 import { demoMode } from "../domain/demo-mode";
+import { selectedDemoPersona } from "../domain/demo-personas";
 type Series = { label: string; color: string; values: (number | null)[] };
 function LineChart({ dates, series, unit }: { dates: string[]; series: Series[]; unit: string }) {
   const id = useId();
@@ -101,7 +102,9 @@ export function HealthHistoryCharts({
     <section className="health-history-overview" aria-label="저장된 건강 기록 추이">
       <header className="stitch-section-heading">
         <h3>{healthPeriods[period].label} 건강 기록</h3>
-        <span className="pixel-tag">{demoMode ? "합성 7일 기록" : "저장된 기록"}</span>
+        <span className="pixel-tag">
+          {demoMode ? `합성 ${selectedDemoPersona().records.length}일 기록` : "저장된 기록"}
+        </span>
       </header>
       <article className="cream-card health-record-card">
         <header>
@@ -163,8 +166,7 @@ export function HealthHistoryCharts({
       </div>
       {demoMode && (
         <p className="analysis-note">
-          페르소나를 위한 합성 기록이에요. 당뇨 환자 전체의 평균값을 뜻하지 않아요. 약 이름·시간은
-          데모 설정이에요.
+          페르소나를 위한 합성 기록이에요. 실제 환자 기록이나 치료 효과를 뜻하지 않아요.
         </p>
       )}
     </section>

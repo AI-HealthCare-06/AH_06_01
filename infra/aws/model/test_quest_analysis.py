@@ -5,6 +5,17 @@ from handler import create_handler
 from quest_analysis import analysis_response, demo_remote
 
 class AnalysisTests(unittest.TestCase):
+    def test_office_month_fixture_has_no_invented_medication_or_unknown_vitals(self):
+        remote = demo_remote(date(2026,10,29), persona_id="office-month-v1")
+        self.assertEqual(remote["health_profile"]["age"],42)
+        self.assertEqual(remote["medications"],[])
+        self.assertEqual(len(remote["game"]["dailySurveys"]),30)
+        self.assertIn("2026-09-30",remote["game"]["dailySurveys"])
+        self.assertIsNone(remote["game"]["dailySurveys"]["2026-10-29"]["restingHr"])
+        self.assertIsNone(remote["game"]["dailySurveys"]["2026-10-29"]["snoring"])
+        with self.assertRaises(ValueError):
+            demo_remote(persona_id="untrusted-path")
+
     def result(self):
         return {"stage_top": None, "data_quality": "not_applicable"}
     def test_demo_executes_original_m2_and_preserves_m1_exclusion(self):
@@ -53,6 +64,10 @@ class AnalysisTests(unittest.TestCase):
         handle=create_handler(lambda *args,**kwargs:self.fail("public fixture must not read user data"),lambda:Model())
         event={"rawPath":"/predictions/bp-stage","requestContext":{"http":{"method":"POST"}},"body":json.dumps({"demo_persona":"htn-diabetes-v1"})}
         self.assertEqual(handle(event)["statusCode"],200)
+        event["body"]=json.dumps({"demo_persona":"office-month-v1"})
+        self.assertEqual(handle(event)["statusCode"],200)
+        event["body"]=json.dumps({"demo_persona":"office-month-v1","age":80})
+        self.assertEqual(handle(event)["statusCode"],401)
         event["body"]=json.dumps({"demo_persona":"htn-diabetes-v1","age":80})
         self.assertEqual(handle(event)["statusCode"],401)
         event["body"]="{}"

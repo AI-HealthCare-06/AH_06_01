@@ -1,0 +1,830 @@
+{
+  "source": "checked-in migrations; live introspection denied by connector",
+  "snapshot": "1628138",
+  "tables": [
+    {
+      "name": "user_profiles",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid primary key references auth.users(id) on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "display_name",
+          "type": "text",
+          "definition": "text not null default '탐험가' check (length(display_name) between 1 and 80)",
+          "nullable": false
+        },
+        {
+          "name": "avatar_id",
+          "type": "text",
+          "definition": "text check (length(avatar_id) <= 80)",
+          "nullable": true
+        },
+        {
+          "name": "onboarding_completed",
+          "type": "boolean",
+          "definition": "boolean not null default false",
+          "nullable": false
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "definition": "text not null default 'Asia/Seoul'",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id"
+      ]
+    },
+    {
+      "name": "user_consents",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid not null references public.user_profiles on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "consent_type",
+          "type": "text",
+          "definition": "text not null check (consent_type in ('health_cloud_storage'))",
+          "nullable": false
+        },
+        {
+          "name": "version",
+          "type": "text",
+          "definition": "text not null",
+          "nullable": false
+        },
+        {
+          "name": "granted_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        },
+        {
+          "name": "revoked_at",
+          "type": "timestamptz",
+          "definition": "timestamptz",
+          "nullable": true
+        }
+      ],
+      "pk": [
+        "user_id",
+        "consent_type",
+        "version"
+      ]
+    },
+    {
+      "name": "health_profiles",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid primary key references public.user_profiles on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "age",
+          "type": "smallint",
+          "definition": "smallint check(age between 1 and 120)",
+          "nullable": true
+        },
+        {
+          "name": "sex",
+          "type": "text",
+          "definition": "text check(sex in ('female','male'))",
+          "nullable": true
+        },
+        {
+          "name": "height_cm",
+          "type": "numeric",
+          "definition": "numeric check(height_cm between 50 and 250)",
+          "nullable": true
+        },
+        {
+          "name": "weight_kg",
+          "type": "numeric",
+          "definition": "numeric check(weight_kg between 1 and 500)",
+          "nullable": true
+        },
+        {
+          "name": "onboarding_bp_text",
+          "type": "text",
+          "definition": "text check(length(onboarding_bp_text)<=20)",
+          "nullable": true
+        },
+        {
+          "name": "fasting_glucose",
+          "type": "numeric",
+          "definition": "numeric check(fasting_glucose>0 and fasting_glucose<=1000)",
+          "nullable": true
+        },
+        {
+          "name": "details",
+          "type": "jsonb",
+          "definition": "jsonb not null default '{}' check(jsonb_typeof(details)='object')",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id"
+      ]
+    },
+    {
+      "name": "medications",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid not null references public.user_profiles on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "id",
+          "type": "text",
+          "definition": "text not null check(length(id) between 1 and 80 and id not like '%|%')",
+          "nullable": false
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "definition": "text not null check(length(name) between 1 and 80)",
+          "nullable": false
+        },
+        {
+          "name": "dose",
+          "type": "text",
+          "definition": "text not null default '' check(length(dose)<=80)",
+          "nullable": false
+        },
+        {
+          "name": "condition",
+          "type": "text",
+          "definition": "text not null default '' check(length(condition)<=80)",
+          "nullable": false
+        },
+        {
+          "name": "drug_class",
+          "type": "text",
+          "definition": "text not null default 'other'",
+          "nullable": false
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "definition": "boolean not null default true",
+          "nullable": false
+        },
+        {
+          "name": "archived",
+          "type": "boolean",
+          "definition": "boolean not null default false",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id",
+        "id"
+      ]
+    },
+    {
+      "name": "medication_schedules",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid not null",
+          "nullable": false
+        },
+        {
+          "name": "medication_id",
+          "type": "text",
+          "definition": "text not null",
+          "nullable": false
+        },
+        {
+          "name": "schedule_time",
+          "type": "time",
+          "definition": "time not null",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id",
+        "medication_id",
+        "schedule_time"
+      ]
+    },
+    {
+      "name": "medication_doses",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid not null",
+          "nullable": false
+        },
+        {
+          "name": "medication_id",
+          "type": "text",
+          "definition": "text not null",
+          "nullable": false
+        },
+        {
+          "name": "dose_date",
+          "type": "date",
+          "definition": "date not null",
+          "nullable": false
+        },
+        {
+          "name": "schedule_time",
+          "type": "time",
+          "definition": "time not null",
+          "nullable": false
+        },
+        {
+          "name": "taken_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "definition": "text not null default 'self_report'",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id",
+        "medication_id",
+        "dose_date",
+        "schedule_time"
+      ]
+    },
+    {
+      "name": "quest_definitions",
+      "fields": [
+        {
+          "name": "id",
+          "type": "text",
+          "definition": "text primary key",
+          "nullable": false
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "definition": "text not null",
+          "nullable": false
+        },
+        {
+          "name": "target",
+          "type": "numeric",
+          "definition": "numeric not null check(target>0)",
+          "nullable": false
+        },
+        {
+          "name": "unit",
+          "type": "text",
+          "definition": "text not null",
+          "nullable": false
+        },
+        {
+          "name": "quest_group",
+          "type": "text",
+          "nullable": false,
+          "definition": "text not null default 'main' check (quest_group in ('main','sub'))"
+        }
+      ],
+      "pk": [
+        "id"
+      ]
+    },
+    {
+      "name": "daily_quest_progress",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid not null references public.user_profiles on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "quest_date",
+          "type": "date",
+          "definition": "date not null",
+          "nullable": false
+        },
+        {
+          "name": "quest_id",
+          "type": "text",
+          "definition": "text not null references public.quest_definitions",
+          "nullable": false
+        },
+        {
+          "name": "progress",
+          "type": "numeric",
+          "definition": "numeric not null default 0 check(progress>=0)",
+          "nullable": false
+        },
+        {
+          "name": "target",
+          "type": "numeric",
+          "definition": "numeric not null check(target>0)",
+          "nullable": false
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamptz",
+          "definition": "timestamptz",
+          "nullable": true
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "definition": "text not null default 'self_report'",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id",
+        "quest_date",
+        "quest_id"
+      ]
+    },
+    {
+      "name": "daily_steps",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid not null references public.user_profiles on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "step_date",
+          "type": "date",
+          "definition": "date not null",
+          "nullable": false
+        },
+        {
+          "name": "step_count",
+          "type": "integer",
+          "definition": "integer not null check(step_count>=0)",
+          "nullable": false
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "definition": "text not null check(source in ('health-connect','healthkit'))",
+          "nullable": false
+        },
+        {
+          "name": "synced_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id",
+        "step_date"
+      ]
+    },
+    {
+      "name": "game_saves",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid primary key references public.user_profiles on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "revision",
+          "type": "bigint",
+          "definition": "bigint not null default 0 check(revision>=0)",
+          "nullable": false
+        },
+        {
+          "name": "snapshot",
+          "type": "jsonb",
+          "definition": "jsonb not null check(jsonb_typeof(snapshot)='object')",
+          "nullable": false
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id"
+      ]
+    },
+    {
+      "name": "user_devices",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid not null references public.user_profiles on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "device_id",
+          "type": "uuid",
+          "definition": "uuid not null",
+          "nullable": false
+        },
+        {
+          "name": "platform",
+          "type": "text",
+          "definition": "text not null check(platform in ('web','android','ios'))",
+          "nullable": false
+        },
+        {
+          "name": "app_version",
+          "type": "text",
+          "definition": "text not null default ''",
+          "nullable": false
+        },
+        {
+          "name": "push_token",
+          "type": "text",
+          "definition": "text check(length(push_token)<=4096)",
+          "nullable": true
+        },
+        {
+          "name": "push_enabled",
+          "type": "boolean",
+          "definition": "boolean not null default false",
+          "nullable": false
+        },
+        {
+          "name": "last_seen_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id",
+        "device_id"
+      ]
+    },
+    {
+      "name": "sync_batches",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid not null references public.user_profiles on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "batch_id",
+          "type": "uuid",
+          "definition": "uuid not null",
+          "nullable": false
+        },
+        {
+          "name": "device_id",
+          "type": "uuid",
+          "definition": "uuid not null",
+          "nullable": false
+        },
+        {
+          "name": "fingerprint",
+          "type": "text",
+          "definition": "text not null",
+          "nullable": false
+        },
+        {
+          "name": "response",
+          "type": "jsonb",
+          "definition": "jsonb not null",
+          "nullable": false
+        },
+        {
+          "name": "received_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id",
+        "batch_id"
+      ]
+    },
+    {
+      "name": "notification_outbox",
+      "fields": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "definition": "uuid primary key default gen_random_uuid()",
+          "nullable": false
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid not null references public.user_profiles on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "event_key",
+          "type": "text",
+          "definition": "text not null",
+          "nullable": false
+        },
+        {
+          "name": "kind",
+          "type": "text",
+          "definition": "text not null default 'quest_completed'",
+          "nullable": false
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "definition": "text not null default 'REXRUN · 퀘스트 완료'",
+          "nullable": false
+        },
+        {
+          "name": "body",
+          "type": "text",
+          "definition": "text not null default '오늘의 실천을 완료했어요. 모험을 이어가 보세요!'",
+          "nullable": false
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "definition": "text not null default 'pending' check(status in ('pending','processing','accepted','retry','no_device'))",
+          "nullable": false
+        },
+        {
+          "name": "attempts",
+          "type": "integer",
+          "definition": "integer not null default 0",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        },
+        {
+          "name": "accepted_at",
+          "type": "timestamptz",
+          "definition": "timestamptz",
+          "nullable": true
+        },
+        {
+          "name": "claimed_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "definition": "timestamptz; delivery lease timestamp"
+        }
+      ],
+      "pk": [
+        "id"
+      ]
+    },
+    {
+      "name": "client_events",
+      "fields": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "definition": "uuid not null references public.user_profiles on delete cascade",
+          "nullable": false
+        },
+        {
+          "name": "event_id",
+          "type": "uuid",
+          "definition": "uuid not null",
+          "nullable": false
+        },
+        {
+          "name": "device_id",
+          "type": "uuid",
+          "definition": "uuid not null",
+          "nullable": false
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "definition": "text not null check(event_type='connection_probe')",
+          "nullable": false
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "definition": "text not null check(source in ('web','android','ios'))",
+          "nullable": false
+        },
+        {
+          "name": "sent_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null",
+          "nullable": false
+        },
+        {
+          "name": "received_at",
+          "type": "timestamptz",
+          "definition": "timestamptz not null default now()",
+          "nullable": false
+        }
+      ],
+      "pk": [
+        "user_id",
+        "event_id"
+      ]
+    }
+  ],
+  "foreignKeys": [
+    {
+      "child": "user_profiles",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "users",
+      "target": [
+        "id"
+      ]
+    },
+    {
+      "child": "user_consents",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "user_profiles",
+      "target": [
+        "user_id"
+      ]
+    },
+    {
+      "child": "health_profiles",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "user_profiles",
+      "target": [
+        "user_id"
+      ]
+    },
+    {
+      "child": "medications",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "user_profiles",
+      "target": [
+        "user_id"
+      ]
+    },
+    {
+      "child": "medication_schedules",
+      "columns": [
+        "user_id",
+        "medication_id"
+      ],
+      "parent": "medications",
+      "target": [
+        "user_id",
+        "id"
+      ]
+    },
+    {
+      "child": "medication_doses",
+      "columns": [
+        "user_id",
+        "medication_id"
+      ],
+      "parent": "medications",
+      "target": [
+        "user_id",
+        "id"
+      ]
+    },
+    {
+      "child": "daily_quest_progress",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "user_profiles",
+      "target": [
+        "user_id"
+      ]
+    },
+    {
+      "child": "daily_quest_progress",
+      "columns": [
+        "quest_id"
+      ],
+      "parent": "quest_definitions",
+      "target": [
+        "id"
+      ]
+    },
+    {
+      "child": "daily_steps",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "user_profiles",
+      "target": [
+        "user_id"
+      ]
+    },
+    {
+      "child": "game_saves",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "user_profiles",
+      "target": [
+        "user_id"
+      ]
+    },
+    {
+      "child": "user_devices",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "user_profiles",
+      "target": [
+        "user_id"
+      ]
+    },
+    {
+      "child": "sync_batches",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "user_profiles",
+      "target": [
+        "user_id"
+      ]
+    },
+    {
+      "child": "notification_outbox",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "user_profiles",
+      "target": [
+        "user_id"
+      ]
+    },
+    {
+      "child": "client_events",
+      "columns": [
+        "user_id"
+      ],
+      "parent": "user_profiles",
+      "target": [
+        "user_id"
+      ]
+    }
+  ]
+}

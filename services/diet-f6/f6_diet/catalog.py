@@ -3,7 +3,10 @@
 import csv
 import difflib
 import math
+import json
 import re
+import unicodedata
+from collections import defaultdict, Counter
 from pathlib import Path
 
 FIELDS = {
@@ -23,38 +26,66 @@ DATA = Path(__file__).resolve().parent.parent / "data"
 
 
 def normalized(name: str) -> str:
-    return " ".join(name.split())
+    return " ".join(unicodedata.normalize("NFKC", name).split())
+
+
+def compact(name):
+    return re.sub(r"[\s_(),·-]", "", normalized(name))
 
 
 class Catalog:
     def __init__(self, directory: Path = DATA):
         self.foods = []
-        with (directory / "food_nutrition_dev_sample.csv").open(
-            encoding="utf-8-sig", newline=""
-        ) as handle:
+        official = (directory / "food_nutrition_mfds.csv").is_file()
+        self.metadata = (
+            json.loads((directory / "catalog-source.json").read_text(encoding="utf-8"))
+            if official
+            else {
+                "version": "f6-dev-sample-v1",
+                "kind": "development_sample",
+                "publisher": "F6 개발용 예시",
+                "source_url": "",
+                "published_on": "",
+            }
+        )
+        self.version = self.metadata["version"]
+        filename = (
+            "food_nutrition_mfds.csv" if official else "food_nutrition_dev_sample.csv"
+        )
+        with (directory / filename).open(encoding="utf-8-sig", newline="") as handle:
             for row in csv.DictReader(handle):
-                if row["영양성분함량기준량"] != "100g":
+                if not official and row["영양성분함량기준량"] != "100g":
                     raise ValueError("Only explicitly declared 100g data is supported")
                 values = {}
                 for key, label in FIELDS.items():
-                    text = row.get(label, "").strip()
+                    text = row.get(key if official else label, "").strip()
                     value = None if not text else float(text)
                     if value is not None and (not math.isfinite(value) or value < 0):
                         raise ValueError("Invalid nutrition source")
                     values[key] = value
                 self.foods.append(
                     {
-                        "food_code": row["식품코드"],
-                        "name": row["식품명"],
-                        "category": row["식품대분류명"],
-                        "serving_g": float(
-                            re.sub(r"[^0-9.]", "", row["식품중량"]) or 100
-                        ),
+                        "food_code": row["food_code" if official else "식품코드"],
+                        "name": row["name" if official else "식품명"],
+                        "category": row["category" if official else "식품대분류명"],
+                        "serving_g": (
+                            float(row["serving_g"]) if row.get("serving_g") else None
+                        )
+                        if official
+                        else float(re.sub(r"[^0-9.]", "", row["식품중량"]) or 100),
+                        "origin": row.get("origin", "개발용 예시"),
+                        "source_date": row.get("source_date", ""),
                         "per_100g": values,
                     }
                 )
         self.by_code = {food["food_code"]: food for food in self.foods}
-        self.by_name = {food["name"]: food for food in self.foods}
+        self.by_name = {}
+        for food in self.foods:
+            self.by_name.setdefault(compact(food["name"]), []).append(food)
+        self.grams = defaultdict(set)
+        for name in self.by_name:
+            for i in range(max(0, len(name) - 1)):
+                self.grams[name[i : i + 2]].add(name)
         with (directory / "food_aliases.csv").open(
             encoding="utf-8-sig", newline=""
         ) as handle:
@@ -64,30 +95,37 @@ class Catalog:
 
     def match(self, name: str) -> tuple[dict | None, str, dict | None]:
         name = normalized(name)
-        candidates = list(
-            dict.fromkeys(
-                [
-                    name,
-                    re.sub(r"\s*\(.*?\)\s*", " ", name).strip(),
-                    name.replace(" ", ""),
-                ]
-            )
-        )
+        candidates = [compact(name)]
+        alias = self.aliases.get(name)
+        if alias:
+            candidates.append(compact(alias))
         for candidate in candidates:
             if candidate in self.by_name:
-                return self.by_name[candidate], "exact", None
-            if candidate in self.aliases and self.aliases[candidate] in self.by_name:
-                return self.by_name[self.aliases[candidate]], "alias", None
+                matches = self.by_name[candidate]
+                if len(matches) == 1:
+                    return (
+                        matches[0],
+                        "alias" if alias and candidate == compact(alias) else "exact",
+                        None,
+                    )
+                # Different sources/preparations may share a name and nutrient values.
+                # Let the user select the source rather than silently pick the last row.
+                return None, "ambiguous", matches[0]
+        key = compact(name)
         contained = [
-            food
-            for food in self.foods
-            if food["name"].replace(" ", "") in name.replace(" ", "")
+            foods[0]
+            for indexed, foods in self.by_name.items()
+            if indexed in key or key in indexed
         ]
         if contained:
             suggestion = max(contained, key=lambda food: len(food["name"]))
         else:
-            closest = difflib.get_close_matches(name, self.by_name, n=1, cutoff=0.45)
-            suggestion = self.by_name[closest[0]] if closest else None
+            votes = Counter()
+            for i in range(max(0, len(key) - 1)):
+                votes.update(self.grams.get(key[i : i + 2], ()))
+            pool = [name for name, _ in votes.most_common(100)]
+            closest = difflib.get_close_matches(key, pool, n=1, cutoff=0.6)
+            suggestion = self.by_name[closest[0]][0] if closest else None
         # A fuzzy suggestion must be explicitly selected. Do not assign a different food's nutrients.
         return None, "none", suggestion
 
@@ -106,4 +144,11 @@ class Catalog:
             "is_soup": food.is_soup,
             "match_type": match_type,
             "suggested_food_code": suggested["food_code"] if suggested else None,
+            "serving_g": matched["serving_g"] if matched else None,
+            "catalog_version": self.version,
+            "source_name": self.metadata["publisher"],
+            "source_date": matched["source_date"] if matched else None,
+            "needs_confirmation": match_type != "exact"
+            or food.confidence < 0.8
+            or grams is None,
         }

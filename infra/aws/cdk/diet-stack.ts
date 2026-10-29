@@ -55,7 +55,7 @@ export class DietStack extends cdk.Stack {
         VISION_API_KEY: secret
           .secretValueFromJson("VISION_API_KEY")
           .unsafeUnwrap(),
-        VISION_MODEL: "gpt-4o-mini",
+        VISION_MODEL: "gpt-4o",
         VISION_BASE_URL: "",
       },
     });

@@ -292,6 +292,74 @@ export function extractObservation(
     // A large cup can touch the mouth while its gripping hand remains far away.
     observation.distance = distanceToBox(mouth, object, width, height) / faceWidth;
     observation.objectAtMouth = observation.distance <= config.waterEnterDistance;
+    let inclination: number | null = null;
+    let palmNormal: { x: number; y: number; z: number } | null = null;
+    if (observation.hand) {
+      const chosen = hands.landmarks
+        .map((points) => ({
+          points,
+          palm: [0, 5, 9, 13, 17].map((i) => points[i]).filter(visible),
+        }))
+        .filter((h) => h.palm.length >= 3)
+        .sort((a, b) => {
+          const avg = (p: Point[]) => ({
+            x: p.reduce((s, p) => s + p.x, 0) / p.length,
+            y: p.reduce((s, p) => s + p.y, 0) / p.length,
+          });
+          return (
+            length(avg(a.palm), observation.hand!, width, height) -
+            length(avg(b.palm), observation.hand!, width, height)
+          );
+        })[0]?.points;
+      if (chosen && [chosen[0], chosen[5], chosen[9], chosen[13], chosen[17]].every(visible)) {
+        const wrist = chosen[0],
+          mcp = [5, 9, 13, 17].map((i) => chosen[i]);
+        const vx = (mcp.reduce((s, p) => s + p.x, 0) / 4 - wrist.x) * width;
+        const vy = (mcp.reduce((s, p) => s + p.y, 0) / 4 - wrist.y) * height;
+        const vz = (mcp.reduce((s, p) => s + (p.z ?? 0), 0) / 4 - (wrist.z ?? 0)) * width;
+        const n = Math.hypot(vx, vy, vz),
+          dx = (landmarks[454].x - landmarks[234].x) * width,
+          dy = (landmarks[454].y - landmarks[234].y) * height;
+        if (n >= 12 && Math.hypot(dx, dy) > 0) {
+          inclination =
+            (Math.acos(Math.max(-1, Math.min(1, (vx * dy - vy * dx) / (n * Math.hypot(dx, dy))))) *
+              180) /
+            Math.PI;
+          const a = {
+            x: (chosen[5].x - wrist.x) * width,
+            y: (chosen[5].y - wrist.y) * height,
+            z: ((chosen[5].z ?? 0) - (wrist.z ?? 0)) * width,
+          };
+          const b = {
+            x: (chosen[17].x - wrist.x) * width,
+            y: (chosen[17].y - wrist.y) * height,
+            z: ((chosen[17].z ?? 0) - (wrist.z ?? 0)) * width,
+          };
+          const nx = a.y * b.z - a.z * b.y,
+            ny = a.z * b.x - a.x * b.z,
+            nz = a.x * b.y - a.y * b.x;
+          const normalLength = Math.hypot(nx, ny, nz),
+            faceLength = Math.hypot(dx, dy);
+          if (normalLength >= 20)
+            palmNormal = {
+              x: (nx * dx + ny * dy) / (normalLength * faceLength),
+              y: (nx * dy - ny * dx) / (normalLength * faceLength),
+              z: nz / normalLength,
+            };
+        }
+      }
+    }
+    observation.drinkMotion = {
+      shapeReliable:
+        object.x > 0.01 &&
+        object.y > 0.01 &&
+        object.x + object.width < 0.99 &&
+        object.y + object.height < 0.99,
+      handInclination: inclination,
+      palmNormal,
+      aspect: (object.width * width) / (object.height * height),
+      lift: ((mouth.y - object.y - object.height / 2) * height) / faceWidth,
+    };
   }
   observation.valid = true;
   observation.reason = observation.objectOccluded

@@ -81,9 +81,10 @@ def test_real_result_provenance_and_alias_matching():
     assert result.status_code == 200
     data = result.json()
     assert data["source"] == "vision"
-    assert data["catalog_kind"] == "development_sample"
+    assert data["catalog_kind"] == "official_mfds"
     assert data["photo_retained"] is False
-    assert data["items"][0]["food_code"] == "DEV-0001"
+    assert data["items"][0]["food_code"] == "D301-022000000-0001"
+    assert data["catalog_source"]["publisher"] == "식품의약품안전처"
     assert "nutrients" not in data["items"][0]
 
 
@@ -137,21 +138,22 @@ def test_no_local_auth_bypass_in_production():
 
 def test_normalization_strips_metadata_and_limits_dimensions():
     data = io.BytesIO()
-    source = Image.new("RGB", (1500, 1100), "blue")
+    source = Image.new("RGB", (3000, 2200), "blue")
     exif = Image.Exif()
     exif[270] = "private metadata"
     source.save(data, format="JPEG", exif=exif)
     with Image.open(io.BytesIO(normalize_image(data.getvalue()))) as result:
-        assert max(result.size) <= 1024
+        assert max(result.size) == 2048
         assert not result.getexif()
 
 
 def test_fuzzy_match_never_assigns_another_foods_nutrients():
     catalog = Catalog()
-    assert catalog.match("공기밥")[0]["food_code"] == "DEV-0001"
-    assert catalog.match("김치찌개(돼지고기)")[0]["name"] == "김치찌개"
+    assert catalog.match("공기밥")[0]["food_code"] == "D301-022000000-0001"
+    matched = catalog.match("김치찌개(돼지고기)")[0]
+    assert matched is None or "돼지고기" in matched["name"]
     assert catalog.match("쌀바압")[0] is None
-    assert catalog.match("쌀밥추가")[2]["food_code"] == "DEV-0001"
+    assert catalog.match("쌀밥추가")[2]["food_code"] == "D301-022000000-0001"
 
 
 def test_server_env_file_overrides_unrelated_host_key(tmp_path, monkeypatch):

@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { cloudEnabled, supabase } from "../cloud/client";
-import { foodByCode, type DietItem } from "../domain/diet";
+import {
+  foodByCode,
+  loadOfficialFoods,
+  catalogVersion,
+  legacyCatalogVersion,
+  type DietItem,
+} from "../domain/diet";
 import config from "../../diet.config.json";
 
 const base =
@@ -14,12 +20,15 @@ const itemSchema = z.object({
   confidence: z.number().finite().min(0).max(1),
   is_soup: z.boolean(),
   suggested_food_code: z.string().nullable(),
+  crop_reviewed: z.boolean().optional(),
+  needs_confirmation: z.boolean().optional(),
 });
 const resultSchema = z.object({
   analysis_id: z.string().min(1).max(100),
   source: z.literal("vision"),
   model: z.string().max(120),
-  catalog_version: z.literal("f6-dev-sample-v1"),
+  catalog_version: z.enum([legacyCatalogVersion, catalogVersion]),
+  warnings: z.array(z.string().max(200)).max(3).optional(),
   items: z.array(itemSchema).min(1).max(12),
   photo_retained: z.literal(false),
 });
@@ -47,7 +56,7 @@ async function uploadImage(photo: string, signal: AbortSignal) {
     signal.throwIfAborted();
     if (image.width * image.height > 24_000_000)
       throw new Error("사진 크기가 너무 커요. 2,400만 화소 이하 사진을 선택해 주세요.");
-    const scale = Math.min(1, 1024 / Math.max(image.width, image.height));
+    const scale = Math.min(1, 2048 / Math.max(image.width, image.height));
     const canvas = document.createElement("canvas");
     canvas.width = Math.max(1, Math.round(image.width * scale));
     canvas.height = Math.max(1, Math.round(image.height * scale));
@@ -109,9 +118,12 @@ export async function analyzeDiet(
   if (!parsed.success)
     throw new Error("분석 결과 형식을 확인하지 못했어요. 직접 입력을 이용해 주세요.");
   const result = parsed.data;
+  if (result.catalog_version !== legacyCatalogVersion) await loadOfficialFoods();
   return {
     id: result.analysis_id,
     model: result.model,
+    catalogVersion: result.catalog_version,
+    warnings: result.warnings ?? [],
     items: result.items.map(
       (item) =>
         ({
@@ -125,6 +137,8 @@ export async function analyzeDiet(
           portionHint: item.portion_hint,
           isSoup: item.is_soup,
           suggestedCode: item.suggested_food_code,
+          cropReviewed: item.crop_reviewed,
+          needsReview: item.needs_confirmation,
         }) satisfies DietItem,
     ),
   };
