@@ -3,10 +3,10 @@ import { appStorageKey } from "../../domain/demo-mode";
 import type { InjectionObservation, InjectionRegion } from "./injection";
 import type { ProcessObservation } from "./types";
 
-export const sequenceFeatureVersion = "motion-sequence-v1";
+export const sequenceFeatureVersion = "motion-sequence-v2";
 export const sequenceLabels = ["water", "oral", "insulin_pen", "syringe", "negative"] as const;
 export type SequenceLabel = (typeof sequenceLabels)[number];
-export const sequenceFeatureCount = 16;
+export const sequenceFeatureCount = 23;
 const vectorSchema = z.array(z.number().finite().min(0).max(1)).length(sequenceFeatureCount);
 export const sequenceFrameSchema = z.object({
   t: z.number().finite().min(0).max(65000),
@@ -88,6 +88,16 @@ export function sequenceFeatures(
       ),
     ),
     Number(frame.tools?.modelReady === true),
+    bounded(drink.drinkMotion?.handInclination, 180),
+    bounded(drink.drinkMotion?.aspect, 3),
+    bounded(drink.drinkMotion ? drink.drinkMotion.lift + 1 : null, 2),
+    Number(
+      drink.drinkMotion?.handInclination !== null &&
+        drink.drinkMotion?.handInclination !== undefined,
+    ),
+    ...(["x", "y", "z"] as const).map((axis) =>
+      bounded(drink.drinkMotion?.palmNormal ? (drink.drinkMotion.palmNormal[axis] + 1) / 2 : 0.5),
+    ),
   ];
 }
 
@@ -160,7 +170,7 @@ export function classifySequence(
   };
 }
 
-const modelKey = () => appStorageKey("rexrun-motion-sequence-model-v1");
+const modelKey = () => appStorageKey("rexrun-motion-sequence-model-v2");
 export function loadSequenceModel(): SequenceModel | null {
   try {
     const data = JSON.parse(localStorage.getItem(modelKey()) ?? "null");

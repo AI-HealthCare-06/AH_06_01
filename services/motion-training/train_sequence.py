@@ -11,7 +11,7 @@ import math
 from pathlib import Path
 
 LABELS = ("water", "oral", "insulin_pen", "syringe", "negative")
-FEATURE_VERSION = "motion-sequence-v1"
+FEATURE_VERSION = "motion-sequence-v2"
 
 
 def resample(frames, count=32):
@@ -35,7 +35,7 @@ def distance(a, b):
     for i, x in enumerate(a, 1):
         current = [math.inf] * (len(b) + 1)
         for j in range(max(1, i - 8), min(len(b), i + 8) + 1):
-            cost = sum(abs(v - b[j - 1][k]) for k, v in enumerate(x)) / 16
+            cost = sum(abs(v - b[j - 1][k]) for k, v in enumerate(x)) / 23
             current[j] = cost + min(previous[j], current[j - 1], previous[j - 1])
         previous = current
     return previous[-1] / max(len(a), len(b))
@@ -68,7 +68,7 @@ def validate_clip(raw):
             or not last < time <= 65000
         ):
             raise ValueError("Frame times must be finite and strictly increasing")
-        if len(values) != 16 or any(
+        if len(values) != 23 or any(
             isinstance(v, bool)
             or not isinstance(v, (int, float))
             or not math.isfinite(v)

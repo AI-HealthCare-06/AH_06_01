@@ -6,6 +6,7 @@ import { AppShell, PageHeading } from "../components/AppShell";
 import { PixelIcon } from "../components/PixelIcon";
 import { quests } from "../domain/game";
 import { useMotionCapture } from "../features/motion-capture/useMotionCapture";
+import { WaterSuccessFeedback } from "../features/motion-capture/WaterSuccessFeedback";
 import type { InputSource, MotionQuest } from "../features/motion-capture/types";
 import { useQuestVerificationStore } from "../stores/quest-verification-store";
 import { useMedicationStore } from "../stores/medication-store";
@@ -312,6 +313,9 @@ export function QuestCamera({ fixedQuest }: { fixedQuest?: CameraQuest }) {
   }
   return (
     <section className="camera-card">
+      {result?.decision === "detected" && result.questId === "water" && (
+        <WaterSuccessFeedback key={result.sessionId} sample={motionSource === "sample"} />
+      )}
       {!fixedQuest && (
         <label className="camera-quest-select">
           기록할 퀘스트

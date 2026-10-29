@@ -10,6 +10,7 @@ import android.view.*;
 import android.widget.*;
 
 import androidx.camera.core.*;
+import androidx.camera.core.resolutionselector.*;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
@@ -49,6 +50,8 @@ public class MotionVisionPlugin extends Plugin {
     private ProcessCameraProvider camera;
     private ImageAnalysis analysis;
     private Dialog dialog;
+    private Dialog feedbackDialog;
+    private FrameLayout viewfinder;
     private TextView status;
     private ProgressBar hold;
     private PreviewView preview;
@@ -66,6 +69,7 @@ public class MotionVisionPlugin extends Plugin {
     private MotionFrameGate gate;
     private String delegates = "";
     private boolean injection;
+    private boolean water;
     private final String assets = "public/models/motion-capture/";
 
     @PluginMethod
@@ -106,6 +110,7 @@ public class MotionVisionPlugin extends Plugin {
                             pending = null;
                             session = id;
                             boolean inject = call.getBoolean("injection", false);
+                            water = !inject && "water".equals(call.getString("quest", ""));
                             boolean gpu = !"cpu".equals(call.getString("delegate", "auto"));
                             analyzer.execute(() -> initializeModels(id, inject, gpu, call));
                         });
@@ -203,13 +208,8 @@ public class MotionVisionPlugin extends Plugin {
     private ObjectDetector createObjects(Delegate delegate) {
         return ObjectDetector.createFromOptions(
                 getContext(),
-                ObjectDetector.ObjectDetectorOptions.builder()
-                        .setBaseOptions(base("efficientdet_lite0.tflite", delegate))
-                        .setRunningMode(RunningMode.VIDEO)
-                        .setScoreThreshold(.25f)
-                        .setCategoryAllowlist(Arrays.asList("cup", "bottle"))
-                        .setMaxResults(5)
-                        .build());
+                MotionDetectionPolicy.options(
+                        assets + "efficientdet_lite0.tflite", delegate, .25f));
     }
 
     private byte[] readAsset(String name, int max) throws IOException {
@@ -235,7 +235,7 @@ public class MotionVisionPlugin extends Plugin {
         JSONObject evaluation = manifest.getJSONObject("evaluation");
         String file = manifest.getString("file");
         if (manifest.getInt("schemaVersion") != 1
-                || !file.matches("tool-[a-zA-Z0-9_.-]+\\.tflite")
+                || !MotionDetectionPolicy.toolFilename(file)
                 || evaluation.getInt("trainSubjects") < 2
                 || evaluation.getInt("evaluationSubjects") < 1
                 || evaluation.getInt("images") < 20
@@ -255,14 +255,7 @@ public class MotionVisionPlugin extends Plugin {
 
     private ObjectDetector createTools(String file, Delegate delegate) {
         return ObjectDetector.createFromOptions(
-                getContext(),
-                ObjectDetector.ObjectDetectorOptions.builder()
-                        .setBaseOptions(base(file, delegate))
-                        .setRunningMode(RunningMode.VIDEO)
-                        .setScoreThreshold(.5f)
-                        .setCategoryAllowlist(Arrays.asList("pill", "insulin_pen", "syringe"))
-                        .setMaxResults(5)
-                        .build());
+                getContext(), MotionDetectionPolicy.options(assets + file, delegate, .5f));
     }
 
     private TextView text(String value, int size) {
@@ -295,14 +288,14 @@ public class MotionVisionPlugin extends Plugin {
                     return insets;
                 });
         LinearLayout header = new LinearLayout(getContext());
-        TextView title = text(injection ? "주사·인슐린 동작" : "물·경구 복약 동작", 18);
+        TextView title = text(injection ? "주사·인슐린 동작" : water ? "물 마시기 동작" : "경구 복약 동작", 18);
         header.addView(title, new LinearLayout.LayoutParams(0, -2, 1));
         Button close = new Button(getContext());
         close.setText("닫기");
         close.setOnClickListener(v -> stopSession(true));
         header.addView(close);
         layout.addView(header);
-        FrameLayout viewfinder = new FrameLayout(getContext());
+        viewfinder = new FrameLayout(getContext());
         viewfinder.setBackgroundColor(Color.BLACK);
         preview = new PreviewView(getContext());
         preview.setImplementationMode(PreviewView.ImplementationMode.COMPATIBLE);
@@ -363,20 +356,40 @@ public class MotionVisionPlugin extends Plugin {
                             return;
                         }
                         camera = future.get();
-                        Preview live =
-                                new Preview.Builder()
-                                        .setTargetResolution(new Size(640, 480))
+                        ResolutionSelector resolution =
+                                new ResolutionSelector.Builder()
+                                        .setAspectRatioStrategy(
+                                                AspectRatioStrategy
+                                                        .RATIO_4_3_FALLBACK_AUTO_STRATEGY)
+                                        .setResolutionStrategy(
+                                                new ResolutionStrategy(
+                                                        new Size(640, 480),
+                                                        ResolutionStrategy
+                                                                .FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER))
                                         .build();
+                        Preview live =
+                                new Preview.Builder().setResolutionSelector(resolution).build();
                         live.setSurfaceProvider(preview.getSurfaceProvider());
                         analysis =
                                 new ImageAnalysis.Builder()
-                                        .setTargetResolution(new Size(640, 480))
+                                        .setResolutionSelector(resolution)
                                         .setBackpressureStrategy(
                                                 ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                                         .setOutputImageFormat(
                                                 ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                                         .build();
                         analysis.setAnalyzer(analyzer, image -> analyze(id, image));
+                        preview.addOnLayoutChangeListener(
+                                (view, l, t, r, b, ol, ot, or, ob) -> {
+                                    if (id.equals(session)
+                                            && analysis != null
+                                            && view == preview
+                                            && view.getDisplay() != null) {
+                                        int rotation = view.getDisplay().getRotation();
+                                        live.setTargetRotation(rotation);
+                                        analysis.setTargetRotation(rotation);
+                                    }
+                                });
                         camera.bindToLifecycle(
                                 (LifecycleOwner) getActivity(),
                                 CameraSelector.DEFAULT_FRONT_CAMERA,
@@ -385,6 +398,16 @@ public class MotionVisionPlugin extends Plugin {
                         JSObject ready = new JSObject();
                         ready.put("backend", "android-native");
                         ready.put("delegate", delegates);
+                        ResolutionInfo sourceInfo = analysis.getResolutionInfo(),
+                                previewInfo = live.getResolutionInfo();
+                        if (sourceInfo != null) {
+                            ready.put("sourceWidth", sourceInfo.getResolution().getWidth());
+                            ready.put("sourceHeight", sourceInfo.getResolution().getHeight());
+                        }
+                        if (previewInfo != null) {
+                            ready.put("previewWidth", previewInfo.getResolution().getWidth());
+                            ready.put("previewHeight", previewInfo.getResolution().getHeight());
+                        }
                         call.resolve(ready);
                     } catch (Exception error) {
                         if (id.equals(session)) stopSession(false);
@@ -395,7 +418,7 @@ public class MotionVisionPlugin extends Plugin {
     }
 
     private void analyze(String id, ImageProxy image) {
-        Bitmap raw = null, upright = null;
+        Bitmap raw = null, oriented = null, upright = null;
         MPImage input = null;
         long timestamp = SystemClock.elapsedRealtime();
         try {
@@ -405,10 +428,17 @@ public class MotionVisionPlugin extends Plugin {
             if (rotation != 0) {
                 Matrix matrix = new Matrix();
                 matrix.postRotate(rotation);
-                upright =
+                oriented =
                         Bitmap.createBitmap(
                                 raw, 0, 0, raw.getWidth(), raw.getHeight(), matrix, false);
-            } else upright = raw;
+            } else oriented = raw;
+            int[] bounds =
+                    MotionDetectionPolicy.boundedDimensions(
+                            oriented.getWidth(), oriented.getHeight());
+            upright =
+                    bounds[0] == oriented.getWidth() && bounds[1] == oriented.getHeight()
+                            ? oriented
+                            : Bitmap.createScaledBitmap(oriented, bounds[0], bounds[1], true);
             if (previousWidth != upright.getWidth() || previousHeight != upright.getHeight()) {
                 previousWidth = upright.getWidth();
                 previousHeight = upright.getHeight();
@@ -458,6 +488,10 @@ public class MotionVisionPlugin extends Plugin {
             JSArray found = new JSArray();
             if (lastObjects != null && timestamp - objectsAt <= 500)
                 for (Detection detection : lastObjects.detections()) {
+                    if (found.length() >= 5) break;
+                    if (detection.categories().stream()
+                            .noneMatch(c -> MotionDetectionPolicy.allowed(c.categoryName(), false)))
+                        continue;
                     RectF box = detection.boundingBox();
                     JSObject value = new JSObject();
                     value.put("x", box.left);
@@ -466,6 +500,8 @@ public class MotionVisionPlugin extends Plugin {
                     value.put("height", box.height());
                     JSArray categories = new JSArray();
                     for (Category category : detection.categories()) {
+                        if (!MotionDetectionPolicy.allowed(category.categoryName(), false))
+                            continue;
                         JSObject c = new JSObject();
                         c.put("categoryName", category.categoryName());
                         c.put("score", category.score());
@@ -479,6 +515,10 @@ public class MotionVisionPlugin extends Plugin {
             JSArray toolList = new JSArray();
             if (lastTools != null && timestamp - toolsAt <= 500)
                 for (Detection detection : lastTools.detections()) {
+                    if (toolList.length() >= 5) break;
+                    if (detection.categories().stream()
+                            .noneMatch(c -> MotionDetectionPolicy.allowed(c.categoryName(), true)))
+                        continue;
                     RectF box = detection.boundingBox();
                     JSObject value = new JSObject();
                     value.put("x", box.left);
@@ -487,6 +527,7 @@ public class MotionVisionPlugin extends Plugin {
                     value.put("height", box.height());
                     JSArray categories = new JSArray();
                     for (Category category : detection.categories()) {
+                        if (!MotionDetectionPolicy.allowed(category.categoryName(), true)) continue;
                         JSObject c = new JSObject();
                         c.put("categoryName", category.categoryName());
                         c.put("score", category.score());
@@ -514,9 +555,6 @@ public class MotionVisionPlugin extends Plugin {
                                     overlay.width = width;
                                     overlay.height = height;
                                     overlay.invalidate();
-                                } else if (overlay != null) {
-                                    overlay.selected = false;
-                                    overlay.invalidate();
                                 }
                             });
             if (id.equals(session)) notifyListeners("motionFrame", result);
@@ -534,7 +572,8 @@ public class MotionVisionPlugin extends Plugin {
             }
         } finally {
             if (input != null) input.close();
-            if (upright != null && upright != raw) upright.recycle();
+            if (upright != null && upright != oriented) upright.recycle();
+            if (oriented != null && oriented != raw) oriented.recycle();
             if (raw != null) raw.recycle();
             image.close();
         }
@@ -567,6 +606,9 @@ public class MotionVisionPlugin extends Plugin {
                                     overlay.radius = (float) region.optDouble("radius", .12d);
                                     overlay.selected = true;
                                     overlay.invalidate();
+                                } else if (overlay != null) {
+                                    overlay.selected = false;
+                                    overlay.invalidate();
                                 }
                             }
                             call.resolve();
@@ -580,12 +622,41 @@ public class MotionVisionPlugin extends Plugin {
                 .runOnUiThread(
                         () -> {
                             if (id.equals(pending)) pending = null;
-                            if (id.equals(session)) stopSession(false);
+                            if (id.equals(session)) {
+                                if (water && "water".equals(call.getString("feedback", "")))
+                                    finishWater();
+                                else stopSession(false);
+                            }
                             call.resolve();
                         });
     }
 
+    private void finishWater() {
+        Dialog completed = dialog;
+        FrameLayout stage = viewfinder;
+        if (status != null) status.setText("음수 동작 감지 완료 · 결과를 확인해 주세요.");
+        if (hold != null) hold.setProgress(1000);
+        dialog = null;
+        // Release camera/models immediately; retain only the window for brief completion feedback.
+        stopSession(false);
+        if (completed == null || stage == null) return;
+        feedbackDialog = completed;
+        WaterSuccessView effect = new WaterSuccessView(getContext());
+        stage.addView(effect, new FrameLayout.LayoutParams(-1, -1));
+        effect.play();
+        stage.postDelayed(() -> {
+            if (feedbackDialog == completed) {
+                feedbackDialog = null;
+                completed.dismiss();
+            }
+        }, 1100);
+    }
+
     private void stopSession(boolean notify) {
+        if (feedbackDialog != null) {
+            feedbackDialog.dismiss();
+            feedbackDialog = null;
+        }
         String previous = session;
         session = null;
         if (analysis != null) {
@@ -603,6 +674,7 @@ public class MotionVisionPlugin extends Plugin {
         status = null;
         overlay = null;
         preview = null;
+        viewfinder = null;
         // Models must close on the same serial thread that owns GPU inference.
         if (!analyzer.isShutdown()) analyzer.execute(this::closeModels);
         if (notify && previous != null) {
@@ -631,7 +703,7 @@ public class MotionVisionPlugin extends Plugin {
     @Override
     protected void handleOnPause() {
         pending = null;
-        if (session != null) stopSession(true);
+        stopSession(true);
     }
 
     @Override

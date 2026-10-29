@@ -1,0 +1,68 @@
+.water-success {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  pointer-events: none;
+  background: #325669;
+  color: #f4e7c3;
+  text-align: center;
+}
+.water-success strong {
+  font-size: clamp(26px, 6vw, 38px);
+}
+.water-success span {
+  font-size: 16px;
+}
+.water-success-burst {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 22px;
+}
+.water-success-burst svg {
+  width: 110px;
+  height: 110px;
+  fill: #8fd4e6;
+  animation: water-pop 500ms ease-out both;
+}
+.water-success-burst i {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  background: #f9d970;
+  transform: rotate(var(--angle)) translateX(95px);
+  animation: water-spark 850ms ease-out both;
+}
+@keyframes water-pop {
+  from {
+    transform: scale(0.5);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes water-spark {
+  from {
+    transform: rotate(var(--angle)) translateX(40px) scale(1.2);
+  }
+  to {
+    transform: rotate(var(--angle)) translateX(115px) scale(0.5);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .water-success-burst svg,
+  .water-success-burst i {
+    animation: none;
+  }
+}

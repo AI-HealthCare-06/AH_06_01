@@ -92,7 +92,7 @@ interface NativePlugin {
     delegate: "auto" | "cpu";
     recordFeatures: boolean;
   }): Promise<{ backend: string; delegate: string }>;
-  stop(options: { sessionId: string }): Promise<void>;
+  stop(options: { sessionId: string; feedback?: "water" }): Promise<void>;
   setProgress(options: {
     sessionId: string;
     message: string;
@@ -237,11 +237,13 @@ export function createNativeSession(options: {
   const listeners: PluginListenerHandle[] = [];
   let stopped = false;
   let lastProgress = "";
-  const stop = () => {
+  const stop = (feedback?: "water") => {
     if (stopped) return;
     stopped = true;
     for (const listener of listeners.splice(0)) void listener.remove();
-    void plugin.stop({ sessionId: options.sessionId }).catch(() => {});
+    void plugin
+      .stop({ sessionId: options.sessionId, ...(feedback ? { feedback } : {}) })
+      .catch(() => {});
   };
   return {
     stop,

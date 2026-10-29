@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AppShell, PageHeading } from "../components/AppShell";
 import { useMotionCapture } from "../features/motion-capture/useMotionCapture";
+import { WaterSuccessFeedback } from "../features/motion-capture/WaterSuccessFeedback";
 import { injectionPoint } from "../features/motion-capture/injection";
 import {
   loadSequenceModel,
@@ -12,7 +13,7 @@ import {
 
 const phaseLabels = {
   hand: "약을 준비한 손 → 입 → 손 내림",
-  drink: "컵 접근 → 입 근처 유지 → 컵 내림",
+  drink: "컵 접근 → 기울여 마시는 동작 → 컵 내림",
   injection: "지정 부위에 손 접근 → 머묾 → 손 떼기",
   complete: "과정 동작 감지",
 };
@@ -102,6 +103,9 @@ export function CvProcessPage() {
   }
   return (
     <AppShell active="camera">
+      {result?.decision === "detected" && result.questId === "water" && (
+        <WaterSuccessFeedback key={result.sessionId} sample={source === "sample"} />
+      )}
       <Link className="quest-auth-back" to="/home">
         ← 홈
       </Link>
@@ -272,7 +276,7 @@ export function CvProcessPage() {
             </div>
           ))}
         </div>
-        <progress aria-label="현재 단계 유지 시간" max={1} value={progress.holdProgress} />
+        <progress aria-label="현재 단계 진행" max={1} value={progress.holdProgress} />
         <div className="cv-controls">
           <button
             className="primary-button"

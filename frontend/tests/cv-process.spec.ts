@@ -2,6 +2,29 @@ import { selectPixelOption } from "./helpers/controls";
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 
+test("water completion feedback appears once at detection and respects reduced motion", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/cv");
+  await page.getByRole("button", { name: "합성 시연", exact: true }).click();
+  await page.clock.runFor(1000);
+  const feedback = page.getByRole("status", { name: "시연 동작 감지", exact: true });
+  await expect(feedback).toHaveCount(0);
+  for (
+    let i = 0;
+    i < 24 && (await page.locator(".cv-process").getAttribute("data-phase")) !== "result";
+    i++
+  )
+    await page.clock.runFor(250);
+  await expect(feedback).toBeVisible();
+  await expect(feedback.locator("svg")).toHaveCSS("animation-name", "none");
+  await page.clock.runFor(1200);
+  await expect(feedback).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "과정 동작 감지", exact: true })).toBeVisible();
+});
+
 test("opt-in feature export keeps synthetic input explicit and contains no pixels or raw landmarks", async ({
   page,
 }) => {
@@ -23,7 +46,7 @@ test("opt-in feature export keeps synthetic input explicit and contains no pixel
   expect(data.trainingExample.label).toBe("water");
   expect(data.trainingExample.frames.length).toBeGreaterThanOrEqual(20);
   expect(
-    data.trainingExample.frames.every((f: { values: number[] }) => f.values.length === 16),
+    data.trainingExample.frames.every((f: { values: number[] }) => f.values.length === 23),
   ).toBe(true);
   expect(json).not.toMatch(/data:image|faceLandmarks|worldLandmarks|handLandmarks/);
 });

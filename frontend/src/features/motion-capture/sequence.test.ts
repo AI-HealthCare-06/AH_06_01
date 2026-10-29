@@ -26,7 +26,7 @@ describe("supervised sequence classifier", () => {
     const times = Array.from({ length: 32 }, (_, i) => i * 100);
     const model = sequenceModelSchema.parse({
       schemaVersion: 1,
-      featureVersion: "motion-sequence-v1",
+      featureVersion: "motion-sequence-v2",
       training: {
         synthetic: false,
         trainSubjects: 2,

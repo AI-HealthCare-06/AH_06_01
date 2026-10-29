@@ -10,14 +10,14 @@ from train_sequence import validate_clip, split_subjects, fit, distance, resampl
 def clip(subject="P01", label="water", offset=0):
     return {
         "schemaVersion": 1,
-        "featureVersion": "motion-sequence-v1",
+        "featureVersion": "motion-sequence-v2",
         "subjectId": subject,
         "sessionId": f"{subject}-{offset}",
         "inputSource": "camera",
         "synthetic": False,
         "label": label,
         "frames": [
-            {"t": i * 100, "values": [min(1, i / 32 + offset)] * 16} for i in range(32)
+            {"t": i * 100, "values": [min(1, i / 32 + offset)] * 23} for i in range(32)
         ],
     }
 

@@ -87,8 +87,29 @@ describe("native camera bridge", () => {
     expect(onError).toHaveBeenCalledTimes(1);
     session.stop();
     session.stop();
+    expect(api.stop).toHaveBeenLastCalledWith({ sessionId: "session-A" });
     expect(removed).toHaveBeenCalledTimes(5);
     handlers.get("motionFrame")!(frame(1500));
     expect(onFrame).toHaveBeenCalledTimes(1);
+  });
+  it("requests water feedback once while stopping delivery of all subsequent frames", async () => {
+    const onFrame = vi.fn();
+    const session = createNativeSession({
+      sessionId: "session-success",
+      quest: "water",
+      injection: false,
+      onFrame,
+      onError: vi.fn(),
+      onTap: vi.fn(),
+      onStop: vi.fn(),
+    });
+    await session.start();
+    const stopCount = api.stop.mock.calls.length;
+    session.stop("water");
+    session.stop("water");
+    expect(api.stop).toHaveBeenCalledTimes(stopCount + 1);
+    expect(api.stop).toHaveBeenLastCalledWith({ sessionId: "session-success", feedback: "water" });
+    handlers.get("motionFrame")!({ ...frame(), sessionId: "session-success" });
+    expect(onFrame).not.toHaveBeenCalled();
   });
 });

@@ -38,6 +38,13 @@ export type MotionObservation = {
   objectEvidence: "detected" | "tracked" | null;
   objectObservedAt: number | null;
   objectOccluded: boolean;
+  drinkMotion?: {
+    handInclination: number | null;
+    palmNormal?: { x: number; y: number; z: number } | null;
+    aspect: number;
+    lift: number;
+    shapeReliable?: boolean;
+  };
 };
 export type DetectionProgress = {
   stage: MotionStage;
@@ -59,7 +66,13 @@ export type MotionResult = {
     | "injection_site_hand_process"
     | null;
   decision: "detected" | "inconclusive" | "cancelled";
-  detector: "rules_v1" | "process_rules_v2" | "injection_rules_v1" | "sequence_dtw_v1";
+  detector:
+    | "rules_v1"
+    | "drinking_rules_v2"
+    | "process_rules_v2"
+    | "process_rules_v3"
+    | "injection_rules_v1"
+    | "sequence_dtw_v1";
   process?: ProcessProgress;
   modelManifestVersion: string;
   configVersion: string;

@@ -86,25 +86,28 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
   const finishObservationRef = useRef<(() => void) | null>(null);
   const finishObservation = useCallback(() => finishObservationRef.current?.(), []);
 
-  const cleanup = useCallback(() => {
-    generation.current++;
-    nativeSession.current?.stop();
-    nativeSession.current = null;
-    stream.current?.getTracks().forEach((track) => track.stop());
-    stream.current = null;
-    if (video.current) video.current.srcObject = null;
-    worker.current?.terminate();
-    worker.current = null;
-    if (animation.current !== null) cancelAnimationFrame(animation.current);
-    if (interval.current !== null) clearInterval(interval.current);
-    if (timeout.current !== null) clearTimeout(timeout.current);
-    animation.current = null;
-    interval.current = null;
-    timeout.current = null;
-    rejectReady.current?.(new Error("Session closed"));
-    rejectReady.current = null;
-    finishObservationRef.current = null;
-  }, [video]);
+  const cleanup = useCallback(
+    (feedback?: "water") => {
+      generation.current++;
+      nativeSession.current?.stop(feedback);
+      nativeSession.current = null;
+      stream.current?.getTracks().forEach((track) => track.stop());
+      stream.current = null;
+      if (video.current) video.current.srcObject = null;
+      worker.current?.terminate();
+      worker.current = null;
+      if (animation.current !== null) cancelAnimationFrame(animation.current);
+      if (interval.current !== null) clearInterval(interval.current);
+      if (timeout.current !== null) clearTimeout(timeout.current);
+      animation.current = null;
+      interval.current = null;
+      timeout.current = null;
+      rejectReady.current?.(new Error("Session closed"));
+      rejectReady.current = null;
+      finishObservationRef.current = null;
+    },
+    [video],
+  );
 
   const cancel = useCallback(() => {
     cleanup();
@@ -198,8 +201,10 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
             : profile === "injection"
               ? "injection_rules_v1"
               : processDetector
-                ? "process_rules_v2"
-                : "rules_v1",
+                ? "process_rules_v3"
+                : quest === "water"
+                  ? "drinking_rules_v2"
+                  : "rules_v1",
           ...(progress.process ? { process: progress.process } : {}),
           modelManifestVersion: manifestVersion,
           configVersion:
@@ -252,7 +257,9 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
               ? []
               : [classification ? "sequence_not_confirmed" : "observation_timeout"],
         };
-        cleanup();
+        cleanup(
+          decision === "detected" && quest === "water" && source === "camera" ? "water" : undefined,
+        );
         setState({
           phase: "result",
           source,
