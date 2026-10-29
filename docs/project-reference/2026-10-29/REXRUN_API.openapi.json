@@ -1,0 +1,3327 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "REXRUN implemented API inventory",
+    "version": "2026-10-29",
+    "description": "Code snapshot 1628138 plus local persona-month branch. Checked-in implementation, not live deployment conformance. CV is on-device and meal history is local; no fictitious REST endpoints are added."
+  },
+  "servers": [
+    {
+      "url": "https://t7uhzwx69l.execute-api.ap-southeast-2.amazonaws.com",
+      "description": "Configured AWS app API; deployment not changed by this task"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "get__health",
+        "summary": "앱 저장소 연결 상태",
+        "description": "ranker=false는 이 연결 상태 응답의 고정 필드이며 프런트엔드 Sub Quest 우선순위 로직 존재 여부와 별개.",
+        "tags": [
+          "App"
+        ],
+        "responses": {
+          "200": {
+            "description": "앱 저장소 연결 상태",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "storage": {
+                      "type": "string"
+                    },
+                    "ranker": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-source": "infra/aws/cdk/collector/rdb.ts",
+        "x-auth-note": "Public",
+        "security": []
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "operationId": "get__v1_me",
+        "summary": "본인 저장 기록 읽기",
+        "description": "본인의 프로필·JSON 게임 저장·복약 일정·최근 퀘스트와 오늘 taken 기록 반환.",
+        "tags": [
+          "App"
+        ],
+        "responses": {
+          "200": {
+            "description": "본인 저장 기록 읽기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoteSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "infra/aws/cdk/collector/rdb.ts; supabase read_rexrun RPC",
+        "x-auth-note": "JWT"
+      }
+    },
+    "/v1/sync": {
+      "post": {
+        "operationId": "post__v1_sync",
+        "summary": "계정 상태 배치 동기화",
+        "description": "요청 250000 bytes 이하. base_revision 낙관적 잠금, batch_id 중복 시 동일 요청만 재사용. consent_version=health-cloud-v1은 명시적 동의 전달. user_id는 토큰 소유자로 결정.",
+        "tags": [
+          "App"
+        ],
+        "responses": {
+          "200": {
+            "description": "계정 상태 배치 동기화",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncAck"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "revision 또는 배치 충돌",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "요청 크기 초과",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "infra/aws/cdk/collector/rdb.ts; latest sync_rexrun migration",
+        "x-auth-note": "JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/devices/push": {
+      "post": {
+        "operationId": "post__v1_devices_push",
+        "summary": "본인 디바이스 푸시 설정",
+        "description": "user_id 입력을 신뢰하지 않음. app_version은 제공하면 semver 형식. 토큰 삭제는 push_token=null.",
+        "tags": [
+          "App"
+        ],
+        "responses": {
+          "200": {
+            "description": "본인 디바이스 푸시 설정",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "stored": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "infra/aws/cdk/collector/rdb.ts",
+        "x-auth-note": "JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevicePush"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/notifications/dispatch": {
+      "post": {
+        "operationId": "post__v1_notifications_dispatch",
+        "summary": "완료 알림 발송 시도",
+        "description": "FCM 접수 상태이며 실제 기기 수신 보장 아님. 24시간 내 이벤트 5개씩 lease 확보; 재시도·중복 방지 적용.",
+        "tags": [
+          "App"
+        ],
+        "responses": {
+          "200": {
+            "description": "완료 알림 발송 시도",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accepted": {
+                      "type": "integer"
+                    },
+                    "claimed": {
+                      "type": "integer"
+                    },
+                    "waitingForDevice": {
+                      "type": "integer"
+                    },
+                    "delivery": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "supabase/functions/rexrun-notify/index.ts",
+        "x-auth-note": "JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/predictions/bp-stage/health": {
+      "get": {
+        "operationId": "get__predictions_bp_stage_health",
+        "summary": "모델 준비 상태",
+        "description": "",
+        "tags": [
+          "App"
+        ],
+        "responses": {
+          "200": {
+            "description": "모델 준비 상태",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ready": {
+                      "type": "boolean"
+                    },
+                    "model_version": {
+                      "type": "string"
+                    },
+                    "feature_version": {
+                      "type": "string"
+                    },
+                    "ranker": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "infra/aws/model/handler.py",
+        "x-auth-note": "Public",
+        "security": []
+      }
+    },
+    "/v1/predictions/bp-stage": {
+      "post": {
+        "operationId": "post__v1_predictions_bp_stage",
+        "summary": "저장 기록 기반 M1 또는 M1 M2 분석",
+        "description": "본문은 {} 또는 {include_m2:true}만 허용. JWT 사용자와 유효 health-cloud-v1 동의를 확인하고 저장 프로필·활성 약·game snapshot을 읽음. 평가 거절도 HTTP 200 품질 결과로 반환.",
+        "tags": [
+          "App"
+        ],
+        "responses": {
+          "200": {
+            "description": "저장 기록 기반 M1 또는 M1 M2 분석",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/M1Result"
+                    },
+                    {
+                      "$ref": "#/components/schemas/QuestAnalysis"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "infra/aws/model/handler.py",
+        "x-auth-note": "JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "include_m2": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/predictions/bp-stage": {
+      "post": {
+        "operationId": "post__predictions_bp_stage",
+        "summary": "고정 합성 데모 또는 직접 입력 분석",
+        "description": "무인증 허용은 정확히 일치하는 고정 demo_persona body뿐. 그 외 입력은 JWT+건강 동의 필요. office-month-v1은 이번 로컬 브랜치 추가이며 운영 서버 배포 전. public 보안 정의는 고정 데모 분기에만 해당.",
+        "tags": [
+          "App"
+        ],
+        "responses": {
+          "200": {
+            "description": "고정 합성 데모 또는 직접 입력 분석",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/M1Result"
+                    },
+                    {
+                      "$ref": "#/components/schemas/QuestAnalysis"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "infra/aws/model/handler.py",
+        "x-auth-note": "Public",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "demo_persona": {
+                        "type": "string",
+                        "enum": [
+                          "htn-diabetes-v1",
+                          "office-month-v1"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "demo_persona"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "$ref": "#/components/schemas/M1Input"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/diet/status": {
+      "get": {
+        "operationId": "get__api_diet_status",
+        "summary": "식단 분석 설정 상태",
+        "description": "available은 설정 존재 확인이며 실제 모델 호출 성공 검증이 아님.",
+        "tags": [
+          "Diet"
+        ],
+        "responses": {
+          "200": {
+            "description": "식단 분석 설정 상태",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "provider": {
+                      "type": "string"
+                    },
+                    "model": {
+                      "type": "string"
+                    },
+                    "catalog_version": {
+                      "type": "string"
+                    },
+                    "local": {
+                      "type": "boolean"
+                    },
+                    "photo_retained": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-source": "services/diet-f6/f6_diet/api.py",
+        "x-auth-note": "Public",
+        "servers": [
+          {
+            "url": "https://me5wwa5wnym6omods4wjmn5vwm0bqzba.lambda-url.ap-southeast-2.on.aws"
+          }
+        ],
+        "security": []
+      }
+    },
+    "/api/diet/analyze": {
+      "post": {
+        "operationId": "post__api_diet_analyze",
+        "summary": "동의된 식단 사진 분석",
+        "description": "multipart photo JPEG/PNG/WEBP <=10MiB, ai_consent=true 필수. 앱 전송은 4MiB 이하로 준비. EXIF 제거 및 1024px 정규화. 운영 JWT/Origin 검증. 로컬만 loopback+x-rexrun-development:1. 계정 하루 10회/전체 200회 제한. 사진 서버 영구 저장 없음.",
+        "tags": [
+          "Diet"
+        ],
+        "responses": {
+          "200": {
+            "description": "동의된 식단 사진 분석",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietPreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietError"
+                }
+              }
+            }
+          },
+          "411": {
+            "description": "Content-Length 필요",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "요청 크기 초과",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "비음식/유효성 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "사용량 제한",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietError"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "AI 출력/공급자 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietError"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "AI 시간 초과",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "services/diet-f6/f6_diet/api.py; schemas.py",
+        "x-auth-note": "JWT",
+        "servers": [
+          {
+            "url": "https://me5wwa5wnym6omods4wjmn5vwm0bqzba.lambda-url.ap-southeast-2.on.aws"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "photo": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "ai_consent": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "photo",
+                  "ai_consent"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/functions/v1/rexrun-notify": {
+      "post": {
+        "operationId": "post__functions_v1_rexrun_notify",
+        "summary": "Supabase 직접 알림 함수",
+        "description": "verify_jwt=false이어도 함수 내부에서 auth.getUser로 검증. 서비스 역할은 서버 런타임 내부 전용.",
+        "tags": [
+          "Edge"
+        ],
+        "responses": {
+          "200": {
+            "description": "Supabase 직접 알림 함수",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accepted": {
+                      "type": "integer"
+                    },
+                    "claimed": {
+                      "type": "integer"
+                    },
+                    "waitingForDevice": {
+                      "type": "integer"
+                    },
+                    "delivery": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "supabase/functions/rexrun-notify/index.ts",
+        "x-auth-note": "JWT",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://bjyanmywcclymklgcrhi.supabase.co"
+          }
+        ]
+      }
+    },
+    "/functions/v1/rexrun-ota-publish": {
+      "post": {
+        "operationId": "post__functions_v1_rexrun_ota_publish",
+        "summary": "서명 OTA 준비 및 활성화",
+        "description": "복호화 payload는 purpose=rexrun-ota-publish, action=prepare|activate, issuedAt(epoch ms, ±10분), release(SignedEnvelope), hashes(SHA256 배열 최대12개). prepare는 uploads[{hash,exists,signedUrl?}], activate는 version,fileCount. 사용자 JWT로 배포하지 않음.",
+        "tags": [
+          "Release"
+        ],
+        "responses": {
+          "200": {
+            "description": "서명 OTA 준비 및 활성화",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "revision 또는 배치 충돌",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "요청 크기 초과",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "supabase/functions/rexrun-ota-publish/index.ts",
+        "x-auth-note": "RSA signed body",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignedEnvelope"
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://bjyanmywcclymklgcrhi.supabase.co"
+          }
+        ],
+        "security": [],
+        "x-body-authentication": {
+          "algorithm": "RSA-SHA256",
+          "required": true,
+          "note": "Signature is verified from the JSON body, not an HTTP Authorization scheme."
+        }
+      }
+    },
+    "/rest/v1/rpc/read_rexrun": {
+      "post": {
+        "operationId": "post__rest_v1_rpc_read_rexrun",
+        "summary": "내부 저장 기록 조회 RPC",
+        "description": "공개 앱 UI용 독립 REST 서비스가 아닌 내부 PostgREST 함수 계약. claim은 authenticated/anon 실행 권한 없음.",
+        "tags": [
+          "Internal RPC"
+        ],
+        "responses": {
+          "200": {
+            "description": "내부 저장 기록 조회 RPC",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoteSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "supabase/migrations",
+        "x-auth-note": "JWT + apikey",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://bjyanmywcclymklgcrhi.supabase.co"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [],
+            "supabaseKey": []
+          }
+        ]
+      }
+    },
+    "/rest/v1/rpc/sync_rexrun": {
+      "post": {
+        "operationId": "post__rest_v1_rpc_sync_rexrun",
+        "summary": "내부 동기화 RPC",
+        "description": "공개 앱 UI용 독립 REST 서비스가 아닌 내부 PostgREST 함수 계약. claim은 authenticated/anon 실행 권한 없음.",
+        "tags": [
+          "Internal RPC"
+        ],
+        "responses": {
+          "200": {
+            "description": "내부 동기화 RPC",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncAck"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "supabase/migrations",
+        "x-auth-note": "JWT + apikey",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "p": {
+                    "$ref": "#/components/schemas/SyncRequest"
+                  }
+                },
+                "required": [
+                  "p"
+                ]
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://bjyanmywcclymklgcrhi.supabase.co"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [],
+            "supabaseKey": []
+          }
+        ]
+      }
+    },
+    "/rest/v1/rpc/claim_rexrun_notifications": {
+      "post": {
+        "operationId": "post__rest_v1_rpc_claim_rexrun_notifications",
+        "summary": "서버 전용 알림 lease RPC",
+        "description": "공개 앱 UI용 독립 REST 서비스가 아닌 내부 PostgREST 함수 계약. claim은 authenticated/anon 실행 권한 없음.",
+        "tags": [
+          "Internal RPC"
+        ],
+        "responses": {
+          "200": {
+            "description": "서버 전용 알림 lease RPC",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "supabase/migrations",
+        "x-auth-note": "service_role only",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "owner_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "owner_id"
+                ]
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://bjyanmywcclymklgcrhi.supabase.co"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [],
+            "supabaseKey": []
+          }
+        ]
+      }
+    },
+    "/v1/test-events": {
+      "post": {
+        "operationId": "post__v1_test_events",
+        "summary": "레거시 합성 수집 연결 probe",
+        "description": "현재 RDB collector 라우팅에 등록되지 않은 구형 IAM 합성 테스트 핸들러. 운영 사용 가능 엔드포인트로 가정하면 안 됨.",
+        "tags": [
+          "Legacy test"
+        ],
+        "responses": {
+          "200": {
+            "description": "레거시 합성 수집 연결 probe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "대상 없음",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "revision 또는 배치 충돌",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "비음식/유효성 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "infra/aws/cdk/collector/core.ts",
+        "x-auth-note": "AWS IAM SigV4",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyntheticEvent"
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://legacy-collector.example.invalid"
+          }
+        ],
+        "security": [
+          {
+            "awsSigV4": []
+          }
+        ]
+      }
+    },
+    "/v1/test-events/{eventId}": {
+      "get": {
+        "operationId": "get__v1_test_events__eventId_",
+        "summary": "레거시 probe 확인",
+        "description": "현재 RDB collector 라우팅에 등록되지 않은 구형 IAM 합성 테스트 핸들러. 운영 사용 가능 엔드포인트로 가정하면 안 됨.",
+        "tags": [
+          "Legacy test"
+        ],
+        "responses": {
+          "200": {
+            "description": "레거시 probe 확인",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "대상 없음",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "revision 또는 배치 충돌",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "비음식/유효성 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "infra/aws/cdk/collector/core.ts",
+        "x-auth-note": "AWS IAM SigV4",
+        "servers": [
+          {
+            "url": "https://legacy-collector.example.invalid"
+          }
+        ],
+        "security": [
+          {
+            "awsSigV4": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
+    },
+    "/auth/v1/signup": {
+      "post": {
+        "operationId": "post__auth_v1_signup",
+        "summary": "SDK 위임 이메일 가입",
+        "description": "Supabase 관리 API. 앱이 이 서버를 구현하지 않음. SDK가 password, refresh_token 또는 pkce grant_type 및 필수 인증 헤더를 구성하며 전체 벤더 명세는 Supabase 문서가 기준.",
+        "tags": [
+          "Managed Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "SDK 위임 이메일 가입",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "frontend/src/cloud/sync.ts; Supabase Auth SDK",
+        "x-auth-note": "Supabase managed",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://bjyanmywcclymklgcrhi.supabase.co"
+          }
+        ],
+        "security": [
+          {
+            "supabaseKey": []
+          }
+        ]
+      }
+    },
+    "/auth/v1/token": {
+      "post": {
+        "operationId": "post__auth_v1_token",
+        "summary": "SDK 위임 로그인 및 토큰 교환",
+        "description": "Supabase 관리 API. 앱이 이 서버를 구현하지 않음. SDK가 password, refresh_token 또는 pkce grant_type 및 필수 인증 헤더를 구성하며 전체 벤더 명세는 Supabase 문서가 기준.",
+        "tags": [
+          "Managed Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "SDK 위임 로그인 및 토큰 교환",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "frontend/src/cloud/sync.ts; Supabase Auth SDK",
+        "x-auth-note": "Supabase managed",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://bjyanmywcclymklgcrhi.supabase.co"
+          }
+        ],
+        "security": [
+          {
+            "supabaseKey": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "grant_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "password",
+                "refresh_token",
+                "pkce"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/auth/v1/logout": {
+      "post": {
+        "operationId": "post__auth_v1_logout",
+        "summary": "SDK 위임 로그아웃",
+        "description": "Supabase 관리 API. 앱이 이 서버를 구현하지 않음. SDK가 password, refresh_token 또는 pkce grant_type 및 필수 인증 헤더를 구성하며 전체 벤더 명세는 Supabase 문서가 기준.",
+        "tags": [
+          "Managed Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "SDK 위임 로그아웃",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "입력 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "로그인 또는 서명 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "동의/권한 거절",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "연결/설정/모델 대기",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "frontend/src/cloud/sync.ts; Supabase Auth SDK",
+        "x-auth-note": "JWT + apikey",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://bjyanmywcclymklgcrhi.supabase.co"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": [],
+            "supabaseKey": []
+          }
+        ]
+      }
+    },
+    "/release.json": {
+      "get": {
+        "operationId": "get__release_json",
+        "summary": "현재 공개 릴리스 출처",
+        "description": "정적 공개 JSON. main commit, APK·웹 버전, APK URL·SHA256 등 배포 provenance. 사용자 건강 데이터 아님.",
+        "tags": [
+          "Release"
+        ],
+        "responses": {
+          "200": {
+            "description": "현재 공개 릴리스 출처",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "대상 없음",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "deployment/release.mjs",
+        "x-auth-note": "Public",
+        "servers": [
+          {
+            "url": "https://d4vy5vn0lhbgi.cloudfront.net"
+          }
+        ],
+        "security": []
+      }
+    },
+    "/storage/v1/object/public/rexrun-app-updates/android/{channel}/{nativeVersion}/latest.json": {
+      "get": {
+        "operationId": "get__storage_v1_object_public_rexrun_app_updates_android__channel___nativeVersion__latest_json",
+        "summary": "호환 네이티브별 서명 OTA manifest",
+        "description": "클라이언트는 payload 원문 RSA 서명과 파일 hash, nativeVersion, channel을 검증해야 함. 정적 저장소 조회.",
+        "tags": [
+          "Release"
+        ],
+        "responses": {
+          "200": {
+            "description": "호환 네이티브별 서명 OTA manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignedEnvelope"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "대상 없음",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudError"
+                }
+              }
+            }
+          }
+        },
+        "x-source": "frontend/src/domain/mobile-update.ts; services/mobile-updates.ts",
+        "x-auth-note": "Public",
+        "servers": [
+          {
+            "url": "https://bjyanmywcclymklgcrhi.supabase.co"
+          }
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "nativeVersion",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Supabase JWT"
+      },
+      "supabaseKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "apikey"
+      },
+      "awsSigV4": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "AWS IAM SigV4, legacy synthetic test collection only"
+      }
+    },
+    "schemas": {
+      "CloudError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "retryable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "DietError": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ]
+              }
+            },
+            "required": [
+              "detail"
+            ]
+          }
+        ]
+      },
+      "BloodPressure": {
+        "type": "object",
+        "properties": {
+          "systolic": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 999
+          },
+          "diastolic": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 999
+          }
+        },
+        "required": [
+          "systolic",
+          "diastolic"
+        ],
+        "description": "수축기 > 이완기. 현재 dailySurveySchema의 구현 범위이며 임상 기준 범위가 아님."
+      },
+      "HealthProfile": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "age": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          },
+          "sex": {
+            "type": "string",
+            "enum": [
+              "female",
+              "male"
+            ]
+          },
+          "height": {
+            "type": "number",
+            "minimum": 50,
+            "maximum": 250
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "bloodPressure": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{2,3}\\s*/\\s*\\d{2,3}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "glucose": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "conditionStatus": {
+            "type": "string",
+            "enum": [
+              "none",
+              "selected",
+              "unknown"
+            ]
+          },
+          "specialHistory": {
+            "type": "string",
+            "maxLength": 1500
+          },
+          "htnStatus": {
+            "type": "string",
+            "enum": [
+              "none",
+              "diagnosed_untreated",
+              "on_medication",
+              "unknown"
+            ]
+          },
+          "pregnancyStatus": {
+            "type": "string",
+            "enum": [
+              "none",
+              "pregnant",
+              "postpartum_6w",
+              "unknown"
+            ]
+          },
+          "familyHistory": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "hypertension",
+                "diabetes",
+                "stroke",
+                "mi_early"
+              ]
+            }
+          },
+          "smoking": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hypertensionFamily": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "diabetesFamily": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bingeMonthly": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "alcoholDays": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "alcoholWeek": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "waistCm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "restingHeartRate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "educationYears": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sleepHours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "activeMinutesWeek": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "age",
+          "sex",
+          "height",
+          "weight",
+          "bloodPressure",
+          "glucose",
+          "smoking",
+          "hypertensionFamily",
+          "diabetesFamily"
+        ],
+        "description": "camelCase 앱 프로필. PostgreSQL 정규화 필드와 details JSON으로 분할 저장됨. 전체 클라이언트 검증은 domain/profile.ts."
+      },
+      "Medication": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "dose": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "drugClass": {
+            "type": "string"
+          },
+          "times": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            }
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "times"
+        ]
+      },
+      "DailySurvey": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "submittedAt": {
+            "type": "integer",
+            "description": "epoch milliseconds"
+          },
+          "bloodPressureStatus": {
+            "type": "string",
+            "enum": [
+              "measured",
+              "not-measured"
+            ]
+          },
+          "morning": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BloodPressure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evening": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BloodPressure"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pulseStatus": {
+            "type": "string",
+            "enum": [
+              "measured",
+              "not-measured"
+            ]
+          },
+          "restingHr": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 20,
+                "maximum": 250
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sleepStatus": {
+            "type": "string",
+            "enum": [
+              "reported",
+              "unknown"
+            ]
+          },
+          "sleepInputKind": {
+            "type": "string",
+            "enum": [
+              "duration",
+              "times"
+            ]
+          },
+          "bedtime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "wakeTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sleepHours": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 24
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fastingGlucose": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 20,
+                "maximum": 1000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "activeMinutes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1440
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sedentaryHours": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 24
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "snoringScore": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "daytimeSleepinessScore": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "snoring": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "daytimeSleepiness": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nocturia": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "submittedAt",
+          "bloodPressureStatus",
+          "morning",
+          "evening",
+          "pulseStatus",
+          "restingHr",
+          "sleepStatus",
+          "sleepHours",
+          "fastingGlucose",
+          "activeMinutes",
+          "sedentaryHours",
+          "snoring",
+          "daytimeSleepiness",
+          "nocturia"
+        ],
+        "description": "서로 일치하는 상태·측정값 필요. times 방식은 취침/기상 차와 sleepHours가 일치해야 함. 별도 HTTP 서베이 API 없음, game.dailySurveys에 저장하여 sync."
+      },
+      "StepSnapshot": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "health-connect",
+              "healthkit"
+            ]
+          },
+          "syncedAt": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "count",
+          "source",
+          "syncedAt"
+        ]
+      },
+      "GameSnapshot": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "completed": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "medicine",
+                "meal",
+                "walk",
+                "water",
+                "sleep",
+                "survey"
+              ]
+            }
+          },
+          "experience": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "gold": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "rp": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "steps": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StepSnapshot"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dailySurveys": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DailySurvey"
+            }
+          },
+          "healthHistory": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "questHistoryDetails": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "sleepExperience": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "profileQuests": {
+            "type": "object",
+            "properties": {}
+          },
+          "combat": {
+            "type": "object",
+            "properties": {}
+          }
+        },
+        "required": [
+          "date"
+        ],
+        "additionalProperties": true,
+        "description": "동기화 어댑터는 JSON object/date를 검사. 앱 전체 저장 계약과 기본값은 domain/game.ts가 기준. debugBuffs는 서버 저장 전 제거."
+      },
+      "SyncRequest": {
+        "type": "object",
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "device_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "base_revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "consent_version": {
+            "type": "string",
+            "enum": [
+              "health-cloud-v1"
+            ]
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "web",
+              "android",
+              "ios"
+            ]
+          },
+          "app_version": {
+            "type": "string"
+          },
+          "game": {
+            "$ref": "#/components/schemas/GameSnapshot"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/HealthProfile"
+          },
+          "medications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Medication"
+            }
+          },
+          "taken": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+              "type": "boolean"
+            }
+          },
+          "avatar_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "onboarding_completed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "batch_id",
+          "device_id",
+          "base_revision",
+          "consent_version",
+          "game"
+        ]
+      },
+      "SyncAck": {
+        "type": "object",
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "stored": {
+            "type": "boolean"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "duplicate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "batch_id",
+          "revision",
+          "stored",
+          "received_at",
+          "duplicate"
+        ]
+      },
+      "RemoteSnapshot": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "health_profile": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "game": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "revision": {
+                    "type": "integer"
+                  },
+                  "snapshot": {
+                    "$ref": "#/components/schemas/GameSnapshot"
+                  },
+                  "updated_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "medications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "quest_progress": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "taken": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "DevicePush": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "web",
+              "android",
+              "ios"
+            ]
+          },
+          "push_enabled": {
+            "type": "boolean"
+          },
+          "push_token": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "app_version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          }
+        },
+        "required": [
+          "device_id",
+          "platform",
+          "push_enabled"
+        ]
+      },
+      "M1Input": {
+        "type": "object",
+        "properties": {
+          "age": {
+            "type": "number"
+          },
+          "height_cm": {
+            "type": "number"
+          },
+          "weight_kg": {
+            "type": "number"
+          },
+          "fasting_glucose": {
+            "type": "number"
+          },
+          "activity_minutes_week": {
+            "type": "number"
+          },
+          "sleep_hours": {
+            "type": "number"
+          },
+          "waist_cm": {
+            "type": "number"
+          },
+          "resting_hr": {
+            "type": "number"
+          },
+          "education_years": {
+            "type": "number"
+          },
+          "alcohol_week": {
+            "type": "number"
+          },
+          "sex": {
+            "type": "string",
+            "enum": [
+              "male",
+              "female"
+            ]
+          },
+          "family_htn": {
+            "type": "boolean"
+          },
+          "dm_dx": {
+            "type": "boolean"
+          },
+          "htn_med": {
+            "type": "boolean"
+          },
+          "binge": {
+            "type": "boolean"
+          },
+          "blood_pressure": {
+            "type": "string"
+          }
+        },
+        "description": "레거시 인증 사용자 직접 입력 경로. 서버 valid_types와 M1 계약 검사 적용. 일반 앱은 저장 프로필 경로 사용."
+      },
+      "M1Result": {
+        "type": "object",
+        "properties": {
+          "stage_probs": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "normal": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "elevated": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "prehtn": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "htn": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stage_top": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "normal",
+                  "elevated",
+                  "prehtn",
+                  "htn"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "risk_level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "normal",
+                  "elevated",
+                  "prehtn",
+                  "htn"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason_codes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "data_quality": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "partial",
+              "insufficient",
+              "out_of_range",
+              "not_applicable"
+            ]
+          },
+          "model_version": {
+            "type": "string"
+          },
+          "feature_version": {
+            "type": "string"
+          },
+          "problems": {
+            "type": "string"
+          },
+          "missing_inputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "stage_probs",
+          "stage_top",
+          "risk_level",
+          "reason_codes",
+          "data_quality",
+          "model_version",
+          "feature_version"
+        ],
+        "description": "확률은 0~1. 평가 불가도 HTTP 200이며 품질 필드와 null 확률을 확인해야 함. 혈압 측정 단계와 별도 모델 참고 결과."
+      },
+      "QuestAnalysis": {
+        "type": "object",
+        "properties": {
+          "m1": {
+            "$ref": "#/components/schemas/M1Result"
+          },
+          "m1_bridge": {
+            "type": "object",
+            "properties": {
+              "step": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          },
+          "m2": {
+            "type": "object",
+            "properties": {
+              "module": {
+                "type": "string",
+                "enum": [
+                  "M2"
+                ]
+              },
+              "contract_version": {
+                "type": "string"
+              },
+              "data_quality": {
+                "type": "string"
+              },
+              "states": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "positive",
+                        "negative",
+                        "not_evaluable",
+                        "not_applicable",
+                        "not_evaluated"
+                      ]
+                    },
+                    "missing_required": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "notes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "previous_day": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "completed_quests": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "steps": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "sleep_hours": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "synthetic-demo",
+              "saved-profile"
+            ]
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date"
+          },
+          "daily_survey_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "m1",
+          "m1_bridge",
+          "m2",
+          "previous_day",
+          "source",
+          "as_of"
+        ]
+      },
+      "DietItem": {
+        "type": "object",
+        "properties": {
+          "name_input": {
+            "type": "string"
+          },
+          "food_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name_final": {
+            "type": "string"
+          },
+          "estimated_g": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 5,
+                "maximum": 1500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "portion_hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "is_soup": {
+            "type": "boolean"
+          },
+          "suggested_food_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "DietPreview": {
+        "type": "object",
+        "properties": {
+          "analysis_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "vision"
+            ]
+          },
+          "provider": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "prompt_version": {
+            "type": "string"
+          },
+          "prompt_sha256": {
+            "type": "string"
+          },
+          "catalog_version": {
+            "type": "string",
+            "enum": [
+              "f6-dev-sample-v1"
+            ]
+          },
+          "catalog_kind": {
+            "type": "string",
+            "enum": [
+              "development_sample"
+            ]
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DietItem"
+            }
+          },
+          "latency_ms": {
+            "type": "integer"
+          },
+          "photo_retained": {
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          }
+        }
+      },
+      "SignedEnvelope": {
+        "type": "object",
+        "properties": {
+          "payload": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "maxLength": 1500000
+          },
+          "signature": {
+            "type": "string",
+            "contentEncoding": "base64",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "payload",
+          "signature"
+        ]
+      },
+      "SyntheticEvent": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "integer",
+            "enum": [
+              1
+            ]
+          },
+          "eventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "web",
+              "android"
+            ]
+          },
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "connection_probe"
+            ]
+          },
+          "synthetic": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "payload": {
+            "type": "object",
+            "properties": {
+              "sample": {
+                "type": "integer",
+                "enum": [
+                  1
+                ]
+              }
+            },
+            "required": [
+              "sample"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "eventId",
+          "sentAt",
+          "source",
+          "eventType",
+          "synthetic",
+          "payload"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

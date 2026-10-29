@@ -1,13 +1,15 @@
 import { expectNoHorizontalOverflow } from "./helpers/layout";
 import { selectPixelOption } from "./helpers/controls";
 import { expect, test } from "@playwright/test";
+import { seedDashboardActivity } from "./helpers/dashboard";
 
 test("period changes preserve the score animation and keep all sections in one scrollable report", async ({
   page,
 }) => {
+  await seedDashboardActivity(page);
   await page.goto("/dashboard/report");
   const score = page.locator(".score-number .number-visual");
-  await expect(score).toHaveAttribute("data-value", "82");
+  await expect(score).toHaveAttribute("data-value", "75");
   await page.locator(".health-score").evaluate((element) => {
     Reflect.set(window, "initialScore", element);
     Reflect.set(
@@ -19,7 +21,7 @@ test("period changes preserve the score animation and keep all sections in one s
   const report = page.getByRole("region", { name: "REPORT", exact: true });
   for (const period of ["day", "month", "year", "week"]) {
     await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), period);
-    await expect(score).toHaveAttribute("data-value", "82");
+    await expect(score).toHaveAttribute("data-value", period === "day" ? "50" : "75");
     expect(
       await page
         .locator(".health-score")

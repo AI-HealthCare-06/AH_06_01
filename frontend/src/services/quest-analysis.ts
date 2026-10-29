@@ -1,5 +1,6 @@
 import { cloudApi, cloudConfig } from "../cloud/client";
 import { questAnalysisSchema } from "../domain/quest-analysis";
+import { selectedDemoPersona } from "../domain/demo-personas";
 export async function loadQuestAnalysis(demo: boolean, userId?: string) {
   const data = demo
     ? await fetch(
@@ -9,7 +10,7 @@ export async function loadQuestAnalysis(demo: boolean, userId?: string) {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ demo_persona: "htn-diabetes-v1" }),
+          body: JSON.stringify({ demo_persona: selectedDemoPersona().id }),
           signal: AbortSignal.timeout(25_000),
         },
       ).then(async (response) => {

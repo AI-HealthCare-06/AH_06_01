@@ -28,6 +28,7 @@ frontend/public/models/motion-capture/*.partial
 docs/*.docx
 docs/*.xlsx
 docs/*.pdf
+docs/project-reference/*.zip
 docs/아키텍처 이미지.png
 docs/산출물_목록.md
 docs/레포템플릿_전체내용.md

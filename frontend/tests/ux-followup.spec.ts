@@ -159,7 +159,7 @@ test("radar uses recorded progress and opens dashboard, whose values and calenda
   await expect(radar).not.toContainText("72일차");
   await radar.click();
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.locator(".hero-vitals")).toContainText("6.2시간");
+  await expect(page.locator(".hero-vitals")).toContainText("평균 6.1시간");
   const height = await page
     .locator(".weekly-calendar>button")
     .first()

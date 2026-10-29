@@ -33,6 +33,7 @@ def main():
     entries.append((Path(__file__).with_name("handler.py"), "handler.py"))
     entries.append((Path(__file__).with_name("quest_analysis.py"), "quest_analysis.py"))
     entries.append((ROOT / "frontend/src/design/demo-persona.json", "demo-persona.json"))
+    entries.append((ROOT / "frontend/src/design/demo-persona-office-month.json", "demo-persona-office-month.json"))
     m2 = ROOT / "ai/m2_state"
     for relative in ("__init__.py", "thresholds.py", "feature_contract.py", "feature_contract.yaml", "rules_m2.py", "inference/__init__.py", "inference/judge_m2.py"):
         entries.append((m2 / relative, "m2_state/" + relative))
