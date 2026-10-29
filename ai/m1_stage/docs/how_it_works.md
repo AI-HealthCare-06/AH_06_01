@@ -133,6 +133,7 @@
 | 이유 코드 | `m1/reasons.py` |
 | 추론 API | `m1/predict.py` |
 | 학습·평가·보고 | `train.py`, `m1/evaluate.py`, `m1/report.py` |
-| 데이터 점검·검증 도구 | `profile_data.py`, `label_data.py`, `predict_cli.py`, `evaluate_cli.py`, `threshold_scan.py`, `reason_rule_compare.py`, `reason_audit.py`, `feature_importance.py`, `explore_data.py`, `step_compare.py` |
+| 데이터 점검·검증 도구 | `profile_data.py`, `label_data.py`, `predict_cli.py`, `evaluate_cli.py`, `threshold_scan.py`, `reason_rule_compare.py`, `reason_audit.py`, `feature_importance.py`, `explore_data.py`, `analysis_pack.py`(둘의 결과를 엑셀 한 권으로), `age_profile.py`(나이대별 요약·변수별 혈압 영향), `train_continuous.py`(M1-C 연속형 혈압 분포 모델 실험, m1/continuous.py), `train_chain.py`(규칙 재설계 체인 파이프라인: 전처리 v2·추가 데이터·sbp→dbp→단계, m1/chain.py), `train_final.py`·`predict_final.py`(최종 모델 M1-F: 다중분류 LightGBM, m1/final_model.py), `boost_accuracy.py`·`max_search.py`·`verify_inputs_cv.py`·`experiments_chain.py`(정답률 탐색·검정), `step_compare.py`, `rule_adjust.py` |
 | 근거 | `docs/reference_table.md`, `docs/reason_code_evidence.md` |
 | 테스트 | `tests/` (30개, 합성 데이터) |
+| 성별 분리 역체인(3단계, dbp→sbp) 학습·추론·검증 | `train_sex_chain.py`, `predict_sex_chain.py`, `validate_sex_chain.py`, `sex_importance.py` (2026-10-29) |

@@ -199,11 +199,11 @@ def write_summary_md(path: Path, run_id: str, cfg: dict, feature_version: str, d
                      bp_results: list[dict] | None = None) -> None:
     lb, ld = ds["labels"], ds["load"]
     L = [f"# {ds.get('title', 'M1 학습 보고')} — run {run_id}\n", "## 1. 실행 정보\n"]
-    L.append(f"- 데이터 경로: `{ld['path']}` ({', '.join(f['file'] + ' ' + str(f['rows']) + '행' for f in ld['files'])})")
+    L.append(f"- 데이터 경로: `{ld['path']}` ({len(ld['files'])}개 파일, {sum(int(f['rows']) for f in ld['files'])}행; 파일 이름은 기록하지 않음)")
     L.append(f"- 로드 {ld['rows_loaded']}행 → 사용 {ld['rows_used']}행 (max_rows={ld['max_rows']}, sample_frac={ld['sample_frac']})")
     if ds.get("test_load"):
         tl = ds["test_load"]
-        L.append(f"- 외부 테스트 파일: `{tl['path']}` ({', '.join(f['file'] + ' ' + str(f['rows']) + '행' for f in tl['files'])}) → 사용 {tl['rows_used']}행")
+        L.append(f"- 외부 테스트 파일: `{tl['path']}` ({len(tl['files'])}개 파일, {sum(int(f['rows']) for f in tl['files'])}행) → 사용 {tl['rows_used']}행")
     if ds.get("model_run"):
         L.append(f"- 평가한 모델: artifacts/{ds['model_run']} (재학습 없음)")
     L.append(f"- seed {cfg['seed']}, 피처 계약 v{feature_version}, 분할 {ds['split']['method']} {ds['split']['sizes']}")
@@ -287,7 +287,7 @@ def write_reports(report_dir: Path, run_id: str, cfg: dict, feature_version: str
     summary, calib = summary_table(results), calibration_table(results)
     ld = ds["load"]
     info = [
-        ("run_id", run_id), ("데이터 경로", ld["path"]), ("파일", "; ".join(f"{f['file']} ({f['rows']}행)" for f in ld["files"])),
+        ("run_id", run_id), ("데이터 경로", ld["path"]), ("파일", f"{len(ld['files'])}개 ({sum(int(f['rows']) for f in ld['files'])}행; 이름 비공개)"),
         ("로드 행", ld["rows_loaded"]), ("사용 행", ld["rows_used"]), ("max_rows", ld["max_rows"]), ("sample_frac", ld["sample_frac"]),
         ("seed", cfg["seed"]), ("feature_version", feature_version), ("분할", f"{ds['split']['method']} {ds['split']['sizes']}"),
         ("라벨 분포", str(ds["labels"]["stage_counts"])), ("행 상태", str(ds["row_status"])), ("제외 사유", str(ds["excluded_problems"])),
