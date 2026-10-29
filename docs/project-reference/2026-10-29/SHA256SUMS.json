@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-29",
+  "branch": "feature/project-docs-persona-month",
+  "files": [
+    {
+      "file": "artifact-verification.json",
+      "bytes": 360,
+      "sha256": "8f814d3732e0c992b5f383b8a445052569b6ef5698ee868a11b314b489bbc644"
+    },
+    {
+      "file": "erd-schema.json",
+      "bytes": 21154,
+      "sha256": "73613b1c6743ee07ed6b327c9855e963940a17fb4b5862082e9946cfa152663b"
+    },
+    {
+      "file": "model-run-provenance.json",
+      "bytes": 834,
+      "sha256": "de5c04a9b3e6d09126a99f5d475132be2181fde2b582e4da4f9429d85155ce3d"
+    },
+    {
+      "file": "persona-a-30-days.csv",
+      "bytes": 2365,
+      "sha256": "6b2bedcf0c8b161e2b7eb2dda08a2cceeea62fce8b719b563e48c99e36f2e9e5"
+    },
+    {
+      "file": "persona-a-30-days.json",
+      "bytes": 33494,
+      "sha256": "2da1278a29c38e3f9b8801603b0ae9af478bcfb9806308fb321a6efa46b52877"
+    },
+    {
+      "file": "persona-a-app-state-summary.json",
+      "bytes": 612,
+      "sha256": "62fa35672bf9f8c39ffdc59392ece088c5b53f9a36262ca1ef9e4f7eb42e6d82"
+    },
+    {
+      "file": "persona-a-local-model-result.json",
+      "bytes": 5368,
+      "sha256": "6ebb234b24dfda87d9d38891d1d18a18fe3f342f991b4e7c68ed2797317549bb"
+    },
+    {
+      "file": "README.md",
+      "bytes": 1338,
+      "sha256": "3ad6a1a33fe81822ffec9935d17d34935cf5739aa049c4a573384e01d9925795"
+    },
+    {
+      "file": "REXRUN_API.openapi.json",
+      "bytes": 92328,
+      "sha256": "8d6d6569d67333c1fedf258898d8a124ca2da36a244c2dba5bc12675543d1a41"
+    },
+    {
+      "file": "REXRUN_API_명세서.pdf",
+      "bytes": 151361,
+      "sha256": "33fd55ec45b27859c52e0cf03fb83554294d56e5e0c596331c58655d94ec381e"
+    },
+    {
+      "file": "REXRUN_ERD.drawio",
+      "bytes": 16166,
+      "sha256": "f433ff9e483d4131e53f288efa88d1fc4cb3c24121350ca51944b5e00c7f4828"
+    },
+    {
+      "file": "REXRUN_ERD.pdf",
+      "bytes": 146014,
+      "sha256": "e79533ab460092fc0e1fc4e3258ccff4fb0ee0b80837a74e50c01cfcea7061d2"
+    },
+    {
+      "file": "REXRUN_와이어프레임.html",
+      "bytes": 8828,
+      "sha256": "89ac82234b51494201a61548846f1cd354f461983f4ec2e37a5a9859cf2620c3"
+    },
+    {
+      "file": "REXRUN_와이어프레임.pdf",
+      "bytes": 205176,
+      "sha256": "3dc226e190482b9c77db284e8f14e3b46b45ddaca932f33b27938dd36e6a6607"
+    },
+    {
+      "file": "개선방안_5가지.md",
+      "bytes": 6414,
+      "sha256": "10182f1effb8b48a39e8bc9cfdbfc635c8495df29785e327d397d1556e59907e"
+    },
+    {
+      "file": "검증_기록.md",
+      "bytes": 3465,
+      "sha256": "a81c1b192062c6c41fe4a846df4af0c716b1bfd32ceb0f7bd66344f402f3655f"
+    },
+    {
+      "file": "페르소나A_시나리오_매핑.md",
+      "bytes": 2278,
+      "sha256": "8ca584047aa467daed6bb264f91476940609af649698073583aa8ecd25d56b8c"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
-import fixture from "../design/demo-persona.json";
+import { legacyDemoPersona, type DemoPersona } from "./demo-personas";
+import { startProfileQuests, completeProfileQuest } from "./profile-quests";
 import { dailySurveySchema } from "./daily-survey";
 import { completeQuest, initialGame, recordDailySurvey, rollDay, type QuestId } from "./game";
 import { localDate } from "./calendar";
@@ -7,16 +8,27 @@ import { initialCombat } from "./battle";
 import { characterStats } from "./game-policy";
 
 // Only the isolated synthetic persona uses this seed; signed-in saves never do.
-export function createDemoGame(today = localDate(), now = Date.now()) {
+export function createDemoGame(
+  today = localDate(),
+  now = Date.now(),
+  fixture: DemoPersona = legacyDemoPersona,
+) {
   let game = initialGame(today);
-  game.experience = experienceForLevel(6) + 40;
-  game.gold = 3200;
+  game.experience = fixture.startingLevel
+    ? experienceForLevel(fixture.startingLevel)
+    : experienceForLevel(6) + 40;
+  game.gold = fixture.startingGold ?? 3200;
   fixture.records.forEach((record, index) => {
     const day = new Date(today + "T12:00:00");
     day.setDate(day.getDate() - (fixture.records.length - 1 - index));
     const date = localDate(day);
     const submittedAt = Math.min(day.getTime(), now);
     game = index === 0 ? { ...game, date } : rollDay(game, date);
+    if (fixture.completeFirstWeek) {
+      if (index === 0) game = startProfileQuests(game, submittedAt);
+      if (index === 1) game = completeProfileQuest(game, "conditions", submittedAt);
+      if (index === 2) game = completeProfileQuest(game, "lifestyle", submittedAt);
+    }
     game.steps = { date, count: record.steps, source: "health-connect", syncedAt: submittedAt };
     for (const id of record.completed) game = completeQuest(game, id as QuestId, date, submittedAt);
     const survey = dailySurveySchema.parse({
@@ -25,15 +37,18 @@ export function createDemoGame(today = localDate(), now = Date.now()) {
       submittedAt,
       bloodPressureStatus: "measured",
       morning: { systolic: record.systolic, diastolic: record.diastolic },
-      evening: null,
-      pulseStatus: "measured",
+      evening: record.evening ?? null,
+      pulseStatus: record.restingHr === null ? "not-measured" : "measured",
       restingHr: record.restingHr,
       sleepStatus: "reported",
       sleepInputKind: "times",
       sleepHours: record.sleepHours,
       fastingGlucose: record.glucose,
-      snoring: record.survey.snoringScore > 0,
-      daytimeSleepiness: record.survey.daytimeSleepinessScore > 0,
+      snoring: record.survey.snoringScore === null ? null : record.survey.snoringScore > 0,
+      daytimeSleepiness:
+        record.survey.daytimeSleepinessScore === null
+          ? null
+          : record.survey.daytimeSleepinessScore > 0,
     });
     game = recordDailySurvey(game, survey, date, submittedAt);
   });
