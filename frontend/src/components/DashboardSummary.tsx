@@ -5,12 +5,15 @@ import { PixelIcon } from "./PixelIcon";
 import { DashboardTrends } from "./DashboardTrends";
 import { useGameStore } from "../stores/game-store";
 import { useProfileStore } from "../stores/profile-store";
-import { questCountOn } from "../domain/game";
+import { mainQuestIds } from "../domain/game";
 import { bloodPressurePresentation } from "../domain/risk-presentation";
 import { QuestModelSummary } from "./QuestModelSummary";
 import { HealthHistoryCharts } from "./HealthHistoryCharts";
 import { healthPeriods, type HealthPeriod } from "../services/health-history";
 import type { DashboardSnapshot } from "../services/dashboard-service";
+import { healthScorePeriod, scoreChangeText } from "../domain/health-score";
+import { demoMode } from "../domain/demo-mode";
+import { SurveyHelp } from "./SurveyControls";
 
 export function DashboardSummary({
   data,
@@ -38,26 +41,24 @@ export function DashboardSummary({
       : null;
   const info = healthPeriods[period];
   const current = date === game.date;
-  const done = questCountOn(game, date);
   const sleep =
     current && !game.sampleDay ? game.sleepHours : (game.healthHistory[date]?.sleepHours ?? null);
-  const steps =
-    current && game.steps?.date === date
-      ? game.steps.count
-      : (game.healthHistory[date]?.steps ?? null);
-  const rings = [
-    {
-      label: "걸음 활동",
-      value: steps === null ? null : Math.min(100, Math.round((steps / 6000) * 100)),
-      detail: steps === null ? "기록 없음" : `${steps.toLocaleString("ko-KR")}보`,
-    },
-    { label: "퀘스트", value: done * 25, detail: `${done} / 4` },
-    {
-      label: "수면",
-      value: sleep === null ? null : Math.min(100, Math.round((sleep / 7) * 100)),
-      detail: sleep === null ? "기록 없음" : `${sleep.toFixed(1)}시간`,
-    },
-  ];
+  const score = healthScorePeriod(game, period, date, from);
+  const multipleDays = score.range.start !== score.range.end;
+  const rings = score.metrics.map((metric) => ({
+    label: { steps: "걸음 활동", quests: "퀘스트", sleep: "수면" }[metric.id],
+    value: metric.percent,
+    detail:
+      metric.value === null
+        ? "기록 없음"
+        : metric.id === "quests"
+          ? `${metric.total} / ${metric.days * mainQuestIds.length}`
+          : `${multipleDays ? "평균 " : ""}${
+              metric.id === "steps"
+                ? `${Math.round(metric.value).toLocaleString("ko-KR")}보`
+                : `${metric.value.toFixed(1)}시간`
+            }`,
+  }));
   return (
     <div className="dashboard-period-content" tabIndex={0} aria-label="대시보드 요약 스크롤">
       <section className="dashboard-summary" aria-label="유저 건강 요약">
@@ -67,7 +68,13 @@ export function DashboardSummary({
         >
           <header>
             <h3>{info.heading} HEALTH SCORE</h3>
-            <span className="pixel-tag">데모 점수</span>
+            <div className="score-source">
+              <span className="pixel-tag">{demoMode ? "데모 기록" : "기록 기반"}</span>
+              <SurveyHelp
+                label="건강 점수"
+                text="걸음 6,000보·메인 퀘스트 4개·수면 7시간의 일별 달성률을 각각 100%까지만 반영해 기간 평균을 내고, 세 지표를 같은 비중으로 평균해요. 기록이 없는 항목은 제외해요. 혈압 단계·모델 위험도와 별개인 생활습관 실천 점수예요."
+              />
+            </div>
           </header>
           <div className="hero-ring-grid">
             <div
@@ -103,7 +110,7 @@ export function DashboardSummary({
               </svg>
               <div className="score-ring-value">
                 <strong className="score-number">
-                  <AnimatedNumber value={data.score} />
+                  {score.score === null ? "—" : <AnimatedNumber value={score.score} />}
                 </strong>
                 <span>/ 100</span>
               </div>
@@ -125,14 +132,18 @@ export function DashboardSummary({
           </div>
           <p className="hero-delta">
             <span>
-              ↑ {info.previous} 대비 <b>+{info.delta}점</b>
+              {score.delta === null ? "" : score.delta > 0 ? "↑ " : score.delta < 0 ? "↓ " : "→ "}
+              <b>{scoreChangeText(score, info.previous)}</b>
             </span>
-            <small>점수·변화량 데모</small>
+            <small>
+              기록 {score.recordedDays}일 · {rings.filter((ring) => ring.value !== null).length}/3
+              지표
+            </small>
           </p>
         </section>
 
         <HealthHistoryCharts game={game} date={date} period={period} from={from} />
-        <DashboardTrends game={game} date={date} period={period} from={from} score={data.score} />
+        <DashboardTrends game={game} date={date} period={period} score={score} />
 
         <section
           className={`summary-pressure stitch-analysis cream-card ${pressure.tone}`}
@@ -212,8 +223,10 @@ export function DashboardSummary({
           </Link>
         </div>
         <small className="summary-data-note">
-          건강 점수·추이는 데모예요. 퀘스트·걸음·수면은 저장된 기록만 표시하며, 생활습관 참고 분석은
-          연결된 서비스 결과를 보여드려요.
+          {demoMode
+            ? "데모 계정의 합성 기록으로 계산한 실천 점수예요."
+            : "저장된 걸음·퀘스트·수면 기록으로 계산한 실천 점수예요."}{" "}
+          생활습관 참고 분석은 연결된 서비스 결과를 보여드려요.
         </small>
       </section>
     </div>
