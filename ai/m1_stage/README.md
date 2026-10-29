@@ -10,6 +10,17 @@
 - 추론: `python3 predict_final.py --json '{"age":52,"sex":"male","bmi":27.5,"waist_cm":95,...}'` 또는 `--data <파일/폴더>` → 단계, 4단계 확률, 기여 요인(top_factors), 제외 사유(note).
 - 임계값·기준값·행 검증 상수는 `thresholds.py`(CHAIN_*, REFERENCE_*)에 있음. 명세 계약 기반 후보(ordinal/nested/lgbm)와 체인·M1-C 실험 코드는 비교용으로 남겨 둠.
 
+## 성별 분리 역체인 모델 M1-X (2026-10-29 멘토링 2차 반영: 3단계, 남·여 따로, dbp → sbp)
+
+- 구성: 같은 ChainPreprocessor(여성 모델은 음주 4열 제외) → ChainFeatures(문헌 기준값 중심, 나이× 추가 데이터) → **1단계 dbp 회귀(LightGBM) → 2단계 sbp 회귀(입력 + dbp; 학습은 실제 dbp, 추론은 예측 dbp)** → 3단계 판정. 분포 경로는 검증 잔차(나이대 풀) 부트스트랩. 코드 `train_sex_chain.py`(ReverseChain), `m1/chain.py`(stage3_from_bp, ChainFeatures extra_name).
+- 3단계 라벨: `thresholds.STAGE3_*`. 기본(`--label dbp_rule`, 사용자 채점 규칙): normal = sbp <122 and dbp <80 / elevated_prehtn = sbp 122~139 or dbp 80~89 / htn = sbp ≥140 or dbp ≥90. `--label sbp` 는 sbp 만(122/140). 122 는 사용자 지정값(문헌 120 과 다름).
+- 성능(dbp 포함 라벨, 무작위 층화 70/15/15 내부 테스트, lgbm): 남 점추정 정확도 0.493 / 분포 0.494 (기준선 0.435), AUROC≥140 0.689; 여 0.617 / 0.629 (기준선 0.588), AUROC 0.753; 합산 0.562. 5겹 CV 점추정 남 0.500 ± 0.004, 여 0.617 ± 0.005. 사용자 테스트 파일 채점 56~57%(동일 규칙). train−test 차이 ±0.015 로 과학습 징후 없음.
+- 검증(`validate_sex_chain.py`, `reports/validate_*`): 입력 표현 8종·학습기 13종·규칙 3종·구조 14종 등 48후보를 같은 구조에서 5겹 CV 짝지어 비교. 기준을 잡음 밖으로 넘는 후보 없음(남 체인 없음 +0.3%p·잎31 +0.2%p 가 최대). 실제 dbp 를 알면 남 0.628·여 0.750(정보 한계).
+- 컬럼 영향도(`sex_importance.py`, `reports/seximp_*`): 남성(dbp 라벨) 나이 2.6%p·bmi 2.2·심박 0.6·공복혈당 0.4, 나머지 <0.2(잡음 ±0.1~0.7); binge 를 뒤섞으면 +0.5%p. 여성(sbp 라벨) 나이 11.3%p·bmi 0.5.
+- 학습: `python3 train_sex_chain.py --data train/ --test-data test/ --label dbp_rule` → `artifacts/sexchain_dbp_rule_<run>/`(model.pkl, meta.json), `reports/sexchain_dbp_rule_<run>/`(summary.md, results.xlsx, test_predictions.xlsx).
+- 추론: `python3 predict_sex_chain.py --json '{"age":52,"sex":"male","bmi":27.5,"waist_cm":95,...}'` 또는 `--data <파일/폴더>` → sbp_pred, dbp_pred, stage3_point, stage3_dist, 3단계 확률, note. 저장된 라벨 규칙을 따른다.
+- 위치: M1-F(4단계 다중분류)는 그대로 두고 병행 보관. 어느 쪽을 제품 모델로 할지는 사용자 결정 대기(단계 정의가 달라 정확도 직접 비교 불가).
+
 혈압을 입력하지 않은 사용자에게 생활습관·신체 변수만으로 **혈압 4단계(normal / elevated / prehtn / htn)에 속할 확률**을 낸다.
 mmHg 점 추정은 제품 출력이 아니다(명세 2-1). 혈압값은 라벨 생성에만 쓰고 피처로는 어떤 형태로도 넣지 않는다(코드가 이름 패턴으로 차단).
 
@@ -52,6 +63,8 @@ mmHg 점 추정은 제품 출력이 아니다(명세 2-1). 혈압값은 라벨 �
 | `docs/reference_table.md` | 참고 수치표(문헌 근거) |
 | `train/`, `test/` | 사용자가 엑셀/CSV를 넣는 폴더. 커밋 제외, 자동 로딩 없음 |
 | `reports/`, `artifacts/` | 실행 산출물(보고서·엑셀·그림 / 모델). `artifacts/LATEST` 가 최근 run_id. 커밋 제외 |
+| `train_sex_chain.py`, `predict_sex_chain.py` | 성별 분리 역체인(dbp→sbp) 3단계 모델 학습(CV·테스트 예측·모델 저장) / 추론 CLI (`--label sbp|dbp_rule`) |
+| `validate_sex_chain.py`, `sex_importance.py`, `predict_sex_best.py` | 성별 역체인 구조 고정 48후보 5겹 CV 검증 / 성별 모델 컬럼 순열 중요도 / 검증 최고 후보 테스트 예측 |
 | `tests/` | 합성 데이터 기반 코드 테스트(성능 보고용 아님) |
 
 ## 실행 순서 (VSCode, 시스템 Python 3.14)

@@ -1,0 +1,107 @@
+{
+  "model_version": "M1-X-20261029_232918",
+  "label": "dbp_rule",
+  "use_dbp": true,
+  "stage3": [
+    "normal",
+    "elevated_prehtn",
+    "htn"
+  ],
+  "sbp_cuts": [
+    122.0,
+    140.0
+  ],
+  "dbp_cuts": [
+    80.0,
+    90.0
+  ],
+  "train_file_count": 1,
+  "rows_loaded": 46691,
+  "rows_used": 45689,
+  "label_counts": {
+    "normal": 23804,
+    "elevated_prehtn": 14842,
+    "htn": 7043
+  },
+  "exclude": {
+    "male": [
+      "sodium_risk_score",
+      "sleep_short_flag",
+      "missing_count",
+      "education_years"
+    ],
+    "female": [
+      "sodium_risk_score",
+      "sleep_short_flag",
+      "missing_count",
+      "education_years",
+      "alcohol_week",
+      "alcohol_15plus",
+      "alcohol_per_day",
+      "binge"
+    ],
+    "pooled": [
+      "sodium_risk_score",
+      "sleep_short_flag",
+      "missing_count",
+      "education_years"
+    ]
+  },
+  "python": "3.14.6",
+  "per_sex": {
+    "male": {
+      "n": 20067,
+      "train": 14046,
+      "val": 3010,
+      "test": 3011,
+      "lgbm_test": {
+        "dbp_rmse": 8.87623700275322,
+        "dbp_r2": 0.25164589125187975,
+        "sbp_rmse": 13.77556932172182,
+        "sbp_r2": 0.16623183526330199,
+        "sbp_rmse_actual_dbp": 10.304759560030078,
+        "point_acc": 0.4928595151112587,
+        "point_acc_alt_rule": 0.5752241780139489,
+        "dist_accuracy": 0.4938558618399203,
+        "dist_recall_normal": 0.6961832061068702,
+        "dist_recall_elevated_prehtn": 0.4662104362703165,
+        "dist_recall_htn": 0.05639097744360902,
+        "dist_auroc_ge140": 0.6887622950073855,
+        "dist_auroc_ge122": 0.6764108225516198,
+        "baseline_all_normal": 0.4350714048488874,
+        "n": 3011
+      },
+      "best_iteration": {
+        "dbp": 123,
+        "sbp": 164
+      }
+    },
+    "female": {
+      "n": 25622,
+      "train": 17935,
+      "val": 3843,
+      "test": 3844,
+      "lgbm_test": {
+        "dbp_rmse": 8.915926523007938,
+        "dbp_r2": 0.14128541148530183,
+        "sbp_rmse": 14.357484924350548,
+        "sbp_r2": 0.3337951646664551,
+        "sbp_rmse_actual_dbp": 10.084707441001544,
+        "point_acc": 0.6168054110301769,
+        "point_acc_alt_rule": 0.6625910509885536,
+        "dist_accuracy": 0.6287721123829344,
+        "dist_recall_normal": 0.8642193719593101,
+        "dist_recall_elevated_prehtn": 0.4102079395085066,
+        "dist_recall_htn": 0.05523809523809524,
+        "dist_auroc_ge140": 0.7533806797801975,
+        "dist_auroc_ge122": 0.7756743685604708,
+        "baseline_all_normal": 0.5881893860561914,
+        "n": 3844
+      },
+      "best_iteration": {
+        "dbp": 160,
+        "sbp": 166
+      }
+    }
+  }
+}

@@ -66,6 +66,16 @@ def stage_from_bp(sbp, dbp) -> np.ndarray:
                     np.where((sbp >= T.SBP_PREHTN_MIN) | (dbp >= T.DBP_PREHTN_MIN), 2, np.where(sbp >= T.SBP_ELEVATED_MIN, 1, 0))).astype(int)
 
 
+def stage3_from_bp(sbp, dbp=None, use_dbp: bool = False) -> np.ndarray:
+    """3단계(0 normal, 1 elevated_prehtn, 2 htn). 기본은 sbp 만: <122 / 122~139 / ≥140. use_dbp 면 dbp 80/90 을 'or' 로 함께 적용."""
+    sbp = np.asarray(sbp, float)
+    lo, hi = T.STAGE3_SBP_CUTS
+    if use_dbp and dbp is not None:
+        dbp = np.asarray(dbp, float); dlo, dhi = T.STAGE3_DBP_CUTS
+        return np.where((sbp >= hi) | (dbp >= dhi), 2, np.where((sbp >= lo) | (dbp >= dlo), 1, 0)).astype(int)
+    return np.where(sbp >= hi, 2, np.where(sbp >= lo, 1, 0)).astype(int)
+
+
 def _mode(s: pd.Series, default: float = 0.0) -> float:
     s = s.dropna()
     return float(s.mode().iloc[0]) if len(s) else default
@@ -228,10 +238,10 @@ def hinge_features(X: pd.DataFrame) -> pd.DataFrame:
 class ChainFeatures:
     """표준화(중심: 평균 또는 문헌 기준값) + 선택적 힌지 + 나이×컬럼 + 성별×컬럼 (+ sbp 및 sbp×컬럼). fit 은 학습 행에서만."""
 
-    def __init__(self, with_sbp: bool = False, center: str = "reference", hinge: bool = False):
+    def __init__(self, with_sbp: bool = False, center: str = "reference", hinge: bool = False, extra_name: str = "sbp"):
         if center not in ("mean", "reference"):
             raise ValueError(f"center 는 mean|reference: {center}")
-        self.with_sbp, self.center, self.hinge = with_sbp, center, hinge
+        self.with_sbp, self.center, self.hinge, self.extra_name = with_sbp, center, hinge, extra_name   # extra_name: 2단계 입력으로 넣는 혈압 열 이름(sbp 또는 dbp)
         self.stats: dict[str, tuple[float, float]] = {}
         self.base_columns: list[str] = []
         self.columns: list[str] = []
@@ -250,20 +260,21 @@ class ChainFeatures:
             for c in H.columns:
                 Z[c] = _z(H[c], self.stats[c])
         if self.with_sbp:
-            Z["sbp"] = _z(sbp, self.stats["sbp"])
+            Z[self.extra_name] = _z(sbp, self.stats[self.extra_name])
         return Z
 
     def _inter(self, Z: pd.DataFrame) -> pd.DataFrame:
         age, male = Z["age"].to_numpy(), Z["male"].to_numpy()
         out = {"age_x_male": age * male}
-        others = [c for c in Z.columns if c not in ("age", "male", "sbp")]
+        ex = self.extra_name
+        others = [c for c in Z.columns if c not in ("age", "male", ex)]
         for c in others:
             out[f"age_x_{c}"] = age * Z[c].to_numpy()
             out[f"male_x_{c}"] = male * Z[c].to_numpy()
         if self.with_sbp:
-            s = Z["sbp"].to_numpy()
-            for c in [c for c in Z.columns if c != "sbp"]:
-                out[f"sbp_x_{c}"] = s * Z[c].to_numpy()
+            s = Z[ex].to_numpy()
+            for c in [c for c in Z.columns if c != ex]:
+                out[f"{ex}_x_{c}"] = s * Z[c].to_numpy()
         return pd.DataFrame(out, index=Z.index)
 
     def fit(self, X: pd.DataFrame, sbp=None) -> "ChainFeatures":
@@ -273,7 +284,7 @@ class ChainFeatures:
             H = hinge_features(X)
             self.stats.update({c: _ms(H[c]) for c in H.columns})
         if self.with_sbp:
-            self.stats["sbp"] = _ms(sbp)
+            self.stats[self.extra_name] = _ms(sbp)
         Z = self._base(X, sbp)
         I = self._inter(Z)
         for c in I.columns:

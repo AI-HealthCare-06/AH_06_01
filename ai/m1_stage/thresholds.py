@@ -20,6 +20,12 @@ DBP_PREHTN_MIN = 80
 SBP_HTN_MIN = 140       # 고혈압: 수축기 ≥140 or 이완기 ≥90 or 복약 (1기·2기 합침)
 DBP_HTN_MIN = 90
 
+# 3단계 정의 (사용자 결정 2026-10-29, 멘토링 반영): elevated 와 prehtn 을 합쳐 sbp 기준 <122 / 122~139 / ≥140.
+# 122 는 사용자가 지정한 값(표준 경계 120 과 다름). dbp 를 함께 쓰는 변형은 STAGE3_DBP_CUTS(80/90, 'or' 규칙)로 비교한다.
+STAGE3 = ("normal", "elevated_prehtn", "htn")
+STAGE3_SBP_CUTS = (122.0, 140.0)
+STAGE3_DBP_CUTS = (80.0, 90.0)
+
 # 라벨용 측정 혈압은 2회 이상 측정의 평균 (명세 2-2)
 LABEL_MIN_MEASUREMENTS = 2
 
