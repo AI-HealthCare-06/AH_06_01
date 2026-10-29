@@ -1,5 +1,6 @@
 import { z } from "zod";
 import catalogData from "../design/f6-foods.json";
+import officialSource from "../design/food-catalog-source.json";
 
 export const nutrientKeys = [
   "energy_kcal",
@@ -15,7 +16,9 @@ export const nutrientKeys = [
 ] as const;
 export type NutrientKey = (typeof nutrientKeys)[number];
 export type Nutrients = Record<NutrientKey, number | null>;
-export const catalogVersion = "f6-dev-sample-v1";
+export const catalogVersion = officialSource.version;
+export const catalogSource = officialSource;
+export const legacyCatalogVersion = "f6-dev-sample-v1";
 export const nutrientLabels: Record<NutrientKey, { name: string; unit: string }> = {
   energy_kcal: { name: "열량", unit: "kcal" },
   carb_g: { name: "탄수화물", unit: "g" },
@@ -39,12 +42,48 @@ export type Food = {
   food_code: string;
   name: string;
   category: string;
-  serving_g: number;
+  serving_g: number | null;
+  origin?: string;
+  source_date?: string;
   per_100g: Nutrients;
 };
 export const foods = catalogData as Food[];
 const byCode = new Map(foods.map((food) => [food.food_code, food]));
+const foodKeys = new Map<string, string>();
 export const foodByCode = (code: string | null) => (code ? byCode.get(code) : undefined);
+let loadingCatalog: Promise<void> | undefined;
+export function loadOfficialFoods() {
+  loadingCatalog ??= import("../design/mfds-foods.json")
+    .then(({ default: rows }) => {
+      const official = rows as Food[];
+      if (official.length !== officialSource.food_count)
+        throw new Error("영양 DB 버전이 맞지 않아요.");
+      for (const food of official) {
+        byCode.set(food.food_code, food);
+        foodKeys.set(food.food_code, foodKey(food.name));
+      }
+      foods.splice(0, foods.length, ...official, ...(catalogData as Food[]));
+    })
+    .catch((error) => {
+      loadingCatalog = undefined;
+      throw error;
+    });
+  return loadingCatalog;
+}
+const foodKey = (name: string) =>
+  name
+    .normalize("NFKC")
+    .replace(/[\s_(),·-]/g, "")
+    .toLowerCase();
+export function searchFoods(query: string, limit = 40, legacy = false) {
+  const key = foodKey(query);
+  return foods
+    .filter((food) =>
+      legacy ? food.food_code.startsWith("DEV-") : !food.food_code.startsWith("DEV-"),
+    )
+    .filter((food) => !key || (foodKeys.get(food.food_code) ?? foodKey(food.name)).includes(key))
+    .slice(0, limit);
+}
 export const mealSlotLabels = { breakfast: "아침", lunch: "점심", dinner: "저녁", snack: "간식" };
 export type MealSlot = keyof typeof mealSlotLabels;
 export const draftItemSchema = z.object({
@@ -58,6 +97,8 @@ export const draftItemSchema = z.object({
   portionHint: z.string().nullable(),
   isSoup: z.boolean(),
   suggestedCode: z.string().nullable(),
+  cropReviewed: z.boolean().optional(),
+  needsReview: z.boolean().optional(),
 });
 export type DietItem = z.infer<typeof draftItemSchema>;
 export const validGrams = (text: string) =>
@@ -114,7 +155,10 @@ export const mealRecordSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   slot: z.enum(["breakfast", "lunch", "dinner", "snack"]),
   source: z.enum(["vision", "manual"]),
-  catalogVersion: z.literal(catalogVersion),
+  catalogVersion: z.union([
+    z.literal(legacyCatalogVersion),
+    z.string().regex(/^mfds-kddb-\d{8}-[a-f0-9]{8}$/),
+  ]),
   model: z.string().max(120).nullable(),
   createdAt: z.string().datetime(),
   items: z

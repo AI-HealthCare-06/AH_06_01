@@ -11,6 +11,16 @@ import { ProcessDetector, processConfig } from "./process";
 import { sampleProcess } from "./process-sample";
 import { MotionDetector } from "./detector";
 import { inferenceFrame } from "./frame";
+import { createNativeSession, nativeMotionAvailable, type RuntimeStats } from "./native";
+import {
+  classifySequence,
+  loadSequenceModel,
+  sequenceFeatureVersion,
+  sequenceFeatures,
+  sequenceSubjectId,
+  type SequenceFrame,
+  type SequenceLabel,
+} from "./sequence";
 import { sampleObservation } from "./sample";
 import type {
   DetectionProgress,
@@ -36,6 +46,7 @@ type CaptureState = {
   observation: MotionObservation | null;
   result: MotionResult | null;
   latencyMs: number | null;
+  runtime: RuntimeStats | null;
 };
 const initialState: CaptureState = {
   phase: "idle",
@@ -45,6 +56,7 @@ const initialState: CaptureState = {
   observation: null,
   result: null,
   latencyMs: null,
+  runtime: null,
 };
 
 const uniqueId = () =>
@@ -65,13 +77,19 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
   const generation = useRef(0);
   const stream = useRef<MediaStream | null>(null);
   const worker = useRef<Worker | null>(null);
+  const nativeSession = useRef<ReturnType<typeof createNativeSession> | null>(null);
+  const runtime = useRef<RuntimeStats | null>(null);
   const animation = useRef<number | null>(null);
   const interval = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rejectReady = useRef<((reason: Error) => void) | null>(null);
+  const finishObservationRef = useRef<(() => void) | null>(null);
+  const finishObservation = useCallback(() => finishObservationRef.current?.(), []);
 
   const cleanup = useCallback(() => {
     generation.current++;
+    nativeSession.current?.stop();
+    nativeSession.current = null;
     stream.current?.getTracks().forEach((track) => track.stop());
     stream.current = null;
     if (video.current) video.current.srcObject = null;
@@ -85,6 +103,7 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
     timeout.current = null;
     rejectReady.current?.(new Error("Session closed"));
     rejectReady.current = null;
+    finishObservationRef.current = null;
   }, [video]);
 
   const cancel = useCallback(() => {
@@ -104,7 +123,12 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
   }, [cancel, cleanup]);
 
   const start = useCallback(
-    async (quest: MotionQuest, source: InputSource, preparation: boolean) => {
+    async (
+      quest: MotionQuest,
+      source: InputSource,
+      preparation: boolean,
+      options: { recordFeatures?: boolean; target?: SequenceLabel; subjectId?: string } = {},
+    ) => {
       cleanup();
       regionRef.current = null;
       setSelectedRegion(null);
@@ -116,6 +140,20 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
       let detectorRegion: InjectionRegion | null = null;
       const token = generation.current;
       const sessionId = uniqueId();
+      const target =
+        options.target ??
+        (profile === "injection" ? "insulin_pen" : quest === "water" ? "water" : "oral");
+      const loadedModel = source === "camera" ? loadSequenceModel() : null;
+      const sequenceModel = loadedModel?.prototypes.some((p) => p.label === target)
+        ? loadedModel
+        : null;
+      const frames: SequenceFrame[] = [];
+      let featureStartedAt: number | null = null;
+      let classification: ReturnType<typeof classifySequence> | null = null;
+      let frameSize = "";
+      let toolModelReady = false;
+      let expectedToolAt: number | null = null;
+      runtime.current = null;
       const detector = new MotionDetector(quest, preparation);
       const processDetector =
         profile === "process" ? new ProcessDetector(quest, preparation) : null;
@@ -155,8 +193,9 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
                     : "hand_to_mouth_motion"
               : null,
           decision,
-          detector:
-            profile === "injection"
+          detector: classification
+            ? "sequence_dtw_v1"
+            : profile === "injection"
               ? "injection_rules_v1"
               : processDetector
                 ? "process_rules_v2"
@@ -174,10 +213,44 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
           durationMs: Math.round(performance.now() - observedAt),
           validObservationRatio: progress.validObservationRatio,
           classificationScore: null,
+          ...(profile !== "motion"
+            ? {
+                toolEvidence: {
+                  modelReady: toolModelReady,
+                  expectedToolObserved: expectedToolAt !== null,
+                },
+              }
+            : {}),
+          ...(runtime.current ? { runtime: runtime.current } : {}),
+          ...(classification
+            ? {
+                sequenceClassification: {
+                  label: classification.label,
+                  distance: classification.distance,
+                  accepted: classification.accepted,
+                },
+              }
+            : {}),
+          ...(options.recordFeatures
+            ? {
+                learningClip: {
+                  schemaVersion: 1,
+                  featureVersion: sequenceFeatureVersion,
+                  subjectId: options.subjectId || sequenceSubjectId(),
+                  sessionId,
+                  inputSource: source,
+                  target,
+                  frames,
+                },
+              }
+            : {}),
           preparationSource: quest === "medicine" ? "user_ack" : "not_required",
           verificationLevel: profile !== "motion" ? "experimental_process" : "local_demo",
           userConfirmed: false,
-          reasonCodes: decision === "detected" ? [] : ["observation_timeout"],
+          reasonCodes:
+            decision === "detected"
+              ? []
+              : [classification ? "sequence_not_confirmed" : "observation_timeout"],
         };
         cleanup();
         setState({
@@ -188,8 +261,11 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
           message,
           observation: null,
           latencyMs: null,
+          runtime: runtime.current,
         });
       };
+      finishObservationRef.current = () =>
+        finish("inconclusive", "관찰을 마쳤어요. 실제 시도한 동작을 선택해 기록을 저장하세요.");
       const consume = (
         observation: MotionObservation,
         latencyMs: number | null,
@@ -197,6 +273,56 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
         injection?: InjectionObservation,
       ) => {
         if (!active()) return;
+        const size = `${observation.frameWidth}x${observation.frameHeight}`;
+        if (frameSize && frameSize !== size) {
+          frames.length = 0;
+          featureStartedAt = null;
+          expectedToolAt = null;
+        }
+        if (profile === "injection" && frameSize && frameSize !== size) {
+          regionRef.current = null;
+          setSelectedRegion(null);
+        }
+        frameSize = size;
+        if (process?.tools) {
+          toolModelReady = process.tools.modelReady;
+          const expected = target === "oral" ? "pill" : target;
+          const region = regionRef.current;
+          if (
+            observation.timestamp - process.tools.observedAt <= 500 &&
+            process.tools.items.some(
+              (item) =>
+                item.label === expected &&
+                item.score >= 0.5 &&
+                (profile !== "injection" ||
+                  (region &&
+                    Math.hypot(
+                      item.x + item.width / 2 - region.x,
+                      item.y + item.height / 2 - region.y,
+                    ) <=
+                      region.radius + 0.15)),
+            )
+          )
+            expectedToolAt = observation.timestamp;
+        }
+        if (options.recordFeatures || sequenceModel) {
+          featureStartedAt ??= observation.timestamp;
+          const t = observation.timestamp - featureStartedAt;
+          if (
+            frames.length < 900 &&
+            t >= 0 &&
+            t <= 65000 &&
+            (!frames.length || t > frames.at(-1)!.t)
+          )
+            frames.push({
+              t,
+              values: sequenceFeatures(
+                process ?? { hand: observation, drink: observation },
+                injection,
+                regionRef.current,
+              ),
+            });
+        }
         if (profile === "injection" && regionRef.current !== detectorRegion) {
           detectorRegion = regionRef.current;
           injectionDetector = detectorRegion ? new InjectionDetector(detectorRegion) : null;
@@ -221,8 +347,25 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
                   },
                 )
               : detector.update(observation);
-        if (progress.stage === "detected") finish("detected", progress.message);
-        else
+        nativeSession.current?.progress(progress.message, progress.holdProgress, regionRef.current);
+        if (progress.stage === "detected") {
+          if (
+            target !== "water" &&
+            toolModelReady &&
+            (expectedToolAt === null || observation.timestamp - expectedToolAt > 5000)
+          ) {
+            finish("inconclusive", "해당 도구를 동작과 함께 확인하지 못했어요.");
+            return;
+          }
+          if (sequenceModel) {
+            classification = classifySequence(sequenceModel, frames, target);
+            if (!classification.accepted) {
+              finish("inconclusive", classification.reason);
+              return;
+            }
+          }
+          finish("detected", progress.message);
+        } else
           setState((current) => ({
             ...current,
             progress,
@@ -232,6 +375,7 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
                 ? process.drink
                 : observation,
             latencyMs,
+            runtime: runtime.current,
             message: progress.message,
           }));
       };
@@ -287,6 +431,46 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
               : undefined,
           );
         }, motionConfig.frameIntervalMs);
+        return;
+      }
+      if (nativeMotionAvailable()) {
+        const native = createNativeSession({
+          sessionId,
+          quest,
+          injection: profile === "injection",
+          recordFeatures: options.recordFeatures,
+          onFinish: () => {
+            if (active()) finishObservationRef.current?.();
+          },
+          onFrame: (observation, latency, process, injection, stats) => {
+            if (!active()) return;
+            runtime.current = stats;
+            consume(observation, latency, process, profile === "injection" ? injection : undefined);
+          },
+          onTap: (region) => {
+            if (active()) selectRegion(region);
+          },
+          onStop: () => {
+            if (active()) cancel();
+          },
+          onError: fail,
+        });
+        nativeSession.current = native;
+        timeout.current = setTimeout(
+          () => fail("네이티브 카메라 준비 시간이 길어졌어요. 다시 시작해 주세요."),
+          motionConfig.loadingTimeoutMs,
+        );
+        try {
+          await native.start();
+          if (!active()) {
+            native.stop();
+            return;
+          }
+          observe();
+        } catch (error) {
+          if (active())
+            fail(error instanceof Error ? error.message : "네이티브 카메라를 준비하지 못했어요.");
+        }
         return;
       }
       if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
@@ -419,7 +603,7 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
         );
       }
     },
-    [cleanup, video, profile],
+    [cleanup, video, profile, selectRegion, cancel],
   );
 
   const confirm = () =>
@@ -435,5 +619,14 @@ export function useMotionCapture(profile: "motion" | "process" | "injection" = "
           }
         : current,
     );
-  return { ...state, selectedRegion, selectRegion, bindVideo, start, cancel, confirm };
+  return {
+    ...state,
+    selectedRegion,
+    selectRegion,
+    bindVideo,
+    start,
+    cancel,
+    confirm,
+    finishObservation,
+  };
 }

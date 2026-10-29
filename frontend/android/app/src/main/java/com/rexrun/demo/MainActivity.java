@@ -9,6 +9,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(DinosaurAppIconPlugin.class);
         registerPlugin(StepSyncPlugin.class);
+        registerPlugin(MotionVisionPlugin.class);
         super.onCreate(savedInstanceState);
         applyDeviceTextSize();
     }

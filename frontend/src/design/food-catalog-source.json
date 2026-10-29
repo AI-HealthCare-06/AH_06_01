@@ -1,0 +1,27 @@
+{
+  "version": "mfds-kddb-20260929-70bd270e",
+  "kind": "official_mfds",
+  "publisher": "식품의약품안전처",
+  "title": "K-FIND 음식 DB",
+  "source_url": "https://various.foodsafetykorea.go.kr/nutrient/general/down/historyList.do",
+  "published_on": "2026-09-29",
+  "downloaded_on": "2026-10-29",
+  "source_sha256": "70bd270eb79d282e0638695239e2099948c2a6b6e3848e0db75f57022d4760b0",
+  "source_rows": 19738,
+  "food_count": 13954,
+  "excluded_basis": {
+    "100ml": 5784
+  },
+  "missing_nutrients": {
+    "carb_g": 10654,
+    "fat_g": 11076,
+    "fiber_g": 12679,
+    "potassium_mg": 12665,
+    "cholesterol_mg": 11139,
+    "sugar_g": 95,
+    "sat_fat_g": 305,
+    "sodium_mg": 46
+  },
+  "basis": "100g",
+  "note": "100ml 자료는 밀도 정보 없이 g으로 바꾸지 않고 제외. 결측·검출한계 표시는 0으로 채우지 않음."
+}

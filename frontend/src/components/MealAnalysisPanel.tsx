@@ -7,6 +7,10 @@ import {
   blankDietItem,
   canSaveDiet,
   catalogVersion,
+  catalogSource,
+  legacyCatalogVersion,
+  loadOfficialFoods,
+  searchFoods,
   displayNutrient,
   foodByCode,
   foods,
@@ -22,7 +26,13 @@ import {
 } from "../domain/diet";
 import { localDate } from "../domain/calendar";
 
-export function DietNutrition({ rows }: { rows: Nutrients[] }) {
+export function DietNutrition({
+  rows,
+  version = catalogVersion,
+}: {
+  rows: Nutrients[];
+  version?: string;
+}) {
   const summary = nutritionSummary(rows);
   return (
     <section className="diet-nutrition" aria-label="식단 추정 영양 정보">
@@ -74,8 +84,25 @@ export function DietNutrition({ rows }: { rows: Nutrients[] }) {
         </dl>
       </details>
       <small>
-        F6 개발용 영양 DB의 100g당 값으로 계산한 참고용 추정치입니다. ‘—’는 값이 없다는 뜻이며 0을
-        의미하지 않아요.
+        {version === "mixed"
+          ? "각 기록에 보관된 식약처·개발 예시 자료"
+          : version === legacyCatalogVersion
+            ? "F6 개발용 예시 DB"
+            : `식약처 음식 DB (${version.match(/\d{8}/)?.[0].replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3") ?? catalogSource.published_on})`}
+        의 100g당 값으로 계산한 참고용 추정치입니다. ‘—’는 결측이며 0이 아닙니다.
+        {version !== legacyCatalogVersion && (
+          <>
+            {" "}
+            <a
+              href={catalogSource.source_url}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`${catalogSource.publisher} ${catalogSource.title} 출처`}
+            >
+              출처
+            </a>
+          </>
+        )}
       </small>
     </section>
   );
@@ -93,6 +120,9 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
   const [source, setSource] = useState<"vision" | "manual" | "sample">("manual");
   const [id, setId] = useState<string>(() => crypto.randomUUID());
   const [model, setModel] = useState<string | null>(null);
+  const [sourceVersion, setSourceVersion] = useState(catalogVersion);
+  const [catalogReady, setCatalogReady] = useState(false);
+  const [dbQueries, setDbQueries] = useState<Record<string, string>>({});
   const [consent, setConsent] = useState(false),
     [confirmed, setConfirmed] = useState(false);
   const [busy, setBusy] = useState(false),
@@ -102,6 +132,19 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
     [slot, setSlot] = useState<MealSlot>("lunch");
   const request = useRef<AbortController | null>(null),
     generation = useRef(0);
+  useEffect(() => {
+    let active = true;
+    void loadOfficialFoods()
+      .then(() => {
+        if (active) setCatalogReady(true);
+      })
+      .catch(() => {
+        if (active) setMessage("공식 영양 DB를 불러오지 못했어요. 새로고침 후 다시 확인해 주세요.");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
   useEffect(() => {
     const controller = new AbortController();
     void dietStatus(AbortSignal.any([controller.signal, AbortSignal.timeout(5000)]))
@@ -145,9 +188,10 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
       setItems(result.items);
       setId(result.id);
       setModel(result.model);
+      setSourceVersion(result.catalogVersion);
       setSource("vision");
       setMessage(
-        "음식 이름과 실제 먹은 양을 확인해 주세요. 사진 속 제공량과 섭취량은 다를 수 있어요.",
+        ["음식 이름·DB 조리 상태·실제 먹은 양을 확인해 주세요.", ...result.warnings].join(" "),
       );
     } catch (error) {
       if (!controller.signal.aborted && token === generation.current)
@@ -163,6 +207,8 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
     request.current?.abort();
     setBusy(false);
     setSource(kind);
+    setSourceVersion(kind === "sample" ? legacyCatalogVersion : catalogVersion);
+    setDbQueries({});
     setSaved(false);
     setConfirmed(false);
     setId(crypto.randomUUID());
@@ -173,7 +219,7 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
     } else {
       setItems(
         ["쌀밥", "김치찌개", "배추김치"].map((name, index) => {
-          const food = foods.find((row) => row.name === name)!;
+          const food = foods.find((row) => row.name === name && row.food_code.startsWith("DEV-"))!;
           return {
             ...blankDietItem(),
             name,
@@ -200,7 +246,7 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
         date,
         slot,
         source,
-        catalogVersion,
+        catalogVersion: sourceVersion,
         model,
         createdAt: new Date().toISOString(),
         items: items.map((item) => ({ ...item, nutrients: itemNutrition(item) })),
@@ -339,7 +385,11 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
               <fieldset className="diet-item" key={item.id} disabled={saved || busy}>
                 <legend>
                   음식 {index + 1}
-                  {item.confidence !== null && item.confidence < 0.5 ? " · 확인 필요" : ""}
+                  {item.needsReview ||
+                  !item.foodCode ||
+                  (item.confidence !== null && item.confidence < 0.8)
+                    ? " · 확인 필요"
+                    : ""}
                 </legend>
                 {source === "vision" && (
                   <small>
@@ -359,6 +409,18 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
                   />
                 </label>
                 <label>
+                  영양 DB 검색
+                  <input
+                    aria-label={`음식 ${index + 1} DB 검색`}
+                    value={dbQueries[item.id] ?? ""}
+                    placeholder="예: 쌀밥, 김치찌개"
+                    disabled={!catalogReady}
+                    onChange={(event) =>
+                      setDbQueries((current) => ({ ...current, [item.id]: event.target.value }))
+                    }
+                  />
+                </label>
+                <label>
                   영양 DB 연결
                   <PixelSelect
                     aria-label={`음식 ${index + 1} 영양 DB`}
@@ -372,9 +434,26 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
                     }}
                   >
                     <option value="">미연결 · 이름으로만 기록</option>
-                    {foods.map((food) => (
+                    {Array.from(
+                      new Map(
+                        [
+                          ...(item.foodCode && foodByCode(item.foodCode)
+                            ? [foodByCode(item.foodCode)!]
+                            : []),
+                          ...(item.suggestedCode && foodByCode(item.suggestedCode)
+                            ? [foodByCode(item.suggestedCode)!]
+                            : []),
+                          ...searchFoods(
+                            dbQueries[item.id] ?? "",
+                            40,
+                            sourceVersion === legacyCatalogVersion,
+                          ),
+                        ].map((food) => [food.food_code, food]),
+                      ).values(),
+                    ).map((food) => (
                       <option key={food.food_code} value={food.food_code}>
                         {food.name}
+                        {food.origin ? ` · ${food.origin}` : ""}
                       </option>
                     ))}
                   </PixelSelect>
@@ -400,6 +479,38 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
                 {item.grams && !validGrams(item.grams) && (
                   <small className="diet-missing">5~1,500g 범위의 숫자를 입력해 주세요.</small>
                 )}
+                {(foodByCode(item.foodCode)?.serving_g || item.estimatedGrams) && (
+                  <div
+                    className="diet-portion-actions"
+                    role="group"
+                    aria-label={`음식 ${index + 1} 분량 보정`}
+                  >
+                    {item.estimatedGrams !== null && (
+                      <button
+                        type="button"
+                        onClick={() => edit(item.id, { grams: String(item.estimatedGrams) })}
+                      >
+                        사진 추정량 {item.estimatedGrams}g
+                      </button>
+                    )}
+                    {foodByCode(item.foodCode)?.serving_g &&
+                      ([1, 0.5, 0.25] as const).map((ratio) => (
+                        <button
+                          key={ratio}
+                          type="button"
+                          onClick={() =>
+                            edit(item.id, {
+                              grams: String(
+                                Math.round(foodByCode(item.foodCode)!.serving_g! * ratio),
+                              ),
+                            })
+                          }
+                        >
+                          참고 제공량 {ratio === 1 ? "1인분" : ratio === 0.5 ? "1/2" : "1/4"}
+                        </button>
+                      ))}
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => {
@@ -422,7 +533,7 @@ function DietEditor({ photo, owner }: { photo: string | null; owner: string | nu
           >
             + 음식 추가
           </button>
-          <DietNutrition rows={items.map(itemNutrition)} />
+          <DietNutrition rows={items.map(itemNutrition)} version={sourceVersion} />
           {source !== "sample" && (
             <>
               <label className="diet-check">

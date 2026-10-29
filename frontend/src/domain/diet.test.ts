@@ -7,9 +7,15 @@ import {
   itemNutrition,
   nutritionSummary,
   validGrams,
+  loadOfficialFoods,
 } from "./diet";
 
 describe("F6 reference nutrition", () => {
+  it("loads official foods without changing legacy reference nutrition", async () => {
+    await loadOfficialFoods();
+    expect(foodByCode("D301-022000000-0001")?.per_100g.energy_kcal).toBe(166);
+    expect(foodByCode("DEV-0001")?.per_100g.energy_kcal).toBe(143);
+  });
   it("scales the supplied 100g values by confirmed weight", () => {
     const item = { ...blankDietItem(), name: "쌀밥", foodCode: "DEV-0001", grams: "150" };
     expect(itemNutrition(item).energy_kcal).toBe(214.5);

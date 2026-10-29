@@ -2,6 +2,32 @@ import { selectPixelOption } from "./helpers/controls";
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 
+test("opt-in feature export keeps synthetic input explicit and contains no pixels or raw landmarks", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto("/cv");
+  await page.getByText("학습 및 검증 기록", { exact: true }).click();
+  await page.getByRole("checkbox", { name: "동작 특징 기록에 동의해요" }).check();
+  await page.getByRole("button", { name: "합성 시연", exact: true }).click();
+  await page.clock.runFor(12000);
+  await expect(page.getByRole("heading", { name: "과정 동작 감지", exact: true })).toBeVisible();
+  await selectPixelOption(page.getByRole("combobox", { name: "시도한 동작 라벨" }), "drinking");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "결과 JSON 저장" }).click();
+  const file = await download;
+  const json = await readFile((await file.path())!, "utf8");
+  const data = JSON.parse(json);
+  expect(data.trainingExample.synthetic).toBe(true);
+  expect(data.trainingExample.inputSource).toBe("sample");
+  expect(data.trainingExample.label).toBe("water");
+  expect(data.trainingExample.frames.length).toBeGreaterThanOrEqual(20);
+  expect(
+    data.trainingExample.frames.every((f: { values: number[] }) => f.values.length === 16),
+  ).toBe(true);
+  expect(json).not.toMatch(/data:image|faceLandmarks|worldLandmarks|handLandmarks/);
+});
+
 for (const quest of ["water", "medicine", "injection"] as const) {
   test(`${quest} process sample finishes without camera access or quest proof`, async ({
     page,
@@ -22,7 +48,7 @@ for (const quest of ["water", "medicine", "injection"] as const) {
       await selectPixelOption(page.getByRole("combobox", { name: "사용한 투약 도구" }), "syringe");
     if (quest !== "water") {
       await expect(page.getByRole("button", { name: "합성 시연", exact: true })).toBeDisabled();
-      await page.getByRole("checkbox").check();
+      await page.getByRole("checkbox").first().check();
     }
     await page.getByRole("button", { name: "합성 시연", exact: true }).click();
     await page.clock.runFor(12_000);
@@ -89,7 +115,7 @@ for (const task of ["medicine", "injection"] as const) {
       });
     });
     await page.goto(`/cv?task=${task}`);
-    await page.getByRole("checkbox").check();
+    await page.getByRole("checkbox").first().check();
     const objectModel = page.waitForResponse(
       (response) =>
         response
@@ -102,7 +128,7 @@ for (const task of ["medicine", "injection"] as const) {
     await expect(page.locator(".cv-process")).toHaveAttribute("data-phase", "observing", {
       timeout: 60_000,
     });
-    await expect(page.locator(".cv-diagnostics dd").first()).toHaveText(/\d+ms/, {
+    await expect(page.locator(".cv-diagnostics dd").nth(1)).toHaveText(/\d+ms/, {
       timeout: 20_000,
     });
     await expect(page.locator(".cv-source-badge")).toHaveText("FRONT · LOCAL", { timeout: 60_000 });
