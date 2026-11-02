@@ -601,6 +601,7 @@
 .shop-screen .gold-effects p,
 .character-vault .gold-effects p {
   grid-column: 1 / -1;
+  color: #fff4ce;
   font-size: calc(12px * var(--ui-text-scale, 1));
 }
 .shop-screen .gold-effects button,

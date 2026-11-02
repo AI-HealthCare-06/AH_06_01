@@ -207,6 +207,13 @@
 .dashboard-report-web > main {
   background: #f8edce;
 }
+.dashboard-report-web .dashboard-heading > .quest-calendar {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #a99e6b;
+  background: #f3e7c8;
+  color: #243b30;
+}
 .dashboard-report-web .health-report {
   border: 0;
   background: transparent;
