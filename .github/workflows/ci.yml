@@ -56,6 +56,12 @@ jobs:
           python3 -m unittest discover -s infra/aws/diet -p 'test_*.py'
           node --test deployment/*.test.mjs
           node deployment/release.mjs --validate-config
+      - name: Validate immutable BP history and forecast research contracts
+        working-directory: .
+        run: |
+          python3 -m unittest discover -s ai/bp_forecast/tests -v
+          npm install --prefix .cache/bp-journal-tools --package-lock=false --ignore-scripts --no-save @electric-sql/pglite@0.5.14
+          node supabase/tests/bp-journal.mjs
       - run: npm ci
       - run: npm run lint
       - run: npm run format:check

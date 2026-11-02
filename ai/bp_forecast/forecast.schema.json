@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rexrun:bp-history-research:0.1.0",
+  "title": "Research only measurement history forecast",
+  "description": "Offline prototype response. No deployed endpoint or clinical validation. Real-world independent calibration is required before a different production contract can be approved.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "role",
+    "status",
+    "production_eligible",
+    "as_of",
+    "model_version",
+    "feature_version",
+    "quality_policy_version",
+    "aggregation_policy_version",
+    "input_window",
+    "target",
+    "point",
+    "prediction_interval",
+    "interval_status",
+    "diagnosis",
+    "quality",
+    "provenance",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": { "const": "bp-history-research-0.1.0" },
+    "role": { "const": "measurement_forecast" },
+    "status": { "enum": ["research_only", "abstained"] },
+    "production_eligible": { "const": false },
+    "as_of": { "type": "string", "format": "date-time" },
+    "feature_version": { "const": "bp-history-research-0.1.0" },
+    "quality_policy_version": { "const": "bp-history-quality-research-v0" },
+    "aggregation_policy_version": { "const": "session-slot-day-balanced-v0" },
+    "input_window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "cutoff"],
+      "properties": {
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": "string", "format": "date" },
+        "cutoff": { "type": "string", "format": "date-time" }
+      }
+    },
+    "model_version": {
+      "enum": [
+        "history-baseline-last_daily-v0",
+        "history-baseline-mean_7d-v0",
+        "history-baseline-median_7d-v0",
+        "history-baseline-mean_28d-v0",
+        "history-baseline-ewma_7d-v0",
+        "history-baseline-damped_trend_28d-v0"
+      ]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "start",
+        "end",
+        "horizon_days",
+        "minimum_observed_days",
+        "unit"
+      ],
+      "properties": {
+        "name": { "const": "next_7d_recorded_home_daily_mean" },
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": "string", "format": "date" },
+        "horizon_days": { "const": 7 },
+        "minimum_observed_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7
+        },
+        "unit": { "const": "mmHg" }
+      }
+    },
+    "point": { "oneOf": [{ "$ref": "#/$defs/pressure" }, { "type": "null" }] },
+    "prediction_interval": { "type": "null" },
+    "interval_status": {
+      "const": "independent_real_world_calibration_required"
+    },
+    "diagnosis": { "type": "null" },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reasons", "features", "excluded", "policy"],
+      "properties": {
+        "reasons": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "features": {
+          "type": "object",
+          "additionalProperties": { "type": ["number", "null"] }
+        },
+        "excluded": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "policy": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["data", "input_fingerprint"],
+      "properties": {
+        "data": { "enum": ["synthetic", "mixed", "real-unvalidated", "none"] },
+        "input_fingerprint": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 4,
+      "items": { "type": "string" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "research_only" } } },
+      "then": {
+        "properties": {
+          "point": { "$ref": "#/$defs/pressure" },
+          "quality": { "properties": { "reasons": { "maxItems": 0 } } }
+        }
+      },
+      "else": {
+        "properties": {
+          "point": { "type": "null" },
+          "quality": { "properties": { "reasons": { "minItems": 1 } } }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "pressure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["systolic", "diastolic"],
+      "properties": {
+        "systolic": { "type": "number", "minimum": 50, "maximum": 300 },
+        "diastolic": { "type": "number", "minimum": 30, "maximum": 200 }
+      }
+    }
+  }
+}

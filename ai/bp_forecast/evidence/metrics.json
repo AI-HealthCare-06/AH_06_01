@@ -1,0 +1,538 @@
+{
+  "scope": "synthetic_engineering_backtest_only",
+  "clinical_performance_claim": false,
+  "production_enabled": false,
+  "subjects": 1,
+  "observed_days": 90,
+  "readings": 180,
+  "fixture_sha256": "1431f63e66c1169ec38cd19684ec8943439795bf9b7db939c4e6789bf3580ff8",
+  "assumptions": [
+    "All pressures come from the existing explicitly synthetic 90-day fixture.",
+    "08:00/20:00 measurement times and five-minute availability lag are simulated, not observed.",
+    "Home setting, upper-arm device, protocol confirmation and stable device are simulated metadata.",
+    "One source value per slot is retained; no additional repeats or people are fabricated.",
+    "The persona is a single smoothly improving scripted trajectory, not independent patient validation."
+  ],
+  "source_sha256": {
+    "__init__.py": "885c30e1a1970dc868eee6f9e8cacc2a6e6bf993ec3e0445312586743d6597de",
+    "backtest.py": "48f154b4bafe5f0d7ebae5a8971ca6838576ffcb89264e0695131efe09ba3b5a",
+    "demo.py": "8c9b73517505fa234c99b0671fc34c3bee57980be89f6fbb55805996ad7f77c2",
+    "forecast.py": "a4461d7cc57a5756a5fd0a57fcf6905519dcd614110f52a5697082385ac963a0",
+    "history.py": "5cd2d968d902ba85f553fb3835d501fe41b9458d0b9c99c06612f7e92701822e",
+    "policy.py": "3edae6aee10c820fbb0ff9030d3a197eb7d7134677c4edeba0274d66ce2c4595",
+    "render_evidence.py": "3f2629f26d218e40baf13efd363432b2297b62016727a444df2c6f2aacb9be4a",
+    "run_demo.py": "9722aea925df1e87b5c52ab356375e7f67e9efe84131d63fb26a4bb178c7e5e9",
+    "verify_evidence.py": "6e2d21091e54439c402de7081d33cdd6e3043158168113589932fc0c1613cd8b",
+    "tests/test_history_forecast.py": "12550bbf6ea5b5c7176048d3ee9eb98b80f4e4158bdeeef827dcfd10ac89c135",
+    "api.openapi.json": "e97bfb4a94c43ff287c23ad15fef2169c7833a5713fa9797f2ece7e0e92a0dff",
+    "forecast.schema.json": "c70306cec45ec01dce7a9f3f439840d6f93fe9626dbd8824e774368f2210e3ad"
+  },
+  "weekly": {
+    "last_daily": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 3.0,
+        "rmse_mmHg": 3.7606990231680526,
+        "bias_mmHg": 0.5714285714285765
+      },
+      "diastolic": {
+        "mae_mmHg": 2.875,
+        "rmse_mmHg": 2.996171025880621,
+        "bias_mmHg": 0.48214285714285765
+      },
+      "future_home_threshold_event": {
+        "tp": 7,
+        "fp": 0,
+        "tn": 0,
+        "fn": 1,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 0.875,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    },
+    "mean_7d": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 1.9108214285714311,
+        "rmse_mmHg": 2.0917830227549232,
+        "bias_mmHg": 1.303678571428577
+      },
+      "diastolic": {
+        "mae_mmHg": 1.3394285714285736,
+        "rmse_mmHg": 1.6654472035327652,
+        "bias_mmHg": 0.8751428571428583
+      },
+      "future_home_threshold_event": {
+        "tp": 8,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 1.0,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    },
+    "median_7d": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 2.0535714285714306,
+        "rmse_mmHg": 2.287387780229417,
+        "bias_mmHg": 1.1964285714285765
+      },
+      "diastolic": {
+        "mae_mmHg": 1.8571428571428577,
+        "rmse_mmHg": 2.051629516620725,
+        "bias_mmHg": 0.6071428571428577
+      },
+      "future_home_threshold_event": {
+        "tp": 8,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 1.0,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    },
+    "mean_28d": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 3.3705714285714308,
+        "rmse_mmHg": 3.6562366483272735,
+        "bias_mmHg": 3.299178571428577
+      },
+      "diastolic": {
+        "mae_mmHg": 2.218660714285715,
+        "rmse_mmHg": 2.490044745417976,
+        "bias_mmHg": 2.1917678571428567
+      },
+      "future_home_threshold_event": {
+        "tp": 8,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 1.0,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    },
+    "ewma_7d": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 2.505071428571437,
+        "rmse_mmHg": 2.6379967575524406,
+        "bias_mmHg": 2.1969285714285824
+      },
+      "diastolic": {
+        "mae_mmHg": 1.709285714285718,
+        "rmse_mmHg": 1.9242184949549104,
+        "bias_mmHg": 1.501392857142859
+      },
+      "future_home_threshold_event": {
+        "tp": 8,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 1.0,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    },
+    "damped_trend_28d": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 1.656732142857141,
+        "rmse_mmHg": 2.0041696490424306,
+        "bias_mmHg": 0.43130357142857534
+      },
+      "diastolic": {
+        "mae_mmHg": 1.423821428571431,
+        "rmse_mmHg": 1.7857691905845006,
+        "bias_mmHg": 0.6063928571428594
+      },
+      "future_home_threshold_event": {
+        "tp": 8,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 1.0,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    }
+  },
+  "weekly_origins": [
+    "2026-09-01",
+    "2026-09-08",
+    "2026-09-15",
+    "2026-09-22",
+    "2026-09-29",
+    "2026-10-06",
+    "2026-10-13",
+    "2026-10-20"
+  ],
+  "weekly_common_evaluation_origins": [
+    "2026-09-01",
+    "2026-09-08",
+    "2026-09-15",
+    "2026-09-22",
+    "2026-09-29",
+    "2026-10-06",
+    "2026-10-13",
+    "2026-10-20"
+  ],
+  "weekly_common_cohort_metrics": {
+    "last_daily": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 3.0,
+        "rmse_mmHg": 3.7606990231680526,
+        "bias_mmHg": 0.5714285714285765
+      },
+      "diastolic": {
+        "mae_mmHg": 2.875,
+        "rmse_mmHg": 2.996171025880621,
+        "bias_mmHg": 0.48214285714285765
+      },
+      "future_home_threshold_event": {
+        "tp": 7,
+        "fp": 0,
+        "tn": 0,
+        "fn": 1,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 0.875,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    },
+    "mean_7d": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 1.9108214285714311,
+        "rmse_mmHg": 2.0917830227549232,
+        "bias_mmHg": 1.303678571428577
+      },
+      "diastolic": {
+        "mae_mmHg": 1.3394285714285736,
+        "rmse_mmHg": 1.6654472035327652,
+        "bias_mmHg": 0.8751428571428583
+      },
+      "future_home_threshold_event": {
+        "tp": 8,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 1.0,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    },
+    "median_7d": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 2.0535714285714306,
+        "rmse_mmHg": 2.287387780229417,
+        "bias_mmHg": 1.1964285714285765
+      },
+      "diastolic": {
+        "mae_mmHg": 1.8571428571428577,
+        "rmse_mmHg": 2.051629516620725,
+        "bias_mmHg": 0.6071428571428577
+      },
+      "future_home_threshold_event": {
+        "tp": 8,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 1.0,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    },
+    "mean_28d": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 3.3705714285714308,
+        "rmse_mmHg": 3.6562366483272735,
+        "bias_mmHg": 3.299178571428577
+      },
+      "diastolic": {
+        "mae_mmHg": 2.218660714285715,
+        "rmse_mmHg": 2.490044745417976,
+        "bias_mmHg": 2.1917678571428567
+      },
+      "future_home_threshold_event": {
+        "tp": 8,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 1.0,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    },
+    "ewma_7d": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 2.505071428571437,
+        "rmse_mmHg": 2.6379967575524406,
+        "bias_mmHg": 2.1969285714285824
+      },
+      "diastolic": {
+        "mae_mmHg": 1.709285714285718,
+        "rmse_mmHg": 1.9242184949549104,
+        "bias_mmHg": 1.501392857142859
+      },
+      "future_home_threshold_event": {
+        "tp": 8,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 1.0,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    },
+    "damped_trend_28d": {
+      "candidate_origins": 8,
+      "predicted_origins": 8,
+      "evaluated_origins": 8,
+      "forecast_coverage": 1.0,
+      "label_coverage_given_prediction": 1.0,
+      "abstention_reasons": {},
+      "label_exclusions": {},
+      "observed_label_flags": {},
+      "systolic": {
+        "mae_mmHg": 1.656732142857141,
+        "rmse_mmHg": 2.0041696490424306,
+        "bias_mmHg": 0.43130357142857534
+      },
+      "diastolic": {
+        "mae_mmHg": 1.423821428571431,
+        "rmse_mmHg": 1.7857691905845006,
+        "bias_mmHg": 0.6063928571428594
+      },
+      "future_home_threshold_event": {
+        "tp": 8,
+        "fp": 0,
+        "tn": 0,
+        "fn": 0,
+        "positive_n": 8,
+        "negative_n": 0,
+        "recall": 1.0,
+        "fpr": null,
+        "comparison_to_cross_sectional_M1": "not_comparable"
+      },
+      "prediction_interval_coverage": null,
+      "clinical_performance_claim": false
+    }
+  },
+  "scenarios": {
+    "unchanged_video_persona": {
+      "status": "research_only",
+      "reasons": []
+    },
+    "sparse_every_third_day": {
+      "status": "abstained",
+      "reasons": [
+        "insufficient_history_days",
+        "insufficient_recent_days",
+        "insufficient_paired_days",
+        "stale_measurements"
+      ]
+    },
+    "morning_only": {
+      "status": "abstained",
+      "reasons": [
+        "insufficient_paired_days"
+      ]
+    },
+    "missing_last_four_days": {
+      "status": "abstained",
+      "reasons": [
+        "insufficient_recent_days",
+        "stale_measurements"
+      ]
+    },
+    "clinic_only": {
+      "status": "abstained",
+      "reasons": [
+        "insufficient_history_days",
+        "insufficient_calendar_span",
+        "insufficient_recent_days",
+        "insufficient_paired_days",
+        "stale_measurements"
+      ]
+    },
+    "unknown_protocol": {
+      "status": "abstained",
+      "reasons": [
+        "insufficient_history_days",
+        "insufficient_calendar_span",
+        "insufficient_recent_days",
+        "insufficient_paired_days",
+        "stale_measurements"
+      ]
+    },
+    "date_unknown": {
+      "status": "abstained",
+      "reasons": [
+        "insufficient_history_days",
+        "insufficient_calendar_span",
+        "insufficient_recent_days",
+        "insufficient_paired_days",
+        "stale_measurements"
+      ]
+    },
+    "device_changed": {
+      "status": "abstained",
+      "reasons": [
+        "device_change_in_lookback"
+      ]
+    },
+    "stable": {
+      "status": "research_only",
+      "reasons": []
+    },
+    "late_increase": {
+      "status": "research_only",
+      "reasons": []
+    },
+    "noisy": {
+      "status": "research_only",
+      "reasons": []
+    },
+    "single_extreme": {
+      "status": "abstained",
+      "reasons": [
+        "outside_research_support"
+      ]
+    },
+    "known_medication_change": {
+      "status": "abstained",
+      "reasons": [
+        "recent_medication_change"
+      ]
+    }
+  }
+}

@@ -28,6 +28,7 @@ import "./profile-quests.css";
 import { useProfileStore } from "./stores/profile-store";
 import { beforeMobileUpdateApply, startMobileUpdates } from "./services/mobile-updates";
 import { capture, startCloud, useCloudStore } from "./cloud/sync";
+import { startBloodPressureCloud } from "./cloud/blood-pressure-sync";
 import { startDinosaurAppIcon } from "./services/dinosaur-app-icon";
 import { CloudLoginPage, AuthCallbackPage } from "./cloud/CloudLoginPage";
 import { cloudEnabled } from "./cloud/client";
@@ -45,6 +46,7 @@ export default function App() {
   }, []);
   useEffect(() => {
     startCloud();
+    startBloodPressureCloud();
     beforeMobileUpdateApply(() => {
       useGameStore.getState().tick();
       capture();

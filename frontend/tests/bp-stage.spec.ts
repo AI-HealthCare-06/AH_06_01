@@ -49,6 +49,31 @@ test("renders real contract distributions and hides the previous account result 
   await expect(page.getByLabel("혈압 단계별 참고 분포")).toHaveCount(0);
   expect(calls).toBe(1);
 });
+test("screening shows a BP check recommendation while retaining the original distribution", async ({
+  page,
+}) => {
+  await page.route("**/v1/predictions/bp-stage", (route) =>
+    route.fulfill({
+      json: {
+        ...sample,
+        model_version: sample.model_version + "-htn-screen-v1",
+        htn_screening: {
+          positive: true,
+          probability: sample.stage_probs.htn,
+          threshold: 0.12143345115658617,
+          policy_id: "htn-screen-v1",
+        },
+      },
+    }),
+  );
+  await page.goto("/tests/fixtures/bp-stage.html");
+  await expect(page.getByText("혈압 확인 권고", { exact: true })).toBeVisible();
+  await expect(page.getByText(/고혈압 판정이 아니며/)).toBeVisible();
+  await expect(page.getByText("41.9%", { exact: true })).toBeVisible();
+  await expect(page.getByText("31.7%", { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: "test-results/model-screening-mobile.png", fullPage: true });
+});
 test("keeps domain refusal score-free and clears output on consent withdrawal", async ({
   page,
 }) => {
