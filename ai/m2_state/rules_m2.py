@@ -21,8 +21,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-import thresholds as T
-from feature_contract import load_contract
+if __package__ == "m2_state":
+    from . import thresholds as T
+    from .feature_contract import load_contract
+else:
+    import thresholds as T
+    from feature_contract import load_contract
 
 M1 = "m1_bp_step"
 

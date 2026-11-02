@@ -99,6 +99,11 @@ export function MealPage() {
           <>
             <DietNutrition
               rows={dayRecords.flatMap((record) => record.items.map((item) => item.nutrients))}
+              version={
+                new Set(dayRecords.map((record) => record.catalogVersion)).size === 1
+                  ? dayRecords[0].catalogVersion
+                  : "mixed"
+              }
             />
             <ol>
               {dayRecords.map((record) => (

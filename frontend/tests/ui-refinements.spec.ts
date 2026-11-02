@@ -11,7 +11,7 @@ test("reduced motion removes decorative battle animations", async ({ page }) => 
   ).toBe(0);
 });
 
-test("radar compares day one and today, and risk changes include units and a delta", async ({
+test("radar compares recorded days and the report keeps unsupported forecasts hidden", async ({
   page,
 }) => {
   await page.goto("/home");
@@ -47,26 +47,22 @@ test("radar compares day one and today, and risk changes include units and a del
     .getByRole("link", { name: "Dashboard" })
     .click();
   await page.getByRole("link", { name: "상세 건강 보고서 웹으로 보기" }).click();
-  await expect(page.locator(".risk-change").last()).toHaveAttribute(
-    "aria-label",
-    "현재 41%, 완료 후 35%, 6%포인트 감소",
+  await expect(page.locator(".risk-change,.impact-card,.risk-grid")).toHaveCount(0);
+  const calculated = await page.evaluate(async () => {
+    const storePath = "/src/stores/game-store.ts",
+      scorePath = "/src/domain/health-score.ts";
+    const [{ useGameStore }, { healthScorePeriod }] = await Promise.all([
+      import(storePath),
+      import(scorePath),
+    ]);
+    const game = useGameStore.getState().game;
+    return healthScorePeriod(game, "week", game.date).score;
+  });
+  expect(calculated).not.toBeNull();
+  await expect(page.locator(".score-number .number-visual")).toHaveAttribute(
+    "data-value",
+    String(calculated),
   );
-  await expect(page.locator(".risk-change-values").last().locator("strong")).toHaveText([
-    "41%",
-    "35%",
-  ]);
-  await expect(page.locator(".risk-change-values").last().locator("small")).toHaveText("−6%p");
-  const colors = await page
-    .locator(".risk-change-values")
-    .last()
-    .evaluate((element) => ({
-      from: getComputedStyle(element.children[0]).color,
-      gradient: getComputedStyle(element.querySelector(".risk-change-arrow")!).backgroundImage,
-      to: getComputedStyle(element.children[2]).color,
-    }));
-  expect(colors.from).not.toBe(colors.to);
-  expect(colors.gradient).toContain(colors.from);
-  expect(colors.gradient).toContain(colors.to);
 });
 
 test("quest rewards stay centered at the row end on narrow screens", async ({ page }) => {

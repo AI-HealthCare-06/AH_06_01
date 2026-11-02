@@ -1,5 +1,6 @@
 import { selectPixelOption } from "./helpers/controls";
 import { expect, test } from "@playwright/test";
+import catalog from "../src/design/food-catalog-source.json" with { type: "json" };
 const image = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAK0lEQVR4nGNkaGAgGzCRr5VhVDOpgIlkHUhgVDOJgIlUDchgVDOJgKIAAwDFMgCoOrIAcgAAAABJRU5ErkJggg==",
   "base64",
@@ -39,6 +40,8 @@ async function mock(page: import("@playwright/test").Page, error = false) {
     if (route.request().url().endsWith("/status"))
       return route.fulfill({ json: { available: true, provider: "openai", local: true } });
     calls++;
+    expect(route.request().postData()).toContain('name="catalog_version"');
+    expect(route.request().postData()).toContain(catalog.version);
     return route.fulfill({
       status: error ? 502 : 200,
       json: error
@@ -108,7 +111,12 @@ test("samples never save; manual nutrition and deletion work without AI", async 
   ).toHaveCount(0);
   expect(calls()).toBe(0);
   await page.getByRole("button", { name: "직접 입력", exact: true }).click();
-  await selectPixelOption(page.getByLabel("음식 1 영양 DB", { exact: true }), "DEV-0001");
+  await page.getByLabel("음식 1 DB 검색", { exact: true }).fill("쌀밥");
+  await selectPixelOption(
+    page.getByLabel("음식 1 영양 DB", { exact: true }),
+    "D301-022000000-0001",
+  );
+  await expect(page.getByRole("link", { name: /식품의약품안전처/ }).first()).toBeVisible();
   await page.getByLabel("음식 1 중량", { exact: true }).fill("150");
   await page
     .getByRole("checkbox", { name: "음식 이름과 실제 먹은 양을 확인했습니다.", exact: true })
@@ -118,6 +126,33 @@ test("samples never save; manual nutrition and deletion work without AI", async 
   await page.getByRole("button", { name: "이 식단 기록 삭제", exact: true }).click();
   await expect(page.locator(".meal-history li")).toHaveCount(0);
   expect(calls()).toBe(0);
+});
+
+test("official portions are explicit and preserve stored nutrition", async ({ page }) => {
+  await page.goto("/meals");
+  await page.getByRole("button", { name: "직접 입력", exact: true }).click();
+  await page.getByLabel("음식 1 DB 검색", { exact: true }).fill("쌀밥");
+  await selectPixelOption(
+    page.getByLabel("음식 1 영양 DB", { exact: true }),
+    "D301-022000000-0001",
+  );
+  await expect(page.getByLabel("음식 1 중량", { exact: true })).toHaveValue("");
+  await page.getByRole("button", { name: /참고 제공량 1\/2/ }).click();
+  await expect(page.getByLabel("음식 1 중량", { exact: true })).not.toHaveValue("");
+  await page.getByLabel("음식 1 중량", { exact: true }).fill("100");
+  await expect(page.locator(".diet-main-nutrients").first()).toContainText("170");
+  await page
+    .getByRole("checkbox", { name: "음식 이름과 실제 먹은 양을 확인했습니다.", exact: true })
+    .check();
+  await page.getByRole("button", { name: "확인한 식단 기록 저장", exact: true }).click();
+  await page.reload();
+  await expect(page.locator(".meal-history")).toContainText("쌀밥 100g");
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+  }
 });
 
 test("API errors are shown without replacing them with an invented meal", async ({ page }) => {
@@ -274,5 +309,5 @@ test("phone photos are resized to JPEG before uploading", async ({ page }) => {
     bitmap.close();
     return result;
   }, jpeg.toString("base64"));
-  expect(size).toEqual([1024, 768]);
+  expect(size).toEqual([2048, 1536]);
 });

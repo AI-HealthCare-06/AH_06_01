@@ -1,0 +1,415 @@
+.dashboard-prediction {
+  margin: 8px 0 14px;
+  padding: 13px 14px;
+  border: 2px solid #203b32;
+  border-left: 6px solid #f6cf68;
+  background: #203b32;
+  color: #fff4ce;
+  box-shadow: 3px 3px #a99e6b;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.prediction-meta,
+.prediction-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+}
+.prediction-meta {
+  color: #f6cf68;
+}
+.dashboard-prediction .prediction-sentence {
+  margin: 9px 0;
+  font-weight: bold;
+  font-size: calc(15px * var(--ui-text-scale, 1));
+  line-height: 1.6;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+.prediction-foot {
+  flex-wrap: wrap;
+  color: #dedab9;
+}
+.dashboard-prediction > details {
+  margin-top: 10px;
+  font-size: 12px;
+}
+.dashboard-prediction > details > summary {
+  cursor: pointer;
+  color: #fff4ce;
+}
+.dashboard-prediction .quest-model-summary {
+  margin: 12px 0 0;
+  color: #243b30;
+}
+.dashboard-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.dashboard-metric-grid article {
+  min-width: 0;
+  padding: 12px;
+  background: #fff9e8;
+  border: 1px solid #74775b;
+  box-shadow: 2px 2px #c5bc91;
+}
+.dashboard-metric-grid article:first-child {
+  border-top: 4px solid #35576b;
+}
+.dashboard-metric-grid article:nth-child(2) {
+  border-top: 4px solid #ab7030;
+}
+.dashboard-metric-grid h3 {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  margin: 0 0 8px;
+}
+.dashboard-metric-grid strong {
+  display: block;
+  font-size: calc(21px * var(--ui-text-scale, 1));
+  line-height: 1.4;
+}
+.dashboard-metric-grid strong small {
+  display: block;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  font-weight: normal;
+}
+.dashboard-metric-grid article > span {
+  display: block;
+  margin-top: 7px;
+  font-size: calc(10px * var(--ui-text-scale, 1));
+  color: #53634e;
+}
+.quarter-comparison,
+.habit-calendar,
+.sleep-rhythm,
+.nutrition-overview,
+.dashboard-records {
+  padding: 16px;
+  min-width: 0;
+}
+.insight-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.insight-heading h3 {
+  font-size: calc(16px * var(--ui-text-scale, 1));
+  line-height: 1.5;
+  margin: 0 0 4px;
+}
+.insight-heading small {
+  color: #53634e;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+}
+.quarter-comparison > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.quarter-comparison article {
+  padding: 12px 10px;
+  background: #e6dfbb;
+  border-left: 3px solid #a99e6b;
+}
+.quarter-comparison article:last-child {
+  background: #dce5ca;
+  border-color: #205d40;
+}
+.quarter-comparison h4 {
+  font-size: 14px;
+  margin: 0 0 5px;
+}
+.quarter-comparison small {
+  font-size: 10px;
+}
+.quarter-comparison dl {
+  margin: 12px 0;
+  display: grid;
+  gap: 10px;
+}
+.quarter-comparison dt {
+  font-size: 11px;
+  color: #53634e;
+}
+.quarter-comparison dd {
+  margin: 3px 0 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+.quarter-comparison dd small {
+  display: block;
+  font-weight: normal;
+}
+.habit-grid {
+  display: grid;
+  grid-template-rows: repeat(7, 26px);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(24px, 1fr);
+  gap: 4px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scrollbar-width: thin;
+}
+.habit-grid button {
+  padding: 0;
+  min-height: 0;
+  border: 1px solid #72785b;
+  border-radius: 0;
+  color: #243b30;
+  font:
+    11px "Galmuri11",
+    sans-serif;
+  background: #ede7ce;
+  cursor: pointer;
+}
+.habit-grid button[data-level="missing"] {
+  background: transparent;
+  border-style: dashed;
+  color: #88856f;
+}
+.habit-grid button[aria-pressed="true"] {
+  outline: 2px solid #d84336;
+  outline-offset: 0;
+}
+.habit-grid button[data-level="1"],
+.habit-legend i[data-level="1"] {
+  background: #d1dbb4;
+}
+.habit-grid button[data-level="2"],
+.habit-legend i[data-level="2"] {
+  background: #a3ba85;
+}
+.habit-grid button[data-level="3"],
+.habit-legend i[data-level="3"] {
+  background: #658953;
+  color: #fff4ce;
+}
+.habit-grid button[data-level="4"],
+.habit-legend i[data-level="4"] {
+  background: #205d40;
+  color: #fff4ce;
+}
+.habit-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 9px;
+  font-size: 10px;
+}
+.habit-legend i {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #72785b;
+  background: #ede7ce;
+}
+.habit-day {
+  margin: 12px 0 0;
+  font-size: 12px;
+  min-height: 2.5em;
+  line-height: 1.6;
+}
+.sleep-axis {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 40px 9px 39px;
+  font-size: 9px;
+  color: #53634e;
+}
+.sleep-rhythm-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 7px;
+  margin: 9px 0;
+}
+.sleep-rhythm-row > small,
+.sleep-rhythm-row b {
+  font-size: 10px;
+}
+.sleep-rhythm-row > div {
+  position: relative;
+  height: 17px;
+  background: #e3ddba;
+  border-left: 1px solid #a99e6b;
+}
+.sleep-rhythm-row i {
+  display: block;
+  position: absolute;
+  height: 100%;
+  background: #35576b;
+  border-left: 3px solid #8cb3bf;
+}
+.sleep-rhythm > p {
+  margin: 14px 0 0;
+  font-size: 12px;
+}
+.nutrition-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.nutrition-values > div > small {
+  display: block;
+  color: #53634e;
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+.nutrition-values strong {
+  font-size: 23px;
+}
+.nutrition-values strong small {
+  font-size: 11px;
+  margin-left: 4px;
+}
+.macro-track {
+  display: flex;
+  height: 26px;
+  border: 1px solid #243b30;
+}
+.macro-track i {
+  height: 100%;
+  display: block;
+}
+.macro-0 {
+  background: #35576b;
+}
+.macro-1 {
+  background: #9ab27b;
+}
+.macro-2 {
+  background: #f0cc6a;
+}
+.macro-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 12px 0;
+  font-size: 11px;
+}
+.macro-legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.macro-legend i {
+  width: 10px;
+  height: 10px;
+  border: 1px solid #53634e;
+}
+.nutrition-overview > small {
+  color: #53634e;
+  font-size: 10px;
+}
+.dashboard-records summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+.record-table-scroll {
+  max-height: 320px;
+  overflow: auto;
+  margin-top: 12px;
+  scrollbar-color: #35576b #e5ddb0;
+  scrollbar-width: thin;
+}
+.record-table-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.record-table-scroll caption {
+  padding: 8px;
+  font-size: 11px;
+}
+.record-table-scroll td,
+.record-table-scroll th {
+  padding: 8px 5px;
+  text-align: center;
+  border-bottom: 1px solid #c5bc91;
+}
+.record-table-scroll thead {
+  background: #e5ddb0;
+  position: sticky;
+  top: 0;
+}
+.demo-mode-banner small {
+  flex: 1;
+  min-width: 0;
+}
+.demo-mode-banner {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+@media (min-width: 900px) {
+  .report-screen .dashboard-metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 350px) {
+  .dashboard-metric-grid article {
+    padding: 10px;
+  }
+  .dashboard-metric-grid strong {
+    font-size: 19px;
+  }
+  .prediction-sentence {
+    font-size: 13px;
+  }
+  .quarter-comparison article {
+    padding: 10px 7px;
+  }
+  .insight-heading {
+    flex-wrap: wrap;
+  }
+}
+.activity-records {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed #a7a37b;
+}
+.activity-records dt,
+.activity-records small {
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  color: #53634e;
+}
+.activity-records dd {
+  margin: 6px 0;
+  font-size: calc(18px * var(--ui-text-scale, 1));
+}
+.selected-day-details {
+  padding: 14px;
+}
+.selected-day-details > summary {
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 1.7;
+}
+.selected-day-details .summary-pressure {
+  margin: 14px 0 0;
+  padding: 12px;
+  box-shadow: none;
+}
+.report-records {
+  margin-top: 22px;
+}
+.report-records > header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.report-records .health-history-overview {
+  margin-top: 20px;
+}

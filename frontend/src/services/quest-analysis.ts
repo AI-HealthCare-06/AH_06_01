@@ -1,6 +1,9 @@
 import { cloudApi, cloudConfig } from "../cloud/client";
 import { questAnalysisSchema } from "../domain/quest-analysis";
+import { selectedDemoPersona } from "../domain/demo-personas";
+import { replayQuarterAnalysis } from "./demo-quarter-analysis";
 export async function loadQuestAnalysis(demo: boolean, userId?: string) {
+  if (demo && selectedDemoPersona().id === "studio-quarter-v1") return replayQuarterAnalysis();
   const data = demo
     ? await fetch(
         (import.meta.env.DEV && import.meta.env.VITE_REXRUN_DEMO_MODEL_API_URL
@@ -9,7 +12,7 @@ export async function loadQuestAnalysis(demo: boolean, userId?: string) {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ demo_persona: "htn-diabetes-v1" }),
+          body: JSON.stringify({ demo_persona: selectedDemoPersona().id }),
           signal: AbortSignal.timeout(25_000),
         },
       ).then(async (response) => {

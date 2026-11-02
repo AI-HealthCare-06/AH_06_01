@@ -64,7 +64,10 @@ export const useQuestVerificationStore = create<VerificationState>((set, get) =>
       !useSessionStore.getState().active ||
       result.questId !== "water" ||
       result.verificationLevel !== "local_demo" ||
-      result.detector !== "rules_v1" ||
+      !(
+        result.detector === "rules_v1" ||
+        (result.questId === "water" && result.detector === "drinking_rules_v2")
+      ) ||
       result.inputSource !== "camera" ||
       result.decision !== "detected" ||
       !result.userConfirmed ||

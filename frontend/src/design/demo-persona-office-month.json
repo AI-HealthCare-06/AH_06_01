@@ -1,0 +1,1277 @@
+{
+  "id": "office-month-v1",
+  "title": "혈압 관리 시작 사무직 30일",
+  "banner": "DEMO · 42세 사무직 A / 합성 30일 기록",
+  "revision": "office-month-20261029-v1",
+  "note": "User-provided fictional QA scenario. Synthetic 30-day use, not observed patient data or treatment effects. Unspecified pulse, glucose, family history and sleep symptoms remain unknown.",
+  "provenance": {
+    "sourceFile": "테스트시나리오_혈압_페르소나A_사무직_관리시작.docx",
+    "sha256": "80e9774b839de61c68c65d9acfc8c07d19840a9b5b2777f5797da5ef88310ec1",
+    "scenarioDate": "2026-10-09",
+    "preparedOn": "2026-10-29",
+    "recordWindow": "rolling 30 days ending on demo startup date",
+    "assumptions": [
+      "Day 29-30 extend the document's Day 28 trajectory with synthetic variation.",
+      "Steps are synthetic app usage, not converted from walking minutes.",
+      "The current app has four main quests. No medicine completion is invented for a user with no medicines.",
+      "BP stage hysteresis and old Q1-Q5 API expectations are QA requirements, not implemented by this seed."
+    ]
+  },
+  "profile": {
+    "name": "사무직 A",
+    "age": 42,
+    "sex": "male",
+    "height": 175,
+    "weight": 78,
+    "bloodPressure": "138 / 89",
+    "glucose": null,
+    "smoking": false,
+    "hypertensionFamily": null,
+    "diabetesFamily": null,
+    "conditions": [],
+    "conditionStatus": "none",
+    "pregnancyStatus": "none",
+    "htnStatus": "none",
+    "alcoholDays": 3,
+    "alcoholWeek": 22.5,
+    "bingeMonthly": null,
+    "waistCm": 92,
+    "restingHeartRate": null,
+    "educationYears": null,
+    "sleepHours": 7,
+    "activeMinutesWeek": 30,
+    "familyHistory": []
+  },
+  "scenarioBaseline": {
+    "officeBp": {
+      "systolic": 138,
+      "diastolic": 89,
+      "monthsBeforeEnrollment": 3
+    },
+    "saltYes": 4,
+    "saltQuestions": 5,
+    "vegetableFruitServings": 5,
+    "alcoholSojuBottlesPerOccasion": 1,
+    "alcoholSojuCupsPerBottle": 7.5,
+    "alcoholOccasionsPerWeek": 3,
+    "stress": 2,
+    "ownsBpMonitor": true,
+    "ownsWeightScale": false,
+    "allSafetyAnswersNo": true,
+    "expectedLifestyleFactors": ["SALT", "ACT", "WT", "ALC"]
+  },
+  "medications": [],
+  "records": [
+    {
+      "steps": 2200,
+      "sleepHours": 7,
+      "systolic": 133,
+      "diastolic": 84,
+      "evening": {
+        "systolic": 132,
+        "diastolic": 83
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "00:00",
+        "wakeTime": "07:00",
+        "activeMinutes": 15,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 1,
+        "morningReadings": [
+          {
+            "systolic": 134,
+            "diastolic": 85
+          },
+          {
+            "systolic": 132,
+            "diastolic": 83
+          }
+        ],
+        "alcoholSojuCups": 4,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "초기 가정혈압 기록",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 2800,
+      "sleepHours": 6.8,
+      "systolic": 132,
+      "diastolic": 83,
+      "evening": {
+        "systolic": 132,
+        "diastolic": 82
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "00:12",
+        "wakeTime": "07:00",
+        "activeMinutes": 5,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 2,
+        "morningReadings": [
+          {
+            "systolic": 133,
+            "diastolic": 84
+          },
+          {
+            "systolic": 131,
+            "diastolic": 82
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "초기 가정혈압 기록",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 3500,
+      "sleepHours": 7.1,
+      "systolic": 134,
+      "diastolic": 84,
+      "evening": {
+        "systolic": 134,
+        "diastolic": 83
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": [],
+      "survey": {
+        "bedtime": "23:54",
+        "wakeTime": "07:00",
+        "activeMinutes": 5,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 3,
+        "morningReadings": [
+          {
+            "systolic": 135,
+            "diastolic": 85
+          },
+          {
+            "systolic": 133,
+            "diastolic": 83
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 1,
+        "saltPractice": "기록 누락",
+        "expectedPhase": "초기 가정혈압 기록",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 3100,
+      "sleepHours": 6.9,
+      "systolic": 133,
+      "diastolic": 83,
+      "evening": {
+        "systolic": 133,
+        "diastolic": 82
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "00:06",
+        "wakeTime": "07:00",
+        "activeMinutes": 5,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 4,
+        "morningReadings": [
+          {
+            "systolic": 134,
+            "diastolic": 84
+          },
+          {
+            "systolic": 132,
+            "diastolic": 82
+          }
+        ],
+        "alcoholSojuCups": 3,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "초기 가정혈압 기록",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 4000,
+      "sleepHours": 7,
+      "systolic": 134,
+      "diastolic": 84,
+      "evening": {
+        "systolic": 134,
+        "diastolic": 83
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "00:00",
+        "wakeTime": "07:00",
+        "activeMinutes": 5,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 5,
+        "morningReadings": [
+          {
+            "systolic": 135,
+            "diastolic": 85
+          },
+          {
+            "systolic": 133,
+            "diastolic": 83
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "초기 가정혈압 기록",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 4600,
+      "sleepHours": 7.2,
+      "systolic": 132,
+      "diastolic": 84,
+      "evening": {
+        "systolic": 132,
+        "diastolic": 83
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal"],
+      "survey": {
+        "bedtime": "23:48",
+        "wakeTime": "07:00",
+        "activeMinutes": 10,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 6,
+        "morningReadings": [
+          {
+            "systolic": 133,
+            "diastolic": 85
+          },
+          {
+            "systolic": 131,
+            "diastolic": 83
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "초기 가정혈압 기록",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 3800,
+      "sleepHours": 7.1,
+      "systolic": 133,
+      "diastolic": 83,
+      "evening": {
+        "systolic": 133,
+        "diastolic": 82
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "23:54",
+        "wakeTime": "07:00",
+        "activeMinutes": 10,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 7,
+        "morningReadings": [
+          {
+            "systolic": 134,
+            "diastolic": 84
+          },
+          {
+            "systolic": 132,
+            "diastolic": 82
+          }
+        ],
+        "alcoholSojuCups": 3,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "초기 가정혈압 기록",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 4500,
+      "sleepHours": 6.9,
+      "systolic": 138,
+      "diastolic": 87,
+      "evening": {
+        "systolic": 138,
+        "diastolic": 87
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "00:06",
+        "wakeTime": "07:00",
+        "activeMinutes": 10,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 8,
+        "morningReadings": [
+          {
+            "systolic": 139,
+            "diastolic": 88
+          },
+          {
+            "systolic": 137,
+            "diastolic": 86
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "가정혈압 상승 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 5200,
+      "sleepHours": 7,
+      "systolic": 139,
+      "diastolic": 88,
+      "evening": {
+        "systolic": 139,
+        "diastolic": 88
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": [],
+      "survey": {
+        "bedtime": "00:00",
+        "wakeTime": "07:00",
+        "activeMinutes": 10,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 9,
+        "morningReadings": [
+          {
+            "systolic": 140,
+            "diastolic": 89
+          },
+          {
+            "systolic": 138,
+            "diastolic": 87
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 1,
+        "saltPractice": "기록 누락",
+        "expectedPhase": "가정혈압 상승 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 4400,
+      "sleepHours": 6.8,
+      "systolic": 137,
+      "diastolic": 86,
+      "evening": {
+        "systolic": 137,
+        "diastolic": 86
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "00:12",
+        "wakeTime": "07:00",
+        "activeMinutes": 10,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 10,
+        "morningReadings": [
+          {
+            "systolic": 138,
+            "diastolic": 87
+          },
+          {
+            "systolic": 136,
+            "diastolic": 85
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "가정혈압 상승 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 6100,
+      "sleepHours": 7.1,
+      "systolic": 140,
+      "diastolic": 88,
+      "evening": {
+        "systolic": 140,
+        "diastolic": 88
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk", "water"],
+      "survey": {
+        "bedtime": "23:54",
+        "wakeTime": "07:00",
+        "activeMinutes": 15,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 11,
+        "morningReadings": [
+          {
+            "systolic": 141,
+            "diastolic": 89
+          },
+          {
+            "systolic": 139,
+            "diastolic": 87
+          }
+        ],
+        "alcoholSojuCups": 3,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "가정혈압 상승 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 4800,
+      "sleepHours": 7,
+      "systolic": 138,
+      "diastolic": 87,
+      "evening": {
+        "systolic": 138,
+        "diastolic": 87
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal"],
+      "survey": {
+        "bedtime": "00:00",
+        "wakeTime": "07:00",
+        "activeMinutes": 15,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 12,
+        "morningReadings": [
+          {
+            "systolic": 139,
+            "diastolic": 88
+          },
+          {
+            "systolic": 137,
+            "diastolic": 86
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "가정혈압 상승 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 5400,
+      "sleepHours": 7.2,
+      "systolic": 139,
+      "diastolic": 86,
+      "evening": {
+        "systolic": 139,
+        "diastolic": 86
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "23:48",
+        "wakeTime": "07:00",
+        "activeMinutes": 15,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 13,
+        "morningReadings": [
+          {
+            "systolic": 140,
+            "diastolic": 87
+          },
+          {
+            "systolic": 138,
+            "diastolic": 85
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "가정혈압 상승 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 5900,
+      "sleepHours": 7.1,
+      "systolic": 137,
+      "diastolic": 88,
+      "evening": {
+        "systolic": 137,
+        "diastolic": 88
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "23:54",
+        "wakeTime": "07:00",
+        "activeMinutes": 15,
+        "sedentaryHours": 9,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 14,
+        "morningReadings": [
+          {
+            "systolic": 138,
+            "diastolic": 89
+          },
+          {
+            "systolic": 136,
+            "diastolic": 87
+          }
+        ],
+        "alcoholSojuCups": 3,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "가정혈압 상승 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 6200,
+      "sleepHours": 7,
+      "systolic": 129,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 129,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk"],
+      "survey": {
+        "bedtime": "00:00",
+        "wakeTime": "07:00",
+        "activeMinutes": 15,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 15,
+        "morningReadings": [
+          {
+            "systolic": 130,
+            "diastolic": 81
+          },
+          {
+            "systolic": 128,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 4800,
+      "sleepHours": 7.2,
+      "systolic": 130,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 130,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "water"],
+      "survey": {
+        "bedtime": "23:48",
+        "wakeTime": "07:00",
+        "activeMinutes": 20,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 16,
+        "morningReadings": [
+          {
+            "systolic": 131,
+            "diastolic": 81
+          },
+          {
+            "systolic": 129,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 6500,
+      "sleepHours": 6.9,
+      "systolic": 130,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 130,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["walk", "water"],
+      "survey": {
+        "bedtime": "00:06",
+        "wakeTime": "07:00",
+        "activeMinutes": 20,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 17,
+        "morningReadings": [
+          {
+            "systolic": 131,
+            "diastolic": 81
+          },
+          {
+            "systolic": 129,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 1,
+        "saltPractice": "기록 누락",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 5800,
+      "sleepHours": 7.1,
+      "systolic": 131,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 131,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal"],
+      "survey": {
+        "bedtime": "23:54",
+        "wakeTime": "07:00",
+        "activeMinutes": 20,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 18,
+        "morningReadings": [
+          {
+            "systolic": 132,
+            "diastolic": 81
+          },
+          {
+            "systolic": 130,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 2,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 7000,
+      "sleepHours": 7.3,
+      "systolic": 129,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 129,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk", "water"],
+      "survey": {
+        "bedtime": "23:42",
+        "wakeTime": "07:00",
+        "activeMinutes": 20,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 19,
+        "morningReadings": [
+          {
+            "systolic": 130,
+            "diastolic": 81
+          },
+          {
+            "systolic": 128,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 6100,
+      "sleepHours": 7.2,
+      "systolic": 130,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 130,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk", "water"],
+      "survey": {
+        "bedtime": "23:48",
+        "wakeTime": "07:00",
+        "activeMinutes": 20,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 20,
+        "morningReadings": [
+          {
+            "systolic": 131,
+            "diastolic": 81
+          },
+          {
+            "systolic": 129,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 5600,
+      "sleepHours": 7,
+      "systolic": 130,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 130,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal"],
+      "survey": {
+        "bedtime": "00:00",
+        "wakeTime": "07:00",
+        "activeMinutes": 30,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 21,
+        "morningReadings": [
+          {
+            "systolic": 131,
+            "diastolic": 81
+          },
+          {
+            "systolic": 129,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 6700,
+      "sleepHours": 7.1,
+      "systolic": 131,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 131,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk", "water"],
+      "survey": {
+        "bedtime": "23:54",
+        "wakeTime": "07:00",
+        "activeMinutes": 30,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 22,
+        "morningReadings": [
+          {
+            "systolic": 132,
+            "diastolic": 81
+          },
+          {
+            "systolic": 130,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 7200,
+      "sleepHours": 7.2,
+      "systolic": 129,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 129,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk", "water"],
+      "survey": {
+        "bedtime": "23:48",
+        "wakeTime": "07:00",
+        "activeMinutes": 30,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 23,
+        "morningReadings": [
+          {
+            "systolic": 130,
+            "diastolic": 81
+          },
+          {
+            "systolic": 128,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 6400,
+      "sleepHours": 7.3,
+      "systolic": 130,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 130,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk"],
+      "survey": {
+        "bedtime": "23:42",
+        "wakeTime": "07:00",
+        "activeMinutes": 30,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 24,
+        "morningReadings": [
+          {
+            "systolic": 131,
+            "diastolic": 81
+          },
+          {
+            "systolic": 129,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 7500,
+      "sleepHours": 7.1,
+      "systolic": 130,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 130,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk", "water"],
+      "survey": {
+        "bedtime": "23:54",
+        "wakeTime": "07:00",
+        "activeMinutes": 30,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 25,
+        "morningReadings": [
+          {
+            "systolic": 131,
+            "diastolic": 81
+          },
+          {
+            "systolic": 129,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 2,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 6900,
+      "sleepHours": 7.2,
+      "systolic": 131,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 131,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk", "water"],
+      "survey": {
+        "bedtime": "23:48",
+        "wakeTime": "07:00",
+        "activeMinutes": 35,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 26,
+        "morningReadings": [
+          {
+            "systolic": 132,
+            "diastolic": 81
+          },
+          {
+            "systolic": 130,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 7100,
+      "sleepHours": 7,
+      "systolic": 129,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 129,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk"],
+      "survey": {
+        "bedtime": "00:00",
+        "wakeTime": "07:00",
+        "activeMinutes": 35,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 27,
+        "morningReadings": [
+          {
+            "systolic": 130,
+            "diastolic": 81
+          },
+          {
+            "systolic": 128,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 6800,
+      "sleepHours": 7.3,
+      "systolic": 130,
+      "diastolic": 80,
+      "evening": {
+        "systolic": 130,
+        "diastolic": 80
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk", "water"],
+      "survey": {
+        "bedtime": "23:42",
+        "wakeTime": "07:00",
+        "activeMinutes": 35,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 28,
+        "morningReadings": [
+          {
+            "systolic": 131,
+            "diastolic": 81
+          },
+          {
+            "systolic": 129,
+            "diastolic": 79
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 7400,
+      "sleepHours": 7.2,
+      "systolic": 129,
+      "diastolic": 79,
+      "evening": {
+        "systolic": 129,
+        "diastolic": 79
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk", "water"],
+      "survey": {
+        "bedtime": "23:48",
+        "wakeTime": "07:00",
+        "activeMinutes": 35,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 29,
+        "morningReadings": [
+          {
+            "systolic": 130,
+            "diastolic": 80
+          },
+          {
+            "systolic": 128,
+            "diastolic": 78
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    },
+    {
+      "steps": 6600,
+      "sleepHours": 7.1,
+      "systolic": 130,
+      "diastolic": 79,
+      "evening": {
+        "systolic": 130,
+        "diastolic": 79
+      },
+      "restingHr": null,
+      "glucose": null,
+      "completed": ["meal", "walk"],
+      "survey": {
+        "bedtime": "23:54",
+        "wakeTime": "07:00",
+        "activeMinutes": 35,
+        "sedentaryHours": 8,
+        "snoringScore": null,
+        "daytimeSleepinessScore": null,
+        "nocturia": null
+      },
+      "scenario": {
+        "day": 30,
+        "morningReadings": [
+          {
+            "systolic": 131,
+            "diastolic": 80
+          },
+          {
+            "systolic": 129,
+            "diastolic": 78
+          }
+        ],
+        "alcoholSojuCups": 0,
+        "mealCount": 2,
+        "saltPractice": "국물 남기기",
+        "expectedPhase": "하강 유지 관찰 구간",
+        "synthetic": true
+      }
+    }
+  ],
+  "m2": {
+    "snoring": null,
+    "daytime_sleepiness": null,
+    "nocturia": null,
+    "salty_habit": true,
+    "eating_out_per_week": null,
+    "sedentary_hours": 8
+  },
+  "startingLevel": 1,
+  "startingGold": 1280,
+  "completeFirstWeek": true
+}

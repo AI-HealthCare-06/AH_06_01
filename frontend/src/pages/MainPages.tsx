@@ -12,7 +12,6 @@ import { DinoRadarCard } from "../components/DinoRadarCard";
 import { DinosaurArt } from "../components/DinosaurArt";
 import { AccessoryCatalog } from "../components/AccessoryCatalog";
 import { CharacterVault } from "../components/CharacterVault";
-import { RiskChange } from "../components/RiskChange";
 import { AnimatedNumber } from "../components/AnimatedNumber";
 import { QuestProgress, PixelCheckbox } from "../components/QuestProgress";
 import { useNotice } from "../components/NoticeProvider";
@@ -36,15 +35,19 @@ import { useProfileStore } from "../stores/profile-store";
 import { GameWallet, GoldEffects } from "../components/GameWallet";
 import { dailyCombatExperienceLimit, questExperience } from "../domain/experience";
 import { PixelDatePicker } from "../components/PixelDatePicker";
-import { BloodPressureReport } from "../components/BloodPressureReport";
+import { DashboardMetricGrid } from "../components/DashboardInsights";
+import { HealthHistoryCharts } from "../components/HealthHistoryCharts";
+import { BloodPressureEntry } from "../components/BloodPressureEntry";
 import { useMedicationStore } from "../stores/medication-store";
 import { dailyDoses } from "../domain/medications";
 import { QuestCameraDialog } from "../components/QuestCameraDialog";
 import { QuestInfoDialog } from "../components/QuestInfoDialog";
 import { QuestCalendar } from "../components/QuestCalendar";
 import { DashboardSummary } from "../components/DashboardSummary";
+import { DashboardPredictionBrief } from "../components/DashboardPredictionBrief";
 import { DashboardReportShell } from "../components/DashboardReportShell";
 import { reportSelection } from "../services/health-history";
+import { healthScorePeriod, scoreChangeText } from "../domain/health-score";
 
 export function HomePage() {
   const location = useLocation();
@@ -331,6 +334,9 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
   const [params, setParams] = useSearchParams();
   const initial = reportSelection(params, game.date);
   const registeredOn = useProfileStore((s) => s.registeredOn);
+  const profilePressure = useProfileStore((s) =>
+    s.hasProfileInput || s.hasBloodPressureInput ? s.profile.bloodPressure : null,
+  );
   const [period, setPeriod] = useState<HealthPeriod>(initial.period);
   const [dateChoice, setSelectedDate] = useState<string | null>(
     params.has("date") ? initial.date : null,
@@ -340,6 +346,7 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
   const range = reportDateRange(period, selectedDate, rangeStart);
   const selectedQuests = questCountOn(game, selectedDate);
   const periodInfo = healthPeriods[period];
+  const score = healthScorePeriod(game, period, selectedDate, rangeStart);
   const { data, isError } = useQuery({
     queryKey: ["dashboard", "demo"],
     queryFn: ({ signal }) => dashboardService.getSnapshot(signal),
@@ -363,6 +370,7 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
       onSelectDate={(date) => selectReportDates(date)}
       showCalendar={false}
     >
+      <DashboardPredictionBrief />
       <div className="dashboard-heading">
         <PageHeading
           title="HEALTH DASHBOARD"
@@ -435,16 +443,14 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
                 <h3>{periodInfo.heading} HEALTH SCORE</h3>
                 <div className="score-value">
                   <strong className="score-number">
-                    <AnimatedNumber value={data.score} />
+                    {score.score === null ? "—" : <AnimatedNumber value={score.score} />}
                   </strong>
                   <span className="score-total">/ 100</span>
                 </div>
-                <b className="score-rank">RANK: A · 데모</b>
-                <p>
-                  {periodInfo.previous}보다 {periodInfo.delta}점 올랐어요!
-                </p>
+                <b className="score-rank">기록 기반 · {score.recordedDays}일</b>
+                <p>{scoreChangeText(score, periodInfo.previous)}</p>
                 <div className="score-track">
-                  <i className="metric-fill" style={{ width: `${data.score}%` }} />
+                  <i className="metric-fill" style={{ width: `${score.score ?? 0}%` }} />
                 </div>
               </div>
             </section>
@@ -454,11 +460,9 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
                   <PixelIcon name="document" />
                   REPORT
                 </h3>
-                <span>{periodInfo.label} 리포트 · 데모</span>
+                <span>{periodInfo.label} 리포트 · 저장된 기록</span>
               </header>
-              <p className="report-score-change">
-                {periodInfo.previous} 대비 건강 점수 <b>+{periodInfo.delta}점</b>
-              </p>
+              <p className="report-score-change">{scoreChangeText(score, periodInfo.previous)}</p>
               <dl>
                 <div>
                   <dt>{selectedDate === game.date ? "오늘 퀘스트" : "선택일 퀘스트"}</dt>
@@ -472,73 +476,39 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
                 </div>
               </dl>
 
-              <small>점수와 추이는 데모이며 퀘스트 현황은 이 기기의 실제 기록이에요.</small>
-              <BloodPressureReport
-                bp={data.bpResult}
-                model={data.modelResult}
-                ranker={data.rankerResult}
-              />
-              <Link to="/risk" className="disease-card" aria-label="질환 위험도 상세 보기">
+              <small>
+                걸음·메인 퀘스트·수면 달성률을 같은 비중으로 평균한 실천 점수예요. 기록이 없는
+                항목은 제외해요.
+              </small>
+              <section className="report-records" aria-label="선택 기간 건강 기록">
                 <header>
-                  <h3>질환 위험도 · 데모</h3>
-                  <small>
+                  <h3>선택 기간 건강 기록</h3>
+                  <small className="report-registered-on">
                     {registeredOn ? `등록일 ${registeredOn.replaceAll("-", ".")}` : "등록일 미등록"}
                   </small>
                 </header>
-                <div className="risk-grid">
-                  {data.risks.map((r) => (
-                    <div className={`risk-tile ${r.tone}`} key={r.name}>
-                      <h4>{r.name}</h4>
-                      <strong>
-                        <AnimatedNumber value={r.current} />%
-                      </strong>
-                      <div className="risk-track">
-                        <i className="metric-fill" style={{ width: `${r.current}%` }} />
-                      </div>
-                      <small>{r.status}</small>
-                    </div>
-                  ))}
+                <div className="bp-measurement">
+                  <div>
+                    <small>프로필 최근 혈압 · 측정일 미확인</small>
+                    <strong>{profilePressure ?? "입력 대기"}</strong>
+                    <span>mmHg · 날짜별 기록은 건강 서베이에 입력해요</span>
+                  </div>
+                  <BloodPressureEntry />
                 </div>
-              </Link>
-              <HealthTrend period={period} today={selectedDate} from={range.start} />
-              {period === "week" && (
-                <section className="impact-card">
-                  <header>
-                    <h3>퀘스트 효과 예측</h3>
-                  </header>
-                  <div className="chart-legend">
-                    <span>현재</span>
-                    <span>완료 후</span>
-                  </div>
-                  <div className="impact-rows">
-                    {data.risks.map((r) => (
-                      <div className="impact-row" key={r.name}>
-                        <span>{r.name}</span>
-                        <div className="impact-bars">
-                          <div>
-                            <i className="metric-fill" style={{ width: `${r.current * 2}%` }} />
-                          </div>
-                          <div>
-                            <i className="metric-fill" style={{ width: `${r.projected * 2}%` }} />
-                          </div>
-                        </div>
-                        <RiskChange
-                          current={r.current}
-                          projected={r.projected}
-                          tone={r.tone}
-                          projectedTone={r.projectedTone}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="chart-axis">
-                    <span>0</span>
-                    <span>25</span>
-                    <span>50%</span>
-                  </div>
-                  <p className="prediction-note">데모 예상 수치로, 실제 결과와 다를 수 있어요.</p>
-                </section>
-              )}
+                <DashboardMetricGrid
+                  game={game}
+                  period={period}
+                  date={selectedDate}
+                  from={rangeStart}
+                />
+                <HealthHistoryCharts
+                  game={game}
+                  period={period}
+                  date={selectedDate}
+                  from={rangeStart}
+                />
+              </section>
+              <HealthTrend period={period} result={score} />
             </div>
           </section>
         </div>

@@ -1,33 +1,26 @@
-// Sample history only; the profile has no connected health-risk service yet.
+// Period labels only. Scores and changes come from saved activity records.
 export const healthPeriods = {
-  day: { label: "일간", heading: "DAILY", previous: "어제", delta: 1, values: [76, 78, 80, 82] },
+  day: { label: "일간", heading: "DAILY", previous: "어제" },
   week: {
     label: "주간",
     heading: "WEEKLY",
     previous: "지난주",
-    delta: 8,
-    values: [74, 76, 75, 78, 79, 81, 82],
   },
   month: {
     label: "월간",
     heading: "MONTHLY",
     previous: "지난달",
-    delta: 14,
-    values: [68, 73, 78, 82],
   },
+  quarter: { label: "3개월", heading: "90-DAY", previous: "이전 90일" },
   year: {
     label: "연간",
     heading: "YEARLY",
     previous: "지난해",
-    delta: 26,
-    values: [58, 59, 62, 61, 65, 68, 69, 72, 74, 77, 80, 82],
   },
   custom: {
     label: "기간",
     heading: "PERIOD",
     previous: "이전 기간",
-    delta: 8,
-    values: [74, 76, 75, 78, 79, 81, 82],
   },
 } as const;
 export type HealthPeriod = keyof typeof healthPeriods;
@@ -54,6 +47,7 @@ export function reportDateRange(period: HealthPeriod, end: string, from?: string
   if (period === "custom") return { start: from && from <= end ? from : end, end };
   if (period === "week") date.setDate(date.getDate() - 6);
   if (period === "month") date.setDate(1);
+  if (period === "quarter") date.setDate(date.getDate() - 89);
   if (period === "year") date.setMonth(0, 1);
   return {
     start: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,

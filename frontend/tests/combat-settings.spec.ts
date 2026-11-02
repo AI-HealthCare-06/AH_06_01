@@ -241,27 +241,16 @@ test("each dinosaur releases from its horn, foreclaw or just ahead of its visibl
   }
 });
 
-test("prediction delta stays smaller and centered above its arrow on narrow and wide dashboards", async ({
+test("reports show recorded metrics without unsupported disease probabilities", async ({
   page,
 }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
   for (const width of [320, 390, 534]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/dashboard/report");
-    await expect(page.locator(".impact-card")).toBeVisible();
-    await page.evaluate(() => document.fonts.ready);
-    for (const row of await page.locator(".impact-card .risk-change").all()) {
-      const delta = row.locator("small"),
-        arrow = row.locator(".risk-change-arrow");
-      const a = (await delta.boundingBox())!,
-        b = (await arrow.boundingBox())!;
-      expect(a.y + a.height).toBeLessThanOrEqual(b.y + 0.1);
-      expect(a.x + a.width / 2).toBeCloseTo(b.x + b.width / 2, 1);
-      expect(
-        parseFloat(await delta.evaluate((node) => getComputedStyle(node).fontSize)),
-      ).toBeLessThan(8);
-      expect(await row.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
-    }
-    await page.locator(".impact-card").screenshot({ path: `test-results/risk-arrow-${width}.png` });
+    await expect(page.locator(".impact-card,.risk-grid")).toHaveCount(0);
+    const metrics = page.getByRole("region", { name: "선택 기간 핵심 지표" });
+    await expect(metrics).toContainText("평균 혈압");
+    await expect(metrics).toContainText("기록 0일");
+    expect(await metrics.evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);
   }
 });

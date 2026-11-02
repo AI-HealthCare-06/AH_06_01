@@ -2,7 +2,7 @@ import { MealPage } from "./pages/MealPage";
 import "./diet.css";
 import { CvProcessPage } from "./pages/CvProcessPage";
 import "./cv-process.css";
-import { demoMode } from "./domain/demo-mode";
+import { demoMode, enterDemo } from "./domain/demo-mode";
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate, type Location } from "react-router-dom";
 import { Capacitor } from "@capacitor/core";
@@ -33,6 +33,10 @@ import { CloudLoginPage, AuthCallbackPage } from "./cloud/CloudLoginPage";
 import { cloudEnabled } from "./cloud/client";
 import { GameLoadingScreen } from "./components/GameLoadingScreen";
 
+function QuarterDemoEntry() {
+  useEffect(() => enterDemo("studio-quarter-v1"), []);
+  return <p role="status">90일 시연 계정을 준비하고 있어요.</p>;
+}
 export default function App() {
   const [booting, setBooting] = useState(() => Capacitor.isNativePlatform());
   useEffect(() => {
@@ -192,6 +196,7 @@ export default function App() {
   return (
     <>
       <Routes location={routeLocation}>
+        <Route path="/demo/studio-quarter" element={<QuarterDemoEntry />} />
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/quests" element={<QuestsPage />} />

@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-29",
+  "days": 30,
+  "first": "2026-09-30",
+  "last": "2026-10-29",
+  "questTotals": {
+    "meal": 27,
+    "water": 20,
+    "survey": 30,
+    "walk": 14
+  },
+  "experience": 45788,
+  "gold": 167880,
+  "sleepBonusDays": 30,
+  "sleepBonusExperience": 12685,
+  "profileQuests": {
+    "startedAt": 1790737200000,
+    "completed": {
+      "conditions": {
+        "completedAt": 1790823600000,
+        "experience": 200
+      },
+      "lifestyle": {
+        "completedAt": 1790910000000,
+        "experience": 200
+      }
+    }
+  },
+  "todayCompleted": [
+    "meal",
+    "walk",
+    "survey"
+  ]
+}

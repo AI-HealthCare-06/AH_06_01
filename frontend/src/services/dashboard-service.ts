@@ -4,8 +4,6 @@ export type DashboardSnapshot = {
   bpResult?: unknown;
   modelResult?: unknown;
   rankerResult?: unknown;
-  score: number;
-  delta: number;
   risks: {
     name: string;
     current: number;
@@ -25,8 +23,6 @@ export const dashboardService: DashboardService = {
   async getSnapshot(signal) {
     signal?.throwIfAborted();
     return {
-      score: 82,
-      delta: 8,
       risks: [
         {
           name: "고혈압",

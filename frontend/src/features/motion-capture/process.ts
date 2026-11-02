@@ -1,8 +1,9 @@
 import { MotionDetector } from "./detector";
+import { DrinkingDetector, drinkingConfig } from "./drinking";
 import type { DetectionProgress, MotionQuest, ProcessObservation, ProcessTrace } from "./types";
 
 export const processConfig = {
-  version: "front-camera-process-v2.0",
+  version: "front-camera-process-v3.0",
   faceGraceMs: 1200,
   handToDrinkWindowMs: 30_000,
   pinchRatioMax: 0.45,
@@ -14,13 +15,13 @@ export const processConfig = {
     medicineHoldMs: 450,
     stableMs: 400,
   },
-  drink: { qualitySlotMs: 200, maxAccumulationGapMs: 350, waterHoldMs: 1100, stableMs: 400 },
+  drink: drinkingConfig,
 };
 
 /** Recognizes visible action order, never pill identity, ingestion, or swallowed volume. */
 export class ProcessDetector {
   private hand = new MotionDetector("medicine", true, processConfig.hand);
-  private drink = new MotionDetector("water", true, processConfig.drink);
+  private drink = new DrinkingDetector();
   private phase: "hand" | "drink" | "complete";
   private trace: ProcessTrace[] = [];
   private lastTimestamp: number | null = null;
@@ -103,7 +104,7 @@ export class ProcessDetector {
       if (progress.stage === "detected") {
         this.handFinishedAt = timestamp;
         this.phase = "drink";
-        this.drink = new MotionDetector("water", true, processConfig.drink);
+        this.drink = new DrinkingDetector();
         this.record("hand_complete", timestamp);
         return this.wrap({
           ...progress,
@@ -122,7 +123,7 @@ export class ProcessDetector {
           message:
             this.quest === "medicine"
               ? "손→입→손 내림과 컵으로 마시는 순서를 감지했어요."
-              : "컵 접근→입 근처 유지→컵 내림을 감지했어요.",
+              : "컵 접근→기울임→컵 내림 동작을 감지했어요.",
         };
       }
     }
@@ -138,7 +139,7 @@ export class ProcessDetector {
     this.phase = this.quest === "medicine" ? "hand" : "drink";
     this.handFinishedAt = null;
     this.hand = new MotionDetector("medicine", true, processConfig.hand);
-    this.drink = new MotionDetector("water", true, processConfig.drink);
+    this.drink = new DrinkingDetector();
     this.lastStage = "";
   }
   private record(event: string, timestamp: number) {

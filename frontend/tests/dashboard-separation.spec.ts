@@ -6,6 +6,7 @@ test("health dashboard has one view and keeps character selection in the main na
   await page.goto("/dashboard");
   await expect(page.getByRole("navigation", { name: "대시보드 선택" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "캐릭터 대시보드" })).toHaveCount(0);
+  await page.locator(".selected-day-details > summary").click();
   await expect(page.getByRole("heading", { name: "혈압 기록과 판정" })).toBeVisible();
   await expect(page.locator(".health-score")).toBeVisible();
   await expect(page.getByLabel("주간 달력", { exact: true })).toBeVisible();

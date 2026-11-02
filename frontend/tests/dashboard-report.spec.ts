@@ -1,13 +1,15 @@
 import { expectNoHorizontalOverflow } from "./helpers/layout";
 import { selectPixelOption } from "./helpers/controls";
 import { expect, test } from "@playwright/test";
+import { seedDashboardActivity } from "./helpers/dashboard";
 
 test("period changes preserve the score animation and keep all sections in one scrollable report", async ({
   page,
 }) => {
+  await seedDashboardActivity(page);
   await page.goto("/dashboard/report");
   const score = page.locator(".score-number .number-visual");
-  await expect(score).toHaveAttribute("data-value", "82");
+  await expect(score).toHaveAttribute("data-value", "75");
   await page.locator(".health-score").evaluate((element) => {
     Reflect.set(window, "initialScore", element);
     Reflect.set(
@@ -19,7 +21,7 @@ test("period changes preserve the score animation and keep all sections in one s
   const report = page.getByRole("region", { name: "REPORT", exact: true });
   for (const period of ["day", "month", "year", "week"]) {
     await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), period);
-    await expect(score).toHaveAttribute("data-value", "82");
+    await expect(score).toHaveAttribute("data-value", period === "day" ? "50" : "75");
     expect(
       await page
         .locator(".health-score")
@@ -31,19 +33,23 @@ test("period changes preserve the score animation and keep all sections in one s
         ),
     ).toBe(true);
     await expect(report.locator(".health-growth-card")).toHaveCount(1);
-    await expect(report.getByRole("link", { name: "질환 위험도 상세 보기" })).toHaveCount(1);
+    await expect(
+      report.getByRole("region", { name: "선택 기간 건강 기록", exact: true }),
+    ).toHaveCount(1);
     await expect(report.locator(".health-trend")).toHaveCount(1);
   }
-  await expect(report.locator(".impact-card")).toHaveCount(1);
+  await expect(report.locator(".impact-card,.risk-grid")).toHaveCount(0);
   const scroll = page.getByLabel("대시보드 리포트 스크롤", { exact: true });
   for (const width of [320, 526]) {
     await page.setViewportSize({ width, height: 844 });
     expect(await scroll.evaluate((element) => getComputedStyle(element).overflowY)).toBe("visible");
-    await report.locator(".prediction-note").scrollIntoViewIfNeeded();
-    await expect(report.locator(".prediction-note")).toBeInViewport();
+    await report.locator(".health-trend").scrollIntoViewIfNeeded();
+    await expect(report.locator(".health-trend")).toBeInViewport();
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
     await expectNoHorizontalOverflow(page, '[aria-label="대시보드 리포트 스크롤"]');
-    await report.getByRole("link", { name: "질환 위험도 상세 보기" }).scrollIntoViewIfNeeded();
-    await expect(report.locator(".risk-tile").last()).toBeInViewport();
+    await report
+      .getByRole("region", { name: "선택 기간 건강 기록", exact: true })
+      .scrollIntoViewIfNeeded();
+    await expect(report.getByRole("region", { name: "선택 기간 핵심 지표" })).toBeInViewport();
   }
 });
