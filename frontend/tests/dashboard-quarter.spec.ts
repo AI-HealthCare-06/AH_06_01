@@ -1,13 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { selectPixelOption } from "./helpers/controls";
-test("video demo has 90 days, model replay and period-consistent dashboard views", async ({
+test("video demo has 90 days, measured analysis and period-consistent dashboard views", async ({
   page,
 }) => {
   await page.goto("/demo/studio-quarter");
   await expect(page).toHaveURL(/dashboard\?period=quarter/);
   const summary = page.getByRole("region", { name: "최종 분석 요약" });
-  await expect(summary).toContainText("수면 관련 확인 1항목");
-  await expect(summary).toContainText("합성 입력 · 모델 결과 재생");
+  await expect(summary).toContainText("134 / 87 mmHg");
+  await expect(summary).toContainText("합성 측정 기록 · 기록 90일 · 측정 180회");
   await expect(page.getByRole("region", { name: "선택 기간 핵심 지표" })).toContainText("90일");
   const counts = await page.evaluate(async () => {
     const p = "/src/stores/game-store.ts",
@@ -26,14 +26,14 @@ test("video demo has 90 days, model replay and period-consistent dashboard views
   await expect(page.getByRole("region", { name: "선택 기간 핵심 지표" })).toContainText("7일");
   await expect(page.getByRole("region", { name: "식단 영양 구성" })).toContainText("14끼 기록");
   await expect(page.locator(".habit-day")).not.toContainText(firstDate!);
-  await expect(summary).toContainText("수면 관련 확인 1항목");
+  await expect(summary).toContainText("기록 7일 · 측정 14회");
 });
 test("demo layouts stay contained and history cells reveal their exact record", async ({
   page,
 }) => {
   await page.goto("/demo/studio-quarter");
   await expect(page.getByRole("region", { name: "최종 분석 요약" })).toContainText(
-    "수면 관련 확인",
+    "혈압 측정 기록 분석",
   );
   for (const width of [320, 390, 430, 1000]) {
     await page.setViewportSize({ width, height: 844 });
@@ -55,13 +55,11 @@ test("demo layouts stay contained and history cells reveal their exact record", 
     await page.screenshot({ path: process.env.REXRUN_CAPTURE_QUARTER + "/sleep-nutrition.png" });
   }
 });
-test("editing a demo survey clears the recorded model result and reset preserves other accounts", async ({
+test("editing demo blood pressure updates measured analysis and reset preserves other accounts", async ({
   page,
 }) => {
   await page.goto("/demo/studio-quarter");
-  await expect(page.getByRole("region", { name: "최종 분석 요약" })).toContainText(
-    "수면 관련 확인",
-  );
+  await expect(page.getByRole("region", { name: "최종 분석 요약" })).toContainText("134 / 87 mmHg");
   await page.evaluate(async () => {
     localStorage.setItem("rexrun-persona:office-month:sentinel", "keep");
     localStorage.setItem("account-isolation-sentinel", "keep");
@@ -73,19 +71,20 @@ test("editing a demo survey clears the recorded model result and reset preserves
         ...game,
         dailySurveys: {
           ...game.dailySurveys,
-          [game.date]: { ...game.dailySurveys[game.date], activeMinutes: 1 },
+          [game.date]: {
+            ...game.dailySurveys[game.date],
+            evening: { systolic: 160, diastolic: 100 },
+          },
         },
       },
     });
   });
   await expect(page.getByRole("region", { name: "최종 분석 요약" })).toContainText(
-    "입력 변경됨 · 시연 초기화로 복원",
+    "160 / 100 mmHg",
     { timeout: 10000 },
   );
   await page.getByRole("button", { name: "시연 초기화", exact: true }).click();
-  await expect(page.getByRole("region", { name: "최종 분석 요약" })).toContainText(
-    "수면 관련 확인",
-  );
+  await expect(page.getByRole("region", { name: "최종 분석 요약" })).toContainText("134 / 87 mmHg");
   expect(
     await page.evaluate(() => [
       localStorage.getItem("rexrun-persona:office-month:sentinel"),

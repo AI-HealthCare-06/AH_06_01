@@ -335,7 +335,7 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
   const initial = reportSelection(params, game.date);
   const registeredOn = useProfileStore((s) => s.registeredOn);
   const profilePressure = useProfileStore((s) =>
-    s.hasProfileInput || s.hasBloodPressureInput ? s.profile.bloodPressure : null,
+    s.hasBloodPressureInput ? s.profile.bloodPressure : null,
   );
   const [period, setPeriod] = useState<HealthPeriod>(initial.period);
   const [dateChoice, setSelectedDate] = useState<string | null>(
@@ -370,7 +370,7 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
       onSelectDate={(date) => selectReportDates(date)}
       showCalendar={false}
     >
-      <DashboardPredictionBrief />
+      <DashboardPredictionBrief period={period} date={selectedDate} from={rangeStart} />
       <div className="dashboard-heading">
         <PageHeading
           title="HEALTH DASHBOARD"
@@ -429,7 +429,6 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
         </p>
       ) : !detailed ? (
         <DashboardSummary
-          data={data}
           period={period}
           date={selectedDate}
           reportUrl={reportUrl}

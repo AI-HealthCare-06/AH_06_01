@@ -116,8 +116,10 @@ test("mobile dashboard keeps the score visible and distinguishes actual inputs f
     await page.goto("/dashboard");
     await expect(page.locator(".score-number")).toHaveText("—");
     await page.locator(".selected-day-details > summary").click();
-    await expect(page.getByRole("heading", { name: "혈압 기록과 판정" })).toBeVisible();
-    await expect(page.getByText("판정 결과 대기", { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "선택일 건강 기록" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "최종 분석 요약" })).toContainText(
+      "생활습관 기반 측정 권고",
+    );
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);

@@ -1,6 +1,7 @@
 import { useId } from "react";
 import type { GameState } from "../domain/game";
-import { healthPeriods, reportDateRange, type HealthPeriod } from "../services/health-history";
+import { healthPeriods, type HealthPeriod } from "../services/health-history";
+import { dashboardInsights } from "../domain/dashboard-insights";
 import { demoMode } from "../domain/demo-mode";
 import { selectedDemoPersona } from "../domain/demo-personas";
 type Series = { label: string; color: string; values: (number | null)[] };
@@ -95,13 +96,10 @@ export function HealthHistoryCharts({
   period: HealthPeriod;
   from?: string;
 }) {
-  const range = reportDateRange(period, date, from);
-  const rows = Object.entries(game.healthHistory)
-    .filter(([day]) => day >= range.start && day <= range.end)
-    .sort(([a], [b]) => a.localeCompare(b));
+  const rows = dashboardInsights(game, [], period, date, from).rows;
   if (!rows.length) return null;
-  const dates = rows.map(([day]) => day),
-    latest = rows.at(-1)![1];
+  const dates = rows.map((row) => row.date),
+    latest = rows.at(-1)!;
   return (
     <section className="health-history-overview" aria-label="저장된 건강 기록 추이">
       <header className="stitch-section-heading">
@@ -114,15 +112,17 @@ export function HealthHistoryCharts({
         <header>
           <h4>혈압 추이</h4>
           <strong>
-            {latest.systolic ?? "—"} / {latest.diastolic ?? "—"} <small>mmHg</small>
+            {latest.systolic === null ? "—" : latest.systolic.toFixed(1)} /{" "}
+            {latest.diastolic === null ? "—" : latest.diastolic.toFixed(1)}{" "}
+            <small>mmHg · 일별 평균</small>
           </strong>
         </header>
         <LineChart
           dates={dates}
           unit="mmHg"
           series={[
-            { label: "수축기", color: "#c34436", values: rows.map(([, r]) => r.systolic ?? null) },
-            { label: "이완기", color: "#35576b", values: rows.map(([, r]) => r.diastolic ?? null) },
+            { label: "수축기", color: "#c34436", values: rows.map((r) => r.systolic) },
+            { label: "이완기", color: "#35576b", values: rows.map((r) => r.diastolic) },
           ]}
         />
       </article>
@@ -142,7 +142,7 @@ export function HealthHistoryCharts({
               {
                 label: "공복 혈당",
                 color: "#ab7030",
-                values: rows.map(([, r]) => r.glucose ?? null),
+                values: rows.map((r) => r.glucose),
               },
             ]}
           />
@@ -151,7 +151,7 @@ export function HealthHistoryCharts({
           <header>
             <h4>안정 시 맥박</h4>
             <strong>
-              {latest.restingHr ?? "—"}
+              {latest.pulse ?? "—"}
               <small> 회/분</small>
             </strong>
           </header>
@@ -162,7 +162,7 @@ export function HealthHistoryCharts({
               {
                 label: "안정 시 맥박",
                 color: "#205d40",
-                values: rows.map(([, r]) => r.restingHr ?? null),
+                values: rows.map((r) => r.pulse),
               },
             ]}
           />

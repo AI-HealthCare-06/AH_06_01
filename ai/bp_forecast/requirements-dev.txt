@@ -1,0 +1,4 @@
+# Optional verification and figure tools; core code/tests use the standard library.
+jsonschema==4.26.0
+matplotlib==3.10.9
+ruff==0.16.8

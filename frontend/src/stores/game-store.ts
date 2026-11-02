@@ -39,6 +39,8 @@ import { questVerified } from "../domain/quest-verification";
 import { useQuestVerificationStore } from "./quest-verification-store";
 
 import { cacheDailySurveyGame, clearDailySurveyGame } from "../services/daily-survey-cache";
+import { useBloodPressureStore } from "./blood-pressure-store";
+import type { PressureDraftBase } from "../domain/blood-pressure-history";
 
 const storageKey = appStorageKey("rexrun-demo-game-v1");
 function loadGame() {
@@ -86,7 +88,7 @@ type GameStore = {
   resetDemo: () => void;
   syncSteps: (snapshot: StepSnapshot) => void;
   recordSleep: (minutes: number, date: string) => void;
-  recordSurvey: (value: unknown) => boolean;
+  recordSurvey: (value: unknown, pressureBaseline?: PressureDraftBase) => boolean;
   tick: () => void;
   suspendSession: () => void;
   resumeSession: () => void;
@@ -216,13 +218,19 @@ export const useGameStore = create<GameStore>((set) => ({
       save(game);
       return { game };
     }),
-  recordSurvey: (value) => {
+  recordSurvey: (value, pressureBaseline) => {
     let stored = false;
     set((state) => {
       if (!useSessionStore.getState().active) return state;
       const current = tickBattle(state.game);
       const game = recordDailySurvey(current, value);
       if (game === current) return state;
+      if (
+        !useBloodPressureStore
+          .getState()
+          .recordSurvey(game.dailySurveys[game.date], pressureBaseline)
+      )
+        return state;
       if (!save(game)) return state;
       stored = true;
       return { game };

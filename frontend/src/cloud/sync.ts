@@ -15,6 +15,7 @@ import { useMedicationStore } from "../stores/medication-store";
 import { initialGame, restoreGame, type GameState } from "../domain/game";
 import { profileSchema, type HealthProfile } from "../domain/profile";
 import { medicationListSchema, type Medication } from "../domain/medications";
+import { useBloodPressureStore } from "../stores/blood-pressure-store";
 
 type Batch = {
   batch_id: string;
@@ -222,6 +223,7 @@ async function attach(session: Session | null) {
   const attachEpoch = generation;
   hydrating = true;
   owner = null;
+  useBloodPressureStore.getState().activate("local");
   setDailySurveyAccount(null);
   useSessionStore.getState().signOut();
   useCloudStore.setState({ healthSnapshotKey: null, healthSyncPending: false });
@@ -244,6 +246,7 @@ async function attach(session: Session | null) {
     return;
   }
   owner = session.user.id;
+  useBloodPressureStore.getState().activate(owner);
   setDailySurveyAccount(owner);
   const epoch = generation;
   try {

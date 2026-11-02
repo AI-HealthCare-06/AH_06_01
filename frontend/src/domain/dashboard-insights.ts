@@ -1,6 +1,6 @@
 import { mainQuestIds, questCountOn, type GameState } from "./game";
 import type { MealRecord, NutrientKey } from "./diet";
-import { latestSurveyPressure } from "./daily-survey";
+import { pressureDays } from "./dashboard-pressure";
 import { reportDateRange, type HealthPeriod } from "../services/health-history";
 
 export const dayOffset = (date: string, n: number) => {
@@ -22,6 +22,7 @@ export function dashboardInsights(
   const range = reportDateRange(period, end, from);
   const dayCount = Math.round((Date.parse(range.end) - Date.parse(range.start)) / 86400000) + 1;
   const mealRows = meals.filter((m) => m.date >= range.start && m.date <= range.end);
+  const pressures = new Map(pressureDays(game).map((day) => [day.date, day]));
   const dates = new Set([
     ...Object.keys(game.healthHistory),
     ...Object.keys(game.dailySurveys),
@@ -36,7 +37,7 @@ export function dashboardInsights(
     .map((date) => {
       const history = game.healthHistory[date],
         survey = game.dailySurveys[date],
-        pressure = survey ? latestSurveyPressure(survey) : null;
+        pressure = pressures.get(date);
       const current = date === game.date && !game.sampleDay;
       const hasActivity = Boolean(
         history ||
@@ -47,8 +48,8 @@ export function dashboardInsights(
       );
       return {
         date,
-        systolic: survey ? (pressure?.systolic ?? null) : (history?.systolic ?? null),
-        diastolic: survey ? (pressure?.diastolic ?? null) : (history?.diastolic ?? null),
+        systolic: pressure?.systolic ?? null,
+        diastolic: pressure?.diastolic ?? null,
         glucose: survey ? survey.fastingGlucose : (history?.glucose ?? null),
         pulse: survey ? survey.restingHr : (history?.restingHr ?? null),
         sleep: survey

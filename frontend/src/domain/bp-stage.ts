@@ -51,6 +51,14 @@ export const bpStageSchema = z
     data_quality: z.enum(["ok", "partial", "insufficient", "out_of_range", "not_applicable"]),
     model_version: z.string().min(1),
     feature_version: z.string().min(1),
+    htn_screening: z
+      .object({
+        positive: z.boolean(),
+        probability: z.number().min(0).max(1),
+        threshold: z.number().min(0).max(1),
+        policy_id: z.string().min(1),
+      })
+      .optional(),
     problems: z.string().optional(),
     missing_inputs: z
       .array(
@@ -73,6 +81,15 @@ export const bpStageSchema = z
       (!usable && (v.stage_probs !== null || v.stage_top !== null || v.risk_level !== null))
     ) {
       ctx.addIssue({ code: "custom", message: "Invalid M1-S stage result" });
+    }
+    if (
+      v.htn_screening &&
+      (!usable ||
+        !v.stage_probs ||
+        Math.abs(v.htn_screening.probability - v.stage_probs.htn) > 0.00005001 ||
+        v.htn_screening.positive !== v.htn_screening.probability >= v.htn_screening.threshold)
+    ) {
+      ctx.addIssue({ code: "custom", message: "Invalid HTN screening result" });
     }
   });
 export type BpStageResult = z.infer<typeof bpStageSchema>;
@@ -133,6 +150,7 @@ export function healthSnapshotKey(
       educationYears: profile.educationYears ?? null,
       alcoholWeek: alcoholDays === 0 ? 0 : (profile.alcoholWeek ?? null),
       bingeMonthly: alcoholDays === 0 ? false : (profile.bingeMonthly ?? null),
+      currentSmoker: profile.smoking ?? null,
     },
     medications.filter((m) => m.active && ["hypertension", "고혈압"].includes(m.condition)).length >
       0,
@@ -141,17 +159,20 @@ export function healthSnapshotKey(
 }
 
 export function bpStagePresentation(result: BpStageResult) {
-  const label = result.stage_top
-    ? bpStageLabels[result.stage_top]
-    : {
-        insufficient: "추가 입력이 필요해요",
-        out_of_range: "입력값을 확인해 주세요",
-        not_applicable: "혈압 기록을 기준으로 확인해요",
-        ok: "결과 확인 중",
-        partial: "결과 확인 중",
-      }[result.data_quality];
-  const description =
-    result.data_quality === "not_applicable"
+  const label = result.htn_screening?.positive
+    ? "혈압 확인 권고"
+    : result.stage_top
+      ? bpStageLabels[result.stage_top]
+      : {
+          insufficient: "추가 입력이 필요해요",
+          out_of_range: "입력값을 확인해 주세요",
+          not_applicable: "혈압 기록을 기준으로 확인해요",
+          ok: "결과 확인 중",
+          partial: "결과 확인 중",
+        }[result.data_quality];
+  const description = result.htn_screening?.positive
+    ? "고혈압을 놓치지 않기 위한 선별 신호예요. 고혈압 판정이 아니며 실제 혈압을 측정해 확인해 주세요."
+    : result.data_quality === "not_applicable"
       ? "혈압을 입력했거나 혈압약을 복용 중이면 생활습관으로 혈압 단계를 추정하지 않아요."
       : result.data_quality === "insufficient"
         ? "분석에 필요한 입력 항목이 부족해요. ‘없음’과 0은 정상 응답이며, 모르는 값은 임의로 채우지 않아요."
@@ -159,6 +180,8 @@ export function bpStagePresentation(result: BpStageResult) {
           ? "이 모델은 만 19~90세, BMI 14~50, 주당 활동 2,000분 이내 입력을 사용해요."
           : result.data_quality === "partial"
             ? "일부 정보가 없어 모델의 결측 처리를 적용한 참고 결과예요."
-            : "생활습관·신체 정보로 추정한 참고 결과이며 진단이나 미래 발병 확률이 아니에요.";
+            : result.htn_screening
+              ? "선별 기준 미만이어도 고혈압이 없다는 뜻은 아니에요. 실제 혈압 기록과 함께 확인해 주세요."
+              : "생활습관·신체 정보로 추정한 참고 결과이며 진단이나 미래 발병 확률이 아니에요.";
   return { label, description, reasons: result.reason_codes.map((code) => reasons[code]) };
 }
