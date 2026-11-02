@@ -53,6 +53,7 @@ jobs:
       - name: Check deployment guards and native compatibility
         working-directory: .
         run: |
+          python3 -m unittest discover -s infra/aws/diet -p 'test_*.py'
           node --test deployment/*.test.mjs
           node deployment/release.mjs --validate-config
       - run: npm ci
