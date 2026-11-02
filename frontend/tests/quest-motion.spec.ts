@@ -127,10 +127,10 @@ test("charts and progress bars replay when returning to their tab", async ({ pag
   ).toBe(true);
   await page.getByRole("link", { name: "Dashboard", exact: true }).click();
   await page.getByRole("link", { name: "상세 건강 보고서 웹으로 보기" }).click();
-  await expect(page.locator(".impact-bars .metric-fill")).toHaveCount(6);
+  await expect(page.locator(".score-track .metric-fill")).toHaveCount(1);
   expect(
     await page
-      .locator(".impact-bars .metric-fill")
+      .locator(".score-track .metric-fill")
       .evaluateAll((elements) => elements.every((element) => element.getAnimations().length > 0)),
   ).toBe(true);
 });
