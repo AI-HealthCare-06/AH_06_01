@@ -44,7 +44,7 @@ test("mobile summary links to a separate report and keeps the selected period an
   await expect(page.locator(".risk-tile, .model-status, .ranker-status")).toHaveCount(0);
   await page.getByRole("link", { name: "상세 건강 보고서 웹으로 보기" }).click();
   await expect(page).toHaveURL(/\/dashboard\/report\?period=month&date=2026-10-10/);
-  await expect(page.locator(".bp-report, .health-trend")).toHaveCount(2);
+  await expect(page.locator(".report-records, .health-trend")).toHaveCount(2);
   await expect(page.locator(".dashboard-summary, .bottom-navigation")).toHaveCount(0);
   await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "year");
   await expect(page.locator(".health-score h3")).toContainText("YEARLY");

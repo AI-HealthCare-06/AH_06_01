@@ -115,6 +115,7 @@ test("mobile dashboard keeps the score visible and distinguishes actual inputs f
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/dashboard");
     await expect(page.locator(".score-number")).toHaveText("—");
+    await page.locator(".selected-day-details > summary").click();
     await expect(page.getByRole("heading", { name: "혈압 기록과 판정" })).toBeVisible();
     await expect(page.getByText("판정 결과 대기", { exact: true })).toBeVisible();
     expect(

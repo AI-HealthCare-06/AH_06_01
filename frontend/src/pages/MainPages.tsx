@@ -37,6 +37,7 @@ import { dailyCombatExperienceLimit, questExperience } from "../domain/experienc
 import { PixelDatePicker } from "../components/PixelDatePicker";
 import { DashboardMetricGrid } from "../components/DashboardInsights";
 import { HealthHistoryCharts } from "../components/HealthHistoryCharts";
+import { BloodPressureEntry } from "../components/BloodPressureEntry";
 import { useMedicationStore } from "../stores/medication-store";
 import { dailyDoses } from "../domain/medications";
 import { QuestCameraDialog } from "../components/QuestCameraDialog";
@@ -333,6 +334,9 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
   const [params, setParams] = useSearchParams();
   const initial = reportSelection(params, game.date);
   const registeredOn = useProfileStore((s) => s.registeredOn);
+  const profilePressure = useProfileStore((s) =>
+    s.hasProfileInput || s.hasBloodPressureInput ? s.profile.bloodPressure : null,
+  );
   const [period, setPeriod] = useState<HealthPeriod>(initial.period);
   const [dateChoice, setSelectedDate] = useState<string | null>(
     params.has("date") ? initial.date : null,
@@ -483,6 +487,14 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
                     {registeredOn ? `등록일 ${registeredOn.replaceAll("-", ".")}` : "등록일 미등록"}
                   </small>
                 </header>
+                <div className="bp-measurement">
+                  <div>
+                    <small>프로필 최근 혈압 · 측정일 미확인</small>
+                    <strong>{profilePressure ?? "입력 대기"}</strong>
+                    <span>mmHg · 날짜별 기록은 건강 서베이에 입력해요</span>
+                  </div>
+                  <BloodPressureEntry />
+                </div>
                 <DashboardMetricGrid
                   game={game}
                   period={period}
