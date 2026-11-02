@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "validated": false,
+  "reason": "awaiting-real-labelled-tool-images",
+  "labels": ["pill", "insulin_pen", "syringe"]
+}

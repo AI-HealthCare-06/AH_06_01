@@ -79,7 +79,7 @@ test("dashboard alone shows quest borders and selected dates/ranges drive the re
     "data-date",
     "2026-09-29",
   );
-  await expect(page.locator(".summary-score dl")).toContainText("4 / 4");
+  await expect(page.locator(".summary-score dl")).toContainText("10 / 16");
   await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "custom");
   await page.getByRole("button", { name: "조회 날짜 범위" }).click();
   await page

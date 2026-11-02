@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { authenticateQuest } from "./fixtures/quest-evidence";
+import { seedDashboardActivity } from "./helpers/dashboard";
 
 test("every quest shows its actual progress and completion updates the bar", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -148,6 +149,7 @@ test("reduced motion immediately shows final metrics and stops entry animations"
   );
   // Resume the test clock so the dashboard's async query notifications can run.
   await page.clock.resume();
+  await seedDashboardActivity(page);
   for (const route of ["home", "quests", "dashboard", "dashboard/report", "shop"]) {
     await page.goto(`/${route}`);
     await page.locator(".animated-number").first().waitFor();

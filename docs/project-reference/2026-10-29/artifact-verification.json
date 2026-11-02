@@ -1,0 +1,19 @@
+{
+  "openapiLocalRefs": 110,
+  "openapiOperations": 22,
+  "personaDays": 30,
+  "pdf": {
+    "REXRUN_API_명세서.pdf": {
+      "pages": 19,
+      "characters": 16093
+    },
+    "REXRUN_ERD.pdf": {
+      "pages": 9,
+      "characters": 10804
+    },
+    "REXRUN_와이어프레임.pdf": {
+      "pages": 8,
+      "characters": 5066
+    }
+  }
+}

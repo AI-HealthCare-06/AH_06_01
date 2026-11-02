@@ -110,7 +110,18 @@ export function CloudLoginPage({ signup = false }: { signup?: boolean }) {
             </button>
           ))}
         </div>
-        <button type="button" className="secondary-button" onClick={enterDemo}>
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => enterDemo("office-month-v1")}
+        >
+          사무직 A · 30일 데모 체험
+        </button>
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => enterDemo("htn-diabetes-v1")}
+        >
           고혈압·당뇨 데모 체험
         </button>
       </form>

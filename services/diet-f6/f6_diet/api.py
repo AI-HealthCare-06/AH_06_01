@@ -22,14 +22,13 @@ from fastapi.responses import JSONResponse
 from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import ValidationError
 
-from .catalog import CATALOG_VERSION, Catalog
+from .catalog import Catalog
 from .quota import MemoryQuota, QuotaExceeded, QuotaUnavailable
-from .schemas import VisionResult
+from .recognition import recognize_meal
 from .vision.base import (
     PromptTemplate,
     VisionProviderError,
     VisionRequest,
-    strip_code_fence,
 )
 from .vision.openai_provider import OpenAIVisionProvider
 
@@ -56,7 +55,7 @@ class Settings:
         values = dotenv_values(env_file) if env_file.is_file() else {}
 
         def option(name: str, default=""):
-            return values[name] if name in values else os.getenv(name, default)
+            return os.getenv(name, values.get(name, default))
 
         # An explicitly blank VISION_API_KEY keeps this service unconfigured.
         api_key = (
@@ -69,7 +68,7 @@ class Settings:
         return cls(
             local=option("F6_APP_ENV") == "local",
             api_key=api_key or "",
-            model=option("VISION_MODEL") or "gpt-4o-mini",
+            model=option("VISION_MODEL") or "gpt-4o",
             base_url=option("VISION_BASE_URL") or os.getenv("OPENAI_BASE_URL") or None,
             origins=[
                 value.strip()
@@ -85,7 +84,7 @@ class Settings:
 
 
 def normalize_image(data: bytes) -> bytes:
-    """Based on supplied F6 image_service: orient, strip EXIF, shrink to 1024, JPEG."""
+    """Orient and strip EXIF, retaining enough resolution for bounded dish crops."""
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
@@ -96,7 +95,7 @@ def normalize_image(data: bytes) -> bytes:
                 ):
                     raise ValueError("unsupported image")
                 image = ImageOps.exif_transpose(source).convert("RGB")
-                image.thumbnail((1024, 1024), Image.Resampling.LANCZOS)
+                image.thumbnail((2048, 2048), Image.Resampling.LANCZOS)
                 output = io.BytesIO()
                 image.save(output, format="JPEG", quality=85, optimize=True)
                 return output.getvalue()
@@ -116,7 +115,7 @@ def normalize_image(data: bytes) -> bytes:
 def create_app(settings: Settings | None = None, provider=None, quota=None):
     settings = settings or Settings.environment()
     catalog = Catalog()
-    prompt_path = ROOT / "prompts" / "diet_vision_v2.md"
+    prompt_path = ROOT / "prompts" / "diet_vision_v3.md"
     prompt = PromptTemplate.load(prompt_path)
     prompt_hash = hashlib.sha256(prompt_path.read_bytes()).hexdigest()
     quota = quota or MemoryQuota()
@@ -219,7 +218,9 @@ def create_app(settings: Settings | None = None, provider=None, quota=None):
             "available": engine is not None,
             "provider": "openai",
             "model": settings.model,
-            "catalog_version": CATALOG_VERSION,
+            "catalog_version": catalog.version,
+            "catalog_kind": catalog.metadata["kind"],
+            "catalog_source": catalog.metadata,
             "local": settings.local,
             "photo_retained": False,
         }
@@ -286,19 +287,20 @@ def create_app(settings: Settings | None = None, provider=None, quota=None):
         try:
             async with asyncio.timeout(settings.timeout):
                 async with slots:
-                    raw = await engine.recognize(
+                    result, passes, review_warnings, reviewed = await recognize_meal(
+                        engine,
                         VisionRequest(
                             image=image,
                             mime_type="image/jpeg",
                             system_prompt=prompt.system,
                             user_prompt=prompt.render_user(
-                                [food["name"] for food in catalog.foods]
+                                []  # Independent recognition; an arbitrary DB prefix would bias it toward rice dishes.
                             ),
-                        )
+                        ),
+                        catalog,
+                        deadline=started + settings.timeout - 1,
+                        disconnected=request.is_disconnected,
                     )
-            if len(raw) > 65536:
-                raise ValueError("Oversized model output")
-            result = VisionResult.model_validate_json(strip_code_fence(raw))
         except TimeoutError as error:
             raise HTTPException(
                 504,
@@ -342,9 +344,18 @@ def create_app(settings: Settings | None = None, provider=None, quota=None):
             "model": engine.model,
             "prompt_version": prompt.version,
             "prompt_sha256": prompt_hash,
-            "catalog_version": CATALOG_VERSION,
-            "catalog_kind": "development_sample",
-            "items": [catalog.item(food) for food in result.foods],
+            "catalog_version": catalog.version,
+            "catalog_kind": catalog.metadata["kind"],
+            "catalog_source": {
+                key: catalog.metadata[key]
+                for key in ("publisher", "source_url", "published_on")
+            },
+            "items": [
+                {**catalog.item(food), "crop_reviewed": index in reviewed}
+                for index, food in enumerate(result.foods)
+            ],
+            "analysis_passes": passes,
+            "warnings": review_warnings,
             "latency_ms": round((time.monotonic() - started) * 1000),
             "photo_retained": False,
         }

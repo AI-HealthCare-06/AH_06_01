@@ -45,6 +45,7 @@ import { QuestCalendar } from "../components/QuestCalendar";
 import { DashboardSummary } from "../components/DashboardSummary";
 import { DashboardReportShell } from "../components/DashboardReportShell";
 import { reportSelection } from "../services/health-history";
+import { healthScorePeriod, scoreChangeText } from "../domain/health-score";
 
 export function HomePage() {
   const location = useLocation();
@@ -340,6 +341,7 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
   const range = reportDateRange(period, selectedDate, rangeStart);
   const selectedQuests = questCountOn(game, selectedDate);
   const periodInfo = healthPeriods[period];
+  const score = healthScorePeriod(game, period, selectedDate, rangeStart);
   const { data, isError } = useQuery({
     queryKey: ["dashboard", "demo"],
     queryFn: ({ signal }) => dashboardService.getSnapshot(signal),
@@ -435,16 +437,14 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
                 <h3>{periodInfo.heading} HEALTH SCORE</h3>
                 <div className="score-value">
                   <strong className="score-number">
-                    <AnimatedNumber value={data.score} />
+                    {score.score === null ? "—" : <AnimatedNumber value={score.score} />}
                   </strong>
                   <span className="score-total">/ 100</span>
                 </div>
-                <b className="score-rank">RANK: A · 데모</b>
-                <p>
-                  {periodInfo.previous}보다 {periodInfo.delta}점 올랐어요!
-                </p>
+                <b className="score-rank">기록 기반 · {score.recordedDays}일</b>
+                <p>{scoreChangeText(score, periodInfo.previous)}</p>
                 <div className="score-track">
-                  <i className="metric-fill" style={{ width: `${data.score}%` }} />
+                  <i className="metric-fill" style={{ width: `${score.score ?? 0}%` }} />
                 </div>
               </div>
             </section>
@@ -454,11 +454,9 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
                   <PixelIcon name="document" />
                   REPORT
                 </h3>
-                <span>{periodInfo.label} 리포트 · 데모</span>
+                <span>{periodInfo.label} 리포트 · 저장된 기록</span>
               </header>
-              <p className="report-score-change">
-                {periodInfo.previous} 대비 건강 점수 <b>+{periodInfo.delta}점</b>
-              </p>
+              <p className="report-score-change">{scoreChangeText(score, periodInfo.previous)}</p>
               <dl>
                 <div>
                   <dt>{selectedDate === game.date ? "오늘 퀘스트" : "선택일 퀘스트"}</dt>
@@ -472,7 +470,10 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
                 </div>
               </dl>
 
-              <small>점수와 추이는 데모이며 퀘스트 현황은 이 기기의 실제 기록이에요.</small>
+              <small>
+                걸음·메인 퀘스트·수면 달성률을 같은 비중으로 평균한 실천 점수예요. 기록이 없는
+                항목은 제외해요.
+              </small>
               <BloodPressureReport
                 bp={data.bpResult}
                 model={data.modelResult}
@@ -500,7 +501,7 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
                   ))}
                 </div>
               </Link>
-              <HealthTrend period={period} today={selectedDate} from={range.start} />
+              <HealthTrend period={period} result={score} />
               {period === "week" && (
                 <section className="impact-card">
                   <header>
