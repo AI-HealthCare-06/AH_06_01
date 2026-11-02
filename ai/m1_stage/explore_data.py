@@ -1,7 +1,7 @@
 """
 [파일] explore_data.py
 [용도] 학습 데이터 탐색 그림·표. 단계별로 겹친 변수 히스토그램, 범주형 변수의 단계 구성비, 변수 간 Spearman 상관 행렬, 연령대×성별·BMI 구간별 단계 구성비를
-      reports/explore_<시각>/ 에 PNG 와 summary.md 로 만든다(학습 안 함).
+      reports/explore_<시각>/ 에 PNG·summary.md·표 csv(상관 행렬, 단계별 중앙값, 구성비)로 만든다(학습 안 함).
 [왜 필요한가] 단계 결정 규칙을 손보기 전에 어떤 변수가 단계와 함께 움직이는지, 단계 간 분포가 얼마나 겹치는지를 눈으로 확인하기 위해서다.
              라벨 규칙·범위·대치는 학습과 같은 함수(m1.pipeline.load_labeled, Preprocessor)를 쓴다.
 [쓰는 곳] 사용자가 직접 실행.
@@ -49,16 +49,48 @@ def _style(ax, title: str) -> None:
     ax.tick_params(colors=MUTED, labelsize=8)
 
 
+# 히스토그램 개별 규칙(사용자 요청 2026-10-23): alcohol_week 는 0(비음주) 제외·15잔/주 이상 한 구간으로 묶음, sbp/dbp 는 단계 구분 없이 전체 분포.
+HIST_RULES = {"alcohol_week": {"drop_zero": True, "cap": 15.0}, "__sbp": {"by_stage": False}, "__dbp": {"by_stage": False}}
+
+
+def _hist_values(df: pd.DataFrame, col: str) -> tuple[pd.Series, pd.Series]:
+    """HIST_RULES 적용 후의 값과 행 마스크. cap 이상은 cap 값으로 모아 마지막 구간에 들어간다."""
+    rule = HIST_RULES.get(col, {})
+    v = df[col]
+    mask = v.notna()
+    if rule.get("drop_zero"):
+        mask &= v > 0
+    v = v[mask]
+    if "cap" in rule:
+        v = v.clip(upper=rule["cap"])
+    return v, mask
+
+
 def fig_histograms(df: pd.DataFrame, path: Path) -> None:
     cols = [c for c in CONTINUOUS if c in df.columns and df[c].notna().any()]
     n = len(cols)
     fig, axes = plt.subplots(2, (n + 1) // 2, figsize=(3.6 * ((n + 1) // 2), 6.4), facecolor=SURFACE)
     for ax, col in zip(axes.ravel(), cols):
-        v = df[col].dropna()
-        bins = np.linspace(v.quantile(0.005), v.quantile(0.995), N_BINS + 1)
-        for k, s in enumerate(T.STAGES):
-            ax.hist(df.loc[df["stage"] == s, col].dropna(), bins=bins, density=True, histtype="step", linewidth=1.5, color=STAGE_COLORS[k], label=s)
-        _style(ax, LABELS.get(col, col))
+        rule = HIST_RULES.get(col, {})
+        v, mask = _hist_values(df, col)
+        if "cap" in rule:
+            bins = np.arange(0.0, rule["cap"] + 2.0, 1.0)  # 마지막 구간 [cap, cap+1) = cap 이상 전부
+        else:
+            bins = np.linspace(v.quantile(0.005), v.quantile(0.995), N_BINS + 1)
+        title = LABELS.get(col, col)
+        if rule.get("by_stage", True):
+            stage = df.loc[mask, "stage"]
+            for k, s in enumerate(T.STAGES):
+                ax.hist(v[stage == s], bins=bins, density=True, histtype="step", linewidth=1.5, color=STAGE_COLORS[k], label=s)
+        else:
+            ax.hist(v, bins=bins, density=True, color=STAGE_COLORS[2], edgecolor=SURFACE, linewidth=0.6)
+            title += " / all stages"
+        if "cap" in rule:
+            cap = rule["cap"]
+            ticks = [t for t in range(0, int(cap), 5)]  # cap 자리는 'cap+' 라벨만
+            ax.set_xticks(ticks + [cap + 0.5], [str(t) for t in ticks] + [f"{cap:g}+"])
+            title += f" (0 excluded, n={len(v)})"
+        _style(ax, title)
         ax.set_ylabel("density", color=MUTED, fontsize=8)
     for ax in axes.ravel()[n:]:
         ax.set_visible(False)
@@ -185,8 +217,16 @@ def main(argv=None) -> Path:
     c = corr["stage_index"].drop("stage_index").rename(index=LABELS)
     L.append(md_table(c.reindex(c.abs().sort_values(ascending=False).index).reset_index().rename(columns={"index": "variable", "stage_index": "spearman_with_stage"}), nd=3))
     L.append("\n__sbp/__dbp 는 라벨을 만든 측정 혈압이며 피처가 아니다. 상관은 선형·단조 관계의 세기만 보여주고 인과를 뜻하지 않는다.\n")
+    # 표 원본 csv (analysis_pack.py 가 엑셀로 모은다)
+    corr.rename(index=LABELS, columns=LABELS).to_csv(out / "correlation_matrix.csv")
+    med.to_csv(out / "stage_medians.csv", index=False)
+    cat_cols = [c for c in CATEGORICAL if c in df.columns]
+    cat = pd.concat([share_table(df, col).reset_index().rename(columns={col: "level"}).assign(variable=col) for col in cat_cols])
+    cat[["variable", "level", *T.STAGES, "n"]].to_csv(out / "category_shares.csv", index=False)
+    grp = pd.concat([t.reset_index().rename(columns={t.index.name: "level"}).assign(group=name) for name, t in tables.items()])
+    grp[["group", "level", *T.STAGES, "n"]].to_csv(out / "group_shares.csv", index=False)
     (out / "summary.md").write_text("\n".join(L) + "\n", encoding="utf-8")
-    print(f"완료: {out}/ (그림 4개, summary.md)")
+    print(f"완료: {out}/ (그림 4개, summary.md, csv 4개)")
     return out
 
 
