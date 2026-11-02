@@ -167,6 +167,30 @@ export function DashboardInsightCharts(props: Props) {
               ? `${selected.date} · ${selected.completed ?? "—"}/4개 · 수면 ${format(selected.sleep, 1)}시간 · ${format(selected.steps)}보`
               : "기록을 쌓으면 실천 흐름이 보여요."}
         </p>
+        <dl className="activity-records" aria-label="선택 기간 활동과 좌식 기록">
+          {[
+            {
+              label: "활동 시간",
+              values: data.rows.map((r) => r.active),
+              unit: "분/일",
+              digits: 0,
+            },
+            {
+              label: "좌식 시간",
+              values: data.rows.map((r) => r.sedentary),
+              unit: "시간/일",
+              digits: 1,
+            },
+          ].map(({ label, values, unit, digits }) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>
+                {format(mean(values), digits)} <small>{unit}</small>
+              </dd>
+              <small>기록 {values.filter((v) => v !== null).length}일 평균</small>
+            </div>
+          ))}
+        </dl>
       </section>
       <section className="sleep-rhythm cream-card" aria-label="수면 리듬">
         <header className="insight-heading">

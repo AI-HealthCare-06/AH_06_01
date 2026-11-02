@@ -154,7 +154,7 @@ test("compact report controls, risk ordering and Galaxy-shaped preview fit narro
       await page.locator(".mobile-screen").evaluate((el) => el.getBoundingClientRect().height),
     ).toBe(844);
     await page.getByRole("link", { name: "상세 건강 보고서 웹으로 보기" }).click();
-    const risk = (await page.locator(".disease-card").boundingBox())!;
+    const risk = (await page.locator(".report-records").boundingBox())!;
     const trend = (await page.locator(".health-trend").boundingBox())!;
     expect(risk.y).toBeLessThan(trend.y);
     await expectNoHorizontalOverflow(page);

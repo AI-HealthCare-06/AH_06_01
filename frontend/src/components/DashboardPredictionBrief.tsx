@@ -38,7 +38,7 @@ export function DashboardPredictionBrief() {
     <section className="dashboard-prediction" aria-label="최종 분석 요약">
       <div className="prediction-meta">
         <span>최종 분석 요약</span>
-        <small>{analysis ? `${analysis.as_of} 기준` : "M1 · M2"}</small>
+        <small>{analysis ? `최신 입력 ${analysis.as_of}` : "M1 · M2"}</small>
       </div>
       <p className="prediction-sentence" role="status">
         {headline}

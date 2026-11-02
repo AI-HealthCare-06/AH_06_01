@@ -128,6 +128,7 @@ test("final review saves daily values once, allows corrections and reflects the 
   await page.getByRole("button", { name: "오늘 기록 수정", exact: true }).click();
   await page.getByRole("link", { name: "대시보드에서 오늘 기록 보기 ›", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.locator(".selected-day-details > summary").click();
   const summary = page.getByRole("region", { name: "혈압 요약", exact: true });
   await expect(summary).toContainText("142 / 90");
   await expect(summary).toContainText("78");
@@ -197,6 +198,7 @@ test("dashboard retains its filter and scroll position when its survey modal clo
   await page.goto("/dashboard?period=week");
   await pause(page);
   const trigger = page.getByRole("link", { name: "오늘 건강 서베이", exact: true });
+  await page.locator(".selected-day-details > summary").click();
   await trigger.scrollIntoViewIfNeeded();
   const before = await page.evaluate(() => scrollY);
   await trigger.click();

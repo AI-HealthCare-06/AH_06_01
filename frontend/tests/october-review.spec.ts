@@ -194,11 +194,7 @@ test("dashboard filters share the range below the week, range picker commits bot
       19.8,
       1,
     );
-    for (const selector of [
-      ".trend-column strong",
-      ".impact-card .risk-change small",
-      ".impact-card .chart-axis",
-    ]) {
+    for (const selector of [".trend-column strong"]) {
       expect(
         await page
           .locator(selector)

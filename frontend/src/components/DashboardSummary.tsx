@@ -147,70 +147,72 @@ export function DashboardSummary({
         <DashboardTrends game={game} date={date} period={period} score={score} />
         <DashboardInsightCharts game={game} period={period} date={date} from={from} />
 
-        <section
-          className={`summary-pressure stitch-analysis cream-card ${pressure.tone}`}
-          aria-label="혈압 요약"
-        >
-          <header className="stitch-section-heading">
-            <div>
-              <h3>
-                <PixelIcon name="document" />
-                혈압 기록과 판정
-              </h3>
-              <p>내 건강 기록 · 생활습관 참고 분석</p>
-            </div>
-            <Link
-              className="blood-pressure-entry-button"
-              to="/daily-survey"
-              state={{ surveyBackground: location }}
-            >
-              오늘 건강 서베이
-            </Link>
-          </header>
-          <div className="stitch-health-grid">
-            <div>
-              <small>선택일 혈압</small>
-              <strong>
-                {recordedPressure
-                  ? `${recordedPressure.systolic} / ${recordedPressure.diastolic}`
-                  : survey
-                    ? "미측정"
-                    : current && (hasProfileInput || hasBloodPressureInput)
-                      ? (profile.bloodPressure ?? "모름")
-                      : "기록 없음"}
-              </strong>
-              <small>
-                {survey || recordedPressure ? `${date} · mmHg` : "프로필 최근 값 · 측정일 미확인"}
-              </small>
-            </div>
-            <div>
-              <small>안정 시 맥박</small>
-              <strong>
-                {survey
-                  ? (survey.restingHr ?? "미측정")
-                  : current && hasProfileInput
-                    ? (profile.restingHeartRate ?? "모름")
-                    : "기록 없음"}
-              </strong>
-              <small>{survey ? "선택일 기록 · 회/분" : "프로필 · 회/분"}</small>
-            </div>
-            <div>
-              <small>수면 시간</small>
-              <strong>{sleep === null ? "기록 대기" : sleep.toFixed(1)}</strong>
-              <small>{sleep === null ? "선택일 수면" : "시간 · 선택일 기록"}</small>
-              {game.sleepExperience[date] && (
-                <small aria-label="선택일 수면 추가 EXP">
-                  수면 보너스 +{game.sleepExperience[date].experience} EXP
+        <details className="selected-day-details cream-card">
+          <summary>선택일 기록과 서베이 · {date}</summary>
+          <section
+            className={`summary-pressure stitch-analysis cream-card ${pressure.tone}`}
+            aria-label="혈압 요약"
+          >
+            <header className="stitch-section-heading">
+              <div>
+                <h3>
+                  <PixelIcon name="document" />
+                  혈압 기록과 판정
+                </h3>
+                <p>내 건강 기록 · 생활습관 참고 분석</p>
+              </div>
+              <Link
+                className="blood-pressure-entry-button"
+                to="/daily-survey"
+                state={{ surveyBackground: location }}
+              >
+                오늘 건강 서베이
+              </Link>
+            </header>
+            <div className="stitch-health-grid">
+              <div>
+                <small>선택일 혈압</small>
+                <strong>
+                  {recordedPressure
+                    ? `${recordedPressure.systolic} / ${recordedPressure.diastolic}`
+                    : survey
+                      ? "미측정"
+                      : current && (hasProfileInput || hasBloodPressureInput)
+                        ? (profile.bloodPressure ?? "모름")
+                        : "기록 없음"}
+                </strong>
+                <small>
+                  {survey || recordedPressure ? `${date} · mmHg` : "프로필 최근 값 · 측정일 미확인"}
                 </small>
-              )}
+              </div>
+              <div>
+                <small>안정 시 맥박</small>
+                <strong>
+                  {survey
+                    ? (survey.restingHr ?? "미측정")
+                    : current && hasProfileInput
+                      ? (profile.restingHeartRate ?? "모름")
+                      : "기록 없음"}
+                </strong>
+                <small>{survey ? "선택일 기록 · 회/분" : "프로필 · 회/분"}</small>
+              </div>
+              <div>
+                <small>수면 시간</small>
+                <strong>{sleep === null ? "기록 대기" : sleep.toFixed(1)}</strong>
+                <small>{sleep === null ? "선택일 수면" : "시간 · 선택일 기록"}</small>
+                {game.sleepExperience[date] && (
+                  <small aria-label="선택일 수면 추가 EXP">
+                    수면 보너스 +{game.sleepExperience[date].experience} EXP
+                  </small>
+                )}
+              </div>
             </div>
-          </div>
-          <p className="summary-pressure-status">
-            {survey ? "날짜별 직접 입력 기록 · 모델 참고 분석과 함께 확인해요." : pressure.label}
-          </p>
-          {pressure.tone === "red" && <small>{pressure.description}</small>}
-        </section>
-
+            <p className="summary-pressure-status">
+              {survey ? "날짜별 직접 입력 기록 · 모델 참고 분석과 함께 확인해요." : pressure.label}
+            </p>
+            {pressure.tone === "red" && <small>{pressure.description}</small>}
+          </section>
+        </details>
         <div className="stitch-quick-actions">
           <Link className="dashboard-quest-link" to="/quests">
             퀘스트 <PixelIcon name="quests" />

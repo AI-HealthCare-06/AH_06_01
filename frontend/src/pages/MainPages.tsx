@@ -12,7 +12,6 @@ import { DinoRadarCard } from "../components/DinoRadarCard";
 import { DinosaurArt } from "../components/DinosaurArt";
 import { AccessoryCatalog } from "../components/AccessoryCatalog";
 import { CharacterVault } from "../components/CharacterVault";
-import { RiskChange } from "../components/RiskChange";
 import { AnimatedNumber } from "../components/AnimatedNumber";
 import { QuestProgress, PixelCheckbox } from "../components/QuestProgress";
 import { useNotice } from "../components/NoticeProvider";
@@ -36,7 +35,8 @@ import { useProfileStore } from "../stores/profile-store";
 import { GameWallet, GoldEffects } from "../components/GameWallet";
 import { dailyCombatExperienceLimit, questExperience } from "../domain/experience";
 import { PixelDatePicker } from "../components/PixelDatePicker";
-import { BloodPressureReport } from "../components/BloodPressureReport";
+import { DashboardMetricGrid } from "../components/DashboardInsights";
+import { HealthHistoryCharts } from "../components/HealthHistoryCharts";
 import { useMedicationStore } from "../stores/medication-store";
 import { dailyDoses } from "../domain/medications";
 import { QuestCameraDialog } from "../components/QuestCameraDialog";
@@ -476,72 +476,27 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
                 걸음·메인 퀘스트·수면 달성률을 같은 비중으로 평균한 실천 점수예요. 기록이 없는
                 항목은 제외해요.
               </small>
-              <BloodPressureReport
-                bp={data.bpResult}
-                model={data.modelResult}
-                ranker={data.rankerResult}
-              />
-              <Link to="/risk" className="disease-card" aria-label="질환 위험도 상세 보기">
+              <section className="report-records" aria-label="선택 기간 건강 기록">
                 <header>
-                  <h3>질환 위험도 · 데모</h3>
-                  <small>
+                  <h3>선택 기간 건강 기록</h3>
+                  <small className="report-registered-on">
                     {registeredOn ? `등록일 ${registeredOn.replaceAll("-", ".")}` : "등록일 미등록"}
                   </small>
                 </header>
-                <div className="risk-grid">
-                  {data.risks.map((r) => (
-                    <div className={`risk-tile ${r.tone}`} key={r.name}>
-                      <h4>{r.name}</h4>
-                      <strong>
-                        <AnimatedNumber value={r.current} />%
-                      </strong>
-                      <div className="risk-track">
-                        <i className="metric-fill" style={{ width: `${r.current}%` }} />
-                      </div>
-                      <small>{r.status}</small>
-                    </div>
-                  ))}
-                </div>
-              </Link>
+                <DashboardMetricGrid
+                  game={game}
+                  period={period}
+                  date={selectedDate}
+                  from={rangeStart}
+                />
+                <HealthHistoryCharts
+                  game={game}
+                  period={period}
+                  date={selectedDate}
+                  from={rangeStart}
+                />
+              </section>
               <HealthTrend period={period} result={score} />
-              {period === "week" && (
-                <section className="impact-card">
-                  <header>
-                    <h3>퀘스트 효과 예측</h3>
-                  </header>
-                  <div className="chart-legend">
-                    <span>현재</span>
-                    <span>완료 후</span>
-                  </div>
-                  <div className="impact-rows">
-                    {data.risks.map((r) => (
-                      <div className="impact-row" key={r.name}>
-                        <span>{r.name}</span>
-                        <div className="impact-bars">
-                          <div>
-                            <i className="metric-fill" style={{ width: `${r.current * 2}%` }} />
-                          </div>
-                          <div>
-                            <i className="metric-fill" style={{ width: `${r.projected * 2}%` }} />
-                          </div>
-                        </div>
-                        <RiskChange
-                          current={r.current}
-                          projected={r.projected}
-                          tone={r.tone}
-                          projectedTone={r.projectedTone}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="chart-axis">
-                    <span>0</span>
-                    <span>25</span>
-                    <span>50%</span>
-                  </div>
-                  <p className="prediction-note">데모 예상 수치로, 실제 결과와 다를 수 있어요.</p>
-                </section>
-              )}
             </div>
           </section>
         </div>

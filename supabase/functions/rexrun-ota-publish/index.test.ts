@@ -107,7 +107,7 @@ Deno.test("publisher rejects a release intended for another native APK", async (
   );
 });
 
-for (const nativeVersion of ["1.1.0", "1.2.0", "1.2.1", "1.3.0", "1.4.0", "1.5.0", "1.5.1", "1.5.2"]) {
+for (const nativeVersion of ["1.1.0", "1.2.0", "1.2.1", "1.3.0", "1.4.0", "1.5.0", "1.5.1", "1.5.2", "1.7.0"]) {
   Deno.test(`publisher accepts the explicitly supported ${nativeVersion} channel before storage setup`, async () => {
     const hash = "a".repeat(64);
     const release = await signed({
@@ -118,6 +118,6 @@ for (const nativeVersion of ["1.1.0", "1.2.0", "1.2.1", "1.3.0", "1.4.0", "1.5.0
     });
     const request = await signed({purpose:"rexrun-ota-publish", action:"prepare", issuedAt:Date.now(), release, hashes:[]});
     // Valid signatures/versions pass validation. No storage credentials are supplied by this test.
-    equal((await post(request, createPublisherHandler(config, ["1.1.0", "1.2.0", "1.2.1", "1.3.0", "1.4.0", "1.5.0", "1.5.1", "1.5.2"]))).status, 503);
+    equal((await post(request, createPublisherHandler(config, ["1.1.0", "1.2.0", "1.2.1", "1.3.0", "1.4.0", "1.5.0", "1.5.1", "1.5.2", "1.7.0"]))).status, 503);
   });
 }

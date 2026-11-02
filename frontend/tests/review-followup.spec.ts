@@ -215,10 +215,12 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
   await page.getByRole("button", { name: "공룡 깨우기" }).click();
   await page.goto("/dashboard");
   await page.getByRole("link", { name: "상세 건강 보고서 웹으로 보기" }).click();
-  await expect(page.locator(".disease-card header small")).toHaveText("등록일 2026.09.29");
+  await expect(page.locator(".report-registered-on")).toHaveText("등록일 2026.09.29");
   await expect(page.locator(".growth-insight")).toHaveCount(0);
-  await expect(page.locator(".impact-card h3")).toHaveText("퀘스트 효과 예측");
-  await expect(page.locator(".prediction-note")).toContainText("실제 결과와 다를 수");
+  await expect(page.locator(".impact-card,.risk-grid")).toHaveCount(0);
+  await expect(
+    page.getByRole("region", { name: "선택 기간 건강 기록", exact: true }),
+  ).toBeVisible();
   await expect(page.locator(".health-growth-card .health-score")).toHaveCount(1);
   await expect(page.locator(".health-growth-card .growth-insight")).toHaveCount(0);
   await expect(page.locator(".dashboard-period-select [role=option]")).toHaveText([
@@ -246,7 +248,9 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
   await expect(page.locator(".trend-column")).toHaveCount(9);
   await expect(page.locator(".health-trend")).toContainText("기록 없음");
   await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "week");
-  await expect(page.locator(".impact-card")).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "선택 기간 핵심 지표", exact: true }),
+  ).toBeVisible();
 });
 
 test("account controls, top notices and step guidance keep dialogs separate", async ({ page }) => {

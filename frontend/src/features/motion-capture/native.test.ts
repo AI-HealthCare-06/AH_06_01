@@ -1,5 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
-import { NativeObservationAdapter, nativeFrameSchema, createNativeSession } from "./native";
+import { Capacitor } from "@capacitor/core";
+import {
+  NativeObservationAdapter,
+  nativeFrameSchema,
+  createNativeSession,
+  nativeMotionAvailable,
+} from "./native";
 
 const { handlers, api, removed } = vi.hoisted(() => {
   const handlers = new Map<string, (event: unknown) => void>();
@@ -50,6 +56,12 @@ function frame(timestamp = 1000) {
   });
 }
 describe("native camera bridge", () => {
+  it("keeps older APKs without MotionVision on the web camera path", () => {
+    const available = vi.spyOn(Capacitor, "isPluginAvailable").mockReturnValueOnce(false);
+    expect(nativeMotionAvailable()).toBe(false);
+    available.mockRestore();
+    expect(nativeMotionAvailable()).toBe(true);
+  });
   it("aligns monotonic clocks and rejects duplicate or out-of-order frames", () => {
     const adapter = new NativeObservationAdapter("water");
     const first = adapter.update(frame(), 10000)!;
