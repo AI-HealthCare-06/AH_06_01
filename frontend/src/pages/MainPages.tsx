@@ -43,6 +43,7 @@ import { QuestCameraDialog } from "../components/QuestCameraDialog";
 import { QuestInfoDialog } from "../components/QuestInfoDialog";
 import { QuestCalendar } from "../components/QuestCalendar";
 import { DashboardSummary } from "../components/DashboardSummary";
+import { DashboardPredictionBrief } from "../components/DashboardPredictionBrief";
 import { DashboardReportShell } from "../components/DashboardReportShell";
 import { reportSelection } from "../services/health-history";
 import { healthScorePeriod, scoreChangeText } from "../domain/health-score";
@@ -365,6 +366,7 @@ export function DashboardPage({ detailed = false }: { detailed?: boolean }) {
       onSelectDate={(date) => selectReportDates(date)}
       showCalendar={false}
     >
+      <DashboardPredictionBrief />
       <div className="dashboard-heading">
         <PageHeading
           title="HEALTH DASHBOARD"

@@ -164,7 +164,7 @@ def create_handler(call=supabase_call, get_predictor=predictor):
                     demo_request = json.loads(demo_body)
                 except (ValueError, TypeError):
                     demo_request = None
-                if any(demo_request == {"demo_persona": persona_id} for persona_id in ("htn-diabetes-v1", "office-month-v1")):
+                if any(demo_request == {"demo_persona": persona_id} for persona_id in ("htn-diabetes-v1", "office-month-v1", "studio-quarter-v1")):
                     try:
                         from quest_analysis import demo_remote, analysis_response
                         remote = demo_remote(persona_id=demo_request["demo_persona"])

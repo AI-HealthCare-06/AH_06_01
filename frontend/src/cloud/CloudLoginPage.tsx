@@ -113,6 +113,13 @@ export function CloudLoginPage({ signup = false }: { signup?: boolean }) {
         <button
           type="button"
           className="secondary-button"
+          onClick={() => enterDemo("studio-quarter-v1")}
+        >
+          시연용 민준 · 90일 데모
+        </button>
+        <button
+          type="button"
+          className="secondary-button"
           onClick={() => enterDemo("office-month-v1")}
         >
           사무직 A · 30일 데모 체험

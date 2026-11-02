@@ -10,7 +10,7 @@ def today_kst():
 
 def demo_remote(as_of=None, persona_id="htn-diabetes-v1"):
     current = as_of or today_kst()
-    files = {"htn-diabetes-v1": "demo-persona.json", "office-month-v1": "demo-persona-office-month.json"}
+    files = {"htn-diabetes-v1": "demo-persona.json", "office-month-v1": "demo-persona-office-month.json", "studio-quarter-v1": "demo-persona-quarter.json"}
     if persona_id not in files:
         raise ValueError("Unknown fixed demo persona")
     fixture_path = Path(__file__).with_name(files[persona_id])

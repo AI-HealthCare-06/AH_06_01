@@ -71,6 +71,7 @@ test("demo week connects survey data, actual rewards, dashboard analysis and cur
     daytimeSleepinessScore: 5,
   });
   const reward = first.sleepExperience[today].experience;
+  await page.getByText("모델 근거와 해석 보기", { exact: true }).click();
   const analysis = page.getByRole("region", { name: "M1·M2 참고 분석" });
   await expect(analysis).toContainText(`일일 서베이 ${today} 반영`, { timeout: 30_000 });
   await expect(analysis).toContainText("확인 항목 1 / 10");

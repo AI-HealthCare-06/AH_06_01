@@ -7,7 +7,7 @@ import { useGameStore } from "../stores/game-store";
 import { useProfileStore } from "../stores/profile-store";
 import { mainQuestIds } from "../domain/game";
 import { bloodPressurePresentation } from "../domain/risk-presentation";
-import { QuestModelSummary } from "./QuestModelSummary";
+import { DashboardMetricGrid, DashboardInsightCharts } from "./DashboardInsights";
 import { HealthHistoryCharts } from "./HealthHistoryCharts";
 import { healthPeriods, type HealthPeriod } from "../services/health-history";
 import type { DashboardSnapshot } from "../services/dashboard-service";
@@ -62,6 +62,7 @@ export function DashboardSummary({
   return (
     <div className="dashboard-period-content" tabIndex={0} aria-label="대시보드 요약 스크롤">
       <section className="dashboard-summary" aria-label="유저 건강 요약">
+        <DashboardMetricGrid game={game} period={period} date={date} from={from} />
         <section
           className="health-score summary-score stitch-health-hero"
           aria-label="유저 건강 점수"
@@ -144,6 +145,7 @@ export function DashboardSummary({
 
         <HealthHistoryCharts game={game} date={date} period={period} from={from} />
         <DashboardTrends game={game} date={date} period={period} score={score} />
+        <DashboardInsightCharts game={game} period={period} date={date} from={from} />
 
         <section
           className={`summary-pressure stitch-analysis cream-card ${pressure.tone}`}
@@ -207,7 +209,6 @@ export function DashboardSummary({
             {survey ? "날짜별 직접 입력 기록 · 모델 참고 분석과 함께 확인해요." : pressure.label}
           </p>
           {pressure.tone === "red" && <small>{pressure.description}</small>}
-          <QuestModelSummary />
         </section>
 
         <div className="stitch-quick-actions">

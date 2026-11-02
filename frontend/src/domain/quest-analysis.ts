@@ -54,8 +54,22 @@ export const questAnalysisSchema = z.object({
   source: z.enum(["synthetic-demo", "saved-profile"]),
   as_of: z.string(),
   daily_survey_date: z.string().nullable().optional(),
+  provenance: z
+    .object({
+      kind: z.literal("recorded-demo"),
+      computedOn: z.string(),
+      fixtureSha256: z.string(),
+      modelSha256: z.string(),
+    })
+    .optional(),
 });
 export type QuestAnalysis = z.infer<typeof questAnalysisSchema>;
+export const analysisSourceLabel = (analysis: QuestAnalysis) =>
+  analysis.provenance?.kind === "recorded-demo"
+    ? "합성 입력 · 모델 결과 재생"
+    : analysis.source === "synthetic-demo"
+      ? "합성 입력 · 실제 호출"
+      : "모델 응답";
 export type RankedQuest = {
   quest: QuestId;
   priority: number;

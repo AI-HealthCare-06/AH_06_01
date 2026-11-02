@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
-import { calendarWeek } from "../domain/calendar";
-import { questCountOn, type GameState } from "../domain/game";
+import type { GameState } from "../domain/game";
+import { dashboardInsights, mean } from "../domain/dashboard-insights";
 import type { HealthPeriod } from "../services/health-history";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { HealthTrend } from "./HealthTrend";
@@ -23,25 +23,27 @@ export function DashboardTrends({
 }) {
   const [metric, setMetric] = useState<Metric>("score");
   const id = useId();
-  const days = calendarWeek(date);
+  const rows = dashboardInsights(game, [], period, date, score.range.start).rows;
+  const days = score.points.map((point) => ({
+    date: point.start,
+    label: point.label,
+    end: point.end,
+  }));
+  const field = metric === "quests" ? "completed" : metric === "steps" ? "steps" : "sleep";
   const points = days.map((day) => {
-    if (day.date > game.date) return null;
-    if (metric === "quests")
-      return day.date === game.date ||
-        Object.hasOwn(game.questHistory, day.date) ||
-        game.completedDates.includes(day.date)
-        ? questCountOn(game, day.date)
-        : null;
-    if (metric === "steps")
-      return game.steps?.date === day.date
-        ? game.steps.count
-        : (game.healthHistory[day.date]?.steps ?? null);
-    return day.date === game.date && !game.sampleDay
-      ? game.sleepHours
-      : (game.healthHistory[day.date]?.sleepHours ?? null);
+    const v = mean(
+      rows.filter((r) => r.date >= day.date && r.date <= day.end).map((r) => r[field]),
+    );
+    return v === null ? null : Number(v.toFixed(metric === "steps" ? 0 : 1));
   });
   const values = points.filter((v): v is number => v !== null);
-  const value = metric === "quests" ? values.reduce((sum, v) => sum + v, 0) : values.at(-1);
+  const recorded = rows.map((r) => r[field]).filter((v): v is number => v !== null);
+  const value =
+    metric === "quests"
+      ? recorded.length
+        ? recorded.reduce((a, b) => a + b, 0)
+        : null
+      : mean(recorded);
   const ceiling = Math.max(metric === "quests" ? 4 : metric === "steps" ? 6000 : 7, ...values);
   const unit = metric === "quests" ? "개" : metric === "steps" ? "보" : "시간";
   return (
@@ -94,15 +96,19 @@ export function DashboardTrends({
           <>
             <div className="stitch-metric-value">
               <div>
-                <small>{metric === "quests" ? "선택 주 완료 합계" : "선택 주의 최근 기록"}</small>
+                <small>{metric === "quests" ? "선택 기간 완료 합계" : "선택 기간 기록 평균"}</small>
                 <strong>
-                  {value === undefined ? "—" : value.toLocaleString("ko-KR")}
+                  {value === null
+                    ? "—"
+                    : value.toLocaleString("ko-KR", {
+                        maximumFractionDigits: metric === "sleep" ? 1 : 0,
+                      })}
                   <span>{unit}</span>
                 </strong>
               </div>
               <small>
                 {days[0].date.slice(5).replace("-", ".")} ~{" "}
-                {days[6].date.slice(5).replace("-", ".")}
+                {score.range.end.slice(5).replace("-", ".")}
               </small>
             </div>
             <div
@@ -131,7 +137,7 @@ export function DashboardTrends({
             </div>
             <p className="stitch-chart-note">
               {values.length
-                ? "저장된 값만 표시해요. —는 기록이 없는 날이에요."
+                ? "막대는 구간별 일평균이에요. —는 기록이 없는 구간이에요."
                 : "아직 연결된 기록이 없어요. 기록하면 여기에 표시돼요."}
             </p>
           </>

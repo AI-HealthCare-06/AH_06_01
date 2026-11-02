@@ -1,5 +1,5 @@
 import { useQuestAnalysis } from "../services/useQuestAnalysis";
-import { m2StateLabels, m2StatusLabels } from "../domain/quest-analysis";
+import { m2StateLabels, m2StatusLabels, analysisSourceLabel } from "../domain/quest-analysis";
 import { bpStagePresentation } from "../domain/bp-stage";
 export function QuestModelSummary() {
   const query = useQuestAnalysis();
@@ -36,9 +36,7 @@ export function QuestModelSummary() {
     <section className="quest-model-summary cream-card" aria-label="M1·M2 참고 분석">
       <header className="stitch-section-heading">
         <h3>M1 · M2 참고 분석</h3>
-        <span className="pixel-tag">
-          {analysis.source === "synthetic-demo" ? "합성 입력 · 실제 호출" : "모델 응답"}
-        </span>
+        <span className="pixel-tag">{analysisSourceLabel(analysis)}</span>
       </header>
       <p className="analysis-as-of">
         기준 {analysis.as_of} · 전날 기록 {analysis.previous_day.date}

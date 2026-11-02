@@ -7,6 +7,8 @@ import { localDate } from "../domain/calendar";
 import { useGameStore } from "../stores/game-store";
 import { useProfileStore } from "../stores/profile-store";
 import { useMedicationStore } from "../stores/medication-store";
+import { dietOwner, useDietStore } from "../stores/diet-store";
+import { mealRecordSchema } from "../domain/diet";
 
 export function initializeDemoPersona() {
   if (!demoMode) return;
@@ -33,9 +35,54 @@ export function initializeDemoPersona() {
           ["demo-htn", "13:00"],
           ["demo-insulin", "08:00"],
         ]
-      : []
+      : fixture.id === "studio-quarter-v1" && fixture.records.at(-1)?.completed.includes("medicine")
+        ? medications.flatMap((m) => m.times.map((time) => [m.id, time]))
+        : []
     ).map(([id, time]) => [doseKey(today, id, time), true]),
   );
   useMedicationStore.getState().restore({ medications, taken, notificationsEnabled: false });
+  if (fixture.id === "studio-quarter-v1") {
+    const owner = dietOwner();
+    if (owner) {
+      const records = fixture.records
+        .flatMap((row, index) => {
+          const day = new Date(today + "T12:00:00");
+          day.setDate(day.getDate() - (fixture.records.length - 1 - index));
+          const date = localDate(day);
+          return (row.meals ?? []).map((meal, n) =>
+            mealRecordSchema.parse({
+              id: `quarter-${date}-${n}`,
+              date,
+              slot: meal.slot,
+              source: "manual",
+              catalogVersion: "f6-dev-sample-v1",
+              model: null,
+              createdAt: day.toISOString(),
+              items: [
+                {
+                  id: `quarter-item-${index}-${n}`,
+                  name: meal.name,
+                  nameInput: meal.name,
+                  foodCode: null,
+                  grams: String(meal.grams),
+                  estimatedGrams: null,
+                  confidence: null,
+                  portionHint: "시연용 합성 영양 기록",
+                  isSoup: false,
+                  suggestedCode: null,
+                  nutrients: meal.nutrients,
+                },
+              ],
+            }),
+          );
+        })
+        .reverse();
+      localStorage.setItem(
+        appStorageKey("rexrun-diet-records-v1") + ":" + owner,
+        JSON.stringify(records),
+      );
+      useDietStore.getState().refresh();
+    }
+  }
   localStorage.setItem(marker, revision);
 }

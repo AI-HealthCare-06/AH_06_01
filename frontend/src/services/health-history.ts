@@ -11,6 +11,7 @@ export const healthPeriods = {
     heading: "MONTHLY",
     previous: "지난달",
   },
+  quarter: { label: "3개월", heading: "90-DAY", previous: "이전 90일" },
   year: {
     label: "연간",
     heading: "YEARLY",
@@ -46,6 +47,7 @@ export function reportDateRange(period: HealthPeriod, end: string, from?: string
   if (period === "custom") return { start: from && from <= end ? from : end, end };
   if (period === "week") date.setDate(date.getDate() - 6);
   if (period === "month") date.setDate(1);
+  if (period === "quarter") date.setDate(date.getDate() - 89);
   if (period === "year") date.setMonth(0, 1);
   return {
     start: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
