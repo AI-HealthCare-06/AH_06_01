@@ -225,6 +225,7 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
     "일간",
     "주간◆",
     "월간",
+    "3개월",
     "연간",
     "기간",
   ]);
@@ -238,6 +239,9 @@ test("dashboard switches monthly/yearly data and shows the saved registration da
   await expect(page.locator(".health-score h3")).toHaveText("MONTHLY HEALTH SCORE");
   await expect(page.locator(".trend-column")).toHaveCount(7);
   await expect(page.locator(".health-trend")).toContainText("기록 없음");
+  await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "quarter");
+  await expect(page.locator(".health-score h3")).toHaveText("90-DAY HEALTH SCORE");
+  await expect(page.locator(".trend-column")).toHaveCount(7);
   await selectPixelOption(page.getByRole("combobox", { name: "건강 변화 조회 기간" }), "year");
   await expect(page.locator(".trend-column")).toHaveCount(9);
   await expect(page.locator(".health-trend")).toContainText("기록 없음");

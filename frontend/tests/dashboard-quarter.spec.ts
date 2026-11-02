@@ -79,7 +79,7 @@ test("editing a demo survey clears the recorded model result and reset preserves
     });
   });
   await expect(page.getByRole("region", { name: "최종 분석 요약" })).toContainText(
-    "분석 연결을 확인",
+    "입력 변경됨 · 시연 초기화로 복원",
     { timeout: 10000 },
   );
   await page.getByRole("button", { name: "시연 초기화", exact: true }).click();

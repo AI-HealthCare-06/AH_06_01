@@ -1,6 +1,7 @@
 import { useQuestAnalysis } from "../services/useQuestAnalysis";
 import { m2StateLabels, m2StatusLabels, analysisSourceLabel } from "../domain/quest-analysis";
 import { bpStagePresentation } from "../domain/bp-stage";
+import { DemoInputChangedError } from "../domain/demo-analysis-input";
 export function QuestModelSummary() {
   const query = useQuestAnalysis();
   const analysis = query.data;
@@ -14,7 +15,9 @@ export function QuestModelSummary() {
           {!query.ready
             ? "건강 정보 저장 동의 후 분석하거나 데모를 체험해 보세요."
             : query.isError
-              ? "분석에 연결하지 못했어요."
+              ? query.error instanceof DemoInputChangedError
+                ? query.error.message
+                : "분석에 연결하지 못했어요."
               : "모델 응답을 확인하고 있어요…"}
         </p>
         {query.ready && query.isError && (

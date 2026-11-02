@@ -2,6 +2,7 @@ import { useQuestAnalysis } from "../services/useQuestAnalysis";
 import { bpStageLabels } from "../domain/bp-stage";
 import { analysisSourceLabel, m2StateLabels } from "../domain/quest-analysis";
 import { QuestModelSummary } from "./QuestModelSummary";
+import { DemoInputChangedError } from "../domain/demo-analysis-input";
 export function DashboardPredictionBrief() {
   const query = useQuestAnalysis(),
     analysis = query.data;
@@ -16,7 +17,9 @@ export function DashboardPredictionBrief() {
     !["invalid", "out_of_range"].includes(analysis.m2.data_quality);
   const headline = !analysis
     ? query.isError
-      ? "분석 연결을 확인해 주세요"
+      ? query.error instanceof DemoInputChangedError
+        ? "입력 변경됨 · 시연 초기화로 복원"
+        : "분석 연결을 확인해 주세요"
       : query.ready
         ? "모델 결과를 확인하고 있어요"
         : "기록 동의 후 분석할 수 있어요"

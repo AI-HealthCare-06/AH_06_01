@@ -3,7 +3,7 @@ import { quarterDemoPersona } from "../domain/demo-personas";
 import { createDemoGame } from "../domain/demo-persona";
 import { profileSchema } from "../domain/profile";
 import { medicationListSchema } from "../domain/medications";
-import { demoAnalysisInputKey } from "../domain/demo-analysis-input";
+import { demoAnalysisInputKey, DemoInputChangedError } from "../domain/demo-analysis-input";
 import { questAnalysisSchema } from "../domain/quest-analysis";
 import { useGameStore } from "../stores/game-store";
 import { useProfileStore } from "../stores/profile-store";
@@ -23,8 +23,7 @@ export function replayQuarterAnalysis() {
     medicationListSchema.parse(quarterDemoPersona.medications),
     baseline,
   );
-  if (current !== expected)
-    throw new Error("시연 입력이 변경됐어요. 초기화하거나 연결된 모델로 다시 분석해 주세요.");
+  if (current !== expected) throw new DemoInputChangedError();
   const previous = new Date(game.date + "T12:00:00Z");
   previous.setUTCDate(previous.getUTCDate() - 1);
   return questAnalysisSchema.parse({
