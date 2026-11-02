@@ -6,12 +6,18 @@ import { cloudEnabled } from "../cloud/client";
 import { PixelTimePicker } from "../components/PixelTimePicker";
 import { SurveyChoices, SurveyHelp } from "../components/SurveyControls";
 import { dailySurveySchema, sleepHoursFromTimes } from "../domain/daily-survey";
-import { localDate } from "../domain/calendar";
+import { BloodPressureMetadataFields } from "../components/BloodPressureMetadataFields";
+import {
+  pressureDate,
+  pressureDraftBase,
+  pressureSurveySnapshot,
+} from "../domain/blood-pressure-history";
+import { pressureStatusText, useBloodPressureStore } from "../stores/blood-pressure-store";
 
 const steps = [
   {
     title: "혈압",
-    keys: ["bloodPressureStatus", "morning", "evening"],
+    keys: ["bloodPressureStatus", "morning", "evening", "bloodPressureDetails"],
     error:
       "혈압 측정 여부를 선택해 주세요. 측정했다면 수축기·이완기를 함께 입력하고 수축기가 더 큰지 확인해 주세요.",
   },
@@ -54,6 +60,15 @@ export function DailySurveyDialog({ onClose }: { onClose: () => void }) {
 function DailySurveyForm({ date, onClose }: { date: string; onClose: () => void }) {
   const saved = useGameStore((s) => s.game.dailySurveys[date]);
   const cloud = useCloudStore();
+  const pressureSyncStatus = useBloodPressureStore((s) => s.status);
+  const [pressureStart] = useState(() =>
+    pressureSurveySnapshot(useBloodPressureStore.getState().records, date, saved),
+  );
+  const [pressureBaseline, setPressureBaseline] = useState(() => {
+    const state = useBloodPressureStore.getState();
+    return pressureDraftBase(state.owner, state.records, date);
+  });
+  const [pressureDetails, setPressureDetails] = useState(pressureStart.metadata);
   const [step, setStep] = useState(0);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -82,11 +97,11 @@ function DailySurveyForm({ date, onClose }: { date: string; onClose: () => void 
     heading.current?.focus({ preventScroll: true });
   }, [step, message]);
   const [fields, setFields] = useState<Record<string, string>>(() => ({
-    bloodPressureStatus: saved?.bloodPressureStatus ?? "",
-    morningSystolic: saved?.morning?.systolic?.toString() ?? "",
-    morningDiastolic: saved?.morning?.diastolic?.toString() ?? "",
-    eveningSystolic: saved?.evening?.systolic?.toString() ?? "",
-    eveningDiastolic: saved?.evening?.diastolic?.toString() ?? "",
+    bloodPressureStatus: pressureStart.status,
+    morningSystolic: pressureStart.morning?.systolic?.toString() ?? "",
+    morningDiastolic: pressureStart.morning?.diastolic?.toString() ?? "",
+    eveningSystolic: pressureStart.evening?.systolic?.toString() ?? "",
+    eveningDiastolic: pressureStart.evening?.diastolic?.toString() ?? "",
     pulseStatus: saved?.pulseStatus ?? "",
     restingHr: saved?.restingHr?.toString() ?? "",
     sleepStatus:
@@ -175,6 +190,12 @@ function DailySurveyForm({ date, onClose }: { date: string; onClose: () => void 
         : "not-measured",
       morning: include("morning") ? pair("morning") : null,
       evening: include("evening") ? pair("evening") : null,
+      bloodPressureDetails: include("bloodPressureDetails")
+        ? {
+            morning: pair("morning") ? pressureDetails.morning : null,
+            evening: pair("evening") ? pressureDetails.evening : null,
+          }
+        : undefined,
       pulseStatus: include("pulseStatus") ? fields.pulseStatus : "not-measured",
       restingHr:
         include("restingHr") && fields.pulseStatus === "measured" ? number("restingHr") : null,
@@ -224,7 +245,7 @@ function DailySurveyForm({ date, onClose }: { date: string; onClose: () => void 
   }
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (date !== localDate()) {
+    if (date !== pressureDate(new Date())) {
       setError("날짜가 바뀌었어요. 오늘의 서베이를 다시 열어 주세요.");
       return;
     }
@@ -250,10 +271,18 @@ function DailySurveyForm({ date, onClose }: { date: string; onClose: () => void 
       return;
     }
     const priorSleepExp = useGameStore.getState().game.sleepExperience[date]?.experience ?? 0;
-    if (!useGameStore.getState().recordSurvey(result.data)) {
-      setError("저장하지 못했어요. 로그인과 오늘 날짜를 확인해 주세요.");
+    if (!useGameStore.getState().recordSurvey(result.data, pressureBaseline)) {
+      setError(
+        useBloodPressureStore.getState().status === "draft-changed"
+          ? pressureStatusText["draft-changed"]
+          : useBloodPressureStore.getState().status === "error"
+            ? "측정 이력을 기기에 저장하지 못했어요. 저장 공간과 기존 기록 상태를 확인해 주세요."
+            : "저장하지 못했어요. 로그인과 오늘 날짜를 확인해 주세요.",
+      );
       return;
     }
+    const pressure = useBloodPressureStore.getState();
+    setPressureBaseline(pressureDraftBase(pressure.owner, pressure.records, date));
     const sleepBonus =
       (useGameStore.getState().game.sleepExperience[date]?.experience ?? 0) - priorSleepExp;
     setMessage(
@@ -365,6 +394,9 @@ function DailySurveyForm({ date, onClose }: { date: string; onClose: () => void 
             <>
               <p role="status">{message}</p>
               <p>오늘 기록을 대시보드에서 확인할 수 있어요.</p>
+              <small className="bp-history-status" aria-live="polite">
+                {pressureStatusText[pressureSyncStatus]}
+              </small>
               <button
                 className="secondary-button"
                 type="button"
@@ -394,6 +426,18 @@ function DailySurveyForm({ date, onClose }: { date: string; onClose: () => void 
                       {numeric("eveningDiastolic", "저녁 이완기", "mmHg", 999, 10, false, true)}
                     </div>
                   )}
+                  {measured &&
+                    (["morning", "evening"] as const).map((slot) =>
+                      fields[`${slot}Systolic`] || fields[`${slot}Diastolic`] ? (
+                        <BloodPressureMetadataFields
+                          key={slot}
+                          date={date}
+                          label={slot === "morning" ? "아침" : "저녁"}
+                          value={pressureDetails[slot]}
+                          onChange={(value) => setPressureDetails((s) => ({ ...s, [slot]: value }))}
+                        />
+                      ) : null,
+                    )}
                 </>
               )}
               {step === 1 && (

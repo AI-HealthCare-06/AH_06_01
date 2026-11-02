@@ -1,28 +1,24 @@
 import { Link, useLocation } from "react-router-dom";
-import { latestSurveyPressure } from "../domain/daily-survey";
+import { pressureDays } from "../domain/dashboard-pressure";
 import { AnimatedNumber } from "./AnimatedNumber";
 import { PixelIcon } from "./PixelIcon";
 import { DashboardTrends } from "./DashboardTrends";
 import { useGameStore } from "../stores/game-store";
 import { useProfileStore } from "../stores/profile-store";
 import { mainQuestIds } from "../domain/game";
-import { bloodPressurePresentation } from "../domain/risk-presentation";
 import { DashboardMetricGrid, DashboardInsightCharts } from "./DashboardInsights";
 import { HealthHistoryCharts } from "./HealthHistoryCharts";
 import { healthPeriods, type HealthPeriod } from "../services/health-history";
-import type { DashboardSnapshot } from "../services/dashboard-service";
 import { healthScorePeriod, scoreChangeText } from "../domain/health-score";
 import { demoMode } from "../domain/demo-mode";
 import { SurveyHelp } from "./SurveyControls";
 
 export function DashboardSummary({
-  data,
   period,
   date,
   reportUrl,
   from,
 }: {
-  data: DashboardSnapshot;
   period: HealthPeriod;
   date: string;
   reportUrl: string;
@@ -31,14 +27,10 @@ export function DashboardSummary({
   const location = useLocation();
   const game = useGameStore((s) => s.game);
   const { profile, hasProfileInput, hasBloodPressureInput } = useProfileStore();
-  const pressure = bloodPressurePresentation(data.bpResult);
   const survey = game.dailySurveys[date];
-  const row = game.healthHistory[date];
-  const recordedPressure = survey
-    ? latestSurveyPressure(survey)
-    : typeof row?.systolic === "number" && typeof row?.diastolic === "number"
-      ? { systolic: row.systolic, diastolic: row.diastolic }
-      : null;
+  const recordedPressure = pressureDays(game)
+    .find((day) => day.date === date)
+    ?.readings.at(-1);
   const info = healthPeriods[period];
   const current = date === game.date;
   const sleep =
@@ -149,17 +141,14 @@ export function DashboardSummary({
 
         <details className="selected-day-details cream-card">
           <summary>선택일 기록과 서베이 · {date}</summary>
-          <section
-            className={`summary-pressure stitch-analysis cream-card ${pressure.tone}`}
-            aria-label="혈압 요약"
-          >
+          <section className="summary-pressure stitch-analysis cream-card" aria-label="혈압 요약">
             <header className="stitch-section-heading">
               <div>
                 <h3>
                   <PixelIcon name="document" />
-                  혈압 기록과 판정
+                  선택일 건강 기록
                 </h3>
-                <p>내 건강 기록 · 생활습관 참고 분석</p>
+                <p>직접 입력한 측정값과 서베이</p>
               </div>
               <Link
                 className="blood-pressure-entry-button"
@@ -171,18 +160,24 @@ export function DashboardSummary({
             </header>
             <div className="stitch-health-grid">
               <div>
-                <small>선택일 혈압</small>
+                <small>선택일 최근 혈압</small>
                 <strong>
                   {recordedPressure
                     ? `${recordedPressure.systolic} / ${recordedPressure.diastolic}`
                     : survey
                       ? "미측정"
-                      : current && (hasProfileInput || hasBloodPressureInput)
+                      : current && hasBloodPressureInput
                         ? (profile.bloodPressure ?? "모름")
                         : "기록 없음"}
                 </strong>
                 <small>
-                  {survey || recordedPressure ? `${date} · mmHg` : "프로필 최근 값 · 측정일 미확인"}
+                  {recordedPressure
+                    ? `${date} ${recordedPressure.slot} · mmHg`
+                    : survey
+                      ? `${date} · 미측정`
+                      : current && hasBloodPressureInput
+                        ? "프로필 최근 값 · 측정일 미확인"
+                        : "날짜별 측정 기록 없음"}
                 </small>
               </div>
               <div>
@@ -208,9 +203,10 @@ export function DashboardSummary({
               </div>
             </div>
             <p className="summary-pressure-status">
-              {survey ? "날짜별 직접 입력 기록 · 모델 참고 분석과 함께 확인해요." : pressure.label}
+              {recordedPressure
+                ? "혈압 평균과 변화는 상단의 측정 기록 분석에서 확인해요."
+                : "혈압을 측정하고 건강 서베이에 기록해 주세요."}
             </p>
-            {pressure.tone === "red" && <small>{pressure.description}</small>}
           </section>
         </details>
         <div className="stitch-quick-actions">

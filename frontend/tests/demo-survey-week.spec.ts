@@ -71,10 +71,10 @@ test("demo week connects survey data, actual rewards, dashboard analysis and cur
     daytimeSleepinessScore: 5,
   });
   const reward = first.sleepExperience[today].experience;
-  await page.getByText("모델 근거와 해석 보기", { exact: true }).click();
-  const analysis = page.getByRole("region", { name: "M1·M2 참고 분석" });
-  await expect(analysis).toContainText(`일일 서베이 ${today} 반영`, { timeout: 30_000 });
-  await expect(analysis).toContainText("확인 항목 1 / 10");
+  const measured = page.getByRole("region", { name: "최종 분석 요약" });
+  await expect(measured).toHaveAttribute("data-bp-mode", "measured");
+  await expect(measured).toContainText("148 / 94 mmHg");
+  await expect(page.getByRole("region", { name: "M1·M2 참고 분석" })).toHaveCount(0);
   await page.locator(".selected-day-details > summary").click();
   await expect(page.getByRole("region", { name: "혈압 요약" })).toContainText("148 / 94");
   await expect(page.locator('[aria-label="선택일 수면 추가 EXP"]')).toContainText(`+${reward} EXP`);
@@ -92,6 +92,9 @@ test("demo week connects survey data, actual rewards, dashboard analysis and cur
   await expect(page.locator('[aria-label="오늘 수면 추가 EXP"]')).toContainText(`+${reward} EXP`);
   await page.getByRole("tab", { name: "Sub Quest", exact: true }).click();
   const sub = page.getByRole("tabpanel");
+  const analysis = sub.getByRole("region", { name: "M1·M2 참고 분석" });
+  await expect(analysis).toContainText(`일일 서베이 ${today} 반영`, { timeout: 30_000 });
+  await expect(analysis).toContainText("확인 항목 1 / 10");
   await expect(sub.getByRole("button", { name: /약 \/ 영양제 복용/ })).toBeVisible();
   await expect(sub.getByRole("button", { name: /6,000걸음 걷기/ })).toBeVisible();
   await expect(sub.getByRole("button", { name: /수면 7시간/ })).toHaveCount(0);

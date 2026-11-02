@@ -44,6 +44,62 @@
   margin: 12px 0 0;
   color: #243b30;
 }
+.dashboard-prediction .prediction-description {
+  font-size: calc(12px * var(--ui-text-scale, 1));
+  line-height: 1.7;
+  margin: 8px 0;
+}
+.dashboard-prediction .prediction-meta {
+  flex-wrap: wrap;
+}
+.dashboard-prediction .prediction-meta small {
+  font-size: inherit;
+}
+.dashboard-prediction .pressure-record-link {
+  color: #fff4ce;
+  padding: 8px 0 8px 8px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+.measurement-details {
+  margin-top: 12px;
+  padding: 14px;
+  background: #fff9e8;
+  color: #243b30;
+  border: 1px solid #a99e6b;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.measured-vitals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.measured-vitals dd {
+  margin: 5px 0 0;
+  font-size: calc(18px * var(--ui-text-scale, 1));
+  font-weight: bold;
+}
+.measured-vitals small {
+  display: block;
+  font-size: calc(11px * var(--ui-text-scale, 1));
+  font-weight: normal;
+}
+.measured-trend {
+  border-top: 1px dashed #a99e6b;
+  margin: 12px 0;
+  padding-top: 10px;
+}
+.measured-trend p {
+  margin: 0 0 6px;
+}
+@media (max-width: 359px) {
+  .measured-vitals {
+    grid-template-columns: 1fr;
+  }
+}
 .dashboard-metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

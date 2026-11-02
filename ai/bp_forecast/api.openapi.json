@@ -1,0 +1,93 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "REXRUN BP history forecast proposed research API",
+    "version": "0.1.0",
+    "description": "DESIGN ONLY. This route is not deployed or registered. Measurement analysis, lifestyle screening and forecasting have separate purposes. This prototype contract cannot authorize production numeric forecasts. A production schema and model registry gate require independent real-world validation and calibration."
+  },
+  "paths": {
+    "/v1/bp/history/forecast": {
+      "post": {
+        "operationId": "proposedResearchBloodPressureForecast",
+        "summary": "Reconstruct the authenticated owner's known history at a cutoff",
+        "description": "Fetch server-owned revisions with measured_at and available_at at or before as_of. Do not accept subject_id, readings, model choice, clinical thresholds or v9 scores from the client. Bind owner to verified auth and explicit consent. Research access requires an additional server-controlled entitlement. Historical cutoffs must use the historical revision snapshot, not today's profile. Never send the full health history to a third-party model API.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["as_of"],
+                "properties": {
+                  "as_of": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Timezone-aware cutoff, not after server now. Prototype uses Asia/Seoul calendar days."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Research-only estimate or explicit abstention; abstention is not a negative diagnosis.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "./forecast.schema.json" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid/future cutoff or invalid request. No values echoed in logs."
+          },
+          "401": { "description": "Invalid or expired authentication." },
+          "403": {
+            "description": "No health-data consent or no research entitlement."
+          },
+          "409": {
+            "description": "Conflicting immutable revision or source reading. Preserve measurement display and repair data."
+          },
+          "422": {
+            "description": "Unsupported timezone/contract. No silent date or unit conversion."
+          },
+          "429": { "description": "Rate limit exceeded." },
+          "503": {
+            "description": "Server/model unavailable. Keep observed analysis available; do not substitute M1 screening probabilities."
+          }
+        },
+        "x-cache-policy": {
+          "scope": "private owner only",
+          "key": [
+            "owner",
+            "as_of",
+            "input_revision_fingerprint",
+            "model_version",
+            "aggregation_policy_version",
+            "quality_policy_version"
+          ],
+          "invalidate_on": [
+            "measurement_revision",
+            "measurement_delete",
+            "context_change",
+            "consent_withdrawal",
+            "account_change",
+            "model_change",
+            "ttl"
+          ]
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

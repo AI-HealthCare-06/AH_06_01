@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { localDate } from "./calendar";
+import { pressureDate, pressureDetailsSchema } from "./blood-pressure-history";
 export function sleepHoursFromTimes(
   bedtime: string | null | undefined,
   wakeTime: string | null | undefined,
@@ -23,6 +23,7 @@ export const dailySurveySchema = z
     bloodPressureStatus: z.enum(["measured", "not-measured"]),
     morning: bp.nullable(),
     evening: bp.nullable(),
+    bloodPressureDetails: pressureDetailsSchema.optional(),
     pulseStatus: z.enum(["measured", "not-measured"]),
     restingHr: z.number().int().min(20).max(250).nullable(),
     sleepStatus: z.enum(["reported", "unknown"]),
@@ -48,6 +49,25 @@ export const dailySurveySchema = z
     nocturia: z.boolean().nullable(),
   })
   .superRefine((v, ctx) => {
+    for (const slot of ["morning", "evening"] as const) {
+      const meta = v.bloodPressureDetails?.[slot];
+      if (meta && (!v[slot] || v.bloodPressureStatus !== "measured"))
+        ctx.addIssue({
+          code: "custom",
+          path: ["bloodPressureDetails", slot],
+          message: "측정값이 없는 시간대의 정보는 비워 주세요.",
+        });
+      if (
+        meta?.measuredAt &&
+        (pressureDate(new Date(meta.measuredAt)) !== v.date ||
+          Date.parse(meta.measuredAt) > v.submittedAt)
+      )
+        ctx.addIssue({
+          code: "custom",
+          path: ["bloodPressureDetails", slot],
+          message: "실제로 측정한 오늘 시각을 확인해 주세요.",
+        });
+    }
     if (v.sleepInputKind === "times") {
       const duration = sleepHoursFromTimes(v.bedtime, v.wakeTime);
       if (
@@ -107,7 +127,7 @@ export function validDailySurvey(value: unknown, date: string, now = Date.now())
   const parsed = dailySurveySchema.safeParse(value);
   return parsed.success &&
     parsed.data.date === date &&
-    localDate(new Date(parsed.data.submittedAt)) === date &&
+    pressureDate(new Date(parsed.data.submittedAt)) === date &&
     parsed.data.submittedAt <= now
     ? parsed.data
     : null;

@@ -12,6 +12,42 @@ const sample = {
   feature_version: "1.2.0",
 };
 describe("M1-S response contract", () => {
+  it("presents a positive screening flag as a BP check without changing stage probabilities", () => {
+    const result = bpStageSchema.parse({
+      ...sample,
+      htn_screening: {
+        positive: true,
+        probability: sample.stage_probs.htn,
+        threshold: 0.12143345115658617,
+        policy_id: "htn-screen-v1",
+      },
+    });
+    expect(bpStagePresentation(result).label).toBe("혈압 확인 권고");
+    expect(bpStagePresentation(result).description).toContain("고혈압 판정이 아니며");
+    expect(result.stage_top).toBe("prehtn");
+    expect(result.stage_probs).toEqual(sample.stage_probs);
+    expect(bpStageSchema.safeParse({ ...result, data_quality: "not_applicable" }).success).toBe(
+      false,
+    );
+    expect(
+      bpStageSchema.safeParse({
+        ...result,
+        htn_screening: { ...result.htn_screening, positive: false },
+      }).success,
+    ).toBe(false);
+  });
+  it("does not present below-threshold screening as an exclusion of hypertension", () => {
+    const result = bpStageSchema.parse({
+      ...sample,
+      htn_screening: {
+        positive: false,
+        probability: sample.stage_probs.htn,
+        threshold: 0.4,
+        policy_id: "test",
+      },
+    });
+    expect(bpStagePresentation(result).description).toContain("고혈압이 없다는 뜻은 아니에요");
+  });
   it("keeps the returned stage even when it is not the maximum probability", () => {
     const result = bpStageSchema.parse({ ...sample, stage_top: "normal", risk_level: "normal" });
     expect(bpStagePresentation(result).label).toBe("정상 참고권");
@@ -45,6 +81,9 @@ describe("M1-S response contract", () => {
     );
     expect(healthSnapshotKey(initialProfile)).not.toBe(
       healthSnapshotKey({ ...initialProfile, bloodPressure: null }),
+    );
+    expect(healthSnapshotKey(initialProfile)).not.toBe(
+      healthSnapshotKey({ ...initialProfile, smoking: !initialProfile.smoking }),
     );
     expect(healthSnapshotKey()).toBeNull();
   });

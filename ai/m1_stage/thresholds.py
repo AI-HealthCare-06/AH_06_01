@@ -20,6 +20,12 @@ DBP_PREHTN_MIN = 80
 SBP_HTN_MIN = 140       # 고혈압: 수축기 ≥140 or 이완기 ≥90 or 복약 (1기·2기 합침)
 DBP_HTN_MIN = 90
 
+# 3단계 정의 (사용자 결정 2026-10-29, 멘토링 반영): elevated 와 prehtn 을 합쳐 sbp 기준 <122 / 122~139 / ≥140.
+# 122 는 사용자가 지정한 값(표준 경계 120 과 다름). dbp 를 함께 쓰는 변형은 STAGE3_DBP_CUTS(80/90, 'or' 규칙)로 비교한다.
+STAGE3 = ("normal", "elevated_prehtn", "htn")
+STAGE3_SBP_CUTS = (122.0, 140.0)
+STAGE3_DBP_CUTS = (80.0, 90.0)
+
 # 라벨용 측정 혈압은 2회 이상 측정의 평균 (명세 2-2)
 LABEL_MIN_MEASUREMENTS = 2
 
@@ -39,6 +45,23 @@ ALCOHOL_DRINKS_PER_DAY_HIGH = 2.0
 # 폭음: 1회 남 7잔 / 여 5잔 이상, 월 1회 이상. 근거: 명세 2-3
 BINGE_DRINKS = {"male": 7, "female": 5}
 BINGE_MIN_PER_MONTH = 1
+# 연속형 실험(M1-C, m1/continuous.py) 입력 규칙: 음주 0(비음주)은 drinker 플래그로 분리하고, 주당 잔 수는 이 값 이상을 같은 값으로 본다.
+# 근거: 사용자 결정 2026-10-23(학습 데이터 히스토그램에서 15잔/주 이상 묶음). 문헌 근거 없음.
+ALCOHOL_WEEK_CAP = 15.0
+# 체인 파이프라인(m1/chain.py) 활동량 상한: 600분/주 이상은 같은 값으로 본다. 근거: 사용자 결정 2026-10-25. 문헌 근거 없음.
+ACTIVITY_MINUTES_CAP = 600.0
+# 체인 파이프라인 행 검증(사용자 결정 2026-10-26): 필수 열, 대치 개수 상한, 학습에 쓰는 값 범위(밖이면 행 제외).
+# 범위 근거: bmi·waist 는 명세 계약 범위, fasting_glucose·resting_hr 은 생리적으로 가능한 폭으로 둔 임시값(문헌 근거 없음; 학습 파일에서 각 65행·29행 해당).
+CHAIN_REQUIRED = ("age", "sex", "bmi", "waist_cm")
+CHAIN_MAX_IMPUTED = 5
+CHAIN_RANGES = {"bmi": (14.0, 50.0), "waist_cm": (50.0, 150.0), "fasting_glucose": (50.0, 300.0), "resting_hr": (40.0, 150.0)}
+# 편차 중심값(사용자 결정 2026-10-26: 평균 대신 문헌 기준값). 0 = 정상 경계, 양수 = 위험 쪽. 나이는 기준값이 없어 평균 사용.
+# 근거: bmi 23 WHO 2004(아시아 행동점), waist 90/85 대한비만학회 2022, fasting_glucose 100 대한당뇨병학회 공복혈당장애 기준(참고표 미기재),
+#       resting_hr 100 일반 정상 범위 상한(문헌 근거 없음), activity 150 지침, alcohol_week 14 = 2잔/일×7 (Roerecke 2017).
+REFERENCE_CENTERS = {"bmi": 23.0, "waist_cm": {"male": 90.0, "female": 85.0}, "fasting_glucose": 100.0, "resting_hr": 100.0, "activity_minutes_week": 150.0, "alcohol_week": 14.0}
+# 정상 범위 초과·미달량(힌지) 경계: (하한, 상한). None 은 해당 쪽 없음. resting_hr 하한 60 은 일반 정상 범위(문헌 근거 없음).
+REFERENCE_RANGES = {"bmi": (18.5, 23.0), "waist_cm": (None, {"male": 90.0, "female": 85.0}), "fasting_glucose": (None, 100.0), "resting_hr": (60.0, 100.0),
+                    "activity_minutes_week": (150.0, None), "alcohol_week": (None, 14.0)}
 # 신체활동 부족: <150 분/주 (결측이면 true). 근거: 명세 2-3
 ACTIVITY_LOW_MIN_PER_WEEK = 150
 # 고강도 분 가중치 (activity_minutes_week = 중강도 + 고강도×2 + 걷기). 근거: 명세 2-3

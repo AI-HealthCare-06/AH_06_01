@@ -1,10 +1,10 @@
 # REXRUN 연결 상태 — 2026-10-19
 
-> 이 문서는 배포 전 사전 연결 구상 기록이다. 2026-10-20의 실제 AWS 웹/API → Supabase RDB·인증·푸시 연결은 [최신 구조도·ERD](../../docs/architecture/SYSTEM_DATABASE_AND_AWS.md)를 따른다. 아래 DynamoDB·SigV4 준비안은 현재 배포 구성이 아니다.
+> 이 문서는 2026-10-19 배포 전 구상 기록이다. 현재의 AWS 웹/API → Supabase RDB·인증·푸시·AI·OTA 연결은 [2026-11-03 시스템 구조](../../docs/SYSTEM_ARCHITECTURE_20261103.md)를 따른다. 아래 DynamoDB·SigV4 준비안은 현재 배포 구성이 아니다.
 
 작업 브랜치: `feature/pixel-adventure-device-quests`. 실선은 확인한 현재 경로, 아래 별도 준비도는 미배포 구성이다.
 
-공유용 PNG/SVG 도식, 현재 저장 키와 수집용 테이블 상세는 [현재 DB 구조와 AWS 연결 구상](../../docs/architecture/SYSTEM_DATABASE_AND_AWS.md)에 정리했다.
+현재 연결 도식은 [시스템 구조](../../docs/SYSTEM_ARCHITECTURE_20261103.md), 새 혈압 테이블·RPC·RLS는 [측정 이력 수집 계약](../../docs/BP_MEASUREMENT_COLLECTION.md)에 정리했다.
 
 ## 현재 연결
 
