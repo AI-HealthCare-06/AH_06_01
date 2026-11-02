@@ -17,6 +17,7 @@ import "./cloud/cloud.css";
 import "./game-loading.css";
 import "./main-tab-motion.css";
 import "./dashboard-stitch.css";
+import "./dashboard-insights.css";
 import "./review-layout.css";
 import { NoticeProvider } from "./components/NoticeProvider";
 import { AndroidExitGuard } from "./components/AndroidExitGuard";

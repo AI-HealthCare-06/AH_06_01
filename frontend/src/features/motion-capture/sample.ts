@@ -20,6 +20,7 @@ export function sampleObservation(
   const mouth = { x: 0.5, y: 0.38 };
   const hand = { x: 0.7 - progress * 0.2, y: 0.8 - progress * 0.39 };
   const objectY = 0.61 - progress * 0.26;
+  const tipping = Math.max(0, Math.min(1, (elapsedMs - 1800) / 450));
   const object =
     quest === "water"
       ? { x: 0.38, y: objectY, width: 0.32, height: Math.min(0.42, 1 - objectY), label: "cup" }
@@ -41,5 +42,14 @@ export function sampleObservation(
     faceWidth: quest === "water" ? 180 : 80,
     hand: quest === "water" ? null : hand,
     object,
+    ...(quest === "water"
+      ? {
+          drinkMotion: {
+            handInclination: 20 + 35 * tipping,
+            aspect: 0.8 + 0.4 * tipping,
+            lift: -0.6 + 0.2 * tipping,
+          },
+        }
+      : {}),
   };
 }

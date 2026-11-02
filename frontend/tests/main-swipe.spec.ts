@@ -86,6 +86,17 @@ test("real vertical scroll and skin-carousel swipes do not switch the main tab",
   await fingerSwipe(page, ".vault-skin-grid", -125);
   await expect(page).toHaveURL(/\/character$/);
   await expect(skin).not.toContainText("SKIN 1 / 9");
+  for (let i = 0; i < 3; i++) {
+    const before = await skin.textContent();
+    await fingerSwipe(page, ".vault-skin-grid", -80);
+    await expect(skin).not.toHaveText(before!);
+  }
+  const selected = await skin.textContent();
+  await fingerSwipe(page, ".vault-skin-grid", 5, -100);
+  await expect(skin).toHaveText(selected!);
+  await expect(page).toHaveURL(/\/character$/);
+  await page.reload();
+  await expect(skin).toHaveText(selected!);
 });
 
 test("swiping dinosaur preview and battle content changes the main tab", async ({ page }) => {

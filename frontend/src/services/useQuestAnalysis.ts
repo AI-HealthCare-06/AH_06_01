@@ -7,6 +7,8 @@ import { useMedicationStore } from "../stores/medication-store";
 import { useGameStore } from "../stores/game-store";
 import { healthSnapshotKey } from "../domain/bp-stage";
 import { loadQuestAnalysis } from "./quest-analysis";
+import { demoAnalysisInputKey } from "../domain/demo-analysis-input";
+import { selectedDemoPersona } from "../domain/demo-personas";
 export function useQuestAnalysis() {
   const cloud = useCloudStore();
   const { profile, hasProfileInput } = useProfileStore();
@@ -27,7 +29,15 @@ export function useQuestAnalysis() {
       key === cloud.healthSnapshotKey &&
       !cloud.healthSyncPending);
   const query = useQuery({
-    queryKey: ["quest-analysis", demoMode ? "synthetic-demo" : cloud.userId, key, date],
+    queryKey: [
+      "quest-analysis",
+      demoMode ? "synthetic-demo" : cloud.userId,
+      key,
+      date,
+      demoMode && selectedDemoPersona().id === "studio-quarter-v1"
+        ? demoAnalysisInputKey(profile, medications, { date, dailySurveys })
+        : null,
+    ],
     queryFn: () => loadQuestAnalysis(demoMode, cloud.userId ?? undefined),
     enabled: ready,
     staleTime: 300_000,

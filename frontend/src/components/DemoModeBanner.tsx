@@ -1,15 +1,27 @@
-import { demoMode, enterDemo, exitDemo } from "../domain/demo-mode";
+import { demoMode, enterDemo, exitDemo, resetDemo } from "../domain/demo-mode";
 import { cloudEnabled } from "../cloud/client";
+import { selectedDemoPersona } from "../domain/demo-personas";
 export function DemoModeBanner() {
   if (cloudEnabled) return null;
   return (
     <div className="demo-mode-banner">
       <small>
-        {demoMode
-          ? "DEMO · 고혈압·당뇨 페르소나 / 합성 7일 기록"
-          : "나의 기록과 분리된 데모를 체험할 수 있어요."}
+        {demoMode ? selectedDemoPersona().banner : "나의 기록과 분리된 데모를 체험할 수 있어요."}
       </small>
-      <button type="button" onClick={demoMode ? exitDemo : enterDemo}>
+      {demoMode && selectedDemoPersona().id === "studio-quarter-v1" && (
+        <button type="button" onClick={resetDemo}>
+          시연 초기화
+        </button>
+      )}
+      {demoMode && selectedDemoPersona().id !== "studio-quarter-v1" && (
+        <button type="button" onClick={() => enterDemo("studio-quarter-v1")}>
+          90일 시연
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={() => (demoMode ? exitDemo() : enterDemo("studio-quarter-v1"))}
+      >
         {demoMode ? "데모 나가기" : "데모 보기"}
       </button>
     </div>

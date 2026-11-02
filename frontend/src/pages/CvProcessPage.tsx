@@ -3,11 +3,17 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AppShell, PageHeading } from "../components/AppShell";
 import { useMotionCapture } from "../features/motion-capture/useMotionCapture";
+import { WaterSuccessFeedback } from "../features/motion-capture/WaterSuccessFeedback";
 import { injectionPoint } from "../features/motion-capture/injection";
+import {
+  loadSequenceModel,
+  saveSequenceModel,
+  removeSequenceModel,
+} from "../features/motion-capture/sequence";
 
 const phaseLabels = {
   hand: "약을 준비한 손 → 입 → 손 내림",
-  drink: "컵 접근 → 입 근처 유지 → 컵 내림",
+  drink: "컵 접근 → 기울여 마시는 동작 → 컵 내림",
   injection: "지정 부위에 손 접근 → 머묾 → 손 떼기",
   complete: "과정 동작 감지",
 };
@@ -24,6 +30,10 @@ export function CvProcessPage() {
   const [prepared, setPrepared] = useState(false);
   const [toolType, setToolType] = useState("insulin_pen");
   const [label, setLabel] = useState("unlabelled");
+  const [recordFeatures, setRecordFeatures] = useState(false);
+  const [subjectCode, setSubjectCode] = useState("");
+  const [model, setModel] = useState(loadSequenceModel);
+  const [modelMessage, setModelMessage] = useState("");
   const {
     phase,
     source,
@@ -31,9 +41,11 @@ export function CvProcessPage() {
     observation,
     result,
     latencyMs,
+    runtime,
     message,
     start,
     cancel,
+    finishObservation,
     bindVideo,
     selectedRegion,
     selectRegion,
@@ -45,16 +57,36 @@ export function CvProcessPage() {
   const camera = source === "camera" && busy;
   function exportResult() {
     if (!result) return;
+    const { learningClip, ...publicResult } = result;
     const exportData = {
-      ...result,
+      ...publicResult,
       attemptedAction: label,
+      ...(learningClip
+        ? {
+            trainingExample: {
+              ...learningClip,
+              label:
+                label === "unlabelled"
+                  ? null
+                  : label === "drinking"
+                    ? "water"
+                    : label === "oral_sequence"
+                      ? "oral"
+                      : label === "injection_site_sequence"
+                        ? toolType
+                        : "negative",
+              synthetic: source === "sample",
+            },
+          }
+        : {}),
       purpose: "cv-process-development",
       videoSaved: false,
       targetProcess: mode,
       ...(mode === "injection"
         ? {
             userDeclaredTool: toolType,
-            toolDetected: false,
+            toolDetected:
+              result.toolEvidence?.modelReady === true && result.toolEvidence.expectedToolObserved,
             needleInsertionVerified: false,
             doseVerified: false,
           }
@@ -71,6 +103,9 @@ export function CvProcessPage() {
   }
   return (
     <AppShell active="camera">
+      {result?.decision === "detected" && result.questId === "water" && (
+        <WaterSuccessFeedback key={result.sessionId} sample={source === "sample"} />
+      )}
       <Link className="quest-auth-back" to="/home">
         ← 홈
       </Link>
@@ -241,22 +276,54 @@ export function CvProcessPage() {
             </div>
           ))}
         </div>
-        <progress aria-label="현재 단계 유지 시간" max={1} value={progress.holdProgress} />
+        <progress aria-label="현재 단계 진행" max={1} value={progress.holdProgress} />
         <div className="cv-controls">
           <button
             className="primary-button"
             disabled={busy || (quest === "medicine" && !prepared)}
-            onClick={() => void start(quest, "camera", prepared)}
+            onClick={() => {
+              if (recordFeatures && !/^[A-Za-z0-9_-]{1,40}$/.test(subjectCode)) {
+                setModelMessage("이름 대신 익명 참가자 코드(P01 등)를 입력해 주세요.");
+                return;
+              }
+              void start(quest, "camera", prepared, {
+                recordFeatures,
+                subjectId: subjectCode,
+                target:
+                  mode === "injection"
+                    ? toolType === "syringe"
+                      ? "syringe"
+                      : "insulin_pen"
+                    : mode === "medicine"
+                      ? "oral"
+                      : "water",
+              });
+            }}
           >
             전면 카메라 시작
           </button>
           <button
             disabled={busy || (quest === "medicine" && !prepared)}
-            onClick={() => void start(quest, "sample", prepared)}
+            onClick={() =>
+              void start(quest, "sample", prepared, {
+                recordFeatures,
+                target:
+                  mode === "injection"
+                    ? toolType === "syringe"
+                      ? "syringe"
+                      : "insulin_pen"
+                    : mode === "medicine"
+                      ? "oral"
+                      : "water",
+              })
+            }
           >
             합성 시연
           </button>
           {busy && <button onClick={cancel}>인식 중단</button>}
+          {busy && recordFeatures && (
+            <button onClick={finishObservation}>관찰 종료 · 특징 확인</button>
+          )}
         </div>
         <p className="cv-scope-note">
           {mode === "injection"
@@ -273,7 +340,9 @@ export function CvProcessPage() {
             <p>
               {source === "sample"
                 ? "합성 입력 · 실제 카메라 검증 결과가 아닙니다."
-                : "실제 카메라 입력 · 동작 규칙 기반 결과"}
+                : result.detector === "sequence_dtw_v1"
+                  ? "실제 카메라 입력 · 등록된 시계열 모델과 동작 순서 확인"
+                  : "실제 카메라 입력 · 동작 규칙 기반 결과"}
             </p>
             <label>
               시도한 동작 라벨
@@ -293,7 +362,27 @@ export function CvProcessPage() {
         )}
         <details className="cv-diagnostics">
           <summary>인식 상태 자세히 보기</summary>
+          <p>
+            {result?.toolEvidence?.modelReady
+              ? "전용 도구 모델 연결됨 · "
+              : "알약·펜·주사기 전용 모델 미학습 · "}
+            {model
+              ? `시계열 모델 등록 · 평가 ${model.training.evaluationClips}개 기록`
+              : "전용 시계열 모델 미등록 · 현재는 동작 규칙으로 관찰해요."}
+          </p>
           <dl>
+            <div>
+              <dt>추론 엔진</dt>
+              <dd>{runtime?.backend ?? result?.runtime?.backend ?? "웹 Worker / 합성 시연"}</dd>
+            </div>
+            {(runtime ?? result?.runtime) && (
+              <div>
+                <dt>네이티브 처리 p50 / p95</dt>
+                <dd>
+                  {(runtime ?? result!.runtime)!.p50Ms} / {(runtime ?? result!.runtime)!.p95Ms}ms
+                </dd>
+              </div>
+            )}
             <div>
               <dt>처리 지연</dt>
               <dd>{latencyMs === null ? "—" : `${latencyMs}ms`}</dd>
@@ -317,6 +406,74 @@ export function CvProcessPage() {
               </li>
             ))}
           </ol>
+        </details>
+        <details className="cv-diagnostics">
+          <summary>학습 및 검증 기록</summary>
+          <label className="cv-preparation">
+            <input
+              type="checkbox"
+              checked={recordFeatures}
+              disabled={busy}
+              onChange={(event) => setRecordFeatures(event.target.checked)}
+            />
+            동작 특징 기록에 동의해요
+          </label>
+          {recordFeatures && (
+            <label>
+              익명 참가자 코드
+              <input
+                value={subjectCode}
+                maxLength={40}
+                disabled={busy}
+                placeholder="P01"
+                onChange={(event) => setSubjectCode(event.target.value)}
+              />
+              <small>
+                같은 사람은 같은 코드, 다른 사람은 다른 코드를 사용해 주세요. 이름은 입력하지
+                마세요.
+              </small>
+            </label>
+          )}
+          <p>
+            켜면 거리·동작 순서 등 숫자 특징만 결과 JSON에 담습니다. 사진·영상·원본 관절 좌표는 담지
+            않습니다. 결과에서 실제 시도한 동작 라벨을 선택해 저장하세요. 합성 시연 기록은 실제
+            학습에서 제외됩니다.
+          </p>
+          <label>
+            검증된 시계열 모델 불러오기
+            <input
+              type="file"
+              accept="application/json,.json"
+              disabled={busy}
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                try {
+                  if (file.size > 750000)
+                    throw new Error("모델 파일은 750KB 이하로 선택해 주세요.");
+                  const next = saveSequenceModel(JSON.parse(await file.text()));
+                  setModel(next);
+                  setModelMessage("기기 내 시계열 모델을 등록했어요.");
+                } catch {
+                  setModelMessage("실제 촬영·사람별 분리 평가를 거친 모델 파일인지 확인해 주세요.");
+                }
+                event.target.value = "";
+              }}
+            />
+          </label>
+          {model && (
+            <button
+              disabled={busy}
+              onClick={() => {
+                removeSequenceModel();
+                setModel(null);
+                setModelMessage("모델을 해제했어요.");
+              }}
+            >
+              등록 모델 해제
+            </button>
+          )}
+          <p role="status">{modelMessage}</p>
         </details>
       </section>
     </AppShell>

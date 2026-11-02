@@ -25,7 +25,7 @@ test("dashboard rings and metric switches show saved activity without granting q
   }, seed);
   await page.reload();
   await expect(
-    page.getByRole("img", { name: /걸음 활동 3,240보, 퀘스트 1 \/ 4, 수면 6.5시간/ }),
+    page.getByRole("img", { name: /걸음 활동 평균 3,240보, 퀘스트 4 \/ 8, 수면 평균 6.5시간/ }),
   ).toBeVisible();
   const panel = page.getByRole("region", { name: "선택한 지표", exact: true });
   await page.getByRole("button", { name: "걸음 수", exact: true }).click();
@@ -39,7 +39,10 @@ test("dashboard rings and metric switches show saved activity without granting q
   await page.getByRole("button", { name: "퀘스트", exact: true }).click();
   await expect(panel.locator(".stitch-metric-value strong")).toHaveText("4개");
   await page.getByRole("button", { name: "건강 점수", exact: true }).click();
-  await expect(panel.getByText("실제 건강 기록이 연결되면 내 변화량을 보여드려요.")).toBeVisible();
+  await expect(page.locator(".score-number")).toHaveText("66");
+  await expect(
+    panel.getByText("저장된 기록만 계산해요. —는 기록이 없는 구간이에요."),
+  ).toBeVisible();
   const before = await page.evaluate(() => {
     const game = JSON.parse(localStorage.getItem("rexrun-demo-game-v1")!);
     return { completed: game.completed, gold: game.gold, experience: game.experience };
@@ -62,7 +65,7 @@ test("historical dashboard does not invent per-quest details or missing step and
 }) => {
   await page.goto("/dashboard?period=month&date=2026-10-10");
   await expect(
-    page.getByRole("img", { name: /걸음 활동 기록 없음, 퀘스트 0 \/ 4, 수면 기록 없음/ }),
+    page.getByRole("img", { name: /걸음 활동 기록 없음, 퀘스트 기록 없음, 수면 기록 없음/ }),
   ).toBeVisible();
   await expect(page.locator(".stitch-quest-row")).toHaveCount(0);
   for (const metric of ["걸음 수", "수면 시간"]) {

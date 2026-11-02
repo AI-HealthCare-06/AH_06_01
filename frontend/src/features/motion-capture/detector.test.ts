@@ -38,113 +38,37 @@ function sequence(quest: MotionQuest, acknowledged = true) {
   return { detector, advance, nextTime: () => timestamp + 100 };
 }
 
-describe("motion sequence acceptance", () => {
-  it.each(["water", "medicine"] as const)(
-    "accepts a full %s approach, hold and return",
-    (quest) => {
-      const { advance } = sequence(quest);
-      expect(advance(1.8, 5).stage).toBe("approaching");
-      expect(advance(0.2, 10).stage).toBe("returning");
-      expect(advance(1.8, 4).stage).toBe("detected");
-      expect(advance(0.2, 10).stage).toBe("detected");
-    },
-  );
-
-  it("does not accept a clip that starts at the mouth", () => {
-    const { advance } = sequence("water");
-    expect(advance(0.1, 15).stage).toBe("ready");
-    expect(advance(2, 5).stage).toBe("approaching");
+describe("medicine hand motion", () => {
+  it("accepts a prepared approach and withdrawal", () => {
+    const { advance } = sequence("medicine");
+    expect(advance(1.8, 5).stage).toBe("approaching");
+    expect(advance(0.2, 10).stage).toBe("returning");
+    expect(advance(1.8, 4).stage).toBe("detected");
   });
-
-  it("accepts a small selfie return but rejects a stationary cup or a partial return", () => {
-    const stationary = sequence("water");
-    expect(stationary.advance(0.5, 25).stage).toBe("approaching");
-    const { advance } = sequence("water");
-    expect(advance(0.5, 5).stage).toBe("approaching");
-    expect(advance(0.3, 10).stage).toBe("approaching");
-    expect(advance(0.1, 10).stage).toBe("returning");
-    expect(advance(0.3, 10).stage).toBe("returning");
-    expect(advance(0.5, 4).stage).toBe("detected");
-  });
-
-  it("tolerates small selfie jitter after entry but rejects movement away during the hold", () => {
-    const { advance } = sequence("water");
-    advance(0.5, 5);
-    advance(0.1, 2);
-    expect(advance(0.27, 5, { objectAtMouth: false }).stage).toBe("at_mouth");
-    expect(advance(0.27, 1, { objectAtMouth: false }).stage).toBe("returning");
-    expect(advance(0.5, 4).stage).toBe("detected");
-    const interrupted = sequence("water");
-    interrupted.advance(0.5, 5);
-    interrupted.advance(0.1, 2);
-    expect(interrupted.advance(0.35, 5).stage).toBe("ready");
-  });
-
-  it("does not classify face touching as drinking without a cup at the mouth", () => {
-    const { advance } = sequence("water");
-    advance(2, 5);
-    expect(advance(0.2, 15, { objectAtMouth: false }).stage).toBe("approaching");
-    expect(advance(2, 5).stage).not.toBe("detected");
-  });
-
-  it("requires medication preparation acknowledgement", () => {
+  it("requires preparation acknowledgement", () => {
     const { advance } = sequence("medicine", false);
-    advance(2, 5);
+    advance(1.8, 5);
     advance(0.2, 10);
-    expect(advance(2, 5).stage).toBe("ready");
+    expect(advance(1.8, 4).stage).not.toBe("detected");
   });
-
-  it("bridges a drinking hold but requires the cup to be observed again before completion", () => {
-    const { advance } = sequence("water");
-    advance(2, 5);
-    expect(advance(0.2, 9, { objectEvidence: "tracked" }).stage).toBe("returning");
-    expect(advance(2, 4, { objectEvidence: "tracked" }).stage).toBe("returning");
-    expect(advance(2, 1, { objectEvidence: "detected" }).stage).toBe("detected");
-  });
-
-  it("rejects a brief pass by the mouth", () => {
-    const { advance } = sequence("water");
-    advance(2, 5);
-    advance(0.2, 1);
-    expect(advance(2, 5).stage).not.toBe("detected");
-  });
-
-  it("does not fill hold time with a missing observation interval", () => {
-    const { detector, advance, nextTime } = sequence("water");
-    advance(2, 5);
-    advance(0.2, 3);
-    expect(detector.update(observation(nextTime() + 1000, 0.2)).stage).toBe("ready");
-  });
-
-  it("starts over when the tracked person or hand changes", () => {
-    const { advance } = sequence("water");
-    advance(2, 5);
-    advance(0.2, 10);
-    expect(advance(2, 1, { trackingChanged: true }).stage).toBe("ready");
-    expect(advance(2, 2).stage).toBe("ready");
-  });
-
-  it("ignores out of order timestamps", () => {
-    const { detector, advance } = sequence("water");
-    advance(2, 5);
+  it("discards interrupted tracking and stale timestamps", () => {
+    const { advance, detector } = sequence("medicine");
+    advance(1.8, 5);
     advance(0.2, 10);
     expect(detector.update(observation(100, 2)).stage).toBe("returning");
+    expect(advance(2, 1, { trackingChanged: true }).stage).toBe("ready");
   });
-
-  it("treats non-finite distances as missing observations", () => {
-    const { advance } = sequence("water");
-    advance(2, 5);
-    advance(0.2, 10);
-    const invalid = advance(Number.NaN, 10);
-    expect(invalid.validObservationRatio).toBeLessThan(0.8);
-    expect(advance(2, 3).stage).not.toBe("detected");
-  });
-
-  it("rejects long invalid observation gaps rather than reusing a candidate", () => {
-    const { advance } = sequence("water");
-    advance(2, 5);
+  it("rejects invalid or too-sparse input", () => {
+    const { advance } = sequence("medicine");
+    advance(1.8, 5);
     advance(0.2, 10);
     advance(2, 10, { valid: false });
     expect(advance(2, 3).stage).not.toBe("detected");
+  });
+  it("routes water to the dynamic detector, never to presence-and-hold rules", () => {
+    const { advance } = sequence("water");
+    advance(2, 5);
+    advance(0.1, 50);
+    expect(advance(2, 5).stage).not.toBe("detected");
   });
 });

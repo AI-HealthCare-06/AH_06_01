@@ -71,9 +71,11 @@ test("demo week connects survey data, actual rewards, dashboard analysis and cur
     daytimeSleepinessScore: 5,
   });
   const reward = first.sleepExperience[today].experience;
+  await page.getByText("모델 근거와 해석 보기", { exact: true }).click();
   const analysis = page.getByRole("region", { name: "M1·M2 참고 분석" });
   await expect(analysis).toContainText(`일일 서베이 ${today} 반영`, { timeout: 30_000 });
   await expect(analysis).toContainText("확인 항목 1 / 10");
+  await page.locator(".selected-day-details > summary").click();
   await expect(page.getByRole("region", { name: "혈압 요약" })).toContainText("148 / 94");
   await expect(page.locator('[aria-label="선택일 수면 추가 EXP"]')).toContainText(`+${reward} EXP`);
   const chart = page.getByRole("region", { name: "저장된 건강 기록 추이" });

@@ -6,6 +6,7 @@ import {
 } from "@mediapipe/tasks-vision";
 import type { Detection } from "@mediapipe/tasks-vision";
 import { motionConfig } from "./config";
+import { loadToolModel, toolEvidence } from "./tools";
 import { extractInjectionHands, extractObservation } from "./features";
 import type { MotionObservation, MotionQuest, WorkerRequest, WorkerResponse } from "./types";
 
@@ -17,6 +18,9 @@ let previousDrink: MotionObservation | null = null;
 let face: FaceLandmarker | null = null;
 let hand: HandLandmarker | null = null;
 let object: ObjectDetector | null = null;
+let tool: ObjectDetector | null = null;
+let toolDetections: Detection[] = [];
+let toolAt = -Infinity;
 let detections: Detection[] = [];
 let objectAt = -Infinity;
 let previous: MotionObservation | null = null;
@@ -79,12 +83,25 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
           canvas: new OffscreenCanvas(1, 1),
         });
       }
+      if (processMode || injectionMode) {
+        const bytes = await loadToolModel(base);
+        if (bytes)
+          tool = await ObjectDetector.createFromOptions(filesFor("tool"), {
+            baseOptions: { modelAssetBuffer: bytes, delegate: "CPU" },
+            runningMode: "VIDEO",
+            scoreThreshold: 0.5,
+            categoryAllowlist: ["pill", "insulin_pen", "syringe"],
+            maxResults: 5,
+            canvas: new OffscreenCanvas(1, 1),
+          });
+      }
       send({ type: "ready", sessionId });
     } catch (error) {
       console.error("Motion model initialization failed", error);
       face?.close();
       hand?.close();
       object?.close();
+      tool?.close();
       send({
         type: "error",
         sessionId,
@@ -105,6 +122,8 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
       objectAt = -Infinity;
       previous = null;
       previousDrink = null;
+      toolDetections = [];
+      toolAt = -Infinity;
     }
     const faceResult = face?.detectForVideo(image, timestamp) ?? {
       faceLandmarks: [],
@@ -112,6 +131,10 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
       facialTransformationMatrixes: [],
     };
     const handResult = hand.detectForVideo(image, timestamp);
+    if (tool && timestamp - toolAt >= 250) {
+      toolDetections = tool.detectForVideo(image, timestamp).detections;
+      toolAt = timestamp;
+    }
     if (object && timestamp - objectAt >= motionConfig.objectIntervalMs) {
       detections = object.detectForVideo(image, timestamp).detections;
       objectAt = timestamp;
@@ -128,7 +151,7 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
       objectAt,
     );
     let process;
-    if (processMode) {
+    if (processMode || injectionMode) {
       const handObservation =
         quest === "medicine"
           ? observation
@@ -166,7 +189,17 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
         handObservation.faceTrackingChanged = true;
         drinkObservation.faceTrackingChanged = true;
       }
-      process = { hand: handObservation, drink: drinkObservation };
+      process = {
+        hand: handObservation,
+        drink: drinkObservation,
+        tools: toolEvidence(
+          timestamp - toolAt <= 500 ? toolDetections : [],
+          toolAt,
+          image.width,
+          image.height,
+          tool !== null,
+        ),
+      };
     }
     if (resized) observation.trackingChanged = true;
     if (quest !== "water" || observation.valid) previous = observation;

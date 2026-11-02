@@ -1,4 +1,7 @@
 import type { InjectionObservation } from "./injection";
+import type { RuntimeStats } from "./native";
+import type { SequenceFrame, SequenceLabel } from "./sequence";
+import type { ToolEvidence } from "./tools";
 
 export type MotionQuest = "water" | "medicine";
 export type InputSource = "camera" | "sample";
@@ -10,7 +13,11 @@ export type ProcessProgress = {
   completedSteps: string[];
   trace: ProcessTrace[];
 };
-export type ProcessObservation = { hand: MotionObservation; drink: MotionObservation };
+export type ProcessObservation = {
+  hand: MotionObservation;
+  drink: MotionObservation;
+  tools?: ToolEvidence;
+};
 export type MotionStage =
   "ready" | "approaching" | "at_mouth" | "at_site" | "returning" | "detected";
 export type MotionObservation = {
@@ -31,6 +38,13 @@ export type MotionObservation = {
   objectEvidence: "detected" | "tracked" | null;
   objectObservedAt: number | null;
   objectOccluded: boolean;
+  drinkMotion?: {
+    handInclination: number | null;
+    palmNormal?: { x: number; y: number; z: number } | null;
+    aspect: number;
+    lift: number;
+    shapeReliable?: boolean;
+  };
 };
 export type DetectionProgress = {
   stage: MotionStage;
@@ -52,7 +66,13 @@ export type MotionResult = {
     | "injection_site_hand_process"
     | null;
   decision: "detected" | "inconclusive" | "cancelled";
-  detector: "rules_v1" | "process_rules_v2" | "injection_rules_v1";
+  detector:
+    | "rules_v1"
+    | "drinking_rules_v2"
+    | "process_rules_v2"
+    | "process_rules_v3"
+    | "injection_rules_v1"
+    | "sequence_dtw_v1";
   process?: ProcessProgress;
   modelManifestVersion: string;
   configVersion: string;
@@ -61,6 +81,22 @@ export type MotionResult = {
   durationMs: number;
   validObservationRatio: number;
   classificationScore: null;
+  toolEvidence?: { modelReady: boolean; expectedToolObserved: boolean };
+  runtime?: RuntimeStats;
+  sequenceClassification?: {
+    label: SequenceLabel | null;
+    distance: number | null;
+    accepted: boolean;
+  };
+  learningClip?: {
+    schemaVersion: 1;
+    featureVersion: string;
+    subjectId: string;
+    sessionId: string;
+    inputSource: InputSource;
+    target: SequenceLabel;
+    frames: SequenceFrame[];
+  };
   preparationSource: "not_required" | "user_ack";
   verificationLevel: "local_demo" | "experimental_process";
   userConfirmed: boolean;

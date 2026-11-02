@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { authenticateQuest } from "./fixtures/quest-evidence";
+import { seedDashboardActivity } from "./helpers/dashboard";
 
 test("every quest shows its actual progress and completion updates the bar", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -126,10 +127,10 @@ test("charts and progress bars replay when returning to their tab", async ({ pag
   ).toBe(true);
   await page.getByRole("link", { name: "Dashboard", exact: true }).click();
   await page.getByRole("link", { name: "상세 건강 보고서 웹으로 보기" }).click();
-  await expect(page.locator(".impact-bars .metric-fill")).toHaveCount(6);
+  await expect(page.locator(".score-track .metric-fill")).toHaveCount(1);
   expect(
     await page
-      .locator(".impact-bars .metric-fill")
+      .locator(".score-track .metric-fill")
       .evaluateAll((elements) => elements.every((element) => element.getAnimations().length > 0)),
   ).toBe(true);
 });
@@ -148,6 +149,7 @@ test("reduced motion immediately shows final metrics and stops entry animations"
   );
   // Resume the test clock so the dashboard's async query notifications can run.
   await page.clock.resume();
+  await seedDashboardActivity(page);
   for (const route of ["home", "quests", "dashboard", "dashboard/report", "shop"]) {
     await page.goto(`/${route}`);
     await page.locator(".animated-number").first().waitFor();

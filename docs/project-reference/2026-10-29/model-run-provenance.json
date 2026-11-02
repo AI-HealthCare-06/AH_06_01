@@ -1,0 +1,20 @@
+{
+  "checkedOn": "2026-10-29",
+  "syntheticOnly": true,
+  "request": {
+    "demo_persona": "office-month-v1"
+  },
+  "endpoint": "http://127.0.0.1:8009/predictions/bp-stage",
+  "rawResponseFile": "persona-a-local-model-result.json",
+  "datasetWindow": [
+    "2026-09-30",
+    "2026-10-29"
+  ],
+  "m1WeightsSha256": "8c2b5e02e27a85a250025809170d32f26945f6859c279ecb8f85917e492a19ac",
+  "m2ThresholdsSha256": "28032a13e44d9a4381b2f3bb62e15773bb681e8624a64c904b2eb45c11f6e9be",
+  "m1DataQuality": "not_applicable",
+  "m2StateCounts": {
+    "not_evaluable": 10
+  },
+  "runtimeNote": "Existing local Python 3.11/scikit-learn 1.9.0 AI runtime and package imports, with this branch fixed-persona adapter. M2 thresholds match this checkout. This is not a production deployment or a standalone clean-checkout runtime test."
+}

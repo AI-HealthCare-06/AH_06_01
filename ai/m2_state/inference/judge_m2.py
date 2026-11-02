@@ -17,9 +17,12 @@ import datetime as dt
 import logging
 from typing import Any, Optional
 
-import thresholds as T
-import feature_contract as fc
-import rules_m2 as R
+if __package__ == "m2_state.inference":
+    from .. import thresholds as T, feature_contract as fc, rules_m2 as R
+else:
+    import thresholds as T
+    import feature_contract as fc
+    import rules_m2 as R
 
 log = logging.getLogger("m2.judge")
 

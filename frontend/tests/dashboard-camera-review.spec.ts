@@ -138,7 +138,7 @@ test("health reports stay in normal flow without horizontal overflow on phones",
   for (const width of [320, 390, 534]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/dashboard/report");
-    await expect(page.locator(".score-number")).toHaveText("82");
+    await expect(page.locator(".score-number")).toHaveText("—");
     const heading = (await page.locator(".dashboard-heading").boundingBox())!,
       score = (await page.locator(".health-score").first().boundingBox())!;
     expect(score.y).toBeGreaterThanOrEqual(heading.y + heading.height);

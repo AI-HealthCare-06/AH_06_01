@@ -14,6 +14,8 @@ class VisionRequest:
     mime_type: str
     system_prompt: str
     user_prompt: str
+    detail: str = "high"
+    max_output_tokens: int = 2400
 
 
 class VisionProvider(Protocol):

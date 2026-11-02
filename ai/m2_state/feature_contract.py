@@ -16,7 +16,10 @@ from typing import Any, Iterable, Optional
 
 import yaml
 
-import thresholds as T
+if __package__ == "m2_state":
+    from . import thresholds as T
+else:
+    import thresholds as T
 
 CONTRACT_PATH = Path(__file__).with_name("feature_contract.yaml")
 SEP = "__"   # 평탄 표 컬럼 구분자: <변수>__<필드>

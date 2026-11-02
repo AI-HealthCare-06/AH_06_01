@@ -1,5 +1,5 @@
 export const motionConfig = {
-  version: "rules-v1.3-selfie",
+  version: "rules-v2-dynamic-sip",
   frameIntervalMs: 100,
   qualitySlotMs: 100,
   objectIntervalMs: 200,
@@ -19,7 +19,6 @@ export const motionConfig = {
   stableMs: 300,
   enterDistance: 0.6,
   leaveDistance: 1,
-  waterHoldMs: 700,
   medicineHoldMs: 250,
   minimumValidRatio: 0.8,
 };

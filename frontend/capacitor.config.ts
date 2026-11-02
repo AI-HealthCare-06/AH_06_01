@@ -18,7 +18,7 @@ const config: CapacitorConfig = {
       autoDeleteFailed: false,
       resetWhenUpdate: true,
       appReadyTimeout: 15000,
-      version: "1.5.2",
+      version: "1.7.0",
       keepUrlPathAfterReload: true,
     },
   },

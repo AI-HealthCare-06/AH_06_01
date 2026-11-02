@@ -10,12 +10,26 @@ MAX_GRAMS = 1500
 class VisionFood(BaseModel):
     model_config = ConfigDict(extra="ignore", allow_inf_nan=False)
 
-    name: str = Field(min_length=1, max_length=30)
+    name: str = Field(min_length=1, max_length=80)
     in_candidates: bool = False
     estimated_g: float | None = None
     portion_hint: str | None = Field(default=None, max_length=50)
     confidence: float = Field(default=0.5, ge=0, le=1)
     is_soup: bool = False
+    bbox: list[float] | None = Field(default=None, min_length=4, max_length=4)
+
+    @field_validator("bbox")
+    @classmethod
+    def _box(cls, value):
+        if value is None:
+            return None
+        if (
+            any(not 0 <= x <= 1 for x in value)
+            or value[0] >= value[2]
+            or value[1] >= value[3]
+        ):
+            return None
+        return value
 
     @field_validator("name")
     @classmethod
@@ -28,7 +42,7 @@ class VisionFood(BaseModel):
     @field_validator("estimated_g")
     @classmethod
     def _range(cls, v: float | None) -> float | None:
-        # 범위 밖이면 None → 매칭된 DB의 1인분 중량으로 대체(설계서 3.3)
+        # 범위 밖의 추정량은 모름으로 남긴다. 제공량을 섭취량으로 대체하지 않는다.
         if v is None or not (MIN_GRAMS <= v <= MAX_GRAMS):
             return None
         return round(v)

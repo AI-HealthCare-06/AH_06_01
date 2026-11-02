@@ -287,3 +287,14 @@
   outline: 3px solid #e5483c;
   outline-offset: 2px;
 }
+.diet-portion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+.diet-portion-actions button {
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 0.9em;
+}

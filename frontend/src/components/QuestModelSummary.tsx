@@ -1,6 +1,7 @@
 import { useQuestAnalysis } from "../services/useQuestAnalysis";
-import { m2StateLabels, m2StatusLabels } from "../domain/quest-analysis";
+import { m2StateLabels, m2StatusLabels, analysisSourceLabel } from "../domain/quest-analysis";
 import { bpStagePresentation } from "../domain/bp-stage";
+import { DemoInputChangedError } from "../domain/demo-analysis-input";
 export function QuestModelSummary() {
   const query = useQuestAnalysis();
   const analysis = query.data;
@@ -14,7 +15,9 @@ export function QuestModelSummary() {
           {!query.ready
             ? "건강 정보 저장 동의 후 분석하거나 데모를 체험해 보세요."
             : query.isError
-              ? "분석에 연결하지 못했어요."
+              ? query.error instanceof DemoInputChangedError
+                ? query.error.message
+                : "분석에 연결하지 못했어요."
               : "모델 응답을 확인하고 있어요…"}
         </p>
         {query.ready && query.isError && (
@@ -36,9 +39,7 @@ export function QuestModelSummary() {
     <section className="quest-model-summary cream-card" aria-label="M1·M2 참고 분석">
       <header className="stitch-section-heading">
         <h3>M1 · M2 참고 분석</h3>
-        <span className="pixel-tag">
-          {analysis.source === "synthetic-demo" ? "합성 입력 · 실제 호출" : "모델 응답"}
-        </span>
+        <span className="pixel-tag">{analysisSourceLabel(analysis)}</span>
       </header>
       <p className="analysis-as-of">
         기준 {analysis.as_of} · 전날 기록 {analysis.previous_day.date}

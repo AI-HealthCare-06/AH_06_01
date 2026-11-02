@@ -19,6 +19,7 @@ import {
   repository,
 } from "./source.mjs";
 import { nativeIdentity } from "../frontend/scripts/mobile-update-native.mjs";
+import { previousChannel } from "./ota-channel.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const frontend = join(root, "frontend");
@@ -164,21 +165,14 @@ async function publish() {
   for (const nativeVersion of config.compatibleNativeVersions) {
     const url = `${base}/android/${mobile.channel}/${nativeVersion}/latest.json`;
     const response = await get(`${url}?t=${Date.now()}`);
-    if (!response.ok)
-      throw new Error(`Existing native channel unavailable: ${nativeVersion}`);
-    const envelope = await response.json(),
-      previous = decode(envelope);
-    if (
-      previous.nativeVersion !== nativeVersion ||
-      previous.channel !== mobile.channel ||
-      previous.appId !== "com.rexrun.demo"
-    )
-      throw new Error("Existing OTA channel identity mismatch");
-    if (
-      compareVersion(version, previous.version) < 0 ||
-      (version === previous.version && previous.source?.commit !== sha)
-    )
-      throw new Error("Release cannot replace a newer or unrelated version");
+    const { envelope, previous } = await previousChannel(response, {
+      nativeVersion,
+      newNativeVersion: config.nativeVersion,
+      channel: mobile.channel,
+      version,
+      sha,
+      decode,
+    });
     channels.push({ nativeVersion, url, envelope, previous });
   }
   const temp = mkdtempSync(join(tmpdir(), "rexrun-signing-"));
@@ -243,7 +237,7 @@ async function publish() {
     const runUrl = `https://github.com/${repository}/actions/runs/${process.env.GITHUB_RUN_ID}`;
     const source = { repository, branch: "main", commit: sha, runUrl };
     for (const channel of channels) {
-      if (version === channel.previous.version) {
+      if (version === channel.previous?.version) {
         if (
           JSON.stringify(channel.previous.files) !== JSON.stringify(publicFiles)
         )
@@ -361,7 +355,7 @@ async function publish() {
     );
     freshMain(sha, true);
     for (const channel of channels) {
-      if (version !== channel.previous.version)
+      if (version !== channel.previous?.version)
         await request(channel, "activate");
       const response = await get(`${channel.url}?t=${Date.now()}`),
         saved = await response.json();
@@ -475,7 +469,10 @@ async function publish() {
 }
 
 function installPage(report) {
+  const existing = report.compatibleNativeVersions
+    .filter((v) => v !== report.nativeVersion)
+    .join(" · ");
   return `<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>REXRUN 설치</title>
 <style>body{margin:0;background:#272c27;color:#20382f;font:18px system-ui,sans-serif;line-height:1.6}main{max-width:560px;margin:32px auto;padding:28px;background:#f3e8c8;border:3px solid #151b16;box-shadow:6px 6px #111}h1{margin:0 0 12px;font-size:36px}a{color:#175b4a}.download{display:block;padding:18px;text-align:center;background:#e54639;color:#fff;text-decoration:none;font-weight:800;border:2px solid #20382f;box-shadow:4px 4px #20382f}img{display:block;max-width:220px;width:65%;margin:24px auto}small{display:block;overflow-wrap:anywhere;margin-top:12px}@media(max-width:620px){main{margin:16px;padding:24px}}</style>
-<main><h1>REXRUN</h1><p>Android 앱 · v${report.nativeVersion}<br>웹 업데이트 v${report.version}</p><a class="download" href="${report.apkUrl}">최신 APK 다운로드</a><img src="/install/install-qr.png" alt="설치 페이지 QR"><p>다운로드한 APK를 열어 설치해 주세요. 기존 앱이 있다면 덮어설치할 수 있습니다. Android에서 요청하면 이 출처의 앱 설치를 허용해 주세요.</p><p>기존 v1.5.0~1.5.2 앱에는 자동 업데이트가 제공됩니다.</p><a href="/">웹에서 열기</a><small>main · <a href="https://github.com/${repository}/commit/${report.source.commit}">${report.source.commit.slice(0, 12)}</a><br>SHA-256 ${report.apkSha256}</small></main></html>`;
+<main><h1>REXRUN</h1><p>Android 앱 · v${report.nativeVersion}<br>웹 업데이트 v${report.version}</p><a class="download" href="${report.apkUrl}">최신 APK 다운로드</a><img src="/install/install-qr.png" alt="설치 페이지 QR"><p>다운로드한 APK를 열어 설치해 주세요. 기존 앱이 있다면 덮어설치할 수 있습니다. Android에서 요청하면 이 출처의 앱 설치를 허용해 주세요.</p><p>기존 ${existing} 앱에는 자동 업데이트가 제공됩니다. 새 네이티브 카메라 추론은 최신 APK 설치 후 사용할 수 있습니다.</p><a href="/">웹에서 열기</a><small>main · <a href="https://github.com/${repository}/commit/${report.source.commit}">${report.source.commit.slice(0, 12)}</a><br>SHA-256 ${report.apkSha256}</small></main></html>`;
 }

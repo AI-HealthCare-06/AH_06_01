@@ -245,6 +245,7 @@ if (import.meta.main) {
       "1.5.0",
       "1.5.1",
       "1.5.2",
+      "1.7.0",
     ], announceAppUpdate),
   );
 }

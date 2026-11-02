@@ -1,0 +1,208 @@
+{
+  "m1": {
+    "stage_probs": null,
+    "stage_top": null,
+    "risk_level": null,
+    "reason_codes": [],
+    "data_quality": "not_applicable",
+    "model_version": "M1-20261020_150607-nested__base",
+    "feature_version": "1.2.0",
+    "problems": "bp_input_present:blood_pressure"
+  },
+  "m1_bridge": {
+    "step": "htn",
+    "source": "medication-contract"
+  },
+  "m2": {
+    "module": "M2",
+    "contract_version": "0.2.0",
+    "thresholds_version": "0.2.0",
+    "subject_id": "synthetic-demo",
+    "as_of": "2026-11-02",
+    "data_quality": "ok",
+    "violations": [],
+    "presence": {
+      "m1_bp_step": true,
+      "pulse_hr": true,
+      "symptom_flags": true,
+      "age_sex": true,
+      "height_weight_waist": true,
+      "medication": true,
+      "smoking_alcohol": false,
+      "sleep_snoring": true,
+      "diet_sodium": true,
+      "activity": true,
+      "lab_glucose_lipid": true,
+      "lab_kidney": false,
+      "family_history": true,
+      "clinical_exam": false
+    },
+    "m1_bp_step": {
+      "step": "htn",
+      "step_date": "2026-11-02"
+    },
+    "guard": {
+      "triggered": null,
+      "pending_m1_field": "guard_flag"
+    },
+    "target_bp": {
+      "sbp": null,
+      "dbp": null,
+      "diabetes": null,
+      "ckd": null,
+      "basis": null
+    },
+    "states": {
+      "ELEVATED": {
+        "status": "negative",
+        "evidence": {
+          "step": "htn",
+          "target_step": "elevated"
+        },
+        "missing_required": [],
+        "auxiliary_present": [
+          "pulse_hr",
+          "height_weight_waist",
+          "medication",
+          "diet_sodium",
+          "activity",
+          "family_history"
+        ],
+        "notes": []
+      },
+      "PREHTN": {
+        "status": "not_evaluable",
+        "evidence": {
+          "step": "htn"
+        },
+        "missing_required": ["smoking_alcohol"],
+        "auxiliary_present": ["pulse_hr", "medication", "sleep_snoring", "lab_glucose_lipid"],
+        "notes": []
+      },
+      "HTN_SUSPECT": {
+        "status": "not_evaluable",
+        "evidence": {
+          "step": "htn"
+        },
+        "missing_required": ["smoking_alcohol"],
+        "auxiliary_present": ["pulse_hr", "symptom_flags", "sleep_snoring", "lab_glucose_lipid"],
+        "notes": []
+      },
+      "HTN_STAGE2_SCREEN": {
+        "status": "not_evaluable",
+        "evidence": {
+          "step": "htn"
+        },
+        "missing_required": ["m1_bp_step.stage2_flag"],
+        "auxiliary_present": [
+          "pulse_hr",
+          "height_weight_waist",
+          "diet_sodium",
+          "lab_glucose_lipid",
+          "family_history"
+        ],
+        "notes": ["pending_m1"]
+      },
+      "ISH": {
+        "status": "not_evaluable",
+        "evidence": {
+          "step": "htn"
+        },
+        "missing_required": ["m1_bp_step.ish_flag"],
+        "auxiliary_present": [
+          "pulse_hr",
+          "symptom_flags",
+          "height_weight_waist",
+          "diet_sodium",
+          "activity"
+        ],
+        "notes": ["pending_m1"]
+      },
+      "WHITE_COAT": {
+        "status": "not_applicable",
+        "evidence": {
+          "step": "htn",
+          "medication_status": 3
+        },
+        "missing_required": [],
+        "auxiliary_present": [],
+        "notes": []
+      },
+      "MASKED": {
+        "status": "not_applicable",
+        "evidence": {
+          "step": "htn",
+          "medication_status": 3
+        },
+        "missing_required": [],
+        "auxiliary_present": ["height_weight_waist", "sleep_snoring"],
+        "notes": []
+      },
+      "MORNING": {
+        "status": "not_evaluable",
+        "evidence": {
+          "step": "htn"
+        },
+        "missing_required": ["smoking_alcohol"],
+        "auxiliary_present": ["pulse_hr", "symptom_flags", "diet_sodium"],
+        "notes": []
+      },
+      "NOCTURNAL_SCREEN": {
+        "status": "positive",
+        "evidence": {
+          "step": "htn",
+          "symptoms": {
+            "snoring": true,
+            "daytime_sleepiness": true,
+            "nocturia": false
+          },
+          "n_symptoms": 2,
+          "symptoms_ge_min": true,
+          "abpm_used": false
+        },
+        "missing_required": [],
+        "auxiliary_present": ["pulse_hr", "height_weight_waist", "diet_sodium"],
+        "notes": []
+      },
+      "RESISTANT_SUSPECT": {
+        "status": "not_evaluable",
+        "evidence": {
+          "step": "htn"
+        },
+        "missing_required": ["smoking_alcohol", "lab_kidney"],
+        "auxiliary_present": [
+          "symptom_flags",
+          "height_weight_waist",
+          "activity",
+          "lab_glucose_lipid"
+        ],
+        "notes": []
+      }
+    },
+    "implemented_states": ["ELEVATED", "PREHTN", "HTN_SUSPECT", "NOCTURNAL_SCREEN"],
+    "pending_m1_states": [
+      "HTN_STAGE2_SCREEN",
+      "ISH",
+      "WHITE_COAT",
+      "MASKED",
+      "MORNING",
+      "RESISTANT_SUSPECT"
+    ],
+    "display_priority": null
+  },
+  "previous_day": {
+    "date": "2026-11-01",
+    "completed_quests": ["medicine", "meal", "walk", "water", "survey"],
+    "steps": 6500,
+    "sleep_hours": 7.416666666666667
+  },
+  "source": "synthetic-demo",
+  "as_of": "2026-11-02",
+  "daily_survey_date": "2026-11-02",
+  "provenance": {
+    "kind": "recorded-demo",
+    "computedOn": "2026-11-02",
+    "fixtureSha256": "1431f63e66c1169ec38cd19684ec8943439795bf9b7db939c4e6789bf3580ff8",
+    "modelSha256": "8c2b5e02e27a85a250025809170d32f26945f6859c279ecb8f85917e492a19ac"
+  }
+}
