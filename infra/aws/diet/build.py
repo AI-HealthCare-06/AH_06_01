@@ -12,13 +12,16 @@ def main():
     cache = root / ".cache/diet-f6"
     package = cache / "lambda-package"
     source = root / "services/diet-f6"
+    metadata = source / "data/catalog-source.json"
+    if (source / "data/food_nutrition_mfds.csv").is_file() and not metadata.is_file():
+        raise FileNotFoundError("Official food catalog metadata is required")
     for name in ["f6_diet", "data", "prompts"]:
         target = package / name
         target.mkdir(exist_ok=True)
         for path in (source / name).rglob("*"):
             if (
                 path.is_file()
-                and path.suffix in {".py", ".csv", ".md"}
+                and (path.suffix in {".py", ".csv", ".md"} or path == metadata)
                 and "__pycache__" not in path.parts
             ):
                 dest = target / path.relative_to(source / name)
