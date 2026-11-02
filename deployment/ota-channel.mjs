@@ -7,6 +7,20 @@ export async function previousChannel(response, options) {
     options;
   if (response.status === 404 && nativeVersion === newNativeVersion)
     return { envelope: null, previous: null };
+  // Storage's public endpoint returns HTTP 400 for a missing key while
+  // carrying its machine-readable 404/NoSuchKey error in the JSON body.
+  if (response.status === 400 && nativeVersion === newNativeVersion) {
+    const error = await response
+      .clone()
+      .json()
+      .catch(() => null);
+    if (
+      error?.statusCode === "404" &&
+      error.error === "not_found" &&
+      error.code === "NoSuchKey"
+    )
+      return { envelope: null, previous: null };
+  }
   if (!response.ok)
     throw new Error(`Existing native channel unavailable: ${nativeVersion}`);
   const envelope = await response.json();

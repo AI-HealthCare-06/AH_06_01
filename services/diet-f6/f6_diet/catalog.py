@@ -34,9 +34,9 @@ def compact(name):
 
 
 class Catalog:
-    def __init__(self, directory: Path = DATA):
+    def __init__(self, directory: Path = DATA, *, prefer_official: bool = True):
         self.foods = []
-        official = (directory / "food_nutrition_mfds.csv").is_file()
+        official = prefer_official and (directory / "food_nutrition_mfds.csv").is_file()
         self.metadata = (
             json.loads((directory / "catalog-source.json").read_text(encoding="utf-8"))
             if official

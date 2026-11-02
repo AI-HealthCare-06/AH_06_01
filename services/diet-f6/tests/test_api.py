@@ -45,10 +45,16 @@ def photo():
     return output.getvalue()
 
 
-def post(client, data=None, image=None, headers=None):
+OFFICIAL_VERSION = Catalog().version
+
+
+def post(client, data=None, image=None, headers=None, catalog_version=OFFICIAL_VERSION):
+    payload = dict(data or {"ai_consent": "true"})
+    if catalog_version is not None:
+        payload["catalog_version"] = catalog_version
     return client.post(
         "/api/diet/analyze",
-        data=data or {"ai_consent": "true"},
+        data=payload,
         files={"photo": ("meal.png", image or photo(), "image/png")},
         headers=headers
         or {"Origin": "http://127.0.0.1:5173", "X-REXRUN-Development": "1"},
@@ -92,6 +98,25 @@ def test_unconfigured_provider_does_not_silently_mock():
     with TestClient(create_app(settings())) as client:
         assert client.get("/api/diet/status").json()["available"] is False
         assert post(client).status_code == 503
+
+
+def test_installed_clients_keep_legacy_codes_until_they_opt_into_official_catalog():
+    with TestClient(create_app(settings(), Provider())) as client:
+        for version in [None, "f6-dev-sample-v1"]:
+            response = post(client, catalog_version=version)
+            assert response.status_code == 200
+            assert response.json()["catalog_version"] == "f6-dev-sample-v1"
+            assert response.json()["items"][0]["food_code"] == "DEV-0001"
+        official = post(client).json()
+        assert official["catalog_version"] == OFFICIAL_VERSION
+        assert official["items"][0]["food_code"] == "D301-022000000-0001"
+
+
+def test_unknown_catalog_is_rejected_before_calling_the_model():
+    provider = Provider()
+    with TestClient(create_app(settings(), provider)) as client:
+        assert post(client, catalog_version="unrecognized-version").status_code == 409
+    assert provider.calls == 0
 
 
 def test_bad_image_and_non_food_have_distinct_errors():

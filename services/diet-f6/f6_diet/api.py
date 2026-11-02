@@ -115,6 +115,7 @@ def normalize_image(data: bytes) -> bytes:
 def create_app(settings: Settings | None = None, provider=None, quota=None):
     settings = settings or Settings.environment()
     catalog = Catalog()
+    legacy_catalog = Catalog(prefer_official=False)
     prompt_path = ROOT / "prompts" / "diet_vision_v3.md"
     prompt = PromptTemplate.load(prompt_path)
     prompt_hash = hashlib.sha256(prompt_path.read_bytes()).hexdigest()
@@ -230,8 +231,19 @@ def create_app(settings: Settings | None = None, provider=None, quota=None):
         request: Request,
         photo: Annotated[UploadFile, File()],
         ai_consent: Annotated[bool, Form()] = False,
+        catalog_version: Annotated[str | None, Form(max_length=100)] = None,
     ):
         user = await owner(request)
+        if catalog_version not in (None, catalog.version, legacy_catalog.version):
+            await photo.close()
+            raise HTTPException(
+                409,
+                {"code": "CATALOG_UNSUPPORTED", "message": "앱 업데이트 후 다시 분석해 주세요."},
+            )
+        # Installed clients without catalog negotiation still require DEV codes.
+        selected_catalog = (
+            catalog if catalog_version == catalog.version else legacy_catalog
+        )
         if not ai_consent:
             await photo.close()
             raise HTTPException(
@@ -297,7 +309,7 @@ def create_app(settings: Settings | None = None, provider=None, quota=None):
                                 []  # Independent recognition; an arbitrary DB prefix would bias it toward rice dishes.
                             ),
                         ),
-                        catalog,
+                        selected_catalog,
                         deadline=started + settings.timeout - 1,
                         disconnected=request.is_disconnected,
                     )
@@ -344,14 +356,14 @@ def create_app(settings: Settings | None = None, provider=None, quota=None):
             "model": engine.model,
             "prompt_version": prompt.version,
             "prompt_sha256": prompt_hash,
-            "catalog_version": catalog.version,
-            "catalog_kind": catalog.metadata["kind"],
+            "catalog_version": selected_catalog.version,
+            "catalog_kind": selected_catalog.metadata["kind"],
             "catalog_source": {
-                key: catalog.metadata[key]
+                key: selected_catalog.metadata[key]
                 for key in ("publisher", "source_url", "published_on")
             },
             "items": [
-                {**catalog.item(food), "crop_reviewed": index in reviewed}
+                {**selected_catalog.item(food), "crop_reviewed": index in reviewed}
                 for index, food in enumerate(result.foods)
             ],
             "analysis_passes": passes,

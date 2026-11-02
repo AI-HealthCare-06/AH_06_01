@@ -39,6 +39,35 @@ test("only the current new APK may bootstrap a missing channel", async () => {
     /unavailable/,
   );
 });
+test("Storage's HTTP 400 NoSuchKey only bootstraps the current new APK", async () => {
+  const missing = { statusCode: "404", error: "not_found", code: "NoSuchKey" };
+  assert.equal(
+    (await previousChannel(Response.json(missing, { status: 400 }), options))
+      .previous,
+    null,
+  );
+  await assert.rejects(
+    () =>
+      previousChannel(Response.json(missing, { status: 400 }), {
+        ...options,
+        nativeVersion: "1.5.2",
+      }),
+    /unavailable/,
+  );
+  for (const body of [
+    { ...missing, code: "NoSuchBucket" },
+    { ...missing, statusCode: "403" },
+    {},
+  ])
+    await assert.rejects(
+      () => previousChannel(Response.json(body, { status: 400 }), options),
+      /unavailable/,
+    );
+  await assert.rejects(
+    () => previousChannel(new Response("invalid", { status: 400 }), options),
+    /unavailable/,
+  );
+});
 test("existing channels retain signature, identity and version checks", async () => {
   assert.equal(
     (await previousChannel(response(manifest), options)).previous.version,

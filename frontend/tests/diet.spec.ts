@@ -1,5 +1,6 @@
 import { selectPixelOption } from "./helpers/controls";
 import { expect, test } from "@playwright/test";
+import catalog from "../src/design/food-catalog-source.json" with { type: "json" };
 const image = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAIAAAAC64paAAAAK0lEQVR4nGNkaGAgGzCRr5VhVDOpgIlkHUhgVDOJgIlUDchgVDOJgKIAAwDFMgCoOrIAcgAAAABJRU5ErkJggg==",
   "base64",
@@ -39,6 +40,8 @@ async function mock(page: import("@playwright/test").Page, error = false) {
     if (route.request().url().endsWith("/status"))
       return route.fulfill({ json: { available: true, provider: "openai", local: true } });
     calls++;
+    expect(route.request().postData()).toContain('name="catalog_version"');
+    expect(route.request().postData()).toContain(catalog.version);
     return route.fulfill({
       status: error ? 502 : 200,
       json: error

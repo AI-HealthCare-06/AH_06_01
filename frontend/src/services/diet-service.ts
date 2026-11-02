@@ -104,6 +104,7 @@ export async function analyzeDiet(
   const form = new FormData();
   form.append("photo", blob, "meal.jpg");
   form.append("ai_consent", "true");
+  form.append("catalog_version", catalogVersion);
   const response = await fetch(`${base}/analyze`, { method: "POST", headers, body: form, signal });
   const json = await response.json().catch(() => null);
   if (!response.ok)
