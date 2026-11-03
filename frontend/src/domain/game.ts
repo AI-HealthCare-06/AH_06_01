@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { coachStateSchema, emptyCoach } from "./exercise-coach";
 import { profileQuestSchema, emptyProfileQuests } from "./profile-quests";
 import { dailySurveySchema, latestSurveyPressure, validDailySurvey } from "./daily-survey";
 import { accessories } from "../design/accessories";
@@ -149,6 +150,7 @@ export const gameSchema = z
     combatExperienceToday: z.number().int().nonnegative().default(0),
     questHistoryDetails: z.record(z.string(), z.array(z.enum(questIds))).default({}),
     profileQuests: profileQuestSchema.default(emptyProfileQuests),
+    exerciseCoach: coachStateSchema.default(emptyCoach),
     dailySurveys: z.record(z.string(), dailySurveySchema).default({}),
     sleepExperience: z
       .record(
@@ -245,6 +247,7 @@ export function initialGame(date = localDate()): GameState {
     combatExperienceToday: 0,
     questHistoryDetails: {},
     profileQuests: emptyProfileQuests(),
+    exerciseCoach: emptyCoach(),
     dailySurveys: {},
     sleepExperience: {},
     healthHistory: {},

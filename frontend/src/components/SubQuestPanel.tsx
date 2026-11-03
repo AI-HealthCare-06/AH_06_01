@@ -1,4 +1,5 @@
 import { quests, type Quest } from "../domain/game";
+import { ExerciseCoachPanel } from "./ExerciseCoachPanel";
 import { rankSubQuests } from "../domain/quest-analysis";
 import { useQuestAnalysis } from "../services/useQuestAnalysis";
 import { useMedicationStore } from "../stores/medication-store";
@@ -20,6 +21,7 @@ export function SubQuestPanel({
     : [];
   return (
     <section className="sub-quest-panel" aria-label="Sub Quest 추천">
+      <ExerciseCoachPanel />
       <header>
         <h3>선택 서브 퀘스트</h3>
       </header>
