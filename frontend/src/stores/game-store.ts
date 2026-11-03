@@ -1,4 +1,15 @@
 import { appStorageKey } from "../domain/demo-mode";
+import {
+  coachSurveySchema,
+  coachPlanSchema,
+  coachContext,
+  coachContextKey,
+  eligibleExercises,
+  type CoachSurvey,
+  type CoachPlan,
+} from "../domain/exercise-coach";
+import { levelUpGold } from "../domain/experience";
+import { useProfileStore } from "./profile-store";
 import { create } from "zustand";
 import {
   startProfileQuests,
@@ -69,6 +80,9 @@ function save(game: GameState) {
 
 type GameStore = {
   game: GameState;
+  saveCoachSurvey: (value: CoachSurvey) => boolean;
+  saveCoachPlan: (value: CoachPlan) => boolean;
+  finishExercise: (id: string) => number | null;
   startProfileQuests: (now?: number, legacy?: boolean) => void;
   finishProfileQuest: (id: ProfileQuestId) => number | null;
   paused: boolean;
@@ -107,6 +121,104 @@ save(loadedGame);
 let lastSaved = 0;
 export const useGameStore = create<GameStore>((set) => ({
   game: loadedGame,
+  saveCoachSurvey: (value) => {
+    let ok = false;
+    set((state) => {
+      const parsed = coachSurveySchema.safeParse(value);
+      if (!useSessionStore.getState().active || !parsed.success) return state;
+      const experience = state.game.experience + (state.game.exerciseCoach.survey ? 0 : 100);
+      const game = {
+        ...state.game,
+        experience,
+        gold: state.game.gold + levelUpGold(state.game.experience, experience),
+        exerciseCoach: { ...state.game.exerciseCoach, survey: parsed.data, plan: null },
+      };
+      if (!save(game)) return state;
+      ok = true;
+      return { game };
+    });
+    return ok;
+  },
+  saveCoachPlan: (value) => {
+    let ok = false;
+    set((state) => {
+      const parsed = coachPlanSchema.safeParse(value),
+        survey = state.game.exerciseCoach.survey;
+      if (
+        !useSessionStore.getState().active ||
+        !parsed.success ||
+        !survey ||
+        parsed.data.date !== localDate() ||
+        parsed.data.surveyRevision !== survey.updatedAt
+      )
+        return state;
+      const context = coachContext(state.game, useProfileStore.getState().profile);
+      const safe = eligibleExercises(survey, context).items;
+      if (
+        parsed.data.contextKey !== coachContextKey(context) ||
+        new Set(parsed.data.items.map((i) => i.id)).size !== parsed.data.items.length ||
+        parsed.data.items.some((i) => !safe.some((s) => s.id === i.id))
+      )
+        return state;
+      const game = {
+        ...state.game,
+        exerciseCoach: { ...state.game.exerciseCoach, plan: parsed.data },
+      };
+      if (!save(game)) return state;
+      ok = true;
+      return { game };
+    });
+    return ok;
+  },
+  finishExercise: (id) => {
+    let reward: number | null = null;
+    set((state) => {
+      const current = rollDay(state.game),
+        coach = current.exerciseCoach,
+        plan = coach.plan,
+        survey = coach.survey;
+      const context = coachContext(current, useProfileStore.getState().profile);
+      const item = survey && eligibleExercises(survey, context).items.find((i) => i.id === id);
+      const completed = coach.completed[current.date] ?? [];
+      if (
+        !useSessionStore.getState().active ||
+        !plan ||
+        !survey ||
+        !item ||
+        plan.date !== current.date ||
+        plan.surveyRevision !== survey.updatedAt ||
+        plan.contextKey !== coachContextKey(context) ||
+        !plan.items.some((i) => i.id === id) ||
+        completed.includes(item.id) ||
+        completed.length >= 3
+      )
+        return state;
+      const gained = 60,
+        experience = current.experience + gained;
+      const history = Object.fromEntries(
+        Object.entries(coach.completed).filter(
+          ([date]) =>
+            date >=
+            new Date(Date.parse(current.date + "T00:00:00Z") - 180 * 86400000)
+              .toISOString()
+              .slice(0, 10),
+        ),
+      );
+      const game = {
+        ...current,
+        experience,
+        gold: current.gold + levelUpGold(current.experience, experience),
+        exerciseCoach: {
+          ...coach,
+          completed: { ...history, [current.date]: [...completed, item.id] },
+        },
+      };
+      if (!save(game)) return state;
+      reward = gained;
+      return { game };
+    });
+    return reward;
+  },
   paused: loadedGame.battlePaused,
   startProfileQuests: (now = Date.now(), legacy = false) =>
     set((state) => {

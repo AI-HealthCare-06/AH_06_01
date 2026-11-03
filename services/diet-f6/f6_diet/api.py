@@ -23,6 +23,8 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import ValidationError
 
 from .catalog import Catalog
+from .exercise import ExerciseRequest
+from .exercise import recommend as recommend_exercise
 from .quota import MemoryQuota, QuotaExceeded, QuotaUnavailable
 from .recognition import recognize_meal
 from .vision.base import (
@@ -238,7 +240,10 @@ def create_app(settings: Settings | None = None, provider=None, quota=None):
             await photo.close()
             raise HTTPException(
                 409,
-                {"code": "CATALOG_UNSUPPORTED", "message": "앱 업데이트 후 다시 분석해 주세요."},
+                {
+                    "code": "CATALOG_UNSUPPORTED",
+                    "message": "앱 업데이트 후 다시 분석해 주세요.",
+                },
             )
         # Installed clients without catalog negotiation still require DEV codes.
         selected_catalog = (
@@ -371,6 +376,61 @@ def create_app(settings: Settings | None = None, provider=None, quota=None):
             "latency_ms": round((time.monotonic() - started) * 1000),
             "photo_retained": False,
         }
+
+    @app.post("/api/diet/exercise/recommend")
+    async def exercise_recommendation(request: Request, payload: ExerciseRequest):
+        user = await owner(request)
+        if not payload.ai_consent:
+            raise HTTPException(
+                400,
+                {
+                    "code": "CONSENT_REQUIRED",
+                    "message": "외부 AI 전송 동의를 확인해 주세요.",
+                },
+            )
+        if engine is None or not hasattr(engine, "_client"):
+            raise HTTPException(
+                503,
+                {
+                    "code": "AI_NOT_CONFIGURED",
+                    "message": "AI 추천 서버가 연결되지 않았어요. 기본 추천을 이용해 주세요.",
+                },
+            )
+        date = datetime.now(timezone(timedelta(hours=9))).date().isoformat()
+        if payload.date != date or (
+            payload.context.pressure is not None
+            and payload.context.pressureDate != date
+        ):
+            raise HTTPException(
+                400,
+                {
+                    "code": "STALE_CONTEXT",
+                    "message": "오늘의 건강 기록으로 다시 추천해 주세요.",
+                },
+            )
+        try:
+            await asyncio.to_thread(
+                quota.consume, user + ":exercise", date, min(5, settings.daily_limit)
+            )
+            async with asyncio.timeout(min(25, settings.timeout)):
+                async with slots:
+                    return await recommend_exercise(payload, engine)
+        except QuotaExceeded as error:
+            raise HTTPException(
+                429,
+                {
+                    "code": "RATE_LIMITED",
+                    "message": "오늘 AI 운동 추천은 모두 사용했어요. 기본 추천을 이용해 주세요.",
+                },
+            ) from error
+        except Exception as error:
+            raise HTTPException(
+                503,
+                {
+                    "code": "AI_UNAVAILABLE",
+                    "message": "AI 추천을 불러오지 못했어요. 기본 추천을 이용해 주세요.",
+                },
+            ) from error
 
     return app
 
