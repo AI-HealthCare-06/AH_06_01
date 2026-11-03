@@ -65,7 +65,7 @@ jobs:
       - name: Validate diet and exercise service without external AI calls
         working-directory: services/diet-f6
         run: |
-          python3 -m pip install -r requirements.txt pytest==9.1.1
+          python3 -m pip install -r requirements-lambda.txt pytest==9.1.1
           PYTHONPATH=. python3 -m pytest tests -q
       - run: npm ci
       - run: npm run lint
