@@ -173,7 +173,19 @@ export function HomePage() {
 
 export function QuestsPage() {
   const location = useLocation();
-  const [questTab, setQuestTab] = useState<"today" | "sub">("today");
+  const [questSearch, setQuestSearch] = useSearchParams();
+  const questTab = questSearch.get("tab") === "sub" ? "sub" : "today";
+  const setQuestTab = (tab: "today" | "sub") => {
+    setQuestSearch(
+      (current) => {
+        const next = new URLSearchParams(current);
+        if (tab === "sub") next.set("tab", "sub");
+        else next.delete("tab");
+        return next;
+      },
+      { replace: true },
+    );
+  };
   const navigate = useNavigate();
   const [detail, setDetail] = useState<{
     quest: (typeof quests)[number];
@@ -196,6 +208,9 @@ export function QuestsPage() {
       </Link>
       <Link className="meal-records-entry" to="/meals">
         식단 분석·기록 보기 ›
+      </Link>
+      <Link className="meal-records-entry" to="/me?notifications=1">
+        퀘스트 독려·진행도 알림 설정 ›
       </Link>
       <div className="quest-hub-tabs" role="tablist" aria-label="퀘스트 종류" data-no-swipe>
         <button
@@ -223,6 +238,11 @@ export function QuestsPage() {
         aria-labelledby="today-quest-tab"
         hidden={questTab !== "today"}
       >
+        <button className="coach-survey-button" onClick={() => setQuestTab("sub")}>
+          {game.exerciseCoach.survey
+            ? "나의 맞춤 운동 서브 퀘스트 ›"
+            : "첫 운동 취향 서베이 · Sub Quest에서 시작 ›"}
+        </button>
         <ProfileQuests />
         <section className="quest-summary">
           <DinosaurArt className="quest-summary-dino" pose="portrait" />

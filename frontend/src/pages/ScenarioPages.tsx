@@ -1,4 +1,5 @@
 import { TextSizeSetting } from "../components/TextSizeSetting";
+import { QuestNotificationSettings } from "../components/QuestNotificationSettings";
 import { useState } from "react";
 import { CloudStatus } from "../cloud/CloudStatus";
 import { cloudEnabled } from "../cloud/client";
@@ -271,7 +272,9 @@ export function MyPage() {
   const [avatarTrigger, setAvatarTrigger] = useState<HTMLButtonElement | null>(null);
   const navigate = useNavigate();
   const notice = useNotice();
-  const [dialog, setDialog] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<string | null>(() =>
+    new URLSearchParams(window.location.search).get("notifications") === "1" ? "알림 설정" : null,
+  );
   const [dialogTrigger, setDialogTrigger] = useState<HTMLButtonElement | null>(null);
   const [notificationPermission, setNotificationPermission] = useState(
     battleNotificationPermission,
@@ -390,6 +393,7 @@ export function MyPage() {
             )
           ) : dialog === "알림 설정" ? (
             <div className="battle-notification-settings">
+              <QuestNotificationSettings />
               <h3>Wave 실패 알림</h3>
               <p>실패하면 화면 알림과 공룡의 응원 대사를 보여드려요.</p>
               <p>

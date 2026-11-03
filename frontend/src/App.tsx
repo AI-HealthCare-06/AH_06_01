@@ -1,4 +1,9 @@
 import { MealPage } from "./pages/MealPage";
+import { startQuestNotifications } from "./services/start-quest-notifications";
+import {
+  useQuestNotificationStore,
+  questNotificationOwner,
+} from "./stores/quest-notification-store";
 import "./diet.css";
 import { CvProcessPage } from "./pages/CvProcessPage";
 import "./cv-process.css";
@@ -70,6 +75,14 @@ export default function App() {
     : location;
   const active = useSessionStore((s) => s.active);
   const cloudReady = useCloudStore((s) => s.ready);
+  const notificationOwner = useCloudStore((s) => s.userId);
+  useEffect(() => {
+    useQuestNotificationStore
+      .getState()
+      .activate(active && cloudReady ? questNotificationOwner() : null);
+    if (!active || !cloudReady) return;
+    return startQuestNotifications();
+  }, [active, cloudReady, notificationOwner]);
   useEffect(() => {
     if (active && cloudReady)
       useGameStore
@@ -176,6 +189,8 @@ export default function App() {
     const notification = LocalNotifications.addListener(
       "localNotificationActionPerformed",
       ({ notification }) => {
+        if (notification.extra?.group === "rexrun-quest-coach" && useSessionStore.getState().active)
+          navigate(notification.extra.route === "/quests?tab=sub" ? "/quests?tab=sub" : "/quests");
         if (notification.extra?.group === "rexrun-update") navigate("/me?updates=1");
         if (notification.extra?.group === "rexrun-medication" && useSessionStore.getState().active)
           navigate("/medications");

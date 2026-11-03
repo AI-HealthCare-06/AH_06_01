@@ -62,6 +62,11 @@ jobs:
           python3 -m unittest discover -s ai/bp_forecast/tests -v
           npm install --prefix .cache/bp-journal-tools --package-lock=false --ignore-scripts --no-save @electric-sql/pglite@0.5.14
           node supabase/tests/bp-journal.mjs
+      - name: Validate diet and exercise service without external AI calls
+        working-directory: services/diet-f6
+        run: |
+          python3 -m pip install -r requirements-lambda.txt pytest==9.1.1
+          PYTHONPATH=. python3 -m pytest tests -q
       - run: npm ci
       - run: npm run lint
       - run: npm run format:check
