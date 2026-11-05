@@ -64,6 +64,7 @@ describe("quest action driven scheduling", () => {
       game: { ...game, completed: ["survey"], activity: { survey: 1 } },
     }));
     expect(useQuestNotificationStore.getState().reminderAnchor).toBe(completedAt);
+    expect(vi.mocked(syncQuestNotifications).mock.lastCall?.[2]).toBe(completedAt);
     await vi.advanceTimersByTimeAsync(500);
     expect(vi.mocked(syncQuestNotifications).mock.lastCall?.[2]).toBe(completedAt);
     stop();

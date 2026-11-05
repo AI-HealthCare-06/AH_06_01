@@ -60,8 +60,12 @@ export function startQuestNotifications() {
       useQuestNotificationStore.getState().owner !== owner
     )
       return;
-    if (hasQuestCompletion(prev.game, next.game))
+    if (hasQuestCompletion(prev.game, next.game)) {
       useQuestNotificationStore.getState().resetReminderClock();
+      clearTimeout(timer);
+      refresh();
+      return;
+    }
     if (
       next.game.date !== prev.game.date ||
       next.game.completed !== prev.game.completed ||
@@ -90,8 +94,9 @@ export function startQuestNotifications() {
     ? App.addListener("appStateChange", ({ isActive }) => {
         if (isActive) {
           key = "";
-          refresh();
         }
+        clearTimeout(timer);
+        refresh();
       })
     : null;
   refresh();
