@@ -74,6 +74,8 @@ test("quest notification settings preview progress and require native permission
   await page.getByRole("link", { name: "퀘스트 독려·진행도 알림 설정 ›" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByRole("switch", { name: "퀘스트 독려 알림" })).toBeVisible();
+  await expect(dialog.getByText("실천 후 3시간 30분마다 독려")).toBeVisible();
+  await expect(dialog.getByText(/퀘스트를 완료하면 다시 3시간 30분/)).toBeVisible();
   await expect(dialog.getByLabel("퀘스트 알림 미리보기")).toContainText("/ 4 완료");
   await dialog.getByRole("switch", { name: "알림창 진행도" }).click();
   await expect(dialog).toContainText("Android 앱에서 켤 수 있어요");

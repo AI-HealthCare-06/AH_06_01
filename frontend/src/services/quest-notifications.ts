@@ -2,10 +2,36 @@ import { Capacitor } from "@capacitor/core";
 import { LocalNotifications, type LocalNotificationSchema } from "@capacitor/local-notifications";
 import { mainQuests, mainQuestCount, type GameState } from "../domain/game";
 import { localDate } from "../domain/calendar";
-import { exerciseCatalog } from "../domain/exercise-coach";
 export const questNotificationGroup = "rexrun-quest-coach";
 export type QuestNotificationPreferences = { reminders: boolean; progress: boolean };
 export const progressNotificationId = 80_000;
+export const questReminderInterval = 3.5 * 60 * 60 * 1000;
+
+// A successful action resets the timer; sensor ticks, edits and battle rewards do not.
+export function hasQuestCompletion(previous: GameState, next: GameState) {
+  const sameDay = previous.date === next.date;
+  if (next.completed.some((id) => !sameDay || !previous.completed.includes(id))) return true;
+  if (
+    Object.entries(next.activity).some(
+      ([id, count]) =>
+        (count ?? 0) >
+        (sameDay ? (previous.activity[id as keyof typeof previous.activity] ?? 0) : 0),
+    )
+  )
+    return true;
+  if (
+    (next.exerciseCoach.completed[next.date] ?? []).some(
+      (id) => !previous.exerciseCoach.completed[next.date]?.includes(id),
+    )
+  )
+    return true;
+  if (!previous.exerciseCoach.survey && next.exerciseCoach.survey) return true;
+  return Object.entries(next.profileQuests.completed).some(
+    ([id, receipt]) =>
+      receipt &&
+      !previous.profileQuests.completed[id as keyof typeof previous.profileQuests.completed],
+  );
+}
 export function questProgressSummary(game: GameState) {
   const today = game.date === localDate();
   const count = today ? mainQuestCount(game.completed) : 0;
@@ -16,66 +42,47 @@ export function questProgressSummary(game: GameState) {
     body: `건강 서베이 ${today && game.completed.includes("survey") ? "완료" : "대기"} · 식사 ${today && game.completed.includes("meal") ? "완료" : "대기"}\n걷기 ${walk.toLocaleString("ko-KR")} / 6,000보 · 맞춤 운동 ${exercises}개 완료`,
   };
 }
-export function buildQuestReminders(game: GameState, now = new Date()): LocalNotificationSchema[] {
+export function buildQuestReminders(
+  game: GameState,
+  now = new Date(),
+  reminderAnchor = now.getTime(),
+): LocalNotificationSchema[] {
   const reminders: LocalNotificationSchema[] = [];
+  const anchor = new Date(
+    Number.isSafeInteger(reminderAnchor) && reminderAnchor >= 0 && reminderAnchor <= now.getTime()
+      ? reminderAnchor
+      : now.getTime(),
+  );
   for (let day = 0; day < 7; day++) {
-    const plan = game.exerciseCoach.plan;
-    const exercise =
-      day === 0 && plan?.date === localDate(now)
-        ? plan.items.find((i) => !game.exerciseCoach.completed[plan.date]?.includes(i.id))
-        : null;
-    const slots = [
-      {
-        hour: 9,
-        minute: 0,
-        quest: "survey",
-        title: "오늘의 건강 서베이",
-        body: "혈압과 어젯밤 수면을 간단히 기록해 볼까요?",
-      },
-      {
-        hour: 12,
-        minute: 30,
-        quest: "meal",
-        title: "건강한 식사하기",
-        body: "오늘 식사를 사진으로 남기고 퀘스트를 이어가요.",
-      },
-      {
-        hour: 18,
-        minute: 30,
-        quest: "walk",
-        title: "6,000걸음 걷기",
-        body: "무리하지 않는 범위에서 오늘의 걸음 수를 확인해요.",
-      },
-      {
-        hour: 20,
-        minute: 30,
-        quest: exercise ? "exercise" : "water",
-        title: exercise
-          ? exerciseCatalog.find((e) => e.id === exercise.id)!.title
-          : "선택 서브 퀘스트",
-        body: "지금 컨디션이 괜찮다면 짧은 실천 하나로 오늘을 마무리해요. 음주 직후나 몸이 불편한 날은 쉬어요.",
-      },
-    ];
-    for (const [index, slot] of slots.entries()) {
-      const at = new Date(now);
-      at.setDate(at.getDate() + day);
-      at.setHours(slot.hour, slot.minute, 0, 0);
-      const sameDay = localDate(at) === game.date;
-      if (
-        at.getTime() <= now.getTime() ||
-        (sameDay && game.completed.includes(slot.quest as (typeof game.completed)[number])) ||
-        (sameDay && slot.quest === "water" && game.completed.includes("water"))
-      )
-        continue;
+    const morning = new Date(now);
+    morning.setDate(morning.getDate() + day);
+    morning.setHours(9, 0, 0, 0);
+    const end = new Date(morning);
+    end.setHours(21, 0, 0, 0);
+    const sameDay = localDate(morning) === game.date;
+    if (sameDay && mainQuestCount(game.completed) === mainQuests.length) continue;
+    const start =
+      localDate(anchor) === localDate(morning)
+        ? Math.max(morning.getTime(), anchor.getTime() + questReminderInterval)
+        : morning.getTime();
+    // Daylight slots are derived from the persisted anchor, never from each refresh.
+    for (
+      let time = start, index = 0;
+      time < end.getTime();
+      time += questReminderInterval, index++
+    ) {
+      if (time <= now.getTime()) continue;
+      const at = new Date(time);
       reminders.push({
         id: 81_000 + day * 10 + index,
-        title: `REXRUN · ${slot.title}`,
-        body: slot.body,
+        title: "REXRUN · 잠깐, 나를 위한 퀘스트 시간",
+        body: sameDay
+          ? `오늘 퀘스트 ${mainQuestCount(game.completed)} / ${mainQuests.length} 완료 · 남은 실천을 확인해 볼까요? 무리하지 않고 하나씩 이어가요.`
+          : "오늘의 건강 서베이와 식사·걸음 퀘스트를 확인해 볼까요? 작은 실천을 이어가요.",
         channelId: questNotificationGroup,
         extra: {
           group: questNotificationGroup,
-          route:
-            slot.quest === "exercise" || slot.quest === "water" ? "/quests?tab=sub" : "/quests",
+          route: "/quests",
           date: localDate(at),
         },
         schedule: { at, allowWhileIdle: false },
@@ -86,6 +93,7 @@ export function buildQuestReminders(game: GameState, now = new Date()): LocalNot
   return reminders;
 }
 let queue: Promise<unknown> = Promise.resolve();
+let generation = 0;
 function enqueue(task: () => Promise<void>) {
   const result = queue.then(task, task);
   queue = result.catch(() => undefined);
@@ -102,6 +110,7 @@ async function cancel() {
   if (own.length) await LocalNotifications.removeDeliveredNotifications({ notifications: own });
 }
 export function cancelQuestNotifications() {
+  generation++;
   return Capacitor.getPlatform() === "android" ? enqueue(cancel) : Promise.resolve();
 }
 export async function requestQuestNotificationPermission() {
@@ -110,11 +119,20 @@ export async function requestQuestNotificationPermission() {
   if ((await LocalNotifications.requestPermissions()).display !== "granted")
     throw new Error("기기 설정에서 REXRUN 알림을 허용해 주세요.");
 }
-export function syncQuestNotifications(game: GameState, preferences: QuestNotificationPreferences) {
+export function syncQuestNotifications(
+  game: GameState,
+  preferences: QuestNotificationPreferences,
+  reminderAnchor = Date.now(),
+  isCurrent = () => true,
+) {
+  const ticket = ++generation;
+  const current = () => ticket === generation && isCurrent();
   if (Capacitor.getPlatform() !== "android") return Promise.resolve();
   return enqueue(async () => {
+    if (!current()) return;
     await cancel();
     if (
+      !current() ||
       (!preferences.reminders && !preferences.progress) ||
       (await LocalNotifications.checkPermissions()).display !== "granted"
     )
@@ -133,7 +151,9 @@ export function syncQuestNotifications(game: GameState, preferences: QuestNotifi
       visibility: 0,
       vibration: false,
     });
-    const notifications = preferences.reminders ? buildQuestReminders(game) : [];
+    const notifications = preferences.reminders
+      ? buildQuestReminders(game, new Date(), reminderAnchor)
+      : [];
     if (preferences.progress)
       notifications.push({
         id: progressNotificationId,
@@ -144,6 +164,6 @@ export function syncQuestNotifications(game: GameState, preferences: QuestNotifi
         extra: { group: questNotificationGroup, route: "/quests", date: localDate() },
         schedule: { at: new Date(Date.now() + 300) },
       });
-    if (notifications.length) await LocalNotifications.schedule({ notifications });
+    if (current() && notifications.length) await LocalNotifications.schedule({ notifications });
   });
 }

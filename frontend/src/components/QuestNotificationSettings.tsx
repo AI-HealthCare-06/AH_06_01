@@ -31,7 +31,7 @@ export function QuestNotificationSettings() {
     <section className="quest-notification-setting">
       <h3>퀘스트 알림</h3>
       <label>
-        <span>아침·점심·저녁 실천 독려</span>
+        <span>실천 후 3시간 30분마다 독려</span>
         <ToggleSwitch
           label="퀘스트 독려 알림"
           checked={preferences.reminders}
@@ -40,7 +40,8 @@ export function QuestNotificationSettings() {
         />
       </label>
       <small>
-        09:00 서베이 · 12:30 식사 · 18:30 걷기 · 20:30 선택 퀘스트. 완료한 퀘스트는 취소해요.
+        퀘스트를 완료하면 다시 3시간 30분을 세어요. 09~21시에만 알리고, 오늘 메인을 모두 마치면 당일
+        독려를 멈춰요.
       </small>
       <label>
         <span>알림창에 진행도 표시</span>
