@@ -7,4 +7,6 @@
 - Keep changes focused on the user's request. Preserve local input documents and unrelated user edits. Do not publish `.env`, credentials, dependencies, generated builds or browser artifacts.
 - For frontend changes, use `frontend/package-lock.json` with `npm ci`. Run the checks relevant to the change; full verification is `npm run lint`, `npm run format:check`, `npm test`, `npm run build`, and `npm run test:e2e` inside `frontend`.
 - Follow the existing Figma assets and visual style unless the user requests a design adjustment. Health predictions remain demo data until an actual service is connected.
+- For future CKM model work, prioritize measured performance and provide readable graphs for every change, including development comparisons, calibration and relevant subgroup/uncertainty results; preserve experiment history and keep individual survey records/model binaries out of Git.
+- Use new run IDs and compare matching development cohorts. Keep 2024 sealed until the final evaluation plan and model are fixed; do not use external benchmarks for repeated tuning. Keep offline research results separate from clinical probability serving.
 - Report the branch used, meaningful verification, and any remaining limitation. Create or publish a release only when the user asks for a release.
