@@ -44,3 +44,12 @@ cdk.out/
 *.private.json
 *.apk
 *.aab
+
+# Survey originals and individual-level derived training data stay local.
+*.sav
+*.zsav
+*.sas7bdat
+*.sas7bcat
+
+# Local recovery archives may contain private data and model binaries.
+.local-archive/
